@@ -5820,6 +5820,8 @@ function loadGameState() {
       if (!state.orders) state.orders = {};
       if (!state.battles) state.battles = [];
       if (!state.storylineChoices) state.storylineChoices = {};
+      if (!state.turnPhase) state.turnPhase = 'orders';
+      if (!state.resolutionLog) state.resolutionLog = [];
       // Migrate: add trade agreements if missing
       if (!state.tradeAgreements) {
         state.tradeAgreements = [
