@@ -645,6 +645,565 @@ body::before {
   display: block;
   margin-bottom: 6px;
 }
+
+/* ==================== DASHBOARD STYLES ==================== */
+.dashboard-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.dashboard-controls select {
+  font-family: 'Crimson Text', serif;
+  font-size: 1em;
+  padding: 8px 14px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.mode-toggle {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 8px 18px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-toggle.gm-active {
+  background: var(--red-empire);
+  color: white;
+  border-color: var(--red-empire);
+}
+
+.dashboard-card {
+  border: 2px solid var(--ink);
+  padding: 24px;
+  background: var(--cream);
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 4px; left: 4px; right: -4px; bottom: -4px;
+  border: 1px solid var(--ink-light);
+  z-index: -1;
+  background: var(--parchment-dark);
+}
+
+.dashboard-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.dashboard-card .faction-type {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  border: 1px solid var(--ink-light);
+  padding: 10px 14px;
+  background: var(--parchment);
+  text-align: center;
+}
+
+.stat-box .stat-label {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.75em;
+  color: var(--ink-light);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.stat-box .stat-value {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.5em;
+  color: var(--ink);
+}
+
+.stat-box input {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.3em;
+  color: var(--ink);
+  width: 60px;
+  text-align: center;
+  border: 1px dashed var(--gold-accent);
+  background: var(--cream);
+  padding: 2px;
+}
+
+.troop-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.troop-table th {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8em;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--parchment-dark);
+}
+
+.troop-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--parchment-dark);
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+}
+
+.troop-table input {
+  width: 50px;
+  text-align: center;
+  border: 1px dashed var(--gold-accent);
+  background: var(--cream);
+  padding: 3px;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+}
+
+.troop-table tr:hover td { background: var(--cream); }
+
+.overview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  margin-top: 16px;
+}
+
+.overview-table th {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.75em;
+  padding: 8px 6px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--parchment-dark);
+  text-align: center;
+}
+
+.overview-table td {
+  padding: 6px;
+  border-bottom: 1px solid var(--parchment-dark);
+  text-align: center;
+  font-family: 'Crimson Text', serif;
+}
+
+.overview-table tr:hover td { background: var(--cream); }
+.overview-table td:first-child { text-align: left; font-weight: 700; }
+
+.btn-save {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 10px 24px;
+  background: var(--green-neutral);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
+
+.btn-save:hover { background: #1e3a0e; }
+
+.btn-danger {
+  background: var(--red-empire);
+}
+
+.btn-danger:hover { background: #6a1010; }
+
+/* ==================== SVG MAP STYLES ==================== */
+.map-container {
+  position: relative;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.map-container svg {
+  width: 100%;
+  height: auto;
+}
+
+.map-region {
+  fill: var(--parchment-dark);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: fill 0.2s, stroke-width 0.2s;
+}
+
+.map-region:hover {
+  fill: #e0d6a8;
+  stroke-width: 2.5;
+}
+
+.map-region.selected {
+  fill: var(--gold-accent);
+  stroke-width: 3;
+  stroke: var(--ink);
+}
+
+.map-region.adjacent-highlight {
+  fill: #d4e8c0;
+  stroke: var(--green-neutral);
+  stroke-width: 2.5;
+}
+
+.map-region.sea-zone {
+  fill: #c8d8e8;
+  stroke: var(--blue-entente);
+}
+
+.map-region.sea-zone:hover {
+  fill: #b0c8e0;
+}
+
+.map-label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 9px;
+  font-weight: 600;
+  fill: var(--ink);
+  pointer-events: none;
+  text-anchor: middle;
+}
+
+.map-troop-count {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  font-weight: 900;
+  pointer-events: none;
+  text-anchor: middle;
+}
+
+.movement-panel {
+  border: 2px solid var(--gold-accent);
+  padding: 16px 20px;
+  background: var(--cream);
+  margin-top: 16px;
+}
+
+.movement-panel h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.movement-panel input[type="number"] {
+  width: 60px;
+  padding: 6px;
+  border: 2px solid var(--ink);
+  font-family: 'Crimson Text', serif;
+  font-size: 1em;
+  text-align: center;
+}
+
+.movement-panel button {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 4px;
+}
+
+.movement-panel .btn-confirm {
+  background: var(--green-neutral);
+  color: white;
+  border-color: var(--green-neutral);
+}
+
+.movement-panel .btn-cancel {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+/* ==================== BATTLE SIMULATOR STYLES ==================== */
+.battle-setup {
+  display: grid;
+  grid-template-columns: 1fr 80px 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 700px) {
+  .battle-setup {
+    grid-template-columns: 1fr;
+  }
+}
+
+.battle-side {
+  border: 2px solid var(--ink);
+  padding: 20px;
+  background: var(--cream);
+}
+
+.battle-side h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.battle-side.attacker { border-left: 6px solid var(--red-empire); }
+.battle-side.defender { border-left: 6px solid var(--blue-entente); }
+
+.battle-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 2em;
+  font-weight: 900;
+  color: var(--ink-light);
+}
+
+.battle-field {
+  margin-bottom: 12px;
+}
+
+.battle-field label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-light);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.battle-field select,
+.battle-field input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  font-family: 'Crimson Text', serif;
+  font-size: 1em;
+  background: var(--parchment);
+}
+
+.modifiers-list {
+  margin-top: 8px;
+}
+
+.modifiers-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+  padding: 4px 0;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+.modifiers-list input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--gold-accent);
+}
+
+.roll-btn {
+  display: block;
+  width: 100%;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  padding: 16px;
+  background: var(--ink);
+  color: var(--parchment);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 24px;
+}
+
+.roll-btn:hover { background: var(--red-empire); }
+.roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.dice-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin: 24px 0;
+  min-height: 80px;
+}
+
+.die {
+  width: 70px;
+  height: 70px;
+  border: 3px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 2em;
+  font-weight: 900;
+  background: var(--cream);
+  transition: all 0.3s;
+}
+
+.die.rolling {
+  animation: diceRoll 0.1s infinite;
+}
+
+@keyframes diceRoll {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(10deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.die.attacker-die { border-color: var(--red-empire); color: var(--red-empire); }
+.die.defender-die { border-color: var(--blue-entente); color: var(--blue-entente); }
+
+.battle-result {
+  border: 3px solid var(--ink);
+  padding: 24px;
+  text-align: center;
+  margin-top: 20px;
+  display: none;
+}
+
+.battle-result.visible { display: block; }
+
+.battle-result.attacker-wins {
+  border-color: var(--red-empire);
+  background: linear-gradient(135deg, #faf0f0, var(--cream));
+}
+
+.battle-result.defender-wins {
+  border-color: var(--blue-entente);
+  background: linear-gradient(135deg, #f0f0fa, var(--cream));
+}
+
+.battle-result h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+}
+
+.battle-result .casualties {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.1em;
+  line-height: 1.8;
+}
+
+.battle-result .apply-btn {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 10px 24px;
+  background: var(--gold-accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: all 0.2s;
+}
+
+.battle-result .apply-btn:hover { background: #9a7209; }
+
+.battle-log {
+  margin-top: 24px;
+  border: 1px solid var(--ink-light);
+  padding: 16px;
+  background: var(--parchment);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.battle-log h4 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--ink-light);
+  padding-bottom: 6px;
+}
+
+.battle-log-entry {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  padding: 4px 0;
+  border-bottom: 1px dotted var(--parchment-dark);
+}
+
+.save-indicator {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.85em;
+  color: var(--green-neutral);
+  margin-left: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.save-indicator.visible { opacity: 1; }
 </style>
 </head>
 <body>
@@ -664,6 +1223,8 @@ body::before {
   <button class="nav-tab" data-tab="turns">Turn Tracker</button>
   <button class="nav-tab" data-tab="news">News Events</button>
   <button class="nav-tab" data-tab="reference">Quick Ref</button>
+  <button class="nav-tab" data-tab="dashboard">Dashboard</button>
+  <button class="nav-tab" data-tab="battle">Battle</button>
   <button class="nav-tab" data-tab="gm">GM Guide</button>
 </div>
 
@@ -1421,6 +1982,141 @@ body::before {
 </div>
 </div>
 
+<!-- ==================== DASHBOARD ==================== -->
+<div id="dashboard" class="tab-content">
+
+<div class="section">
+<div class="section-title"><span class="icon">📊</span> War Room Dashboard</div>
+
+<div class="dashboard-controls">
+  <button class="mode-toggle" id="modeToggle" onclick="toggleDashboardMode()">Switch to GM Mode</button>
+  <select id="factionSelect" onchange="renderDashboard()">
+    <option value="germany">German Empire</option>
+    <option value="france">French Republic</option>
+    <option value="britain">British Empire</option>
+    <option value="russia">Russian Empire</option>
+    <option value="austria">Austria-Hungary</option>
+    <option value="ottoman">Ottoman Empire</option>
+    <option value="krupp">Krupp-Vickers</option>
+    <option value="schneider">Schneider-Škoda</option>
+  </select>
+  <button class="btn-save" onclick="saveGameState()">Save State</button>
+  <button class="btn-save btn-danger" onclick="if(confirm('Reset ALL game data to starting values?')){resetGameState();}">Reset Game</button>
+  <span class="save-indicator" id="saveIndicator">Saved!</span>
+</div>
+
+<div id="dashboardContent"></div>
+
+<div class="section-title" style="margin-top:30px;"><span class="icon">🗺</span> Theatre of War</div>
+<p style="margin-bottom:8px;">Click a region to select it. Then click an adjacent region to move troops. The map shows all troop positions.</p>
+<div class="dashboard-controls" style="margin-bottom:8px;">
+  <label style="font-family:'Source Serif 4',serif; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Moving faction:</label>
+  <select id="mapFactionSelect" onchange="clearMapSelection()">
+    <option value="germany">Germany</option>
+    <option value="france">France</option>
+    <option value="britain">Britain</option>
+    <option value="russia">Russia</option>
+    <option value="austria">Austria-Hungary</option>
+    <option value="ottoman">Ottoman Empire</option>
+  </select>
+</div>
+<div class="map-container" id="mapContainer"></div>
+<div id="movementPanel"></div>
+
+</div>
+</div>
+
+<!-- ==================== BATTLE SIMULATOR ==================== -->
+<div id="battle" class="tab-content">
+
+<div class="section">
+<div class="section-title"><span class="icon">⚔</span> Battle Simulator</div>
+<p>Select the attacking and defending factions, choose the region, commit forces, and roll for battle. Results follow the game's combat rules.</p>
+
+<div class="battle-setup">
+  <div class="battle-side attacker">
+    <h4>Attacker</h4>
+    <div class="battle-field">
+      <label>Faction</label>
+      <select id="atkFaction" onchange="updateBattleOptions()">
+        <option value="">— Select —</option>
+        <option value="germany">German Empire</option>
+        <option value="france">French Republic</option>
+        <option value="britain">British Empire</option>
+        <option value="russia">Russian Empire</option>
+        <option value="austria">Austria-Hungary</option>
+        <option value="ottoman">Ottoman Empire</option>
+      </select>
+    </div>
+    <div class="battle-field">
+      <label>Divisions Committed</label>
+      <input type="number" id="atkDivisions" min="1" value="1">
+    </div>
+    <div class="battle-field">
+      <label>Attacking From</label>
+      <select id="atkRegion"><option value="">— Select attacker first —</option></select>
+    </div>
+    <div class="modifiers-list">
+      <label><input type="checkbox" id="modArtillery"> Artillery Upgrade (+1)</label>
+      <label><input type="checkbox" id="modGas"> Gas Warfare (+2)</label>
+    </div>
+  </div>
+
+  <div class="battle-vs">VS</div>
+
+  <div class="battle-side defender">
+    <h4>Defender</h4>
+    <div class="battle-field">
+      <label>Faction</label>
+      <select id="defFaction" onchange="updateBattleOptions()">
+        <option value="">— Select —</option>
+        <option value="germany">German Empire</option>
+        <option value="france">French Republic</option>
+        <option value="britain">British Empire</option>
+        <option value="russia">Russian Empire</option>
+        <option value="austria">Austria-Hungary</option>
+        <option value="ottoman">Ottoman Empire</option>
+      </select>
+    </div>
+    <div class="battle-field">
+      <label>Divisions Committed</label>
+      <input type="number" id="defDivisions" min="1" value="1">
+    </div>
+    <div class="battle-field">
+      <label>Defending Region</label>
+      <select id="defRegion"><option value="">— Select defender first —</option></select>
+    </div>
+    <div class="modifiers-list">
+      <label><input type="checkbox" id="modFortified"> Fortified (+2 defense)</label>
+      <label><input type="checkbox" id="modTrench"> Trench Warfare (+1 defense)</label>
+      <label><input type="checkbox" id="modRussiaMob"> Russia 1st-turn mobilization (half forces)</label>
+    </div>
+  </div>
+</div>
+
+<button class="roll-btn" id="rollBtn" onclick="rollBattle()">⚄ Roll for Battle ⚄</button>
+
+<div class="dice-display" id="diceDisplay" style="display:none;">
+  <div>
+    <div style="text-align:center; font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; color:var(--red-empire); margin-bottom:6px;">Attacker</div>
+    <div class="die attacker-die" id="atkDie">?</div>
+  </div>
+  <div>
+    <div style="text-align:center; font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; color:var(--blue-entente); margin-bottom:6px;">Defender</div>
+    <div class="die defender-die" id="defDie">?</div>
+  </div>
+</div>
+
+<div class="battle-result" id="battleResult"></div>
+
+<div class="battle-log" id="battleLog">
+  <h4>Battle Log</h4>
+  <div id="battleLogEntries"><em style="font-family:'IM Fell English',serif;">No battles yet. The peace holds — for now.</em></div>
+</div>
+
+</div>
+</div>
+
 </div><!-- end container -->
 
 <script>
@@ -1611,6 +2307,685 @@ newsEvents.forEach((ev, i) => {
   };
   newsContainer.appendChild(card);
 });
+
+// ==================== GAME STATE ====================
+
+const LAND_REGIONS = [
+  'france','paris','alsace_lorraine','belgium','britain',
+  'germany','austria','serbia','russia','poland',
+  'ottoman','dardanelles','italy','balkans'
+];
+
+const SEA_REGIONS = ['north_sea','english_channel','mediterranean','baltic'];
+
+const ALL_REGIONS = LAND_REGIONS.concat(SEA_REGIONS);
+
+const REGION_NAMES = {
+  france:'France', paris:'Paris', alsace_lorraine:'Alsace-Lorraine', belgium:'Belgium',
+  britain:'Britain', germany:'Germany', austria:'Austria', serbia:'Serbia',
+  russia:'Russia', poland:'Poland', ottoman:'Ottoman Empire', dardanelles:'Dardanelles',
+  italy:'Italy', balkans:'Balkans',
+  north_sea:'North Sea', english_channel:'English Channel', mediterranean:'Mediterranean', baltic:'Baltic Sea'
+};
+
+const ADJACENCY = {
+  france: ['paris','alsace_lorraine','belgium','italy','english_channel','mediterranean'],
+  paris: ['france','belgium','alsace_lorraine'],
+  alsace_lorraine: ['france','paris','germany','belgium'],
+  belgium: ['france','paris','alsace_lorraine','germany','english_channel','north_sea'],
+  britain: ['english_channel','north_sea'],
+  germany: ['alsace_lorraine','belgium','poland','austria','north_sea','baltic'],
+  austria: ['germany','serbia','italy','poland','balkans'],
+  serbia: ['austria','balkans','ottoman'],
+  russia: ['poland','baltic','ottoman','balkans'],
+  poland: ['germany','austria','russia','baltic'],
+  ottoman: ['serbia','dardanelles','balkans','russia','mediterranean'],
+  dardanelles: ['ottoman','mediterranean'],
+  italy: ['france','austria','mediterranean'],
+  balkans: ['serbia','austria','russia','ottoman'],
+  north_sea: ['britain','belgium','germany','english_channel','baltic'],
+  english_channel: ['britain','france','belgium','north_sea','mediterranean'],
+  mediterranean: ['france','italy','ottoman','dardanelles','english_channel'],
+  baltic: ['russia','poland','germany','north_sea']
+};
+
+const FACTION_NAMES = {
+  germany:'German Empire', france:'French Republic', britain:'British Empire',
+  russia:'Russian Empire', austria:'Austria-Hungary', ottoman:'Ottoman Empire',
+  krupp:'Krupp-Vickers', schneider:'Schneider-Škoda'
+};
+
+const FACTION_COLORS = {
+  germany:'#8b1a1a', france:'#1a3a6b', britain:'#1a3a6b',
+  russia:'#1a3a6b', austria:'#8b1a1a', ottoman:'#2d5016',
+  krupp:'#b8860b', schneider:'#b8860b'
+};
+
+const FACTION_ALLIANCE = {
+  germany:'central', france:'entente', britain:'entente',
+  russia:'entente', austria:'central', ottoman:'neutral',
+  krupp:'corp', schneider:'corp'
+};
+
+function defaultGameState() {
+  return {
+    factions: {
+      germany: {
+        gold: 25, income: 8, army: 10, navy: 6, vp: 0,
+        troops: { germany: 6, alsace_lorraine: 3, poland: 1 },
+        fleets: { north_sea: 4, baltic: 2 },
+        alliances: ['austria'], status: []
+      },
+      france: {
+        gold: 18, income: 6, army: 8, navy: 4, vp: 0,
+        troops: { france: 5, paris: 3 },
+        fleets: { mediterranean: 2, english_channel: 2 },
+        alliances: ['britain','russia'], status: []
+      },
+      britain: {
+        gold: 30, income: 9, army: 4, navy: 12, vp: 0,
+        troops: { britain: 4 },
+        fleets: { north_sea: 6, english_channel: 4, mediterranean: 2 },
+        alliances: ['france','russia'], status: []
+      },
+      russia: {
+        gold: 16, income: 6, army: 12, navy: 3, vp: 0,
+        troops: { russia: 8, poland: 3, balkans: 1 },
+        fleets: { baltic: 2, mediterranean: 1 },
+        alliances: ['france','britain'], status: []
+      },
+      austria: {
+        gold: 14, income: 5, army: 7, navy: 2, vp: 0,
+        troops: { austria: 5, balkans: 2 },
+        fleets: { mediterranean: 2 },
+        alliances: ['germany'], status: []
+      },
+      ottoman: {
+        gold: 8, income: 4, army: 6, navy: 2, vp: 0,
+        troops: { ottoman: 4, dardanelles: 2 },
+        fleets: { mediterranean: 2 },
+        alliances: [], status: []
+      },
+      krupp: {
+        gold: 22, income: 3, army: 0, navy: 0, vp: 0,
+        troops: {}, fleets: {},
+        alliances: [], status: [], sales: 0, contracts: []
+      },
+      schneider: {
+        gold: 16, income: 2, army: 0, navy: 0, vp: 0,
+        troops: {}, fleets: {},
+        alliances: [], status: [], sales: 0, contracts: []
+      }
+    },
+    battleLog: [],
+    currentTurnNum: 1
+  };
+}
+
+let gameState = loadGameState();
+let dashboardMode = 'player'; // 'player' or 'gm'
+
+function loadGameState() {
+  try {
+    const saved = localStorage.getItem('gunsOfAugust_gameState');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return defaultGameState();
+}
+
+function saveGameState() {
+  localStorage.setItem('gunsOfAugust_gameState', JSON.stringify(gameState));
+  const ind = document.getElementById('saveIndicator');
+  ind.classList.add('visible');
+  setTimeout(() => ind.classList.remove('visible'), 1500);
+}
+
+function resetGameState() {
+  gameState = defaultGameState();
+  saveGameState();
+  renderDashboard();
+  renderMap();
+}
+
+// ==================== DASHBOARD ====================
+
+function toggleDashboardMode() {
+  dashboardMode = dashboardMode === 'player' ? 'gm' : 'player';
+  const btn = document.getElementById('modeToggle');
+  btn.textContent = dashboardMode === 'gm' ? 'Switch to Player Mode' : 'Switch to GM Mode';
+  btn.classList.toggle('gm-active', dashboardMode === 'gm');
+  renderDashboard();
+}
+
+function renderDashboard() {
+  const container = document.getElementById('dashboardContent');
+  if (dashboardMode === 'gm') {
+    renderGMDashboard(container);
+  } else {
+    renderPlayerDashboard(container);
+  }
+}
+
+function renderPlayerDashboard(container) {
+  const fid = document.getElementById('factionSelect').value;
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  const allianceCls = FACTION_ALLIANCE[fid];
+
+  let troopRows = '';
+  if (!isDealer) {
+    ALL_REGIONS.forEach(r => {
+      const troops = (f.troops[r] || 0);
+      const fleets = (f.fleets[r] || 0);
+      if (troops > 0 || fleets > 0) {
+        troopRows += `<tr><td>${REGION_NAMES[r]}</td><td>${troops || '—'}</td><td>${fleets || '—'}</td></tr>`;
+      }
+    });
+  }
+
+  container.innerHTML = `
+    <div class="dashboard-card">
+      <h3>${FACTION_NAMES[fid]}</h3>
+      <div class="faction-type"><span class="alliance-badge ${allianceCls}">${allianceCls}</span></div>
+      <div class="stats-grid">
+        <div class="stat-box"><span class="stat-label">Treasury</span><span class="stat-value">${f.gold} 💰</span></div>
+        <div class="stat-box"><span class="stat-label">Income/Turn</span><span class="stat-value">${f.income}</span></div>
+        <div class="stat-box"><span class="stat-label">Total Army</span><span class="stat-value">${f.army} ⚔</span></div>
+        <div class="stat-box"><span class="stat-label">Total Navy</span><span class="stat-value">${f.navy} ⚓</span></div>
+        <div class="stat-box"><span class="stat-label">Victory Points</span><span class="stat-value">${f.vp}</span></div>
+        ${isDealer ? `<div class="stat-box"><span class="stat-label">Total Sales</span><span class="stat-value">${f.sales || 0}</span></div>` : ''}
+      </div>
+      ${f.alliances.length ? `<p style="margin-bottom:8px;"><strong>Alliances:</strong> ${f.alliances.map(a => FACTION_NAMES[a] || a).join(', ')}</p>` : ''}
+      ${f.status && f.status.length ? `<p><strong>Status:</strong> ${f.status.join(', ')}</p>` : ''}
+      ${!isDealer && troopRows ? `
+        <table class="troop-table">
+          <tr><th>Region</th><th>Divisions</th><th>Fleets</th></tr>
+          ${troopRows}
+        </table>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderGMDashboard(container) {
+  const fid = document.getElementById('factionSelect').value;
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+
+  let troopInputs = '';
+  if (!isDealer) {
+    ALL_REGIONS.forEach(r => {
+      const troops = f.troops[r] || 0;
+      const fleets = f.fleets[r] || 0;
+      if (troops > 0 || fleets > 0 || SEA_REGIONS.indexOf(r) === -1) {
+        if (LAND_REGIONS.indexOf(r) !== -1) {
+          troopInputs += `<tr>
+            <td>${REGION_NAMES[r]}</td>
+            <td><input type="number" min="0" value="${troops}" data-region="${r}" data-type="troops"></td>
+            <td><input type="number" min="0" value="${fleets}" data-region="${r}" data-type="fleets"></td>
+          </tr>`;
+        }
+      }
+    });
+    SEA_REGIONS.forEach(r => {
+      const fleets = f.fleets[r] || 0;
+      troopInputs += `<tr>
+        <td>${REGION_NAMES[r]}</td>
+        <td>—</td>
+        <td><input type="number" min="0" value="${fleets}" data-region="${r}" data-type="fleets"></td>
+      </tr>`;
+    });
+  }
+
+  container.innerHTML = `
+    <div class="dashboard-card" style="border-left: 6px solid ${FACTION_COLORS[fid]};">
+      <h3>GM EDIT: ${FACTION_NAMES[fid]}</h3>
+      <div class="stats-grid">
+        <div class="stat-box"><span class="stat-label">Treasury</span><input type="number" id="gm_gold" value="${f.gold}"></div>
+        <div class="stat-box"><span class="stat-label">Income/Turn</span><input type="number" id="gm_income" value="${f.income}"></div>
+        <div class="stat-box"><span class="stat-label">Total Army</span><input type="number" id="gm_army" value="${f.army}"></div>
+        <div class="stat-box"><span class="stat-label">Total Navy</span><input type="number" id="gm_navy" value="${f.navy}"></div>
+        <div class="stat-box"><span class="stat-label">Victory Points</span><input type="number" id="gm_vp" value="${f.vp}"></div>
+        ${isDealer ? `<div class="stat-box"><span class="stat-label">Total Sales</span><input type="number" id="gm_sales" value="${f.sales || 0}"></div>` : ''}
+      </div>
+      ${!isDealer ? `
+        <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.9em; margin: 16px 0 8px;">Troop Deployment</h4>
+        <table class="troop-table" id="gmTroopTable">
+          <tr><th>Region</th><th>Divisions</th><th>Fleets</th></tr>
+          ${troopInputs}
+        </table>
+      ` : ''}
+      <button class="btn-save" onclick="applyGMEdits('${fid}')" style="margin-top:16px;">Apply Changes</button>
+    </div>
+
+    <div style="margin-top:24px;">
+      <div class="section-title" style="font-size:1.2em;"><span class="icon">📋</span> All Factions Overview</div>
+      <div style="overflow-x:auto;">
+        <table class="overview-table">
+          <tr><th>Faction</th><th>Gold</th><th>Income</th><th>Army</th><th>Navy</th><th>VP</th></tr>
+          ${Object.keys(gameState.factions).map(k => {
+            const fc = gameState.factions[k];
+            return `<tr><td>${FACTION_NAMES[k]}</td><td>${fc.gold}</td><td>${fc.income}</td><td>${fc.army}</td><td>${fc.navy}</td><td>${fc.vp}</td></tr>`;
+          }).join('')}
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function applyGMEdits(fid) {
+  const f = gameState.factions[fid];
+  f.gold = parseInt(document.getElementById('gm_gold').value) || 0;
+  f.income = parseInt(document.getElementById('gm_income').value) || 0;
+  f.army = parseInt(document.getElementById('gm_army').value) || 0;
+  f.navy = parseInt(document.getElementById('gm_navy').value) || 0;
+  f.vp = parseInt(document.getElementById('gm_vp').value) || 0;
+  const salesEl = document.getElementById('gm_sales');
+  if (salesEl) f.sales = parseInt(salesEl.value) || 0;
+
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  if (!isDealer) {
+    const table = document.getElementById('gmTroopTable');
+    if (table) {
+      const inputs = table.querySelectorAll('input[type="number"]');
+      f.troops = {};
+      f.fleets = {};
+      inputs.forEach(inp => {
+        const region = inp.getAttribute('data-region');
+        const type = inp.getAttribute('data-type');
+        const val = parseInt(inp.value) || 0;
+        if (val > 0) {
+          if (type === 'troops') f.troops[region] = val;
+          else f.fleets[region] = val;
+        }
+      });
+    }
+  }
+
+  saveGameState();
+  renderDashboard();
+  renderMap();
+}
+
+// ==================== SVG MAP ====================
+
+// Map coordinates for each region (x, y, w, h for simplified rectangles)
+const MAP_COORDS = {
+  britain:        { x: 80,  y: 30,  w: 90,  h: 70 },
+  north_sea:      { x: 190, y: 20,  w: 100, h: 60, sea: true },
+  baltic:         { x: 380, y: 20,  w: 100, h: 60, sea: true },
+  english_channel:{ x: 100, y: 110, w: 110, h: 40, sea: true },
+  belgium:        { x: 220, y: 95,  w: 70,  h: 55 },
+  germany:        { x: 300, y: 85,  w: 120, h: 80 },
+  france:         { x: 100, y: 160, w: 100, h: 100 },
+  paris:          { x: 145, y: 155, w: 55,  h: 40, inner: true },
+  alsace_lorraine:{ x: 210, y: 155, w: 80,  h: 50 },
+  poland:         { x: 430, y: 85,  w: 90,  h: 80 },
+  russia:         { x: 490, y: 20,  w: 130, h: 180 },
+  austria:        { x: 310, y: 175, w: 110, h: 70 },
+  italy:          { x: 200, y: 260, w: 90,  h: 80 },
+  balkans:        { x: 350, y: 260, w: 80,  h: 70 },
+  serbia:         { x: 340, y: 250, w: 60,  h: 50 },
+  ottoman:        { x: 440, y: 250, w: 120, h: 80 },
+  dardanelles:    { x: 430, y: 340, w: 70,  h: 40 },
+  mediterranean:  { x: 170, y: 350, w: 240, h: 50, sea: true }
+};
+
+let mapSelectedRegion = null;
+
+function renderMap() {
+  const container = document.getElementById('mapContainer');
+  let svg = `<svg viewBox="0 0 650 420" xmlns="http://www.w3.org/2000/svg" style="background:#d4dce8; border:2px solid var(--ink);">`;
+
+  // Draw regions
+  ALL_REGIONS.forEach(r => {
+    const c = MAP_COORDS[r];
+    if (!c) return;
+    let cls = 'map-region';
+    if (c.sea) cls += ' sea-zone';
+    if (r === mapSelectedRegion) cls += ' selected';
+    else if (mapSelectedRegion && ADJACENCY[mapSelectedRegion] && ADJACENCY[mapSelectedRegion].indexOf(r) !== -1) cls += ' adjacent-highlight';
+
+    svg += `<rect class="${cls}" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="3" data-region="${r}" onclick="mapClickRegion('${r}')"/>`;
+
+    // Region name
+    const cx = c.x + c.w/2;
+    const cy = c.y + 14;
+    svg += `<text class="map-label" x="${cx}" y="${cy}">${REGION_NAMES[r]}</text>`;
+
+    // Troop counts per faction
+    if (!c.sea) {
+      let troopTexts = [];
+      Object.keys(gameState.factions).forEach(fid => {
+        if (fid === 'krupp' || fid === 'schneider') return;
+        const troops = gameState.factions[fid].troops[r] || 0;
+        if (troops > 0) {
+          troopTexts.push({ fid, count: troops, type: 'A' });
+        }
+      });
+      troopTexts.forEach((t, i) => {
+        const ty = cy + 14 + i * 13;
+        svg += `<text class="map-troop-count" x="${cx}" y="${ty}" fill="${FACTION_COLORS[t.fid]}">${t.count}⚔ ${t.fid.substring(0,3).toUpperCase()}</text>`;
+      });
+    }
+
+    // Fleet counts for sea zones and coastal
+    let fleetTexts = [];
+    Object.keys(gameState.factions).forEach(fid => {
+      if (fid === 'krupp' || fid === 'schneider') return;
+      const fleets = gameState.factions[fid].fleets[r] || 0;
+      if (fleets > 0) {
+        fleetTexts.push({ fid, count: fleets });
+      }
+    });
+    if (c.sea && fleetTexts.length) {
+      fleetTexts.forEach((t, i) => {
+        const ty = cy + 14 + i * 13;
+        svg += `<text class="map-troop-count" x="${cx}" y="${ty}" fill="${FACTION_COLORS[t.fid]}">${t.count}⚓ ${t.fid.substring(0,3).toUpperCase()}</text>`;
+      });
+    }
+  });
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+function mapClickRegion(region) {
+  const fid = document.getElementById('mapFactionSelect').value;
+  const f = gameState.factions[fid];
+  const panel = document.getElementById('movementPanel');
+
+  if (!mapSelectedRegion) {
+    // First click — select source
+    const hasTroops = (f.troops[region] || 0) > 0;
+    const hasFleets = (f.fleets[region] || 0) > 0;
+    if (!hasTroops && !hasFleets) {
+      panel.innerHTML = `<div class="movement-panel"><p style="color:var(--red-empire);">${FACTION_NAMES[fid]} has no forces in ${REGION_NAMES[region]}. Select a region where you have troops.</p></div>`;
+      return;
+    }
+    mapSelectedRegion = region;
+    renderMap();
+    const troops = f.troops[region] || 0;
+    const fleets = f.fleets[region] || 0;
+    panel.innerHTML = `<div class="movement-panel">
+      <h4>Selected: ${REGION_NAMES[region]}</h4>
+      <p>${troops} division(s), ${fleets} fleet(s) here. Click an adjacent <span style="color:var(--green-neutral); font-weight:700;">highlighted</span> region to move forces there.</p>
+      <button class="btn-cancel" onclick="clearMapSelection()">Cancel</button>
+    </div>`;
+  } else if (region === mapSelectedRegion) {
+    clearMapSelection();
+  } else {
+    // Second click — destination
+    if (!ADJACENCY[mapSelectedRegion] || ADJACENCY[mapSelectedRegion].indexOf(region) === -1) {
+      panel.innerHTML = `<div class="movement-panel"><p style="color:var(--red-empire);">${REGION_NAMES[region]} is not adjacent to ${REGION_NAMES[mapSelectedRegion]}. Pick a highlighted region.</p><button class="btn-cancel" onclick="clearMapSelection()">Cancel</button></div>`;
+      return;
+    }
+
+    const srcTroops = f.troops[mapSelectedRegion] || 0;
+    const srcFleets = f.fleets[mapSelectedRegion] || 0;
+    const isSea = !!MAP_COORDS[region].sea;
+    const srcIsSea = !!MAP_COORDS[mapSelectedRegion].sea;
+
+    panel.innerHTML = `<div class="movement-panel">
+      <h4>Move: ${REGION_NAMES[mapSelectedRegion]} → ${REGION_NAMES[region]}</h4>
+      ${!srcIsSea && !isSea && srcTroops > 0 ? `
+        <div style="margin-bottom:8px;">
+          <label style="font-family:'Source Serif 4',serif; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Divisions to move (max ${srcTroops}):</label>
+          <input type="number" id="moveTroops" min="0" max="${srcTroops}" value="${srcTroops}">
+        </div>` : ''}
+      ${(srcFleets > 0) ? `
+        <div style="margin-bottom:8px;">
+          <label style="font-family:'Source Serif 4',serif; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Fleets to move (max ${srcFleets}):</label>
+          <input type="number" id="moveFleets" min="0" max="${srcFleets}" value="${isSea ? srcFleets : 0}">
+        </div>` : ''}
+      <button class="btn-confirm" onclick="executeMove('${fid}','${mapSelectedRegion}','${region}')">Confirm Move</button>
+      <button class="btn-cancel" onclick="clearMapSelection()">Cancel</button>
+    </div>`;
+  }
+}
+
+function executeMove(fid, src, dest) {
+  const f = gameState.factions[fid];
+  const troopInput = document.getElementById('moveTroops');
+  const fleetInput = document.getElementById('moveFleets');
+  const moveTroops = troopInput ? Math.min(parseInt(troopInput.value) || 0, f.troops[src] || 0) : 0;
+  const moveFleets = fleetInput ? Math.min(parseInt(fleetInput.value) || 0, f.fleets[src] || 0) : 0;
+
+  if (moveTroops === 0 && moveFleets === 0) {
+    alert('Select at least some forces to move.');
+    return;
+  }
+
+  // Move troops
+  if (moveTroops > 0) {
+    f.troops[src] = (f.troops[src] || 0) - moveTroops;
+    f.troops[dest] = (f.troops[dest] || 0) + moveTroops;
+    if (f.troops[src] <= 0) delete f.troops[src];
+  }
+
+  // Move fleets
+  if (moveFleets > 0) {
+    f.fleets[src] = (f.fleets[src] || 0) - moveFleets;
+    f.fleets[dest] = (f.fleets[dest] || 0) + moveFleets;
+    if (f.fleets[src] <= 0) delete f.fleets[src];
+  }
+
+  saveGameState();
+  clearMapSelection();
+  renderDashboard();
+}
+
+function clearMapSelection() {
+  mapSelectedRegion = null;
+  document.getElementById('movementPanel').innerHTML = '';
+  renderMap();
+}
+
+// ==================== BATTLE SIMULATOR ====================
+
+let lastBattleResult = null;
+
+function updateBattleOptions() {
+  const atkFid = document.getElementById('atkFaction').value;
+  const defFid = document.getElementById('defFaction').value;
+
+  const atkRegionSel = document.getElementById('atkRegion');
+  const defRegionSel = document.getElementById('defRegion');
+
+  // Populate attacker regions (where they have troops)
+  atkRegionSel.innerHTML = '<option value="">— Select region —</option>';
+  if (atkFid && gameState.factions[atkFid]) {
+    const f = gameState.factions[atkFid];
+    Object.keys(f.troops).forEach(r => {
+      if (f.troops[r] > 0) {
+        atkRegionSel.innerHTML += `<option value="${r}">${REGION_NAMES[r]} (${f.troops[r]} div)</option>`;
+      }
+    });
+  }
+
+  // Populate defender regions (where they have troops)
+  defRegionSel.innerHTML = '<option value="">— Select region —</option>';
+  if (defFid && gameState.factions[defFid]) {
+    const f = gameState.factions[defFid];
+    Object.keys(f.troops).forEach(r => {
+      if (f.troops[r] > 0) {
+        defRegionSel.innerHTML += `<option value="${r}">${REGION_NAMES[r]} (${f.troops[r]} div)</option>`;
+      }
+    });
+  }
+
+  // Auto-fill division counts
+  if (atkFid) {
+    const maxAtk = getTotalTroops(atkFid);
+    document.getElementById('atkDivisions').max = maxAtk;
+  }
+  if (defFid) {
+    const maxDef = getTotalTroops(defFid);
+    document.getElementById('defDivisions').max = maxDef;
+  }
+}
+
+function getTotalTroops(fid) {
+  const f = gameState.factions[fid];
+  let total = 0;
+  Object.values(f.troops).forEach(v => total += v);
+  return total;
+}
+
+function rollBattle() {
+  const atkFid = document.getElementById('atkFaction').value;
+  const defFid = document.getElementById('defFaction').value;
+  const atkRegion = document.getElementById('atkRegion').value;
+  const defRegion = document.getElementById('defRegion').value;
+
+  if (!atkFid || !defFid || !atkRegion || !defRegion) {
+    alert('Select both factions and their regions before rolling.');
+    return;
+  }
+  if (atkFid === defFid) {
+    alert('Attacker and defender cannot be the same faction.');
+    return;
+  }
+
+  let atkDiv = parseInt(document.getElementById('atkDivisions').value) || 1;
+  let defDiv = parseInt(document.getElementById('defDivisions').value) || 1;
+
+  // Modifiers
+  let atkMod = 0, defMod = 0;
+  if (document.getElementById('modArtillery').checked) atkMod += 1;
+  if (document.getElementById('modGas').checked) atkMod += 2;
+  if (document.getElementById('modFortified').checked) defMod += 2;
+  if (document.getElementById('modTrench').checked) defMod += 1;
+  if (document.getElementById('modRussiaMob').checked) defDiv = Math.ceil(defDiv / 2);
+
+  // Show dice
+  const diceDisplay = document.getElementById('diceDisplay');
+  diceDisplay.style.display = 'flex';
+  const atkDie = document.getElementById('atkDie');
+  const defDie = document.getElementById('defDie');
+  const rollBtn = document.getElementById('rollBtn');
+  rollBtn.disabled = true;
+
+  // Animate dice
+  atkDie.classList.add('rolling');
+  defDie.classList.add('rolling');
+  let rollCount = 0;
+  const rollInterval = setInterval(() => {
+    atkDie.textContent = Math.ceil(Math.random() * 6);
+    defDie.textContent = Math.ceil(Math.random() * 6);
+    rollCount++;
+    if (rollCount > 15) {
+      clearInterval(rollInterval);
+      // Final roll
+      const atkRoll = Math.ceil(Math.random() * 6);
+      const defRoll = Math.ceil(Math.random() * 6);
+      atkDie.textContent = atkRoll;
+      defDie.textContent = defRoll;
+      atkDie.classList.remove('rolling');
+      defDie.classList.remove('rolling');
+      rollBtn.disabled = false;
+
+      resolveBattle(atkFid, defFid, atkDiv, defDiv, atkRoll, defRoll, atkMod, defMod, atkRegion, defRegion);
+    }
+  }, 80);
+}
+
+function resolveBattle(atkFid, defFid, atkDiv, defDiv, atkRoll, defRoll, atkMod, defMod, atkRegion, defRegion) {
+  const atkTotal = atkDiv + atkRoll + atkMod;
+  const defTotal = defDiv + defRoll + defMod;
+
+  const attackerWins = atkTotal > defTotal;
+  const difference = Math.abs(atkTotal - defTotal);
+  const loserLoss = Math.max(1, Math.ceil(difference / 2));
+  const winnerLoss = 1;
+
+  let atkLosses, defLosses, headline;
+
+  if (attackerWins) {
+    atkLosses = winnerLoss;
+    defLosses = loserLoss;
+    headline = `VICTORY FOR ${FACTION_NAMES[atkFid].toUpperCase()}!`;
+  } else {
+    atkLosses = loserLoss;
+    defLosses = winnerLoss;
+    headline = defTotal === atkTotal
+      ? `${FACTION_NAMES[defFid].toUpperCase()} HOLDS THE LINE! (Tie → Defender)`
+      : `${FACTION_NAMES[defFid].toUpperCase()} HOLDS THE LINE!`;
+  }
+
+  lastBattleResult = {
+    atkFid, defFid, atkRegion, defRegion,
+    atkLosses: Math.min(atkLosses, atkDiv),
+    defLosses: Math.min(defLosses, defDiv),
+    attackerWins
+  };
+
+  const resultDiv = document.getElementById('battleResult');
+  resultDiv.className = 'battle-result visible ' + (attackerWins ? 'attacker-wins' : 'defender-wins');
+  resultDiv.innerHTML = `
+    <h3>${headline}</h3>
+    <div class="casualties">
+      <p><strong>${FACTION_NAMES[atkFid]}:</strong> ${atkDiv} divisions + d6(${document.getElementById('atkDie').textContent}) ${atkMod ? '+ ' + atkMod + ' mods' : ''} = <strong>${atkTotal}</strong></p>
+      <p><strong>${FACTION_NAMES[defFid]}:</strong> ${defDiv} divisions + d6(${document.getElementById('defDie').textContent}) ${defMod ? '+ ' + defMod + ' mods' : ''} = <strong>${defTotal}</strong></p>
+      <hr style="margin:12px 0; border:1px solid var(--parchment-dark);">
+      <p style="color:var(--red-empire);"><strong>${FACTION_NAMES[atkFid]} loses:</strong> ${lastBattleResult.atkLosses} division(s)</p>
+      <p style="color:var(--blue-entente);"><strong>${FACTION_NAMES[defFid]} loses:</strong> ${lastBattleResult.defLosses} division(s)</p>
+      ${!attackerWins ? `<p style="margin-top:8px;"><em>Attacker retreats to ${REGION_NAMES[atkRegion]}</em></p>` : `<p style="margin-top:8px;"><em>Defender retreats from ${REGION_NAMES[defRegion]}</em></p>`}
+    </div>
+    <button class="apply-btn" onclick="applyBattleResult()">Apply Results to Game State</button>
+  `;
+
+  // Add to log
+  const logEntry = `${FACTION_NAMES[atkFid]} (${atkTotal}) vs ${FACTION_NAMES[defFid]} (${defTotal}) at ${REGION_NAMES[defRegion]} — ${attackerWins ? FACTION_NAMES[atkFid] + ' wins' : FACTION_NAMES[defFid] + ' holds'}. Losses: ${lastBattleResult.atkLosses}/${lastBattleResult.defLosses}`;
+  gameState.battleLog.push(logEntry);
+  renderBattleLog();
+}
+
+function applyBattleResult() {
+  if (!lastBattleResult) return;
+  const { atkFid, defFid, atkRegion, defRegion, atkLosses, defLosses, attackerWins } = lastBattleResult;
+  const atkF = gameState.factions[atkFid];
+  const defF = gameState.factions[defFid];
+
+  // Apply losses
+  atkF.army = Math.max(0, atkF.army - atkLosses);
+  defF.army = Math.max(0, defF.army - defLosses);
+
+  // Remove from specific regions
+  if (atkF.troops[atkRegion]) {
+    atkF.troops[atkRegion] = Math.max(0, atkF.troops[atkRegion] - atkLosses);
+    if (atkF.troops[atkRegion] <= 0) delete atkF.troops[atkRegion];
+  }
+  if (defF.troops[defRegion]) {
+    defF.troops[defRegion] = Math.max(0, defF.troops[defRegion] - defLosses);
+    if (defF.troops[defRegion] <= 0) delete defF.troops[defRegion];
+  }
+
+  saveGameState();
+  lastBattleResult = null;
+
+  const resultDiv = document.getElementById('battleResult');
+  resultDiv.innerHTML += `<p style="margin-top:12px; color:var(--green-neutral); font-weight:700; font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px;">Results Applied</p>`;
+  resultDiv.querySelector('.apply-btn').style.display = 'none';
+
+  renderMap();
+}
+
+function renderBattleLog() {
+  const entries = document.getElementById('battleLogEntries');
+  if (gameState.battleLog.length === 0) {
+    entries.innerHTML = '<em style="font-family:\'IM Fell English\',serif;">No battles yet. The peace holds — for now.</em>';
+    return;
+  }
+  entries.innerHTML = gameState.battleLog.map((e, i) =>
+    `<div class="battle-log-entry"><strong>${i + 1}.</strong> ${e}</div>`
+  ).reverse().join('');
+}
+
+// ==================== INIT NEW FEATURES ====================
+renderDashboard();
+renderMap();
+renderBattleLog();
 </script>
 
 </body>
