@@ -1789,7 +1789,7 @@ body::before {
 .map-svg-wrapper {
   width: 100%;
   border: 3px solid var(--ink);
-  background: #6b8e9e;
+  background: #4a7a8e;
 }
 
 .map-svg-wrapper svg {
@@ -1799,42 +1799,54 @@ body::before {
 }
 
 .map-region {
-  stroke: rgba(255,255,255,0.6);
-  stroke-width: 1.5;
+  fill: transparent;
+  stroke: rgba(255,255,255,0.15);
+  stroke-width: 1;
   cursor: pointer;
-  transition: fill-opacity 0.2s, stroke-width 0.2s, stroke 0.2s;
-  fill-opacity: 0.08;
+  transition: all 0.15s;
 }
 
-.map-region.land { fill: #ffffff; }
-.map-region.sea { fill: #4488cc; fill-opacity: 0.12; }
-.map-region.land:hover { fill: #ffe066; fill-opacity: 0.35; stroke: #fff; stroke-width: 2.5; }
-.map-region.sea:hover { fill: #66aaff; fill-opacity: 0.3; stroke: #fff; stroke-width: 2.5; }
-.map-region.selected { fill: #b8860b; fill-opacity: 0.45; stroke: #fff; stroke-width: 3; }
-.map-region.adjacent { fill: #44cc44; fill-opacity: 0.35; stroke: #fff; stroke-width: 2.5; }
-.map-region.sea.selected { fill: #c9a825; fill-opacity: 0.4; }
-.map-region.sea.adjacent { fill: #44cc44; fill-opacity: 0.3; }
+.map-region:hover {
+  fill: rgba(255,255,200,0.25);
+  stroke: #fff;
+  stroke-width: 2;
+}
+.map-region.selected {
+  fill: rgba(184,134,11,0.35);
+  stroke: #fff;
+  stroke-width: 2.5;
+}
+.map-region.adjacent {
+  fill: rgba(68,204,68,0.25);
+  stroke: #44cc44;
+  stroke-width: 2;
+  stroke-dasharray: 5,3;
+}
 
 .map-label {
-  font-family: 'Source Serif 4', serif;
-  font-size: 12px;
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
   font-weight: 700;
   fill: #fff;
   text-anchor: middle;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   pointer-events: none;
   paint-order: stroke;
-  stroke: rgba(0,0,0,0.7);
+  stroke: rgba(0,0,0,0.8);
   stroke-width: 3px;
+  letter-spacing: 0.5px;
 }
 
-.map-label.sea-label { fill: #cce0ff; font-style: italic; font-size: 10px; }
+.map-label.sea-label {
+  fill: #d0e8ff;
+  font-style: italic;
+  font-size: 10px;
+  stroke: rgba(0,20,50,0.6);
+}
 
 .map-troops {
-  font-family: 'Playfair Display', serif;
-  font-size: 11px;
-  font-weight: 900;
+  font-family: 'Crimson Text', serif;
+  font-size: 10px;
+  font-weight: 700;
   text-anchor: middle;
   pointer-events: none;
   paint-order: stroke;
@@ -2236,8 +2248,6 @@ body::before {
   <button class="nav-tab" data-tab="setup">Setup</button>
   <button class="nav-tab" data-tab="factions">Factions</button>
   <button class="nav-tab" data-tab="rules">Rules</button>
-  <button class="nav-tab" data-tab="turns">Turn Tracker</button>
-  <button class="nav-tab" data-tab="news">News Events</button>
   <button class="nav-tab" data-tab="reference">Quick Ref</button>
   <button class="nav-tab" data-tab="dashboard">Dashboard</button>
   <button class="nav-tab" data-tab="gmcontrol">GM Control</button>
@@ -4129,6 +4139,94 @@ function renderCustomNewsCards() {
   }).join('');
 }
 
+// GM-embedded turn tracker (renders into #gmTurnTracker / #gmTurnDetail)
+let gmCurrentTurn = 0;
+let gmCompletedTurns = new Set();
+
+function renderGMTurnTracker() {
+  const tracker = document.getElementById('gmTurnTracker');
+  if (!tracker) return;
+  tracker.innerHTML = '';
+  turns.forEach((t, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'turn-dot' + (i === gmCurrentTurn ? ' active' : '') + (gmCompletedTurns.has(i) ? ' completed' : '');
+    dot.textContent = t.num;
+    dot.onclick = () => { gmCurrentTurn = i; renderGMTurnTracker(); renderGMTurnDetail(); };
+    tracker.appendChild(dot);
+  });
+  const completeBtn = document.createElement('button');
+  completeBtn.className = 'print-btn';
+  completeBtn.style.fontSize = '0.75em';
+  completeBtn.style.padding = '10px 16px';
+  completeBtn.style.marginLeft = '12px';
+  completeBtn.textContent = gmCompletedTurns.has(gmCurrentTurn) ? '\u21A9 Reopen Turn' : '\u2713 Complete Turn';
+  completeBtn.onclick = () => {
+    if (gmCompletedTurns.has(gmCurrentTurn)) gmCompletedTurns.delete(gmCurrentTurn);
+    else gmCompletedTurns.add(gmCurrentTurn);
+    if (!gmCompletedTurns.has(gmCurrentTurn + 1) && gmCurrentTurn < turns.length - 1) gmCurrentTurn++;
+    renderGMTurnTracker();
+    renderGMTurnDetail();
+  };
+  tracker.appendChild(completeBtn);
+}
+
+function renderGMTurnDetail() {
+  const detail = document.getElementById('gmTurnDetail');
+  if (!detail) return;
+  const t = turns[gmCurrentTurn];
+  detail.innerHTML = `
+    <div class="turn-info">
+      <h3>Turn ${t.num}: ${t.title}</h3>
+      <div class="year">${t.year}</div>
+      <p style="margin-bottom:16px; font-family:'IM Fell English',serif; font-style:italic;">${t.desc}</p>
+      <div class="phase-list">
+        ${t.phases.map(p => `
+          <div class="phase">
+            <div class="phase-num">${p.n}</div>
+            <div class="phase-text">${p.text}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderGMNewsCards() {
+  // Render custom news into GM console
+  const customContainer = document.getElementById('gmCustomNewsCards');
+  if (customContainer) {
+    const customNews = gameState.customNews || [];
+    if (customNews.length > 0) {
+      customContainer.innerHTML = customNews.map(n => {
+        const factionLabel = n.faction ? FACTION_NAMES[n.faction] || n.faction : 'Global Event';
+        return `<div class="news-card gm-custom revealed">
+          <div class="news-turn">Turn ${n.turnNum} \u2014 ${factionLabel}</div>
+          <div class="news-headline">${n.headline}</div>
+          <div class="news-body">
+            <p>${n.body}</p>
+            ${n.effect ? `<div class="news-effect">GAME EFFECT: ${n.effect}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      customContainer.innerHTML = '';
+    }
+  }
+
+  // Render scripted news into GM console
+  const newsContainer = document.getElementById('gmNewsCards');
+  if (newsContainer) {
+    newsContainer.innerHTML = newsEvents.map(ev => `<div class="news-card" onclick="this.classList.toggle('revealed')">
+      <div class="news-turn">${ev.turn}</div>
+      <div class="news-headline">${ev.headline}</div>
+      <div class="news-body">
+        <p>${ev.body}</p>
+        <div class="news-effect">${ev.effect}</div>
+      </div>
+    </div>`).join('');
+  }
+}
+
 function purchaseUnit(fid, type) {
   const f = gameState.factions[fid];
   if (!f) return;
@@ -4748,7 +4846,7 @@ function renderGMControl() {
     </div>
     <div class="gm-section-body">
       <p style="font-family:'Crimson Text',serif; font-size:0.95em; color:var(--ink-light); margin-bottom:12px;">
-        Push custom news events based on player actions. These appear in the News Events tab alongside the scripted headlines.
+        Push custom news events based on player actions. These appear in the News Events section below alongside the scripted headlines.
       </p>
       <div class="news-broadcast-form">
         <div>
@@ -4974,7 +5072,37 @@ function renderGMControl() {
     <div class="gm-section-body" style="max-height:400px; overflow-y:auto;">${logHtml}</div>
   </div>`;
 
-  container.innerHTML = turnSection + newsSection + orderSection + battleSection + factionSection + overviewSection + logSection;
+  // Turn Tracker section (moved from standalone tab)
+  let turnTrackerSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Turn Tracker</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">
+      <p style="font-family:'Crimson Text',serif; font-size:0.95em; color:var(--ink-light); margin-bottom:12px;">Click a turn to see its details and phases. Mark turns complete as you progress.</p>
+      <div class="turn-tracker" id="gmTurnTracker"></div>
+      <div id="gmTurnDetail"></div>
+    </div>
+  </div>`;
+
+  // News Events section (scripted + custom, moved from standalone tab)
+  let newsEventsSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>News Events</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">
+      <p style="font-family:'Crimson Text',serif; font-size:0.95em; color:var(--ink-light); margin-bottom:12px;">Read one headline at the start of each turn. Click to reveal the full story and game effects.</p>
+      <div class="gm-note">Read these dramatically! Stand up, clear your throat, and announce them like a newsboy on a London street corner.</div>
+      <div id="gmCustomNewsCards" style="margin-top:12px;"></div>
+      <div id="gmNewsCards" style="margin-top:12px;"></div>
+    </div>
+  </div>`;
+
+  container.innerHTML = turnSection + turnTrackerSection + newsSection + newsEventsSection + orderSection + battleSection + factionSection + overviewSection + logSection;
+
+  // Render turn tracker into GM console
+  renderGMTurnTracker();
+  renderGMTurnDetail();
+  renderGMNewsCards();
 
   // Render the faction editor for the currently selected faction
   renderGMFactionEditor();
@@ -5172,84 +5300,161 @@ function applyGMEdits(fid) {
 
 const MAP_REGIONS = {
   // === INTERACTIVE GAME REGIONS ===
-  // Coordinates calibrated to europe1910.jpg (1080x736)
+  // ViewBox: 0 0 1080 736 — Tesselated political map of 1914 Europe
+  // Shared border points ensure countries tile seamlessly
+
+  // Key shared border points:
+  // A=270,290 B=310,280 C=345,290 D=370,280 E=400,270 F=440,265
+  // G=480,275 H=540,270 I=580,265 J=635,260
+  // K=270,340 L=310,340 M=345,340 N=370,340 O=400,340
+  // P=440,340 Q=480,340 R=540,345 S=580,350 T=635,350
+  // U=310,390 V=345,390 W=370,390 X=400,400 Y=440,400
+  // Z=480,400 a=540,410 b=580,420 c=635,430
+
   britain: {
-    points: '130,210 140,195 155,180 168,170 182,172 192,180 198,195 202,210 205,228 210,248 208,268 200,285 190,298 178,310 165,318 152,315 142,305 135,290 130,272 128,252 128,232',
-    cx: 170, cy: 250, sea: false
+    points: '200,175 208,168 218,162 230,158 242,165 250,160 258,162 264,172 260,185 268,192 272,205 278,222 282,240 282,258 278,275 270,290 260,300 248,310 238,318 225,322 215,315 208,305 202,292 198,275 194,258 192,240 192,222 195,205 198,190',
+    cx: 238, cy: 242, sea: false
   },
   belgium: {
-    points: '280,308 295,300 312,302 320,312 318,325 305,332 288,328 280,318',
-    cx: 300, cy: 316, sea: false
+    points: '310,280 328,278 345,280 345,290 345,300 340,310 328,315 315,312 310,300 310,290',
+    cx: 328, cy: 296, sea: false
   },
   paris: {
-    points: '240,390 258,385 275,390 278,408 260,418 242,412 238,400',
-    cx: 258, cy: 400, sea: false
+    points: '280,345 295,340 310,340 310,365 300,375 285,372 278,360',
+    cx: 295, cy: 358, sea: false
   },
   france: {
-    points: '200,390 215,378 232,368 250,360 270,355 288,348 305,355 320,365 328,380 322,398 310,410 295,420 278,408 260,418 242,412 240,390 232,400 225,420 220,440 218,460 222,480 230,498 242,510 255,520 268,525 250,535 232,540 215,538 198,530 182,518 170,502 162,485 158,465 160,445 168,425 178,408 190,395',
-    cx: 240, cy: 460, sea: false
+    points: '190,345 210,332 235,325 260,320 280,318 300,318 310,320 310,280 310,300 315,312 328,315 340,310 345,300 345,290 345,340 310,340 295,340 280,345 278,360 285,372 300,375 310,395 310,410 305,430 298,450 295,468 298,485 305,500 305,510 290,518 272,522 255,518 238,510 222,498 210,482 200,462 195,440 195,420 200,400 210,380 210,360 200,350',
+    cx: 258, cy: 420, sea: false
   },
   alsace_lorraine: {
-    points: '312,368 328,362 340,370 342,388 335,400 322,398 312,390 310,378',
-    cx: 325, cy: 382, sea: false
+    points: '345,340 360,330 370,340 370,390 355,395 345,390 345,370',
+    cx: 358, cy: 362, sea: false
   },
   germany: {
-    points: '312,302 330,285 352,272 378,262 405,258 430,262 448,275 455,292 455,312 450,332 440,348 425,358 408,362 390,358 372,350 355,342 342,332 340,318 335,308 325,300 318,305',
-    cx: 390, cy: 315, sea: false
+    points: '345,290 362,275 380,268 400,262 425,260 445,262 465,270 480,280 480,310 480,340 465,350 448,355 430,355 410,350 395,345 380,340 370,340 360,330 345,340 345,300 345,290',
+    cx: 412, cy: 308, sea: false
   },
   poland: {
-    points: '455,275 478,265 505,260 528,268 542,282 548,300 548,320 542,340 532,355 518,362 502,358 488,348 475,335 468,318 462,300 455,288',
-    cx: 505, cy: 315, sea: false
+    points: '480,280 500,270 525,265 548,268 565,278 575,292 578,310 575,330 570,345 558,355 540,358 522,355 508,348 495,340 485,328 480,315 480,300',
+    cx: 530, cy: 312, sea: false
   },
   russia: {
-    points: '555,120 598,95 648,75 708,65 778,68 848,88 908,128 950,182 975,248 985,320 978,395 958,458 928,505 888,535 842,552 798,558 755,548 718,530 685,505 660,475 642,442 630,408 622,372 618,340 618,308 622,275 628,245 635,215 640,180 645,148 618,135 590,135 568,138',
-    cx: 810, cy: 310, sea: false
+    points: '578,110 610,88 655,72 710,62 770,60 835,72 895,98 940,140 970,195 988,260 995,330 988,400 972,458 948,505 915,540 878,560 838,572 798,568 762,555 730,535 702,510 682,482 668,452 658,420 650,388 645,358 642,328 642,300 645,272 650,245 655,218 658,192 655,168 645,148 628,135 610,128 592,128 578,130',
+    cx: 828, cy: 300, sea: false
   },
   austria: {
-    points: '342,388 355,375 372,365 390,358 408,362 425,358 440,348 455,345 475,348 495,355 515,365 532,378 542,395 545,415 540,435 530,452 515,462 498,468 478,470 458,465 440,455 425,442 412,428 402,412 395,398 388,385 378,378 365,375 352,378 345,385',
-    cx: 460, cy: 415, sea: false
+    points: '370,390 385,378 400,370 415,365 430,360 448,358 465,358 480,360 498,368 518,378 538,392 552,408 560,425 560,445 555,462 542,475 525,482 505,485 485,482 465,475 448,465 432,452 418,438 408,422 400,408 395,395 385,388',
+    cx: 472, cy: 422, sea: false
   },
   serbia: {
-    points: '532,430 548,422 565,428 570,445 560,458 545,455 530,445',
-    cx: 550, cy: 442, sea: false
+    points: '555,435 568,425 582,428 590,442 585,458 572,465 558,462 550,450',
+    cx: 570, cy: 445, sea: false
   },
   italy: {
-    points: '290,500 305,488 318,478 330,470 342,465 352,470 358,482 365,498 370,518 372,540 370,562 365,582 358,598 348,610 335,615 325,608 318,592 315,572 318,552 322,535 320,518 312,505 302,498',
-    cx: 340, cy: 545, sea: false
+    points: '305,510 310,495 310,470 312,450 318,435 328,425 340,420 352,418 362,422 368,432 372,448 378,468 382,490 385,510 385,530 382,548 376,565 368,580 358,590 345,595 335,588 328,572 325,552 325,532 322,515 318,502',
+    cx: 355, cy: 510, sea: false
   },
   balkans: {
-    points: '570,458 588,445 610,438 635,442 655,455 662,475 658,498 648,515 632,522 612,518 595,508 580,492 572,475',
-    cx: 618, cy: 480, sea: false
+    points: '590,460 608,450 628,448 650,455 668,472 672,492 665,512 650,525 632,530 612,528 598,518 588,502 585,480',
+    cx: 630, cy: 490, sea: false
   },
   ottoman: {
-    points: '672,478 700,462 732,452 768,448 808,455 845,468 878,488 898,512 905,538 898,558 882,572 860,580 835,582 808,578 782,568 758,555 738,538 722,518 710,498 698,485 680,478',
-    cx: 795, cy: 520, sea: false
+    points: '685,485 712,468 745,458 780,455 818,462 855,478 885,498 905,522 912,550 905,572 890,585 868,592 845,595 820,590 798,580 775,565 755,548 738,530 722,512 710,498',
+    cx: 805, cy: 528, sea: false
   },
   // === SEA ZONES ===
   dardanelles: {
-    points: '650,460 668,452 678,468 678,490 668,502 652,495 648,478',
-    cx: 665, cy: 478, sea: true
+    points: '665,458 680,450 692,465 695,490 685,505 668,498 662,478',
+    cx: 678, cy: 478, sea: true
   },
   north_sea: {
-    points: '150,168 175,155 200,148 225,145 248,150 265,162 272,178 275,198 272,220 268,242 262,258 248,268 235,272 220,268 208,258 198,248 188,235 178,222 170,208 162,195 155,180',
-    cx: 218, cy: 210, sea: true
+    points: '200,150 228,140 258,138 285,142 305,155 312,170 315,190 310,212 305,235 298,258 288,272 278,280 270,290 260,300 248,310 238,318 225,322 215,315 208,305 202,292 198,275 194,258 192,240 192,222 195,205 198,190 198,172',
+    cx: 255, cy: 215, sea: true
   },
   english_channel: {
-    points: '120,330 138,322 158,318 178,316 198,315 218,318 238,325 248,338 240,348 225,352 208,350 190,348 172,345 155,345 140,348 128,350 120,342',
-    cx: 182, cy: 336, sea: true
+    points: '170,328 190,320 210,318 232,318 255,320 270,325 278,332 275,342 260,346 242,345 222,342 202,342 185,344 172,345 168,338',
+    cx: 225, cy: 334, sea: true
   },
   baltic: {
-    points: '380,185 405,170 432,160 458,158 480,165 490,180 492,200 490,222 488,245 485,265 480,280 472,290 462,285 452,278 440,272 428,268 418,265 408,268 398,275 390,280 382,272 378,258 375,240 375,222 376,205 378,192',
-    cx: 438, cy: 225, sea: true
+    points: '420,175 445,162 470,158 495,162 510,175 515,195 515,218 512,242 508,262 502,278 495,290 488,298 480,295 480,280 465,270 445,262 425,260 415,262 408,268 400,275 392,282 388,272 385,255 382,238 382,218 385,200 392,185',
+    cx: 458, cy: 225, sea: true
   },
   mediterranean: {
-    points: '155,555 200,560 250,562 300,565 345,572 385,580 425,585 465,582 505,578 545,575 585,578 625,585 665,590 705,588 745,585 785,590 825,598 865,608 905,615 945,610 985,602 1020,598 1080,595 1080,736 0,736 0,555 60,552 110,552',
-    cx: 520, cy: 650, sea: true
+    points: '185,535 240,538 300,540 360,542 420,540 480,538 540,542 600,548 660,552 720,550 780,555 840,565 900,575 960,578 1020,575 1080,572 1080,736 0,736 0,535 90,532 140,532',
+    cx: 545, cy: 635, sea: true
   }
 };
 
-// Decorative background regions — not needed with real map image
-const DECO_REGIONS = {};
+// Faction colors for the political map (inspired by 1910 European map style)
+const FACTION_MAP_COLORS = {
+  germany: '#6b7e4a',    // olive green
+  france: '#4a6a9e',     // blue
+  britain: '#7b4a5a',    // maroon/mauve
+  russia: '#c4b07a',     // tan/beige
+  austria: '#c4a040',    // golden yellow
+  ottoman: '#b05050',    // red
+  italy: '#6a8e50',      // green
+  serbia: '#8a6a8a',     // purple
+  belgium: '#c4b440',    // yellow
+  poland: '#c4a898',     // pink/contested
+  balkans: '#5a8a6a',    // teal green
+  alsace_lorraine: '#7a8e5a', // disputed olive
+  paris: '#4a6a9e',      // same as france
+  dardanelles: '#4488cc' // sea zone color
+};
+
+// Which faction "owns" each land region (for display name)
+const REGION_OWNER = {
+  germany: 'germany', france: 'france', britain: 'britain',
+  russia: 'russia', austria: 'austria', ottoman: 'ottoman',
+  italy: 'italy', serbia: 'serbia', belgium: 'belgium',
+  poland: 'russia', balkans: 'austria', alsace_lorraine: 'germany',
+  paris: 'france'
+};
+
+// Full display names for the map (period-appropriate)
+const MAP_DISPLAY_NAMES = {
+  germany: 'German Empire', france: 'France', britain: 'Great Britain',
+  russia: 'Russian Empire', austria: 'Austria-Hungary', ottoman: 'Ottoman Empire',
+  italy: 'Kingdom of Italy', serbia: 'Serbia', belgium: 'Belgium',
+  poland: 'Poland', balkans: 'Balkans', alsace_lorraine: 'Alsace-Lorraine',
+  paris: 'Paris', dardanelles: 'Dardanelles',
+  north_sea: 'North Sea', english_channel: 'English Channel',
+  mediterranean: 'Mediterranean Sea', baltic: 'Baltic Sea'
+};
+
+// Background (non-interactive) European landmasses for geographic context
+const BG_REGIONS = [
+  // Iceland
+  { points: '50,50 65,35 85,30 108,35 118,50 112,65 95,75 72,78 55,68', fill: '#9a9080' },
+  // Ireland
+  { points: '148,225 162,215 178,212 192,220 195,242 192,265 188,282 178,295 165,298 155,288 150,270 148,248', fill: '#7a9a5a' },
+  // Norway — west coast of Scandinavia
+  { points: '348,55 365,42 382,38 400,42 408,55 402,75 395,98 392,122 388,148 385,175 382,200 378,222 372,240 365,252 355,258 345,252 340,235 340,215 342,192 345,168 346,142 347,118 347,95 348,75', fill: '#6a7a9a' },
+  // Sweden — east of Norway
+  { points: '385,48 400,42 418,45 432,55 442,75 448,100 452,128 452,158 450,185 445,212 438,235 428,252 418,260 408,255 400,242 395,222 392,200 390,175 388,148 388,122 388,98 388,75 385,60', fill: '#5a8aaa' },
+  // Finland — east of Sweden
+  { points: '458,55 475,45 498,42 515,50 528,68 535,92 538,122 538,152 535,180 528,202 518,215 505,218 495,210 488,195 482,175 478,152 475,128 472,105 468,82 462,65', fill: '#c8b888' },
+  // Denmark — Jutland peninsula
+  { points: '358,235 368,225 380,228 388,238 390,252 385,265 378,272 368,268 362,258 358,248', fill: '#6a7a50' },
+  // Netherlands
+  { points: '298,278 310,272 325,275 330,288 328,298 318,302 305,300 298,290', fill: '#b08840' },
+  // Spain
+  { points: '108,478 132,468 160,462 192,460 222,465 248,478 268,495 275,515 272,535 262,552 248,565 230,575 210,582 188,585 165,582 142,575 122,565 108,552 98,535 95,515 100,498', fill: '#c4a060' },
+  // Portugal
+  { points: '78,480 92,472 108,478 100,498 95,515 98,535 92,550 80,558 68,545 65,525 68,505 75,490', fill: '#508a50' },
+  // Switzerland
+  { points: '338,400 352,392 368,395 375,405 372,418 358,425 345,420 338,410', fill: '#a08878' },
+  // Greece + Crete
+  { points: '592,515 608,505 625,508 640,520 645,540 640,558 628,572 615,578 598,575 585,565 580,548 582,530', fill: '#7a9a6a' },
+  // Romania
+  { points: '575,392 598,385 618,388 635,398 642,415 638,435 628,448 610,452 592,448 580,438 575,420 572,405', fill: '#b8a050' },
+  // Bulgaria
+  { points: '612,452 632,448 650,455 665,468 662,485 648,498 630,495 615,485 608,470', fill: '#6a8a5a' },
+  // North Africa coastline
+  { points: '108,612 160,598 228,588 308,582 408,578 508,578 608,582 708,588 808,598 888,612 958,622 1028,625 1080,622 1080,736 0,736 0,652 55,638', fill: '#d4c49a' },
+];
 
 let mapSelectedRegion = null;
 
@@ -5257,47 +5462,132 @@ function renderMap() {
   const container = document.getElementById('mapContainer');
   let svg = `<div class="map-svg-wrapper"><svg viewBox="0 0 1080 736" xmlns="http://www.w3.org/2000/svg">`;
 
-  // 1910 Europe map image as background
-  svg += `<image href="europe1910.jpg" x="0" y="0" width="1080" height="736" preserveAspectRatio="xMidYMid slice"/>`;
+  // INVERTED APPROACH: Land-first, then carve water
+  // Start with entire background as land color
+  svg += `<rect x="0" y="0" width="1080" height="736" fill="#c0b8a5"/>`;
 
-  // Draw interactive game region polygons (semi-transparent overlays)
+  // Draw water areas on top of land (Atlantic, seas, channels)
+  // Atlantic Ocean — west side
+  svg += `<polygon fill="#5a8a9e" points="
+    0,0 140,0 140,210 155,210 162,215 148,225 142,248 142,270 148,288 155,298
+    148,305 140,312 130,325 140,332 158,338 170,345 185,345 190,348 200,345
+    188,352 172,365 155,385 140,410 125,440 112,468 105,490 100,510 95,530
+    88,548 78,558 68,545 65,525 68,505 75,490 65,480 55,478 40,480 20,490 0,505
+  "/>`;
+  // Atlantic south of Spain
+  svg += `<polygon fill="#5a8a9e" points="
+    0,505 20,490 40,480 55,478 65,480 75,490 92,472 108,478
+    132,468 160,462 192,460 222,465 248,478 268,495 275,515 272,535 262,552
+    248,565 230,575 210,582 188,585 165,582 142,575 122,565 108,552 100,535
+    95,540 90,548 85,555 80,562 75,570 108,612 0,620
+  "/>`;
+  // Arctic ocean — top
+  svg += `<polygon fill="#5a8a9e" points="
+    0,0 1080,0 1080,55 995,35 940,30 895,35 835,42 770,42 710,48 655,58
+    610,75 578,95 565,110 555,128 548,150 545,175 545,200 548,225 545,255
+    538,252 540,225 538,195 530,170 515,150 498,142 478,148 460,155 452,160 452,130
+    450,100 445,75 435,55 420,45 410,52 400,42 382,38 365,42 350,55 348,70 348,95
+    347,128 346,158 345,188 342,215 340,240 340,265 335,268 330,272 310,278 298,280
+    290,278 280,272 268,268 255,272 240,278 220,280 200,278 192,270
+    190,255 188,240 190,220 195,200 200,185 200,175 195,170 188,168 178,165 165,162 145,160 140,155 140,0
+  "/>`;
+  // Irish Sea / sea between Ireland and Britain
+  svg += `<polygon fill="#5a8a9e" points="
+    140,210 155,210 162,215 178,212 192,220 195,242 192,270 200,278
+    190,280 180,280 168,285 155,295 148,305 140,312 130,325 140,332 158,338
+    170,345 185,345 190,348 200,345 210,332 220,322 230,318 238,318
+    248,310 260,300 270,290 280,280 285,275 288,270 292,262 295,248
+    298,235 300,222 302,205 305,190 308,178 310,170 312,162 310,155
+    305,148 298,142 290,140 278,140 265,142 252,145 240,148 228,148
+    215,148 205,152 198,158 195,170 200,175 200,185 195,200 190,220
+    192,242 192,260 190,270 192,270 195,242 192,220 178,212 162,215
+    155,210 148,215 142,222 140,235 140,248 142,265 148,280
+    148,288 155,298 148,305 140,312
+    140,210
+  "/>`;
+  // East of Scandinavia / Arctic Russia water
+  svg += `<polygon fill="#5a8a9e" points="
+    1080,0 1080,55 995,35 940,30 895,35 835,42 770,42 710,48 655,58
+    610,75 578,95 565,110 555,128 548,150 545,175 545,200 548,225 545,255
+    548,262 555,268 565,272 575,275 578,262 580,240 582,218 585,195 590,170
+    592,150 595,135 600,125 610,118 625,115 640,118 655,128 665,142 672,158
+    678,178 680,200 678,225 675,250 672,270 670,285 670,300 672,318 676,338
+    680,358 686,378 692,398 700,420 710,442 720,458 732,472 745,482
+    755,488 770,490 785,488 800,482 818,472 838,462 860,455 885,452
+    912,452 935,458 955,468 972,480 988,495 1000,512 1008,530 1010,545
+    1020,540 1040,530 1060,520 1080,510
+  "/>`;
+
+  // Draw background (non-game) country overlays with distinct colors
+  BG_REGIONS.forEach(bg => {
+    svg += `<polygon class="map-bg-land" points="${bg.points}" fill="${bg.fill}"/>`;
+  });
+
+  // Draw interactive game region polygons with faction colors
   ALL_REGIONS.forEach(r => {
     const reg = MAP_REGIONS[r];
     if (!reg) return;
     let cls = 'map-region ' + (reg.sea ? 'sea' : 'land');
     if (r === mapSelectedRegion) cls += ' selected';
     else if (mapSelectedRegion && ADJACENCY[mapSelectedRegion] && ADJACENCY[mapSelectedRegion].indexOf(r) !== -1) cls += ' adjacent';
-    svg += `<polygon class="${cls}" points="${reg.points}" onclick="mapClickRegion('${r}')"/>`;
+
+    const fillColor = reg.sea ? '#4488cc' : (FACTION_MAP_COLORS[r] || '#b0a590');
+    svg += `<polygon class="${cls}" points="${reg.points}" fill="${fillColor}" onclick="mapClickRegion('${r}')"/>`;
   });
 
-  // English region labels (translated from German original)
+  // Country name labels and troop strengths
   ALL_REGIONS.forEach(r => {
     const reg = MAP_REGIONS[r];
     if (!reg) return;
-    const labelCls = reg.sea ? 'map-label sea-label' : 'map-label';
-    svg += `<text class="${labelCls}" x="${reg.cx}" y="${reg.cy - 8}">${REGION_NAMES[r]}</text>`;
-    let lineOffset = 0;
-    if (!reg.sea) {
-      Object.keys(gameState.factions).forEach(fid => {
-        if (fid === 'krupp' || fid === 'schneider') return;
-        const troops = gameState.factions[fid].troops[r] || 0;
-        if (troops > 0) {
-          lineOffset += 14;
-          svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${troops}⚔ ${fid.substring(0,3).toUpperCase()}</text>`;
-        }
-      });
-    }
+    const displayName = MAP_DISPLAY_NAMES[r] || REGION_NAMES[r];
+    const isSmall = ['belgium','paris','alsace_lorraine','serbia','dardanelles'].includes(r);
+
     if (reg.sea) {
+      svg += `<text class="map-label sea-label" x="${reg.cx}" y="${reg.cy}">${displayName}</text>`;
+      // Fleet counts in sea zones
+      let lineOffset = 0;
       Object.keys(gameState.factions).forEach(fid => {
         if (fid === 'krupp' || fid === 'schneider') return;
         const fleets = gameState.factions[fid].fleets[r] || 0;
         if (fleets > 0) {
           lineOffset += 14;
-          svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${fleets}⚓ ${fid.substring(0,3).toUpperCase()}</text>`;
+          svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${fleets} fleet ${FACTION_NAMES[fid].split(' ')[0]}</text>`;
         }
       });
+    } else {
+      // Country name
+      const labelCls = isSmall ? 'map-country-label small-region' : 'map-country-label';
+      svg += `<text class="${labelCls}" x="${reg.cx}" y="${reg.cy - 10}">${displayName}</text>`;
+
+      // Compute total troop strength in this region
+      let totalTroops = 0;
+      let troopDetails = [];
+      Object.keys(gameState.factions).forEach(fid => {
+        if (fid === 'krupp' || fid === 'schneider') return;
+        const troops = gameState.factions[fid].troops[r] || 0;
+        if (troops > 0) {
+          totalTroops += troops;
+          troopDetails.push({ fid, troops });
+        }
+      });
+
+      if (totalTroops > 0) {
+        // Show total strength like the reference map
+        svg += `<text class="map-strength" x="${reg.cx}" y="${reg.cy + 5}">(${totalTroops} div.)</text>`;
+
+        // Show per-faction breakdown below
+        let lineOffset = 8;
+        troopDetails.forEach(td => {
+          lineOffset += 12;
+          const shortName = FACTION_NAMES[td.fid].split(' ')[0];
+          svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[td.fid]}">${td.troops} ${shortName}</text>`;
+        });
+      }
     }
   });
+
+  // Map title
+  svg += `<text x="540" y="24" text-anchor="middle" font-family="'Playfair Display', serif" font-size="16" font-weight="900" fill="#1a1008" letter-spacing="3" paint-order="stroke" stroke="rgba(255,255,255,0.3)" stroke-width="2">EUROPE — 1914</text>`;
 
   svg += `</svg></div>`;
   container.innerHTML = svg;
