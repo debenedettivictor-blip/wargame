@@ -737,6 +737,152 @@ body::before {
   background: #8b1a1a;
   color: var(--cream);
 }
+.btn-gm-skip {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border: 1px solid var(--ink-light);
+  background: transparent;
+  color: var(--ink-light);
+  cursor: pointer;
+}
+.btn-gm-skip:hover { background: var(--ink-light); color: var(--cream); }
+
+/* === Phase Indicator === */
+.phase-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+.phase-step {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  border: 1px solid var(--ink-light);
+  color: var(--ink-light);
+  background: transparent;
+}
+.phase-step.current {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+  font-weight: 700;
+}
+.phase-step.done {
+  background: rgba(45,80,22,0.15);
+  color: #2d5016;
+  border-color: #2d5016;
+}
+.phase-arrow {
+  color: var(--ink-light);
+  font-size: 0.9em;
+}
+
+/* === Order Status Panel === */
+.order-status-panel {
+  border: 1px solid var(--ink-light);
+  background: var(--parchment);
+  margin: 10px 0;
+}
+.order-status-header {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-light);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ink-light);
+  background: rgba(0,0,0,0.03);
+}
+.order-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  font-family: 'Crimson Text', serif;
+  font-size: 0.92em;
+}
+.order-status-row:last-child { border-bottom: none; }
+.order-status-row.submitted .order-status-icon { color: #2d5016; }
+.order-status-row.pending .order-status-icon { color: #b8860b; }
+.order-status-icon { font-size: 1.1em; width: 20px; text-align: center; }
+.order-status-name { font-weight: 700; min-width: 140px; }
+.order-status-detail { flex: 1; color: var(--ink-light); font-size: 0.9em; }
+.btn-confirm-no-orders {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border: 1px solid var(--ink-light);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.btn-confirm-no-orders:hover { background: var(--ink); color: var(--cream); }
+
+/* === Phase Actions === */
+.phase-actions { margin-top: 12px; }
+.btn-phase-action {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 24px;
+  border: 2px solid var(--gold-accent);
+  background: var(--gold-accent);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+  width: 100%;
+}
+.btn-phase-action:hover:not(:disabled) { background: #a07008; color: var(--cream); border-color: #a07008; }
+.btn-phase-action:disabled { opacity: 0.4; cursor: not-allowed; }
+.phase-hint {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.88em;
+  color: var(--ink-light);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* === Resolution Log === */
+.resolution-log {
+  border: 1px solid var(--ink-light);
+  margin: 10px 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.resolution-log-header {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-light);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ink-light);
+  background: rgba(0,0,0,0.03);
+}
+.res-log-entry {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.88em;
+  padding: 4px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.res-log-entry:last-child { border-bottom: none; }
+.res-icon { display: inline-block; width: 18px; text-align: center; margin-right: 4px; }
+.res-ok { color: #2d5016; }
+.res-error { color: #8b1a1a; background: rgba(139,26,26,0.05); }
+.res-battle { color: #8b1a1a; font-weight: 700; }
+.res-manual { color: #b8860b; font-style: italic; }
 
 /* === Dispatch Feed (Player Dashboard) === */
 #dispatchFeed {
@@ -6558,6 +6704,10 @@ function computeLosses(tier, atkDiv, defDiv) {
 
 function advanceTurn() {
   if (gameState.currentTurnNum >= turns.length) return;
+  if (gameState.turnPhase !== 'complete') {
+    alert('Cannot advance turn yet. Current phase: ' + gameState.turnPhase.toUpperCase() + '.\n\nComplete all phases (Orders → Resolution → Battles) before advancing.\n\nOr use "Skip to Complete" to override.');
+    return;
+  }
   if (!confirm('Advance to next turn? This will collect income and deduct maintenance for ALL factions.')) return;
 
   const summary = [];
@@ -6631,6 +6781,8 @@ function advanceTurn() {
   });
 
   gameState.currentTurnNum++;
+  gameState.turnPhase = 'orders';
+  gameState.resolutionLog = [];
   if (!gameState.turnLog) gameState.turnLog = [];
   gameState.turnLog.push({
     turn: gameState.currentTurnNum,
@@ -6645,33 +6797,302 @@ function advanceTurn() {
   renderGMControl();
 }
 
+// ==================== TURN RESOLUTION ENGINE ====================
+
+function getPlayableFactions() {
+  // Return factions that are player-controlled (not disabled, not arms dealers for order purposes)
+  return Object.keys(FACTION_NAMES).filter(fid => {
+    const cfg = gameState.setup && gameState.setup.factionConfig ? gameState.setup.factionConfig[fid] : null;
+    return !cfg || cfg.controlled !== 'disabled';
+  });
+}
+
+function allOrdersSubmitted() {
+  const factions = getPlayableFactions();
+  return factions.every(fid => {
+    const orders = getOrders(fid);
+    return orders.submitted;
+  });
+}
+
+function confirmNoOrders(fid) {
+  if (!gameState.orders) gameState.orders = {};
+  gameState.orders[fid] = { turn: gameState.currentTurnNum, submitted: true, actions: [] };
+  logAction(fid, 'orders', 'No orders submitted for Turn ' + gameState.currentTurnNum + ' (confirmed by GM)');
+  saveGameState();
+  renderGMControl();
+}
+
+function beginResolution() {
+  if (!allOrdersSubmitted()) {
+    alert('Not all factions have submitted orders. Use "Confirm No Orders" for factions that haven\'t submitted.');
+    return;
+  }
+  if (!confirm('Begin order resolution? This will auto-execute all non-combat orders (recruits, moves, deploys, upgrades).')) return;
+
+  gameState.turnPhase = 'resolution';
+  gameState.resolutionLog = [];
+
+  const factions = getPlayableFactions();
+  const attackOrders = [];
+
+  // Process orders in priority: upgrades → recruits → deploys → moves → attacks (collected)
+  factions.forEach(fid => {
+    const orders = getOrders(fid);
+    if (!orders.submitted || orders.actions.length === 0) return;
+    const f = gameState.factions[fid];
+
+    orders.actions.forEach(action => {
+      switch (action.type) {
+        case 'upgrade': {
+          const upg = UPGRADES[action.upgradeId];
+          if (upg && f.gold >= upg.cost) {
+            f.gold -= upg.cost;
+            if (!f.upgrades) f.upgrades = {};
+            f.upgrades[action.upgradeId] = true;
+            gameState.resolutionLog.push({ fid, icon: '\u2191', text: `${FACTION_NAMES[fid]} upgraded to ${upg.name} (-${upg.cost}g)` });
+            logAction(fid, 'upgrade', `Purchased ${upg.name} (-${upg.cost}g)`);
+          } else if (upg) {
+            gameState.resolutionLog.push({ fid, icon: '\u2717', text: `${FACTION_NAMES[fid]} cannot afford ${upg.name} (need ${upg.cost}g, have ${f.gold}g)`, error: true });
+          }
+          break;
+        }
+        case 'recruit': {
+          const cost = action.unitType === 'army' ? UNIT_COSTS.army : UNIT_COSTS.fleet;
+          if (f.gold >= cost) {
+            f.gold -= cost;
+            if (action.unitType === 'army') {
+              f.army++;
+              const home = HOME_REGIONS[fid] || fid;
+              f.troops[home] = (f.troops[home] || 0) + 1;
+              f.units.push({ id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2,4), type: 'army', state: 'deployed' });
+              gameState.resolutionLog.push({ fid, icon: '+', text: `${FACTION_NAMES[fid]} recruited 1 army → ${REGION_NAMES[home]} (-${cost}g)` });
+            } else {
+              f.navy++;
+              const homeSea = HOME_SEAS[fid] || 'mediterranean';
+              f.fleets[homeSea] = (f.fleets[homeSea] || 0) + 1;
+              f.units.push({ id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2,4), type: 'fleet', state: 'deployed' });
+              gameState.resolutionLog.push({ fid, icon: '+', text: `${FACTION_NAMES[fid]} recruited 1 fleet → ${REGION_NAMES[homeSea]} (-${cost}g)` });
+            }
+            logAction(fid, 'purchase', `Recruited ${action.unitType} (-${cost}g)`);
+          } else {
+            gameState.resolutionLog.push({ fid, icon: '\u2717', text: `${FACTION_NAMES[fid]} cannot afford ${action.unitType} (need ${cost}g, have ${f.gold}g)`, error: true });
+          }
+          break;
+        }
+        case 'move': {
+          const from = action.from;
+          const to = action.to;
+          const count = action.count || 1;
+          const isNaval = SEA_REGIONS.includes(from) || SEA_REGIONS.includes(to);
+          if (isNaval) {
+            const available = f.fleets[from] || 0;
+            const moved = Math.min(count, available);
+            if (moved > 0) {
+              f.fleets[from] = (f.fleets[from] || 0) - moved;
+              f.fleets[to] = (f.fleets[to] || 0) + moved;
+              gameState.resolutionLog.push({ fid, icon: '\u2794', text: `${FACTION_NAMES[fid]} moved ${moved} fleet: ${REGION_NAMES[from]} → ${REGION_NAMES[to]}` });
+              logAction(fid, 'move', `Moved ${moved} fleet from ${REGION_NAMES[from]} to ${REGION_NAMES[to]}`);
+            }
+          } else {
+            const available = f.troops[from] || 0;
+            const moved = Math.min(count, available);
+            if (moved > 0) {
+              f.troops[from] = (f.troops[from] || 0) - moved;
+              f.troops[to] = (f.troops[to] || 0) + moved;
+              gameState.resolutionLog.push({ fid, icon: '\u2794', text: `${FACTION_NAMES[fid]} moved ${moved} div: ${REGION_NAMES[from]} → ${REGION_NAMES[to]}` });
+              logAction(fid, 'move', `Moved ${moved} divisions from ${REGION_NAMES[from]} to ${REGION_NAMES[to]}`);
+            }
+          }
+          break;
+        }
+        case 'deploy': {
+          if (action.region) {
+            gameState.resolutionLog.push({ fid, icon: '\u2794', text: `${FACTION_NAMES[fid]} deployed unit to ${REGION_NAMES[action.region] || action.region}` });
+            logAction(fid, 'deploy', action.desc || `Deployed to ${REGION_NAMES[action.region]}`);
+          }
+          break;
+        }
+        case 'attack': {
+          attackOrders.push({ fid, action });
+          gameState.resolutionLog.push({ fid, icon: '\u2694', text: `${FACTION_NAMES[fid]} attacks ${REGION_NAMES[action.target] || action.target} (${action.divisions || '?'} div from ${REGION_NAMES[action.from] || action.from})`, battle: true });
+          break;
+        }
+        case 'diplomacy':
+        case 'trade':
+        case 'modernize': {
+          gameState.resolutionLog.push({ fid, icon: '\u25C6', text: `${FACTION_NAMES[fid]}: ${action.desc || action.type} (GM to adjudicate)`, manual: true });
+          break;
+        }
+        default: {
+          gameState.resolutionLog.push({ fid, icon: '\u2022', text: `${FACTION_NAMES[fid]}: ${action.desc || action.type}` });
+          break;
+        }
+      }
+    });
+  });
+
+  // Detect battles from attack orders
+  if (attackOrders.length > 0) {
+    detectBattles(attackOrders);
+    gameState.turnPhase = 'battles';
+  } else {
+    gameState.turnPhase = 'complete';
+  }
+
+  saveGameState();
+  renderGMControl();
+  renderDashboard();
+  renderMap();
+}
+
+function detectBattles(attackOrders) {
+  if (!gameState.battles) gameState.battles = [];
+
+  // Group attacks by target region
+  const byRegion = {};
+  attackOrders.forEach(({ fid, action }) => {
+    const target = action.target;
+    if (!byRegion[target]) byRegion[target] = [];
+    byRegion[target].push({ fid, divisions: action.divisions || 1, from: action.from || fid });
+  });
+
+  // Create a battle for each attacked region
+  Object.keys(byRegion).forEach(region => {
+    const attackers = byRegion[region];
+
+    // Find defenders — factions with troops in the target region (that aren't attacking it)
+    const attackerFids = attackers.map(a => a.fid);
+    const defenders = [];
+    Object.keys(gameState.factions).forEach(defFid => {
+      if (attackerFids.includes(defFid)) return;
+      const defTroops = gameState.factions[defFid].troops[region] || 0;
+      if (defTroops > 0) {
+        defenders.push({ fid: defFid, divisions: defTroops, from: region });
+      }
+    });
+
+    if (defenders.length === 0 && attackers.length > 0) {
+      // Uncontested — just log it, no battle needed
+      gameState.resolutionLog.push({ icon: '\u2714', text: `${REGION_NAMES[region]}: Uncontested advance — no defenders present.` });
+      return;
+    }
+
+    // Create pending battle
+    const battle = {
+      id: 'battle_' + Date.now() + '_' + Math.random().toString(36).substr(2,6),
+      status: 'pending',
+      turn: gameState.currentTurnNum,
+      targetRegion: region,
+      attackerCoalition: attackers.map(a => ({
+        fid: a.fid,
+        divisions: a.divisions,
+        from: a.from,
+        supportPledged: false,
+        actualSupport: null
+      })),
+      defenderCoalition: defenders.map(d => ({
+        fid: d.fid,
+        divisions: d.divisions,
+        from: d.from
+      }))
+    };
+
+    gameState.battles.push(battle);
+    gameState.resolutionLog.push({ icon: '\u2694', text: `BATTLE CREATED: ${REGION_NAMES[region]} — ${attackers.map(a => FACTION_NAMES[a.fid]).join(' + ')} vs ${defenders.map(d => FACTION_NAMES[d.fid]).join(' + ')}`, battle: true });
+  });
+}
+
+function allBattlesResolved() {
+  const pending = (gameState.battles || []).filter(b => b.status === 'pending' && b.turn === gameState.currentTurnNum);
+  return pending.length === 0;
+}
+
+function completeBattlePhase() {
+  if (!allBattlesResolved()) {
+    alert('There are still pending battles. Resolve all battles before completing the turn.');
+    return;
+  }
+  gameState.turnPhase = 'complete';
+  saveGameState();
+  renderGMControl();
+}
+
+function skipToComplete() {
+  // GM override to skip phases (for flexibility)
+  if (!confirm('Skip directly to turn completion? This bypasses any pending orders or battles.')) return;
+  gameState.turnPhase = 'complete';
+  saveGameState();
+  renderGMControl();
+}
+
 // ==================== CUSTOM NEWS ====================
+
+const NEWS_EFFECT_LABELS = {
+  '': 'No Effect',
+  'vp_gain_1': '+1 VP to target',
+  'vp_gain_2': '+2 VP to target',
+  'vp_loss_1': '-1 VP to target',
+  'vp_loss_2': '-2 VP to target',
+  'gold_gain_2': '+2 Gold to target',
+  'gold_gain_3': '+3 Gold to target',
+  'gold_loss_2': '-2 Gold from target',
+  'gold_loss_3': '-3 Gold from target',
+  'trade_disrupted': 'Trade routes disrupted',
+  'casus_belli': 'Gains casus belli',
+  'alliance_strained': 'Alliance strained',
+  'treaty_broken': 'Treaty broken',
+  'peace_offer': 'Peace overture',
+  'mobilize_free': 'Free mobilization of 1 unit',
+  'unit_destroyed': '1 unit destroyed',
+  'forced_retreat': 'Forced retreat',
+  'arms_embargo': 'Arms embargo',
+  'conscription': 'Emergency conscription',
+  'revolution': 'Revolution! -1 VP, -2 Gold',
+  'assassination': 'Assassination — skip diplomacy',
+  'scandal': 'Scandal — lose 2 VP',
+  'windfall': 'Windfall — gain 3 Gold',
+  'mutiny': 'Military mutiny',
+  'espionage': 'Espionage revealed',
+  'custom': 'Custom effect'
+};
+
+const NEWS_TARGET_LABELS = {
+  'all': 'All Players',
+  'entente': 'Entente Powers',
+  'central': 'Central Powers'
+};
 
 function publishCustomNews() {
   const headline = document.getElementById('gmNewsHeadline').value.trim();
   const body = document.getElementById('gmNewsBody').value.trim();
-  const effect = document.getElementById('gmNewsEffect').value.trim();
+  const effectKey = document.getElementById('gmNewsEffect').value;
   const faction = document.getElementById('gmNewsFaction').value;
+  const target = document.getElementById('gmNewsTarget').value;
   const turnNum = parseInt(document.getElementById('gmNewsTurn').value) || gameState.currentTurnNum;
 
   if (!headline) { alert('Enter a headline for the news event.'); return; }
-  if (!body) { alert('Enter a description of what happened.'); return; }
+
+  const effectLabel = NEWS_EFFECT_LABELS[effectKey] || '';
 
   if (!gameState.customNews) gameState.customNews = [];
   gameState.customNews.push({
     id: Date.now(),
     headline: headline.toUpperCase(),
     body,
-    effect,
+    effect: effectKey,
+    effectLabel,
     faction: faction || null,
+    target: target || 'all',
     turnNum,
     timestamp: new Date().toISOString()
   });
 
+  const targetLabel = NEWS_TARGET_LABELS[target] || FACTION_NAMES[target] || 'All';
   gameState.actionLog.push({
     turn: gameState.currentTurnNum,
     fid: 'gm',
-    description: `Broadcast news: "${headline.toUpperCase()}"`
+    description: `Broadcast news to ${targetLabel}: "${headline.toUpperCase()}"`
   });
 
   saveGameState();
@@ -6697,12 +7118,17 @@ function renderCustomNewsCards() {
   }
   container.innerHTML = customNews.map(n => {
     const factionLabel = n.faction ? FACTION_NAMES[n.faction] || n.faction : 'Global Event';
+    const targetLabel = n.target === 'all' ? '' :
+      n.target === 'entente' ? ' → Entente' :
+      n.target === 'central' ? ' → Central Powers' :
+      FACTION_NAMES[n.target] ? ` → ${FACTION_NAMES[n.target]}` : '';
+    const effectDisplay = n.effectLabel || (n.effect && NEWS_EFFECT_LABELS[n.effect]) || (n.effect || '');
     return `<div class="news-card gm-custom revealed">
-      <div class="news-turn">Turn ${n.turnNum} — ${factionLabel}</div>
+      <div class="news-turn">Turn ${n.turnNum} — ${factionLabel}${targetLabel}</div>
       <div class="news-headline">${n.headline}</div>
       <div class="news-body">
-        <p>${n.body}</p>
-        ${n.effect ? `<div class="news-effect">GAME EFFECT: ${n.effect}</div>` : ''}
+        ${n.body ? `<p>${n.body}</p>` : ''}
+        ${effectDisplay && effectDisplay !== 'No Effect' ? `<div class="news-effect">⚡ ${effectDisplay}</div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -7900,7 +8326,76 @@ function renderGMControl() {
   const t = turns[turnIdx];
   const isLastTurn = gameState.currentTurnNum >= turns.length;
 
-  // 1. Turn Banner
+  // 1. Turn Banner + Phase Management
+  const phase = gameState.turnPhase || 'orders';
+  const phases = ['orders','resolution','battles','complete'];
+  const phaseLabels = { orders: 'Orders', resolution: 'Resolution', battles: 'Battles', complete: 'Complete' };
+  const phaseIcons = { orders: '\u270D', resolution: '\u2699', battles: '\u2694', complete: '\u2714' };
+
+  let phaseIndicatorHtml = phases.map(p => {
+    const isCurrent = p === phase;
+    const isPast = phases.indexOf(p) < phases.indexOf(phase);
+    const cls = isCurrent ? 'phase-step current' : (isPast ? 'phase-step done' : 'phase-step');
+    return `<span class="${cls}">${phaseIcons[p]} ${phaseLabels[p]}</span>`;
+  }).join('<span class="phase-arrow">\u2192</span>');
+
+  // Order status panel
+  const playableFactions = getPlayableFactions();
+  let orderStatusHtml = playableFactions.map(fid => {
+    const orders = getOrders(fid);
+    const isSubmitted = orders.submitted;
+    const actionCount = orders.actions.length;
+    const statusIcon = isSubmitted ? '\u2714' : '\u25CB';
+    const statusClass = isSubmitted ? 'submitted' : 'pending';
+    const confirmBtn = (!isSubmitted && phase === 'orders') ? `<button class="btn-confirm-no-orders" onclick="confirmNoOrders('${fid}')">Confirm No Orders</button>` : '';
+    return `<div class="order-status-row ${statusClass}">
+      <span class="order-status-icon">${statusIcon}</span>
+      <span class="order-status-name">${FACTION_NAMES[fid]}</span>
+      <span class="order-status-detail">${isSubmitted ? (actionCount > 0 ? actionCount + ' order' + (actionCount > 1 ? 's' : '') : 'No orders') : 'Pending'}</span>
+      ${confirmBtn}
+    </div>`;
+  }).join('');
+
+  const allSubmitted = allOrdersSubmitted();
+
+  // Phase action buttons
+  let phaseActionsHtml = '';
+  if (phase === 'orders') {
+    phaseActionsHtml = `<button class="btn-phase-action" onclick="beginResolution()" ${allSubmitted ? '' : 'disabled'}>
+      Begin Resolution \u2192
+    </button>
+    ${!allSubmitted ? '<p class="phase-hint">All factions must submit orders or be confirmed as "No Orders" before resolution can begin.</p>' : ''}`;
+  } else if (phase === 'resolution' || phase === 'battles') {
+    const pendingBattles = (gameState.battles || []).filter(b => b.status === 'pending' && b.turn === gameState.currentTurnNum);
+    if (phase === 'battles' && pendingBattles.length > 0) {
+      phaseActionsHtml = `<p class="phase-hint">${pendingBattles.length} pending battle${pendingBattles.length > 1 ? 's' : ''} to resolve. Use the Battle Resolution section below.</p>
+      <button class="btn-phase-action" onclick="completeBattlePhase()" ${allBattlesResolved() ? '' : 'disabled'}>
+        Complete Battle Phase \u2192
+      </button>`;
+    } else {
+      phaseActionsHtml = `<button class="btn-phase-action" onclick="completeBattlePhase()">
+        Complete Phase \u2192
+      </button>`;
+    }
+  } else if (phase === 'complete') {
+    phaseActionsHtml = `<button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
+      ${isLastTurn ? 'Final Turn' : 'Advance Turn \u2192'}
+    </button>`;
+  }
+
+  // Resolution log
+  let resLogHtml = '';
+  const resLog = gameState.resolutionLog || [];
+  if (resLog.length > 0) {
+    resLogHtml = `<div class="resolution-log">
+      <div class="resolution-log-header">Resolution Log</div>
+      ${resLog.map(entry => {
+        const cls = entry.error ? 'res-error' : (entry.battle ? 'res-battle' : (entry.manual ? 'res-manual' : 'res-ok'));
+        return `<div class="res-log-entry ${cls}"><span class="res-icon">${entry.icon}</span> ${entry.text}</div>`;
+      }).join('')}
+    </div>`;
+  }
+
   let turnSection = `<div class="gm-section">
     <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
       <span>Turn Management</span><span>\u25BC</span>
@@ -7913,12 +8408,17 @@ function renderGMControl() {
           <span class="turn-year">${t.year}</span>
         </div>
         <div class="gm-turn-actions">
-          <button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
-            ${isLastTurn ? 'Final Turn' : 'Advance Turn \u2192'}
-          </button>
           <button class="btn-gm-reset" onclick="gmResetGame()">Reset Game</button>
+          <button class="btn-gm-skip" onclick="skipToComplete()">Skip to Complete</button>
         </div>
       </div>
+      <div class="phase-indicator">${phaseIndicatorHtml}</div>
+      <div class="order-status-panel">
+        <div class="order-status-header">Order Status</div>
+        ${orderStatusHtml}
+      </div>
+      ${resLogHtml}
+      <div class="phase-actions">${phaseActionsHtml}</div>
     </div>
   </div>`;
 
@@ -7983,14 +8483,20 @@ function renderGMControl() {
   if (customNews.length > 0) {
     existingNewsHtml = `<div class="gm-news-list">
       <label style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; color:var(--ink-light); margin-bottom:6px; display:block;">Published News</label>
-      ${customNews.map((n, i) => `<div class="gm-news-item">
+      ${customNews.map((n, i) => {
+        const tgt = !n.target || n.target === 'all' ? '' :
+          n.target === 'entente' ? ' → Entente' :
+          n.target === 'central' ? ' → Central' :
+          FACTION_NAMES[n.target] ? ` → ${FACTION_NAMES[n.target]}` : '';
+        const eff = n.effectLabel || (n.effect && NEWS_EFFECT_LABELS[n.effect]) || '';
+        return `<div class="gm-news-item">
         <div class="gm-news-item-content">
           <div class="gm-news-item-headline">${n.headline}</div>
-          <div class="gm-news-item-desc">${n.body.substring(0, 80)}${n.body.length > 80 ? '...' : ''}</div>
-          <div class="gm-news-item-meta">Turn ${n.turnNum} &mdash; ${n.faction ? FACTION_NAMES[n.faction] || n.faction : 'Global'}</div>
+          <div class="gm-news-item-desc">${(n.body || '').substring(0, 80)}${(n.body || '').length > 80 ? '...' : ''}${eff && eff !== 'No Effect' ? ' ⚡' + eff : ''}</div>
+          <div class="gm-news-item-meta">Turn ${n.turnNum} &mdash; ${n.faction ? FACTION_NAMES[n.faction] || n.faction : 'Global'}${tgt}</div>
         </div>
         <button class="btn-delete-news" onclick="deleteCustomNews(${i})">Remove</button>
-      </div>`).join('')}
+      </div>`;}).join('')}
     </div>`;
   }
 
@@ -8009,11 +8515,50 @@ function renderGMControl() {
         </div>
         <div>
           <label>What Happened</label>
-          <textarea id="gmNewsBody" placeholder="Brief description of what happened and why..."></textarea>
+          <textarea id="gmNewsBody" placeholder="Brief description..." style="min-height:40px;"></textarea>
         </div>
         <div>
           <label>Game Effect</label>
-          <textarea id="gmNewsEffect" placeholder="Mechanical impact — e.g. Germany loses 2 VP, France gains casus belli..." style="min-height:40px;"></textarea>
+          <select id="gmNewsEffect" style="width:100%;">
+            <option value="">— No Mechanical Effect —</option>
+            <optgroup label="Victory Points">
+              <option value="vp_gain_1">+1 VP to target</option>
+              <option value="vp_gain_2">+2 VP to target</option>
+              <option value="vp_loss_1">-1 VP to target</option>
+              <option value="vp_loss_2">-2 VP to target</option>
+            </optgroup>
+            <optgroup label="Gold / Economy">
+              <option value="gold_gain_2">+2 Gold to target</option>
+              <option value="gold_gain_3">+3 Gold to target</option>
+              <option value="gold_loss_2">-2 Gold from target</option>
+              <option value="gold_loss_3">-3 Gold from target</option>
+              <option value="trade_disrupted">Trade routes disrupted — no trade income this turn</option>
+            </optgroup>
+            <optgroup label="Diplomatic">
+              <option value="casus_belli">Gains casus belli</option>
+              <option value="alliance_strained">Alliance strained — lose 1 VP if not resolved</option>
+              <option value="treaty_broken">Treaty broken — diplomatic fallout</option>
+              <option value="peace_offer">Peace overture — opportunity to negotiate</option>
+            </optgroup>
+            <optgroup label="Military">
+              <option value="mobilize_free">Free mobilization of 1 unit</option>
+              <option value="unit_destroyed">1 unit destroyed</option>
+              <option value="forced_retreat">Forced retreat from a territory</option>
+              <option value="arms_embargo">Arms embargo — cannot purchase arms this turn</option>
+              <option value="conscription">Emergency conscription — gain 1 infantry</option>
+            </optgroup>
+            <optgroup label="Chaos Events">
+              <option value="revolution">Revolution! Internal unrest — lose 1 VP and 2 Gold</option>
+              <option value="assassination">Assassination — political chaos, skip diplomacy phase</option>
+              <option value="scandal">Scandal exposed — lose 2 VP</option>
+              <option value="windfall">Windfall — gain 3 Gold from unexpected source</option>
+              <option value="mutiny">Military mutiny — 1 unit refuses orders this turn</option>
+              <option value="espionage">Espionage revealed — intelligence compromised</option>
+            </optgroup>
+            <optgroup label="Custom">
+              <option value="custom">Custom effect (specify in description)</option>
+            </optgroup>
+          </select>
         </div>
         <div style="display:flex; gap:12px;">
           <div style="flex:1;">
@@ -8024,6 +8569,15 @@ function renderGMControl() {
             </select>
           </div>
           <div style="flex:1;">
+            <label>Send To</label>
+            <select id="gmNewsTarget" style="width:100%;">
+              <option value="all">All Players</option>
+              <option value="entente">Entente Powers</option>
+              <option value="central">Central Powers</option>
+              ${Object.keys(FACTION_NAMES).map(f => `<option value="${f}">${FACTION_NAMES[f]}</option>`).join('')}
+            </select>
+          </div>
+          <div style="flex:0 0 80px;">
             <label>Turn</label>
             <input type="number" id="gmNewsTurn" value="${gameState.currentTurnNum}" min="1" max="6" style="width:100%;">
           </div>
