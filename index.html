@@ -5724,42 +5724,42 @@ function defaultGameState() {
       gold: 25, income: 15, army: 14, navy: 4, vp: 0,
       troops: { germany: 8, alsace_lorraine: 4, poland: 2 },
       fleets: { north_sea: 2, baltic: 2 },
-      alliances: ['austria'], status: [], upgrades: {},
+      alliances: ['austria'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     france: {
-      gold: 20, income: 8, army: 10, navy: 4, vp: 0,
-      troops: { france: 7, paris: 3 },
+      gold: 20, income: 8, army: 12, navy: 4, vp: 0,
+      troops: { france: 9, paris: 3 },
       fleets: { mediterranean: 2, english_channel: 2 },
-      alliances: ['britain','russia'], status: [], upgrades: {},
+      alliances: ['britain','russia'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     britain: {
-      gold: 30, income: 11, army: 6, navy: 14, vp: 0,
-      troops: { britain: 6 },
+      gold: 30, income: 11, army: 8, navy: 14, vp: 0,
+      troops: { britain: 8 },
       fleets: { north_sea: 7, english_channel: 4, mediterranean: 3 },
-      alliances: ['france','russia'], status: [], upgrades: {},
+      alliances: ['france','russia'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     russia: {
       gold: 18, income: 7, army: 14, navy: 3, vp: 0,
       troops: { russia: 9, poland: 4, balkans: 1 },
       fleets: { baltic: 2, mediterranean: 1 },
-      alliances: ['france','britain'], status: [], upgrades: {},
+      alliances: ['france','britain'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     austria: {
       gold: 14, income: 5, army: 8, navy: 2, vp: 0,
       troops: { austria: 6, balkans: 2 },
       fleets: { mediterranean: 2 },
-      alliances: ['germany'], status: [], upgrades: {},
+      alliances: ['germany'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     ottoman: {
       gold: 10, income: 6, army: 6, navy: 2, vp: 0,
       troops: { ottoman: 4, dardanelles: 2 },
       fleets: { mediterranean: 2 },
-      alliances: [], status: [], upgrades: {},
+      alliances: [], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     krupp: {
@@ -5788,6 +5788,14 @@ function defaultGameState() {
     battles: [],
     customNews: [],
     storylineChoices: {},
+    tradeAgreements: [
+      { parties: ['germany','austria'], value: 1, label: 'Central Powers Cooperation' },
+      { parties: ['france','russia'],   value: 1, label: 'Franco-Russian Alliance Trade' },
+      { parties: ['britain','france'],  value: 1, label: 'Entente Cordiale' },
+      { parties: ['germany','russia'],  value: 1, label: 'Reinsurance Treaty Remnants' },
+      { parties: ['germany','ottoman'], value: 1, label: 'Berlin-Baghdad Railway' },
+      { parties: ['britain','ottoman'], value: 1, label: 'Suez Trade Route' }
+    ],
     currentTurnNum: 1,
     setup: getDefaultSetup()
   };
@@ -5810,6 +5818,17 @@ function loadGameState() {
       if (!state.orders) state.orders = {};
       if (!state.battles) state.battles = [];
       if (!state.storylineChoices) state.storylineChoices = {};
+      // Migrate: add trade agreements if missing
+      if (!state.tradeAgreements) {
+        state.tradeAgreements = [
+          { parties: ['germany','austria'], value: 1, label: 'Central Powers Cooperation' },
+          { parties: ['france','russia'],   value: 1, label: 'Franco-Russian Alliance Trade' },
+          { parties: ['britain','france'],  value: 1, label: 'Entente Cordiale' },
+          { parties: ['germany','russia'],  value: 1, label: 'Reinsurance Treaty Remnants' },
+          { parties: ['germany','ottoman'], value: 1, label: 'Berlin-Baghdad Railway' },
+          { parties: ['britain','ottoman'], value: 1, label: 'Suez Trade Route' }
+        ];
+      }
       Object.keys(state.factions).forEach(fid => {
         if (!state.factions[fid].upgrades) state.factions[fid].upgrades = {};
         // Migrate: generate units from troops/fleets if missing
@@ -5821,6 +5840,7 @@ function loadGameState() {
         if (state.factions[fid].blockadeTurns === undefined) state.factions[fid].blockadeTurns = 0;
         if (state.factions[fid].atWar === undefined) state.factions[fid].atWar = false;
         if (state.factions[fid].warTurns === undefined) state.factions[fid].warTurns = 0;
+        if (state.factions[fid].modernization === undefined) state.factions[fid].modernization = 0;
       });
       return state;
     }
@@ -6015,6 +6035,34 @@ function computeEconomy(fid) {
     }
   }
 
+  // --- Trade agreement income ---
+  let tradeAgreementIncome = 0;
+  if (!isDealer && gameState.tradeAgreements) {
+    gameState.tradeAgreements.forEach(function(agreement) {
+      if (agreement.parties.includes(fid)) {
+        tradeAgreementIncome += agreement.value;
+      }
+    });
+  }
+
+  // --- Austria Dual Monarchy Stability bonus ---
+  let dualMonarchyBonus = 0;
+  if (fid === 'austria' && !f.atWar && !(f.status && f.status.includes('rebellion'))) {
+    dualMonarchyBonus = 2;
+  }
+
+  // --- Modernization income ---
+  let modernizationIncome = 0;
+  if (!isDealer && f.modernization && f.modernization > 0) {
+    modernizationIncome = f.modernization;
+  }
+
+  // --- Austria desertion risk (for GM reference) ---
+  let desertionRisk = 0;
+  if (fid === 'austria' && f.atWar) {
+    desertionRisk = Math.min(2, 1 + Math.floor((f.warTurns || 0) / 2));
+  }
+
   // --- War dividend for arms dealers ---
   let warDividend = 0;
   if (isDealer) {
@@ -6024,7 +6072,8 @@ function computeEconomy(fid) {
     }
   }
 
-  const grossIncome = industry + trade + bonus + warDividend + peaceDividend;
+  const grossIncome = industry + trade + bonus + warDividend + peaceDividend
+                    + tradeAgreementIncome + dualMonarchyBonus + modernizationIncome;
   const blockadePenalty = tradeLoss + industryLoss;
   const effectiveIncome = Math.max(0, grossIncome - blockadePenalty);
   const baseUpkeep = Math.ceil(f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet);
@@ -6035,12 +6084,87 @@ function computeEconomy(fid) {
     industry, trade, bonus, bonusLabel,
     tradeLoss, industryLoss, blockadeDetail,
     mobilizationCost, warDividend, warPenalty, warPenaltyLabel,
-    peaceDividend,
+    peaceDividend, tradeAgreementIncome, dualMonarchyBonus,
+    modernizationIncome, desertionRisk,
     grossIncome, blockadePenalty, effectiveIncome,
     baseUpkeep, totalUpkeep, net,
     isBlockaded: blockadePenalty > 0,
     atWar: !!f.atWar
   };
+}
+
+// ==================== TRADE & DIPLOMACY HELPERS ====================
+
+function getTradeAgreements(fid) {
+  if (!gameState.tradeAgreements) return [];
+  return gameState.tradeAgreements.filter(function(a) { return a.parties.includes(fid); });
+}
+
+function proposeTradeAgreement(fid, targetFid) {
+  addOrder(fid, {
+    type: 'trade',
+    action: 'propose',
+    target: targetFid,
+    desc: 'Propose trade agreement with ' + FACTION_NAMES[targetFid] + ' (+1g each)'
+  });
+}
+
+function breakTradeAgreement(fid, targetFid) {
+  addOrder(fid, {
+    type: 'trade',
+    action: 'break',
+    target: targetFid,
+    desc: 'Break trade agreement with ' + FACTION_NAMES[targetFid] + ' (costs 2 VP)'
+  });
+}
+
+function subsidizeAlly(fid, targetFid, amount) {
+  amount = Math.max(1, Math.min(5, parseInt(amount) || 1));
+  addOrder(fid, {
+    type: 'diplomacy',
+    action: 'subsidize',
+    target: targetFid,
+    amount: amount,
+    desc: 'Send ' + amount + ' Gold subsidy to ' + FACTION_NAMES[targetFid]
+  });
+}
+
+function lobbyAustria(fid) {
+  addOrder(fid, {
+    type: 'diplomacy',
+    action: 'lobby_austria',
+    desc: 'Lobby Austria toward war (2 Gold) — pressure Dual Monarchy to support military action'
+  });
+}
+
+const MODERNIZATION_CONFIG = {
+  austria: { name: 'Accelerate Industrialization', cost: 4, max: 3, desc: 'Invest in Bohemian and Hungarian industry. +1g/turn permanently.' },
+  russia:  { name: 'Railway Expansion', cost: 4, max: 3, desc: 'Extend the Trans-Siberian and military railway network. +1g/turn permanently.' },
+  ottoman: { name: 'Young Turk Reforms', cost: 3, max: 3, desc: 'Modernize Ottoman bureaucracy and industry. +1g/turn permanently.' },
+  france:  { name: 'Colonial Investment', cost: 3, max: 3, desc: 'Expand colonial trade networks in Africa and Indochina. +1g/turn permanently.' },
+  germany: { name: 'Industrial Expansion', cost: 5, max: 2, desc: 'Expand Ruhr steel and chemical industries. +1g/turn permanently.' },
+  britain: { name: 'Imperial Infrastructure', cost: 4, max: 2, desc: 'Invest in colonial railways and telegraph networks. +1g/turn permanently.' }
+};
+
+function queueModernization(fid) {
+  const mod = MODERNIZATION_CONFIG[fid];
+  if (!mod) return;
+  addOrder(fid, {
+    type: 'modernize',
+    desc: mod.name + ' (' + mod.cost + ' Gold, +1g/turn permanently)'
+  });
+}
+
+function deployBEF(fid) {
+  if (fid !== 'britain') return;
+  const f = gameState.factions.britain;
+  if (f.upgrades && f.upgrades.bef_deployed) { alert('BEF already deployed this game.'); return; }
+  if (f.gold < 2) { alert('Need 2 Gold for BEF deployment.'); return; }
+  addOrder(fid, {
+    type: 'deploy',
+    action: 'bef_rapid',
+    desc: 'BEF Rapid Deployment: 4 divisions to France (2 Gold, one-time)'
+  });
 }
 
 // Declare a blockade: blockading faction deploys fleets to sea zone
@@ -6153,7 +6277,7 @@ const FACTION_SPECIALS = {
     abilities: [
       { name: 'Lorraine Reconquest', desc: '+4 Gold/turn if you retake Alsace-Lorraine. Moving troops there also denies Germany their +4g bonus — a 8g swing!', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
       { name: 'Fortress Paris', desc: 'Paris is always considered fortified (+2 defense) at no cost.', type: 'military' },
-      { name: 'Entente Coordination', desc: 'Combined with Britain (16 army + 18 fleet), you outmatch Germany on land and sea. Coordinate to overwhelm.', type: 'strategic' }
+      { name: 'Entente Coordination', desc: 'Combined with Britain (20 army + 18 fleet), you outmatch Germany on land and sea. Coordinate to overwhelm.', type: 'strategic' }
     ]
   },
   britain: {
@@ -6161,7 +6285,8 @@ const FACTION_SPECIALS = {
     abilities: [
       { name: 'Naval Supremacy', desc: '14 fleets dominate the seas. Blockading Germany cuts their trade immediately and crushes their industry over time.', type: 'strategic' },
       { name: 'Colonial Trade Network', desc: 'Highest trade income (7g) but expensive navy. War disrupts your own trade too — peace keeps the money flowing.', type: 'economic' },
-      { name: 'Expeditionary Force', desc: '6 army divisions can reinforce France via the Channel — but losing them is costly to replace (2g each).', type: 'military' }
+      { name: 'Expeditionary Force', desc: '8 army divisions can reinforce France via the Channel — but losing them is costly to replace (2g each).', type: 'military' },
+      { name: 'BEF Rapid Deployment', desc: 'Deploy 4 divisions to France instantly for 2 Gold. Can only be used once per game — the professional army crosses the Channel.', type: 'military', check: function(f) { return !(f.upgrades && f.upgrades.bef_deployed); } }
     ]
   },
   russia: {
@@ -6175,9 +6300,10 @@ const FACTION_SPECIALS = {
   austria: {
     title: 'Dual Monarchy Command',
     abilities: [
+      { name: 'Dual Monarchy Stability', desc: '+2g/turn while at peace AND no rebellion. Austria profits enormously from maintaining the status quo.', type: 'economic', check: function(f) { return !f.atWar && !(f.status && f.status.includes('rebellion')); } },
+      { name: 'Nationality Crisis', desc: 'While at war: risk losing 1-2 army divisions per turn to desertion as ethnic minorities refuse to fight. Rebellion chance increases each turn.', type: 'penalty', check: function(f) { return f.atWar; } },
       { name: 'Internal Rebellion', desc: 'Rebellion costs -2 Gold/turn and may cause unit desertion.', type: 'penalty', check: function(f) { return f.status && f.status.includes('rebellion'); } },
-      { name: 'Dual Monarchy', desc: 'Must balance Hungarian and Austrian interests or risk internal crisis and VP loss.', type: 'strategic' },
-      { name: 'German Alliance', desc: '8 divisions support Germany. Together you field 22 army — but splitting between fronts is dangerous.', type: 'military' }
+      { name: 'German Alliance', desc: '8 divisions support Germany. Together you field 22 army — but Germany may pressure you into a war that tears your empire apart.', type: 'strategic' }
     ]
   },
   ottoman: {
@@ -6405,6 +6531,9 @@ function advanceTurn() {
       warPenalty: econ.warPenalty || 0,
       warPenaltyLabel: econ.warPenaltyLabel || '',
       peaceDividend: econ.peaceDividend || 0,
+      tradeAgreementIncome: econ.tradeAgreementIncome || 0,
+      dualMonarchyBonus: econ.dualMonarchyBonus || 0,
+      modernizationIncome: econ.modernizationIncome || 0,
       maintenance: econ.totalUpkeep,
       baseUpkeep: econ.baseUpkeep,
       net: econ.net,
@@ -6421,6 +6550,9 @@ function advanceTurn() {
       if (e.bonus !== 0) detail += ' + Bonus ' + (e.bonus >= 0 ? '+' : '') + e.bonus + 'g';
       if (e.warDividend > 0) detail += ' + War Dividend +' + e.warDividend + 'g';
       if (e.peaceDividend > 0) detail += ' + Peace Dividend +' + e.peaceDividend + 'g';
+      if (e.tradeAgreementIncome > 0) detail += ' + Trade Agreements +' + e.tradeAgreementIncome + 'g';
+      if (e.dualMonarchyBonus > 0) detail += ' + Stability +' + e.dualMonarchyBonus + 'g';
+      if (e.modernizationIncome > 0) detail += ' + Modernization +' + e.modernizationIncome + 'g';
       if (e.tradeLoss > 0) detail += ' | Trade loss: –' + e.tradeLoss + 'g';
       if (e.industryLoss > 0) detail += ', Industry loss: –' + e.industryLoss + 'g';
       detail += ' | Upkeep –' + e.baseUpkeep + 'g';
@@ -7055,6 +7187,15 @@ function renderFinanceTab(fid) {
   if (econ.peaceDividend > 0) {
     incomeRows += `<div class="ledger-row"><span class="ledger-label">Peace Dividend</span><span class="ledger-value positive">+${econ.peaceDividend}</span></div>`;
   }
+  if (econ.tradeAgreementIncome > 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">Trade Agreements</span><span class="ledger-value positive">+${econ.tradeAgreementIncome}</span></div>`;
+  }
+  if (econ.dualMonarchyBonus > 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">Dual Monarchy Stability</span><span class="ledger-value positive">+${econ.dualMonarchyBonus}</span></div>`;
+  }
+  if (econ.modernizationIncome > 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">Modernization</span><span class="ledger-value positive">+${econ.modernizationIncome}</span></div>`;
+  }
 
   let expenseRows = '';
   const armyUpkeep = Math.ceil(f.army * MAINTENANCE_COSTS.army);
@@ -7105,6 +7246,8 @@ function renderTradeTab(fid) {
   const f = gameState.factions[fid];
   const isDealer = fid === 'krupp' || fid === 'schneider';
   const econ = computeEconomy(fid);
+  const orders = getOrders(fid);
+  const isSubmitted = orders.submitted;
 
   let html = '<div class="tab-section-title" style="margin-top:0;">Trade Routes</div>';
 
@@ -7142,8 +7285,48 @@ function renderTradeTab(fid) {
   }
   html += `<div class="ledger-row"><span class="ledger-label">Effective Trade Income</span><span class="ledger-value ${econ.trade - econ.tradeLoss > 0 ? 'positive' : econ.trade - econ.tradeLoss < 0 ? 'negative' : 'zero'}">${econ.trade - econ.tradeLoss}</span></div>`;
 
-  html += '<div class="tab-section-title">Agreements</div>';
-  html += '<div class="empty-state" style="font-style:italic;">Negotiate trade agreements through diplomacy. Alliances can provide mutual economic benefits.</div>';
+  // --- Trade Agreements ---
+  html += '<div class="tab-section-title">Trade Agreements</div>';
+  const agreements = getTradeAgreements(fid);
+  if (agreements.length > 0) {
+    agreements.forEach(function(a) {
+      const partnerId = a.parties[0] === fid ? a.parties[1] : a.parties[0];
+      html += `<div class="trade-route" style="flex-wrap:wrap;">
+        <span style="display:flex; align-items:center; gap:6px;">
+          <span class="alliance-dot" style="background:${FACTION_COLORS[partnerId] || '#888'};"></span>
+          <strong>${FACTION_NAMES[partnerId] || partnerId}</strong> &mdash; ${a.label}
+        </span>
+        <span style="display:flex; align-items:center; gap:8px;">
+          <span class="trade-route-status open">+${a.value}g/turn</span>
+          <button class="action-btn" style="width:auto; margin:0; padding:6px 12px; font-size:0.8em;"
+            onclick="breakTradeAgreement('${fid}','${partnerId}')"
+            ${isSubmitted ? 'disabled' : ''}>Break (costs 2 VP)</button>
+        </span>
+      </div>`;
+    });
+    html += `<div class="ledger-row" style="margin-top:8px; font-weight:700;">
+      <span class="ledger-label">Total Agreement Income</span>
+      <span class="ledger-value positive">+${agreements.reduce(function(s,a) { return s + a.value; }, 0)}</span>
+    </div>`;
+  } else {
+    html += '<div class="empty-state">No active trade agreements.</div>';
+  }
+
+  // Propose new agreements
+  const majorFactions = ['germany','france','britain','russia','austria','ottoman'];
+  const availablePartners = majorFactions.filter(function(other) {
+    if (other === fid) return false;
+    return !agreements.some(function(a) { return a.parties.includes(other); });
+  });
+  if (availablePartners.length > 0) {
+    html += '<div class="tab-section-title">Propose New Agreement</div>';
+    availablePartners.forEach(function(other) {
+      html += `<button class="action-btn" onclick="proposeTradeAgreement('${fid}','${other}')" ${isSubmitted ? 'disabled' : ''}>
+        <span>Propose to ${FACTION_NAMES[other]} (+1g each)</span>
+        <span class="action-cost">Requires acceptance</span>
+      </button>`;
+    });
+  }
 
   return html;
 }
@@ -7201,6 +7384,10 @@ function renderDiplomacyTab(fid) {
       <span>Industrial Espionage &mdash; Reveal rival consortium's finances</span>
       <span class="action-cost">2 Gold</span>
     </button>`;
+    html += `<button class="action-btn" onclick="lobbyAustria('${fid}')" ${isSubmitted ? 'disabled' : ''}>
+      <span>Lobby Austria &mdash; Pressure the Dual Monarchy toward war. Undermine their peace faction.</span>
+      <span class="action-cost">2 Gold</span>
+    </button>`;
     if (fid === 'schneider') {
       html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Exclusive Contract (2 Gold)'})" ${isSubmitted ? 'disabled' : ''}>
         <span>Exclusive Contract &mdash; Lock a nation into buying from you for 3 turns</span>
@@ -7216,6 +7403,27 @@ function renderDiplomacyTab(fid) {
       <span>Bribe Minor Nation &mdash; GM decides outcome based on amount</span>
       <span class="action-cost">2-5 Gold</span>
     </button>`;
+  }
+
+  // --- Economic Aid / Subsidies ---
+  if (!isDealer) {
+    const allFactions = ['germany','france','britain','russia','austria','ottoman'];
+    const potentialTargets = allFactions.filter(function(other) { return other !== fid; });
+    html += '<div class="tab-section-title">Economic Aid</div>';
+    html += '<div style="display:flex; flex-wrap:wrap; gap:8px;">';
+    potentialTargets.forEach(function(targetId) {
+      html += `<div style="display:flex; align-items:center; gap:6px; padding:6px 10px; background:var(--parchment); border:1px solid var(--ink-faint); border-radius:4px;">
+        <span class="alliance-dot" style="background:${FACTION_COLORS[targetId] || '#888'};"></span>
+        <span style="font-weight:600; font-size:0.85em;">${FACTION_NAMES[targetId]}</span>
+        <select id="subsidy_${fid}_${targetId}" style="padding:3px; font-size:0.85em;">
+          <option value="1">1g</option><option value="2">2g</option><option value="3">3g</option><option value="4">4g</option><option value="5">5g</option>
+        </select>
+        <button class="action-btn" style="width:auto; margin:0; padding:4px 10px; font-size:0.8em;"
+          onclick="subsidizeAlly('${fid}','${targetId}',parseInt(document.getElementById('subsidy_${fid}_${targetId}').value))"
+          ${isSubmitted ? 'disabled' : ''}>Send</button>
+      </div>`;
+    });
+    html += '</div>';
   }
 
   // Intelligence overview
@@ -7253,6 +7461,59 @@ function renderSpecialTab(fid) {
       ${statusHtml}
     </div>`;
   });
+
+  // --- Modernization Actions ---
+  const modConfig = MODERNIZATION_CONFIG[fid];
+  if (modConfig) {
+    const modCount = f.modernization || 0;
+    const orders = getOrders(fid);
+    const isSubmitted = orders.submitted;
+    const canAfford = f.gold >= modConfig.cost;
+    const atMax = modCount >= modConfig.max;
+    html += '<div class="tab-section-title">Modernization</div>';
+    html += `<div class="ability-card economic" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="ability-name">${modConfig.name} (${modCount}/${modConfig.max})</div>
+        <div class="ability-desc">${modConfig.desc}</div>
+      </div>
+      <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
+        onclick="queueModernization('${fid}')"
+        ${isSubmitted || !canAfford || atMax ? 'disabled' : ''}>
+        ${atMax ? 'Max Reached' : modConfig.cost + ' Gold'}
+      </button>
+    </div>`;
+  }
+
+  // --- BEF Rapid Deployment for Britain ---
+  if (fid === 'britain') {
+    const befUsed = f.upgrades && f.upgrades.bef_deployed;
+    const orders = getOrders(fid);
+    const isSubmitted = orders.submitted;
+    html += '<div class="tab-section-title">Special Deployment</div>';
+    html += `<div class="ability-card military" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="ability-name">BEF Rapid Deployment</div>
+        <div class="ability-desc">Instantly deploy 4 divisions from Britain to France. The professional army crosses the Channel.</div>
+      </div>
+      <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
+        onclick="deployBEF('${fid}')"
+        ${isSubmitted || befUsed || f.gold < 2 ? 'disabled' : ''}>
+        ${befUsed ? 'Already Deployed' : '2 Gold'}
+      </button>
+    </div>`;
+  }
+
+  // --- Austria desertion warning ---
+  if (fid === 'austria' && f.atWar) {
+    const econ = computeEconomy(fid);
+    html += `<div class="ability-card penalty" style="border-color:#8b1a1a;">
+      <div>
+        <div class="ability-name" style="color:#8b1a1a;">Nationality Crisis Active</div>
+        <div class="ability-desc">At war for ${f.warTurns || 0} turns. Risk of losing ${econ.desertionRisk} division(s) to desertion this turn. Czechs, Slovaks, and South Slavs refuse to fight for Vienna.</div>
+      </div>
+      <span class="ability-status inactive">CRITICAL</span>
+    </div>`;
+  }
 
   return html;
 }
@@ -8333,11 +8594,7 @@ let mapSelectedRegion = null;
 function renderMap() {
   const container = document.getElementById('mapContainer');
   if (!container) return;
-  container.innerHTML = `<div class="map-svg-wrapper">
-    <svg viewBox="0 0 1080 736" xmlns="http://www.w3.org/2000/svg">
-      <image href="europe1910.jpg" x="0" y="0" width="1080" height="736" preserveAspectRatio="xMidYMid slice"/>
-    </svg>
-  </div>`;
+  container.innerHTML = `<img src="europe1910.jpg" alt="Europe 1910" style="width:100%; display:block; border:3px solid var(--ink);">`;
 }
 
 function mapClickRegion() {}
