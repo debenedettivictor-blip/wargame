@@ -5686,14 +5686,14 @@ function generateUnitsFromTroops(fid, troops, fleets) {
   Object.keys(troops).forEach(region => {
     const count = troops[region] || 0;
     for (let i = 0; i < count; i++) {
-      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, type: 'army', state: 'deployed', region: region, createdTurn: 0 });
+      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, type: 'army', state: 'reserve', region: region, createdTurn: 0 });
       idx++;
     }
   });
   Object.keys(fleets).forEach(region => {
     const count = fleets[region] || 0;
     for (let i = 0; i < count; i++) {
-      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, type: 'fleet', state: 'deployed', region: region, createdTurn: 0 });
+      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, type: 'fleet', state: 'reserve', region: region, createdTurn: 0 });
       idx++;
     }
   });
