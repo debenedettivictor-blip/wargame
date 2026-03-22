@@ -527,6 +527,137 @@ body::before {
   margin-left: 10px;
   white-space: nowrap;
 }
+
+/* === Scenario Launcher === */
+.scenario-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.scenario-filter-btn {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 5px 12px;
+  border: 1px solid var(--ink-light);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.scenario-filter-btn:hover {
+  background: var(--ink);
+  color: var(--parchment);
+}
+.scenario-filter-btn.active {
+  background: var(--ink);
+  color: var(--parchment);
+  font-weight: 700;
+}
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.scenario-card {
+  border: 1px solid var(--ink-light);
+  background: var(--parchment);
+  padding: 14px;
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.scenario-card:hover {
+  border-color: var(--ink);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+.scenario-card.used {
+  opacity: 0.5;
+  border-style: dashed;
+}
+.scenario-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.scenario-category-badge {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-light);
+  background: rgba(139,26,26,0.08);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+.scenario-severity {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.65em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+.scenario-severity.minor {
+  color: #2d5016;
+  background: rgba(45,80,22,0.1);
+}
+.scenario-severity.moderate {
+  color: #b8860b;
+  background: rgba(184,134,11,0.1);
+}
+.scenario-severity.major {
+  color: var(--red-empire);
+  background: rgba(139,26,26,0.1);
+}
+.scenario-card-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+  margin-bottom: 4px;
+}
+.scenario-card-target {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.85em;
+  color: var(--rust);
+  margin-bottom: 8px;
+}
+.scenario-card-effect {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.85em;
+  color: var(--ink-light);
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+.btn-deploy-scenario {
+  display: block;
+  width: 100%;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px;
+  border: 1px solid var(--red-empire);
+  background: transparent;
+  color: var(--red-empire);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-deploy-scenario:hover:not(:disabled) {
+  background: var(--red-empire);
+  color: var(--parchment);
+}
+.btn-deploy-scenario:disabled {
+  border-color: var(--ink-light);
+  color: var(--ink-light);
+  cursor: not-allowed;
+}
 .btn-delete-news:hover { background: var(--red-empire); color: var(--cream); }
 
 /* Quick Reference */
@@ -3573,6 +3704,482 @@ const FACTION_ALLIANCE = {
   krupp:'corp', schneider:'corp'
 };
 
+// ==================== GM SCENARIOS (Pre-loaded Rebalancing Events) ====================
+
+const GM_SCENARIOS = [
+  // === COLONIAL / IMPERIAL DISTRACTIONS ===
+  {
+    id: 'uk_india_revolt',
+    category: 'Colonial Crisis',
+    name: 'Indian Uprising',
+    target: 'britain',
+    headline: 'UPRISING IN BENGAL: BRITISH FORCES NEEDED IN INDIA',
+    body: 'A widespread revolt has erupted across Bengal and the Punjab. The Viceroy urgently requests reinforcements from the home garrison. The Empire must choose between security at home and stability abroad.',
+    effect: 'Britain must reassign 2 fleet from European waters to escort transports to India. Lose 2 fleet from any sea zone and 2 Gold in emergency spending.',
+    severity: 'major',
+    apply: function() {
+      const f = gameState.factions.britain;
+      f.navy = Math.max(0, f.navy - 2);
+      f.gold = Math.max(0, f.gold - 2);
+      // Remove from most stacked sea zone
+      const zones = Object.keys(f.fleets).sort((a,b) => (f.fleets[b]||0) - (f.fleets[a]||0));
+      let toRemove = 2;
+      for (const z of zones) {
+        if (toRemove <= 0) break;
+        const remove = Math.min(f.fleets[z] || 0, toRemove);
+        f.fleets[z] = (f.fleets[z] || 0) - remove;
+        toRemove -= remove;
+      }
+      f.units = f.units || [];
+      let removed = 0;
+      for (let i = f.units.length - 1; i >= 0 && removed < 2; i--) {
+        if (f.units[i].type === 'fleet') { f.units.splice(i, 1); removed++; }
+      }
+    }
+  },
+  {
+    id: 'uk_boer_flareup',
+    category: 'Colonial Crisis',
+    name: 'Boer Insurgency Flares',
+    target: 'britain',
+    headline: 'BOER GUERRILLAS STRIKE ACROSS TRANSVAAL',
+    body: 'Despite the 1902 peace, Boer commandos have launched coordinated raids on British positions in South Africa. London is forced to divert troops and gold to maintain order in the Cape Colony.',
+    effect: 'Britain loses 1 army division and 3 Gold to emergency deployment in South Africa.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.britain;
+      f.army = Math.max(0, f.army - 1);
+      f.gold = Math.max(0, f.gold - 3);
+      if (f.troops.britain > 0) f.troops.britain--;
+      f.units = f.units || [];
+      const idx = f.units.findIndex(u => u.type === 'army');
+      if (idx >= 0) f.units.splice(idx, 1);
+    }
+  },
+  {
+    id: 'france_morocco_crisis',
+    category: 'Colonial Crisis',
+    name: 'Moroccan Tribal Revolt',
+    target: 'france',
+    headline: 'BERBER TRIBES RISE AGAINST FRENCH PROTECTORATE',
+    body: 'Rif tribesmen have overwhelmed the French garrison at Fez. Paris must send a relief column immediately or risk losing its North African holdings entirely.',
+    effect: 'France must spend 3 Gold and loses 1 army division to the Moroccan expedition.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.france;
+      f.army = Math.max(0, f.army - 1);
+      f.gold = Math.max(0, f.gold - 3);
+      if (f.troops.france > 0) f.troops.france--;
+      else if (f.troops.paris > 0) f.troops.paris--;
+      const idx = (f.units||[]).findIndex(u => u.type === 'army');
+      if (idx >= 0) f.units.splice(idx, 1);
+    }
+  },
+  {
+    id: 'russia_manchuria',
+    category: 'Colonial Crisis',
+    name: 'Manchurian Border Incident',
+    target: 'russia',
+    headline: 'JAPANESE PROVOCATIONS ON MANCHURIAN BORDER',
+    body: 'Japan has deployed troops along the Manchurian frontier. The Tsar is forced to divert Siberian reserves eastward, weakening the western front.',
+    effect: 'Russia loses 2 army divisions redeployed to the Far East.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.russia;
+      f.army = Math.max(0, f.army - 2);
+      let toRemove = 2;
+      const regions = ['russia','poland','balkans'];
+      for (const r of regions) {
+        if (toRemove <= 0) break;
+        const remove = Math.min(f.troops[r] || 0, toRemove);
+        f.troops[r] = (f.troops[r] || 0) - remove;
+        toRemove -= remove;
+      }
+      let removed = 0;
+      for (let i = (f.units||[]).length - 1; i >= 0 && removed < 2; i--) {
+        if (f.units[i].type === 'army') { f.units.splice(i, 1); removed++; }
+      }
+    }
+  },
+  {
+    id: 'ottoman_libya',
+    category: 'Colonial Crisis',
+    name: 'Italian Invasion of Libya',
+    target: 'ottoman',
+    headline: 'ITALY SEIZES TRIPOLITANIA FROM OTTOMAN EMPIRE',
+    body: 'Italian forces have landed in Libya and overwhelmed the Ottoman garrison. The Sublime Porte must divert forces to defend its last African territories or accept the humiliating loss.',
+    effect: 'Ottoman Empire loses 1 army, 1 fleet, and 2 Gold. Italy gains +1 VP.',
+    severity: 'major',
+    apply: function() {
+      const f = gameState.factions.ottoman;
+      f.army = Math.max(0, f.army - 1);
+      f.navy = Math.max(0, f.navy - 1);
+      f.gold = Math.max(0, f.gold - 2);
+      if (f.troops.ottoman > 0) f.troops.ottoman--;
+      const fleetZones = Object.keys(f.fleets).sort((a,b) => (f.fleets[b]||0) - (f.fleets[a]||0));
+      if (fleetZones.length > 0 && f.fleets[fleetZones[0]] > 0) f.fleets[fleetZones[0]]--;
+      let removedA = false, removedF = false;
+      for (let i = (f.units||[]).length - 1; i >= 0; i--) {
+        if (!removedA && f.units[i].type === 'army') { f.units.splice(i, 1); removedA = true; }
+        if (!removedF && f.units[i].type === 'fleet') { f.units.splice(i, 1); removedF = true; }
+      }
+    }
+  },
+
+  // === INTERNAL INSTABILITY ===
+  {
+    id: 'russia_revolution_rumble',
+    category: 'Internal Crisis',
+    name: 'Worker Strikes in St. Petersburg',
+    target: 'russia',
+    headline: 'GENERAL STRIKE PARALYZES RUSSIAN CAPITAL',
+    body: 'Workers in St. Petersburg have downed tools demanding bread and political reform. The Tsar deploys Cossacks to restore order, but the unrest spreads to Moscow. Industrial output grinds to a halt.',
+    effect: 'Russia loses 3 Gold to lost productivity and must add "revolution" status if not already present. Income reduced until resolved.',
+    severity: 'major',
+    apply: function() {
+      const f = gameState.factions.russia;
+      f.gold = Math.max(0, f.gold - 3);
+      if (!f.status) f.status = [];
+      if (!f.status.includes('revolution')) f.status.push('revolution');
+    }
+  },
+  {
+    id: 'austria_ethnic_tensions',
+    category: 'Internal Crisis',
+    name: 'Hungarian Separatist Movement',
+    target: 'austria',
+    headline: 'BUDAPEST PARLIAMENT DEMANDS FULL INDEPENDENCE',
+    body: 'The Hungarian Diet has passed a resolution demanding complete autonomy from Vienna. Ethnic Romanians, Czechs, and Croats follow suit with their own demands. The Dual Monarchy threatens to fracture from within.',
+    effect: 'Austria-Hungary gains "rebellion" status. Loses 2 Gold to emergency concessions.',
+    severity: 'major',
+    apply: function() {
+      const f = gameState.factions.austria;
+      f.gold = Math.max(0, f.gold - 2);
+      if (!f.status) f.status = [];
+      if (!f.status.includes('rebellion')) f.status.push('rebellion');
+    }
+  },
+  {
+    id: 'germany_socialist_unrest',
+    category: 'Internal Crisis',
+    name: 'SPD Organizes Mass Protests',
+    target: 'germany',
+    headline: 'SOCIALIST DEMONSTRATIONS ROCK BERLIN AND HAMBURG',
+    body: 'The Social Democratic Party has organized massive anti-militarist rallies across Germany. The Kaiser is furious but the army is reluctant to fire on German citizens. Military spending faces political headwinds.',
+    effect: 'Germany loses 3 Gold to political concessions. All unit purchases cost +1 Gold this turn.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.germany;
+      f.gold = Math.max(0, f.gold - 3);
+    }
+  },
+  {
+    id: 'ottoman_armenian_crisis',
+    category: 'Internal Crisis',
+    name: 'Armenian Reforms Demanded',
+    target: 'ottoman',
+    headline: 'GREAT POWERS DEMAND OTTOMAN REFORMS FOR ARMENIANS',
+    body: 'Russia and Britain have jointly demanded the Ottoman Empire implement sweeping reforms in its Armenian provinces. Refusal risks international intervention; compliance weakens central authority.',
+    effect: 'Ottoman Empire must spend 2 Gold on reforms or lose 1 VP and gain "rebellion" status.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.ottoman;
+      f.gold = Math.max(0, f.gold - 2);
+    }
+  },
+
+  // === MILITARY SETBACKS / FORCE REBALANCING ===
+  {
+    id: 'germany_naval_accident',
+    category: 'Military Setback',
+    name: 'Dreadnought Sinks in Kiel',
+    target: 'germany',
+    headline: 'SMS POMMERN CAPSIZES IN KIEL HARBOUR — ALL HANDS LOST',
+    body: 'The pride of the High Seas Fleet, SMS Pommern, has capsized during a training exercise in Kiel harbour. An investigation reveals catastrophic design flaws. The Kaiser orders a fleet review, delaying all naval construction.',
+    effect: 'Germany loses 1 fleet and 2 Gold for salvage operations.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.germany;
+      f.navy = Math.max(0, f.navy - 1);
+      f.gold = Math.max(0, f.gold - 2);
+      const zones = Object.keys(f.fleets).sort((a,b) => (f.fleets[b]||0) - (f.fleets[a]||0));
+      if (zones.length > 0 && f.fleets[zones[0]] > 0) f.fleets[zones[0]]--;
+      const idx = (f.units||[]).findIndex(u => u.type === 'fleet');
+      if (idx >= 0) f.units.splice(idx, 1);
+    }
+  },
+  {
+    id: 'france_mutiny',
+    category: 'Military Setback',
+    name: 'Garrison Mutiny at Lyon',
+    target: 'france',
+    headline: 'FRENCH GARRISON MUTINIES — SOLDIERS REFUSE DEPLOYMENT ORDERS',
+    body: 'The 15th Infantry Regiment at Lyon has mutinied, refusing orders to deploy to the frontier. The contagion spreads to two neighboring garrisons before order is restored. Several ringleaders are court-martialed.',
+    effect: 'France loses 1 army division and 1 Gold for courts-martial proceedings.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.france;
+      f.army = Math.max(0, f.army - 1);
+      f.gold = Math.max(0, f.gold - 1);
+      if (f.troops.france > 0) f.troops.france--;
+      else if (f.troops.paris > 0) f.troops.paris--;
+      const idx = (f.units||[]).findIndex(u => u.type === 'army');
+      if (idx >= 0) f.units.splice(idx, 1);
+    }
+  },
+  {
+    id: 'russia_fleet_disaster',
+    category: 'Military Setback',
+    name: 'Baltic Fleet Collides in Fog',
+    target: 'russia',
+    headline: 'RUSSIAN BALTIC FLEET DEVASTATED IN PEACETIME COLLISION',
+    body: 'Two cruisers of the Russian Baltic Fleet have collided in heavy fog off Kronstadt, sinking both vessels. The disaster is reminiscent of the Dogger Bank incident and exposes Russian naval incompetence.',
+    effect: 'Russia loses 1 fleet from the Baltic.',
+    severity: 'minor',
+    apply: function() {
+      const f = gameState.factions.russia;
+      f.navy = Math.max(0, f.navy - 1);
+      if (f.fleets.baltic > 0) f.fleets.baltic--;
+      const idx = (f.units||[]).findIndex(u => u.type === 'fleet');
+      if (idx >= 0) f.units.splice(idx, 1);
+    }
+  },
+
+  // === DIPLOMATIC WINDFALLS / BOOSTS ===
+  {
+    id: 'ottoman_german_alliance',
+    category: 'Diplomatic Windfall',
+    name: 'German Military Mission to Constantinople',
+    target: 'ottoman',
+    headline: 'KAISER SENDS MILITARY ADVISORS TO OTTOMAN EMPIRE',
+    body: 'Germany has dispatched General Liman von Sanders and a military mission to modernize the Ottoman army. The move infuriates Russia and France but significantly strengthens Ottoman defenses.',
+    effect: 'Ottoman Empire gains 2 army divisions and 3 Gold in German military aid.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.ottoman;
+      f.army += 2;
+      f.gold += 3;
+      f.troops.ottoman = (f.troops.ottoman || 0) + 2;
+      f.units = f.units || [];
+      f.units.push({ id: 'aid_' + Date.now() + '_1', type: 'army', state: 'deployed' });
+      f.units.push({ id: 'aid_' + Date.now() + '_2', type: 'army', state: 'deployed' });
+    }
+  },
+  {
+    id: 'austria_german_reassurance',
+    category: 'Diplomatic Windfall',
+    name: 'Nibelungen Alliance Reaffirmed',
+    target: 'austria',
+    headline: 'GERMANY PLEDGES UNCONDITIONAL SUPPORT TO AUSTRIA-HUNGARY',
+    body: 'Kaiser Wilhelm has written a personal letter to Emperor Franz Joseph promising Germany\'s full military support in any conflict with Serbia or Russia. The "blank cheque" emboldens Vienna.',
+    effect: 'Austria-Hungary gains 3 Gold in German subsidies and +1 VP for strengthened alliance.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.austria;
+      f.gold += 3;
+      f.vp += 1;
+    }
+  },
+  {
+    id: 'france_russian_loan',
+    category: 'Diplomatic Windfall',
+    name: 'French Capital Floods into Russia',
+    target: 'russia',
+    headline: 'PARIS BANKS EXTEND MASSIVE LOAN TO ST. PETERSBURG',
+    body: 'French financiers have extended 500 million francs in loans to Russia, earmarked for railway construction to the German border. The strategic investment deepens the Franco-Russian alliance.',
+    effect: 'Russia gains 4 Gold from French loans.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.russia;
+      f.gold += 4;
+    }
+  },
+
+  // === ECONOMIC EVENTS ===
+  {
+    id: 'arms_race_escalation',
+    category: 'Economic Event',
+    name: 'Arms Race Heats Up',
+    target: null,
+    headline: 'MILITARY SPENDING REACHES RECORD LEVELS ACROSS EUROPE',
+    body: 'Every Great Power has increased its military budget for the third consecutive year. Arms manufacturers report unprecedented demand. The continent bristles with new weapons.',
+    effect: 'All major powers gain 2 Gold. Arms dealers (Krupp, Schneider) gain 3 Gold each.',
+    severity: 'moderate',
+    apply: function() {
+      ['germany','france','britain','russia','austria','ottoman'].forEach(fid => {
+        gameState.factions[fid].gold += 2;
+      });
+      gameState.factions.krupp.gold += 3;
+      gameState.factions.schneider.gold += 3;
+    }
+  },
+  {
+    id: 'trade_disruption',
+    category: 'Economic Event',
+    name: 'Global Trade Slump',
+    target: null,
+    headline: 'FINANCIAL PANIC DISRUPTS INTERNATIONAL TRADE',
+    body: 'A banking crisis originating in Vienna has spread across European exchanges. Trade routes are disrupted as credit freezes. Maritime powers are hit hardest.',
+    effect: 'Britain loses 4 Gold, France loses 2 Gold, Germany loses 2 Gold. Trade-dependent nations suffer most.',
+    severity: 'major',
+    apply: function() {
+      gameState.factions.britain.gold = Math.max(0, gameState.factions.britain.gold - 4);
+      gameState.factions.france.gold = Math.max(0, gameState.factions.france.gold - 2);
+      gameState.factions.germany.gold = Math.max(0, gameState.factions.germany.gold - 2);
+    }
+  },
+  {
+    id: 'uk_dreadnought_program',
+    category: 'Economic Event',
+    name: 'Emergency Naval Estimates',
+    target: 'britain',
+    headline: 'PARLIAMENT APPROVES EMERGENCY NAVAL ESTIMATES — "WE WANT EIGHT AND WE WON\'T WAIT"',
+    body: 'Public pressure and fears of German naval expansion have forced the government to approve an emergency naval building program. The Royal Navy will receive eight new dreadnoughts.',
+    effect: 'Britain gains 2 fleets deployed to the North Sea, but loses 5 Gold for construction costs.',
+    severity: 'major',
+    apply: function() {
+      const f = gameState.factions.britain;
+      f.navy += 2;
+      f.gold = Math.max(0, f.gold - 5);
+      f.fleets.north_sea = (f.fleets.north_sea || 0) + 2;
+      f.units = f.units || [];
+      f.units.push({ id: 'dread_' + Date.now() + '_1', type: 'fleet', state: 'deployed' });
+      f.units.push({ id: 'dread_' + Date.now() + '_2', type: 'fleet', state: 'deployed' });
+    }
+  },
+
+  // === ROGUE ORDERS / GM CURVEBALLS ===
+  {
+    id: 'rogue_general_france',
+    category: 'Rogue Orders',
+    name: 'French General Advances Without Orders',
+    target: 'france',
+    headline: 'ROGUE FRENCH GENERAL MARCHES INTO ALSACE',
+    body: 'General Bonneau, commander of VII Corps, has launched an unauthorized advance into Alsace-Lorraine, seeking personal glory. The attack is repulsed with losses. Paris is furious.',
+    effect: 'France loses 1 army division. Germany gains casus belli and +1 VP.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.france;
+      f.army = Math.max(0, f.army - 1);
+      if (f.troops.france > 0) f.troops.france--;
+      const idx = (f.units||[]).findIndex(u => u.type === 'army');
+      if (idx >= 0) f.units.splice(idx, 1);
+      gameState.factions.germany.vp += 1;
+    }
+  },
+  {
+    id: 'rogue_admiral_germany',
+    category: 'Rogue Orders',
+    name: 'German Admiral Provokes Incident at Sea',
+    target: 'germany',
+    headline: 'GERMAN WARSHIP FIRES ON FRENCH FISHING VESSEL',
+    body: 'A trigger-happy German admiral has ordered his cruiser to fire warning shots at a French fishing fleet, claiming they were in restricted waters. The diplomatic fallout is severe.',
+    effect: 'Germany loses 2 VP from diplomatic embarrassment. France gains casus belli.',
+    severity: 'moderate',
+    apply: function() {
+      gameState.factions.germany.vp = Math.max(0, gameState.factions.germany.vp - 2);
+    }
+  },
+  {
+    id: 'rogue_cossacks_russia',
+    category: 'Rogue Orders',
+    name: 'Cossack Raid into Galicia',
+    target: 'russia',
+    headline: 'COSSACK IRREGULARS RAID AUSTRIAN BORDER VILLAGES',
+    body: 'A band of Cossacks has crossed into Austrian Galicia, looting villages and terrorizing the population. The Tsar disavows the action but the damage to Russo-Austrian relations is done.',
+    effect: 'Russia loses 1 VP. Austria-Hungary gains casus belli and may demand 2 Gold compensation.',
+    severity: 'minor',
+    apply: function() {
+      gameState.factions.russia.vp = Math.max(0, gameState.factions.russia.vp - 1);
+    }
+  },
+  {
+    id: 'uk_must_patrol_suez',
+    category: 'Rogue Orders',
+    name: 'Suez Canal Threat',
+    target: 'britain',
+    headline: 'OTTOMAN IRREGULARS THREATEN SUEZ CANAL',
+    body: 'Reports of armed bands massing near the Suez Canal have reached London. The Admiralty orders the Mediterranean Fleet to detach vessels for canal defense, weakening Britain\'s European position.',
+    effect: 'Britain must move 1 fleet from European waters to guard Suez (removed from play). Loses 1 Gold.',
+    severity: 'moderate',
+    apply: function() {
+      const f = gameState.factions.britain;
+      f.navy = Math.max(0, f.navy - 1);
+      f.gold = Math.max(0, f.gold - 1);
+      const zones = ['mediterranean','english_channel','north_sea'];
+      for (const z of zones) {
+        if (f.fleets[z] > 0) { f.fleets[z]--; break; }
+      }
+      const idx = (f.units||[]).findIndex(u => u.type === 'fleet');
+      if (idx >= 0) f.units.splice(idx, 1);
+    }
+  },
+  {
+    id: 'assassination_attempt',
+    category: 'Rogue Orders',
+    name: 'Assassination Attempt on Kaiser',
+    target: 'germany',
+    headline: 'ANARCHIST FIRES ON KAISER WILHELM DURING PARADE',
+    body: 'An anarchist has attempted to assassinate Kaiser Wilhelm II during a military parade in Potsdam. The Kaiser is unharmed but shaken. A wave of repression follows, diverting resources from military preparations.',
+    effect: 'Germany loses 2 Gold to security crackdown. All German orders delayed — cannot submit orders until next phase.',
+    severity: 'moderate',
+    apply: function() {
+      gameState.factions.germany.gold = Math.max(0, gameState.factions.germany.gold - 2);
+    }
+  }
+];
+
+const SCENARIO_CATEGORIES = [...new Set(GM_SCENARIOS.map(s => s.category))];
+
+function applyGMScenario(scenarioId) {
+  const scenario = GM_SCENARIOS.find(s => s.id === scenarioId);
+  if (!scenario) { alert('Scenario not found!'); return; }
+
+  const targetName = scenario.target ? FACTION_NAMES[scenario.target] : 'All Powers';
+  if (!confirm(`Deploy scenario: "${scenario.name}"\nAffects: ${targetName}\n\n${scenario.effect}\n\nThis will apply game state changes AND broadcast the news. Continue?`)) return;
+
+  // Apply game state changes
+  scenario.apply();
+
+  // Publish as custom news
+  if (!gameState.customNews) gameState.customNews = [];
+  gameState.customNews.push({
+    id: Date.now(),
+    headline: scenario.headline,
+    body: scenario.body,
+    effect: scenario.effect,
+    faction: scenario.target || null,
+    turnNum: gameState.currentTurnNum,
+    timestamp: new Date().toISOString(),
+    scenarioId: scenario.id
+  });
+
+  // Log the action
+  gameState.actionLog.push({
+    turn: gameState.currentTurnNum,
+    fid: 'gm',
+    type: 'scenario',
+    description: `Deployed scenario: "${scenario.name}" — ${scenario.effect}`
+  });
+
+  saveGameState();
+  renderGMControl();
+  renderCustomNewsCards();
+  renderDashboard();
+}
+
+function filterScenarios(btn, category) {
+  document.querySelectorAll('.scenario-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.scenario-card').forEach(card => {
+    if (category === 'all' || card.dataset.category === category) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
 // ==================== FACTION ROLES & SETUP ====================
 
 const FACTION_ROLES = {
@@ -5322,6 +5929,45 @@ function renderGMControl() {
     </div>
   </div>`;
 
+  // 2b. Scenario Launcher
+  let scenarioFilterHtml = `<div class="scenario-filters">
+    <button class="scenario-filter-btn active" onclick="filterScenarios(this, 'all')">All</button>
+    ${SCENARIO_CATEGORIES.map(cat => `<button class="scenario-filter-btn" onclick="filterScenarios(this, '${cat}')">${cat}</button>`).join('')}
+  </div>`;
+
+  let scenarioCardsHtml = GM_SCENARIOS.map(s => {
+    const targetName = s.target ? FACTION_NAMES[s.target] : 'All Powers';
+    const severityClass = s.severity || 'moderate';
+    const alreadyUsed = (gameState.customNews || []).some(n => n.scenarioId === s.id);
+    return `<div class="scenario-card ${severityClass} ${alreadyUsed ? 'used' : ''}" data-category="${s.category}" data-target="${s.target || 'global'}">
+      <div class="scenario-card-header">
+        <span class="scenario-category-badge">${s.category}</span>
+        <span class="scenario-severity ${severityClass}">${severityClass}</span>
+      </div>
+      <div class="scenario-card-name">${s.name}</div>
+      <div class="scenario-card-target">${targetName}</div>
+      <div class="scenario-card-effect">${s.effect}</div>
+      <button class="btn-deploy-scenario" onclick="applyGMScenario('${s.id}')" ${alreadyUsed ? 'disabled' : ''}>
+        ${alreadyUsed ? 'Already Deployed' : 'Deploy Scenario'}
+      </button>
+    </div>`;
+  }).join('');
+
+  let scenarioSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Scenario Launcher</span><span>▼</span>
+    </div>
+    <div class="gm-section-body">
+      <p style="font-family:'Crimson Text',serif; font-size:0.95em; color:var(--ink-light); margin-bottom:12px;">
+        Pre-loaded scenarios to rebalance the game. Each deploys a news event AND applies game-state changes (troop losses, gold costs, status effects). Use these to create pressure, punish runaway leaders, or inject historical chaos.
+      </p>
+      ${scenarioFilterHtml}
+      <div class="scenario-grid" id="scenarioGrid">
+        ${scenarioCardsHtml}
+      </div>
+    </div>
+  </div>`;
+
   // 3. Order Review
   let orderReviewHtml = '';
   Object.keys(FACTION_NAMES).forEach(fid => {
@@ -5620,7 +6266,7 @@ function renderGMControl() {
     </div>
   </div>`;
 
-  container.innerHTML = turnSection + turnTrackerSection + newsSection + newsEventsSection + orderSection + battleSection + economySection + factionSection + overviewSection + logSection;
+  container.innerHTML = turnSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + battleSection + economySection + factionSection + overviewSection + logSection;
 
   // Render turn tracker into GM console
   renderGMTurnTracker();
