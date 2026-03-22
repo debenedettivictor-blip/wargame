@@ -6519,7 +6519,7 @@ function showOrderConfirmation(fid) {
   const groupLabels = {
     recruit: 'Build Forces', deploy: 'Deploy Troops', move: 'Move Forces',
     attack: 'Attack Orders', support: 'Support Pledges', upgrade: 'Upgrades',
-    diplomacy: 'Diplomacy'
+    diplomacy: 'Diplomacy', modernize: 'Investment & Development'
   };
   actions.forEach(function(a) {
     const type = a.type || 'other';
@@ -6543,6 +6543,7 @@ function showOrderConfirmation(fid) {
   let orderCost = 0;
   let newArmies = 0;
   let newFleets = 0;
+  let newIncomePerTurn = 0;
   actions.forEach(function(a) {
     if (a.type === 'recruit') {
       if (a.unitType === 'army') { orderCost += UNIT_COSTS.army; newArmies++; }
@@ -6551,8 +6552,11 @@ function showOrderConfirmation(fid) {
     if (a.type === 'upgrade' && a.upgradeId && UPGRADES[a.upgradeId]) {
       orderCost += UPGRADES[a.upgradeId].cost;
     }
+    if (a.type === 'modernize') {
+      var modConfig = MODERNIZATION_CONFIG[fid];
+      if (modConfig) { orderCost += modConfig.cost; newIncomePerTurn += 1; }
+    }
     if (a.type === 'diplomacy') {
-      // Extract cost from desc if present
       var costMatch = (a.desc || '').match(/\((\d+)\s*Gold\)/);
       if (costMatch) orderCost += parseInt(costMatch[1]);
     }
@@ -6565,7 +6569,8 @@ function showOrderConfirmation(fid) {
   const currentUpkeep = econ.totalUpkeep;
   const upkeepDelta = newUpkeep - currentUpkeep;
   const treasuryAfter = f.gold - orderCost;
-  const newNet = econ.grossIncome - (econ.blockadePenalty || 0) - newUpkeep;
+  const newGross = econ.grossIncome + newIncomePerTurn;
+  const newNet = newGross - (econ.blockadePenalty || 0) - newUpkeep;
   const netDelta = newNet - econ.net;
 
   // Financial summary
@@ -6747,6 +6752,22 @@ function advanceTurn() {
       logAction(fid, 'income', detail);
     }
   });
+
+  // Lifecycle transitions: reserve → mobilized (auto after 1 turn in reserve)
+  Object.keys(factions).forEach(fid => {
+    const f = factions[fid];
+    if (!f.units) return;
+    f.units.forEach(u => {
+      if (u.state === 'reserve' && u.createdTurn < gameState.currentTurnNum) {
+        u.state = 'mobilized';
+        logAction(fid, 'lifecycle', `${u.type === 'army' ? 'Division' : 'Fleet'} (${u.id}) mobilized from reserve — ready for deployment`);
+      }
+    });
+    recomputeAggregates(fid);
+  });
+
+  // Clear orders for new turn
+  gameState.orders = {};
 
   gameState.currentTurnNum++;
   gameState.turnPhase = 'orders';
