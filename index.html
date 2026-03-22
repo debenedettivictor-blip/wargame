@@ -5900,15 +5900,15 @@ function renderPowerInfo() {
       <h4>Unit Power Reference</h4>
       <dl>
         <dt>Army Division</dt>
-        <dd>1 division = 1 combat strength. Battle = committed divisions + 1d6 + modifiers. Costs ${UNIT_COSTS.army}g to recruit, ${MAINTENANCE_COSTS.army}g/turn upkeep.</dd>
+        <dd>1 division = 1 combat strength. Battle = committed divisions + 1d6 + modifiers. Costs ${UNIT_COSTS.army} Gold to recruit, ${MAINTENANCE_COSTS.army} Gold/turn upkeep.</dd>
         <dt>Fleet</dt>
-        <dd>Controls sea zones, enables blockades. 1 fleet = 1 naval combat strength. Costs ${UNIT_COSTS.fleet}g to recruit, ${MAINTENANCE_COSTS.fleet}g/turn upkeep.</dd>
+        <dd>Controls sea zones, enables blockades. 1 fleet = 1 naval combat strength. Costs ${UNIT_COSTS.fleet} Gold to recruit, ${MAINTENANCE_COSTS.fleet} Gold/turn upkeep.</dd>
         <dt>Artillery</dt>
-        <dd>+1 to all attack rolls. One-time purchase: ${UPGRADES.artillery.cost}g.</dd>
+        <dd>+1 to all attack rolls. One-time purchase: ${UPGRADES.artillery.cost} Gold.</dd>
         <dt>Trench Networks</dt>
-        <dd>+1 to all defense rolls. One-time purchase: ${UPGRADES.trenches.cost}g.</dd>
+        <dd>+1 to all defense rolls. One-time purchase: ${UPGRADES.trenches.cost} Gold.</dd>
         <dt>Gas Weapons</dt>
-        <dd>+2 to attack rolls. Available Turn 4+. One-time purchase: ${UPGRADES.gas.cost}g.</dd>
+        <dd>+2 to attack rolls. Available Turn 4+. One-time purchase: ${UPGRADES.gas.cost} Gold.</dd>
       </dl>
     </div>
   `;
@@ -5923,7 +5923,7 @@ function renderTurnSummary() {
     entries += `<div class="summary-entry"><strong>Turn ${log.turn} Resolution:</strong><br>`;
     log.entries.forEach(e => {
       const cls = e.net >= 0 ? 'positive' : 'negative';
-      entries += `${e.faction}: +${e.income} income, -${e.maintenance} upkeep = <span class="${cls}">${e.net >= 0 ? '+' : ''}${e.net}</span> (${e.oldGold} → ${e.newGold}g)<br>`;
+      entries += `${e.faction}: +${e.income} income, -${e.maintenance} upkeep = <span class="${cls}">${e.net >= 0 ? '+' : ''}${e.net}</span> (${e.oldGold} → ${e.newGold} Gold)<br>`;
     });
     entries += `</div>`;
   });
@@ -5953,17 +5953,17 @@ function renderPlayerTurnSummary(fid) {
         <div class="summary-section">
           <div class="summary-section-title">Income Statement — Turn ${lastLog.turn - 1}</div>
           <table class="income-table">
-            <tr><td>Industry</td><td class="positive">+${entry.industry || entry.income}g</td></tr>
-            <tr><td>Trade</td><td class="positive">+${entry.trade || 0}g</td></tr>
-            ${entry.bonus ? `<tr><td>Bonus (${entry.bonusLabel || ''})</td><td class="${entry.bonus >= 0 ? 'positive' : 'negative'}">${entry.bonus >= 0 ? '+' : ''}${entry.bonus}g</td></tr>` : ''}
-            ${entry.warDividend > 0 ? `<tr><td>War Dividend</td><td class="positive">+${entry.warDividend}g</td></tr>` : ''}
-            ${entry.tradeLoss > 0 ? `<tr><td style="color:var(--red-empire);">⚓ Blockade (trade)</td><td class="negative">-${entry.tradeLoss}g</td></tr>` : ''}
-            ${entry.industryLoss > 0 ? `<tr><td style="color:var(--red-empire);">⚓ Blockade (industry)</td><td class="negative">-${entry.industryLoss}g</td></tr>` : ''}
-            <tr class="income-divider"><td>Effective income</td><td class="positive">+${entry.income}g</td></tr>
-            <tr><td>Base upkeep</td><td class="negative">-${entry.baseUpkeep || entry.maintenance}g</td></tr>
-            ${entry.mobilizationCost > 0 ? `<tr><td style="color:var(--gold-accent);">⚠ Mobilization surcharge</td><td class="negative">-${entry.mobilizationCost}g</td></tr>` : ''}
-            <tr class="income-divider income-net"><td>Net</td><td class="${netCls}">${entry.net >= 0 ? '+' : ''}${entry.net}g</td></tr>
-            <tr><td>Treasury</td><td>${entry.oldGold} → ${entry.newGold}g</td></tr>
+            <tr><td>Industry</td><td class="positive">+${entry.industry || entry.income}</td></tr>
+            <tr><td>Trade</td><td class="positive">+${entry.trade || 0}</td></tr>
+            ${entry.bonus ? `<tr><td>Bonus (${entry.bonusLabel || ''})</td><td class="${entry.bonus >= 0 ? 'positive' : 'negative'}">${entry.bonus >= 0 ? '+' : ''}${entry.bonus}</td></tr>` : ''}
+            ${entry.warDividend > 0 ? `<tr><td>War Dividend</td><td class="positive">+${entry.warDividend}</td></tr>` : ''}
+            ${entry.tradeLoss > 0 ? `<tr><td style="color:var(--red-empire);">⚓ Blockade (trade)</td><td class="negative">-${entry.tradeLoss}</td></tr>` : ''}
+            ${entry.industryLoss > 0 ? `<tr><td style="color:var(--red-empire);">⚓ Blockade (industry)</td><td class="negative">-${entry.industryLoss}</td></tr>` : ''}
+            <tr class="income-divider"><td>Effective income</td><td class="positive">+${entry.income}</td></tr>
+            <tr><td>Base upkeep</td><td class="negative">-${entry.baseUpkeep || entry.maintenance}</td></tr>
+            ${entry.mobilizationCost > 0 ? `<tr><td style="color:var(--gold-accent);">⚠ Mobilization surcharge</td><td class="negative">-${entry.mobilizationCost}</td></tr>` : ''}
+            <tr class="income-divider income-net"><td>Net</td><td class="${netCls}">${entry.net >= 0 ? '+' : ''}${entry.net}</td></tr>
+            <tr><td>Treasury</td><td>${entry.oldGold} → ${entry.newGold}</td></tr>
           </table>
         </div>`;
     }
@@ -7059,13 +7059,13 @@ function renderGMControl() {
     const f = gameState.factions[fid];
     return `<tr>
       <td>${FACTION_NAMES[fid]}</td>
-      <td>${econ.industry}g</td>
-      <td>${econ.tradeLoss > 0 ? '<s>' + econ.trade + 'g</s> <span class="negative">0g</span>' : econ.trade + 'g'}</td>
-      <td>${econ.bonus !== 0 ? (econ.bonus >= 0 ? '+' : '') + econ.bonus + 'g' : '—'}</td>
-      <td class="${econ.isBlockaded ? 'negative' : ''}">${econ.effectiveIncome}g</td>
-      <td class="negative">${econ.totalUpkeep}g</td>
-      <td class="${econ.net >= 0 ? 'positive' : 'negative'}">${econ.net >= 0 ? '+' : ''}${econ.net}g</td>
-      <td>${f.gold}g</td>
+      <td>${econ.industry}</td>
+      <td>${econ.tradeLoss > 0 ? '<s>' + econ.trade + '</s> <span class="negative">0</span>' : econ.trade}</td>
+      <td>${econ.bonus !== 0 ? (econ.bonus >= 0 ? '+' : '') + econ.bonus : '—'}</td>
+      <td class="${econ.isBlockaded ? 'negative' : ''}">${econ.effectiveIncome}</td>
+      <td class="negative">${econ.totalUpkeep}</td>
+      <td class="${econ.net >= 0 ? 'positive' : 'negative'}">${econ.net >= 0 ? '+' : ''}${econ.net}</td>
+      <td>${f.gold}</td>
     </tr>`;
   }).join('');
 
