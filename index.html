@@ -434,6 +434,101 @@ body::before {
   border-top: 1px solid var(--parchment-dark);
 }
 
+.news-card.gm-custom {
+  border-left: 5px solid var(--gold);
+  position: relative;
+}
+.news-card.gm-custom .news-turn { color: var(--gold); }
+.news-card.gm-custom::after {
+  content: 'GM EVENT';
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.65em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 2px 8px;
+}
+
+.news-broadcast-form { display: flex; flex-direction: column; gap: 10px; }
+.news-broadcast-form label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink);
+}
+.news-broadcast-form input,
+.news-broadcast-form textarea,
+.news-broadcast-form select {
+  font-family: 'Crimson Text', serif;
+  font-size: 1em;
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+}
+.news-broadcast-form textarea { resize: vertical; min-height: 60px; }
+.btn-broadcast {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 24px;
+  border: 2px solid var(--ink);
+  background: var(--gold);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-broadcast:hover { background: var(--ink); color: var(--cream); }
+
+.gm-news-list { margin-top: 16px; }
+.gm-news-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--ink-light);
+  background: var(--parchment);
+}
+.gm-news-item-content { flex: 1; }
+.gm-news-item-headline {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.95em;
+}
+.gm-news-item-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  color: var(--ink-light);
+  margin-top: 2px;
+}
+.gm-news-item-meta {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--rust);
+  margin-top: 4px;
+}
+.btn-delete-news {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.75em;
+  padding: 4px 10px;
+  border: 1px solid var(--red-empire);
+  background: transparent;
+  color: var(--red-empire);
+  cursor: pointer;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+.btn-delete-news:hover { background: var(--red-empire); color: var(--cream); }
+
 /* Quick Reference */
 .ref-table {
   width: 100%;
@@ -2838,6 +2933,8 @@ body::before {
 
 <div class="gm-note">Read these dramatically! Stand up, clear your throat, and announce them like a newsboy on a London street corner. These events are the engine that keeps the game from stalling.</div>
 
+<div id="customNewsCards"></div>
+
 <div id="newsCards"></div>
 </div>
 </div>
@@ -3755,6 +3852,7 @@ function defaultGameState() {
     actionLog: [],
     orders: {},
     battles: [],
+    customNews: [],
     currentTurnNum: 1,
     setup: getDefaultSetup()
   };
@@ -3966,6 +4064,69 @@ function advanceTurn() {
   renderTurnBanner();
   renderDashboard();
   renderMap();
+}
+
+// ==================== CUSTOM NEWS ====================
+
+function publishCustomNews() {
+  const headline = document.getElementById('gmNewsHeadline').value.trim();
+  const body = document.getElementById('gmNewsBody').value.trim();
+  const effect = document.getElementById('gmNewsEffect').value.trim();
+  const faction = document.getElementById('gmNewsFaction').value;
+  const turnNum = parseInt(document.getElementById('gmNewsTurn').value) || gameState.currentTurnNum;
+
+  if (!headline) { alert('Enter a headline for the news event.'); return; }
+  if (!body) { alert('Enter a description of what happened.'); return; }
+
+  if (!gameState.customNews) gameState.customNews = [];
+  gameState.customNews.push({
+    id: Date.now(),
+    headline: headline.toUpperCase(),
+    body,
+    effect,
+    faction: faction || null,
+    turnNum,
+    timestamp: new Date().toISOString()
+  });
+
+  gameState.actionLog.push({
+    turn: gameState.currentTurnNum,
+    fid: 'gm',
+    description: `Broadcast news: "${headline.toUpperCase()}"`
+  });
+
+  saveGameState();
+  renderGMControl();
+  renderCustomNewsCards();
+}
+
+function deleteCustomNews(index) {
+  if (!gameState.customNews) return;
+  gameState.customNews.splice(index, 1);
+  saveGameState();
+  renderGMControl();
+  renderCustomNewsCards();
+}
+
+function renderCustomNewsCards() {
+  const container = document.getElementById('customNewsCards');
+  if (!container) return;
+  const customNews = gameState.customNews || [];
+  if (customNews.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = customNews.map(n => {
+    const factionLabel = n.faction ? FACTION_NAMES[n.faction] || n.faction : 'Global Event';
+    return `<div class="news-card gm-custom revealed">
+      <div class="news-turn">Turn ${n.turnNum} — ${factionLabel}</div>
+      <div class="news-headline">${n.headline}</div>
+      <div class="news-body">
+        <p>${n.body}</p>
+        ${n.effect ? `<div class="news-effect">GAME EFFECT: ${n.effect}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function purchaseUnit(fid, type) {
@@ -4564,7 +4725,64 @@ function renderGMControl() {
     </div>
   </div>`;
 
-  // 2. Order Review
+  // 2. News Broadcaster
+  const customNews = gameState.customNews || [];
+  let existingNewsHtml = '';
+  if (customNews.length > 0) {
+    existingNewsHtml = `<div class="gm-news-list">
+      <label style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; color:var(--ink-light); margin-bottom:6px; display:block;">Published News</label>
+      ${customNews.map((n, i) => `<div class="gm-news-item">
+        <div class="gm-news-item-content">
+          <div class="gm-news-item-headline">${n.headline}</div>
+          <div class="gm-news-item-desc">${n.body.substring(0, 80)}${n.body.length > 80 ? '...' : ''}</div>
+          <div class="gm-news-item-meta">Turn ${n.turnNum} &mdash; ${n.faction ? FACTION_NAMES[n.faction] || n.faction : 'Global'}</div>
+        </div>
+        <button class="btn-delete-news" onclick="deleteCustomNews(${i})">Remove</button>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  let newsSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>News Broadcaster</span><span>▼</span>
+    </div>
+    <div class="gm-section-body">
+      <p style="font-family:'Crimson Text',serif; font-size:0.95em; color:var(--ink-light); margin-bottom:12px;">
+        Push custom news events based on player actions. These appear in the News Events tab alongside the scripted headlines.
+      </p>
+      <div class="news-broadcast-form">
+        <div>
+          <label>Headline</label>
+          <input type="text" id="gmNewsHeadline" placeholder="e.g. GERMANY BREAKS TREATY OF LONDON" style="width:100%; box-sizing:border-box;">
+        </div>
+        <div>
+          <label>What Happened</label>
+          <textarea id="gmNewsBody" placeholder="Brief description of what happened and why..."></textarea>
+        </div>
+        <div>
+          <label>Game Effect</label>
+          <textarea id="gmNewsEffect" placeholder="Mechanical impact — e.g. Germany loses 2 VP, France gains casus belli..." style="min-height:40px;"></textarea>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <div style="flex:1;">
+            <label>Triggered By</label>
+            <select id="gmNewsFaction" style="width:100%;">
+              <option value="">Global / No Faction</option>
+              ${Object.keys(FACTION_NAMES).map(f => `<option value="${f}">${FACTION_NAMES[f]}</option>`).join('')}
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label>Turn</label>
+            <input type="number" id="gmNewsTurn" value="${gameState.currentTurnNum}" min="1" max="6" style="width:100%;">
+          </div>
+        </div>
+        <button class="btn-broadcast" onclick="publishCustomNews()">📰 Broadcast News</button>
+      </div>
+      ${existingNewsHtml}
+    </div>
+  </div>`;
+
+  // 3. Order Review
   let orderReviewHtml = '';
   Object.keys(FACTION_NAMES).forEach(fid => {
     const orders = getOrders(fid);
@@ -4756,7 +4974,7 @@ function renderGMControl() {
     <div class="gm-section-body" style="max-height:400px; overflow-y:auto;">${logHtml}</div>
   </div>`;
 
-  container.innerHTML = turnSection + orderSection + battleSection + factionSection + overviewSection + logSection;
+  container.innerHTML = turnSection + newsSection + orderSection + battleSection + factionSection + overviewSection + logSection;
 
   // Render the faction editor for the currently selected faction
   renderGMFactionEditor();
@@ -5877,6 +6095,7 @@ renderFactionDossiers();
 renderOverviewFactions();
 updateSubtitle();
 updatePrintButtons();
+renderCustomNewsCards();
 // GM Control will render on tab switch
 </script>
 
