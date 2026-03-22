@@ -4448,7 +4448,7 @@ document.getElementById('navTabs').addEventListener('click', function(e) {
   document.getElementById(tabId).classList.add('active');
   btn.classList.add('active');
   if (tabId === 'gmcontrol') renderGMControl();
-  if (tabId === 'dashboard') renderDashboard();
+  if (tabId === 'dashboard') { renderDashboard(); setTimeout(renderMap, 150); }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
@@ -9930,9 +9930,12 @@ function renderMap() {
 
   // Don't reinitialize if already built
   if (theatreMap) {
-    theatreMap.invalidateSize();
+    setTimeout(() => theatreMap.invalidateSize(), 100);
     return;
   }
+
+  // Don't initialize if container is hidden (zero dimensions)
+  if (container.offsetWidth === 0 || container.offsetHeight === 0) return;
 
   buildMapLegend();
 
