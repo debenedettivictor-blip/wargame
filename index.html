@@ -4429,6 +4429,76 @@ const FACTION_NAMES = {
   krupp:'Krupp-Vickers', schneider:'Schneider-Škoda'
 };
 
+// Historically-inspired unit names per faction
+const UNIT_NAMES = {
+  germany: {
+    army: [
+      '1. Garde-Division', 'Prussian Guards', 'Bavarian Iron Div.', 'Saxon Corps',
+      'Brandenburg Grenadiers', 'Württemberg Rifles', 'Silesian Hussars', 'Hanoverian Jägers',
+      'Rhineland Fusiliers', 'Pomeranian Dragoons', 'Westphalian Lancers', 'Thuringian Reserve',
+      'Mecklenburg Pioneers', 'Baden Landwehr'
+    ],
+    fleet: [
+      'Hochseeflotte I', 'Hochseeflotte II', 'Ostseegeschwader', 'Kaiserliche Kreuzer'
+    ]
+  },
+  france: {
+    army: [
+      'Garde Impériale', 'Chasseurs Alpins', 'Zouaves de Paris', 'Légion Étrangère',
+      'Cuirassiers de Lorraine', 'Tirailleurs Algériens', 'Dragons de Normandie', 'Grenadiers de Verdun',
+      'Chasseurs d\'Afrique', 'Voltigeurs de Lyon', 'Fusiliers Marins', 'Spahis du Levant'
+    ],
+    fleet: [
+      'Escadre Méditerranée', 'Flottille du Nord', 'Escadre d\'Orient', 'Flottille de Brest'
+    ]
+  },
+  britain: {
+    army: [
+      'Coldstream Guards', 'Black Watch', 'Royal Fusiliers', 'King\'s Own Hussars',
+      'Gordon Highlanders', 'Gurkha Rifles', 'Irish Guards', 'Royal Engineers'
+    ],
+    fleet: [
+      'Home Fleet', 'Grand Fleet', 'Channel Squadron', 'Mediterranean Fleet',
+      'Atlantic Patrol', 'Cape Squadron', 'China Station', 'Reserve Fleet',
+      'Harwich Force', 'Dover Patrol', 'Northern Patrol', 'Cruiser Force K',
+      'Battle Squadron V', 'Scouting Group'
+    ]
+  },
+  russia: {
+    army: [
+      'Preobrazhensky Guard', 'Semyonovsky Regiment', 'Siberian Rifles', 'Don Cossacks',
+      'Pavlov Grenadiers', 'Izmaylovsky Guard', 'Kuban Plastuns', 'Ural Dragoons',
+      'Volhynian Hussars', 'Finnish Jägers', 'Caucasus Corps', 'Turkestan Rifles',
+      'Warsaw Garrison', 'Manchurian Veterans'
+    ],
+    fleet: [
+      'Baltic Fleet', 'Black Sea Fleet', 'Pacific Squadron'
+    ]
+  },
+  austria: {
+    army: [
+      'Kaiserjäger', 'Bosniaken Regiment', 'Magyar Hussars', 'Tiroler Standschützen',
+      'k.u.k. Dragoner', 'Wiener Haustruppen', 'Honvéd Division', 'Landwehr Galizien'
+    ],
+    fleet: [
+      'k.u.k. Adriaflotte', 'Küstengeschwader'
+    ]
+  },
+  ottoman: {
+    army: [
+      'Nizam-ı Cedid', 'Hamidiye Cavalry', 'Janissary Legacy Bde.', 'Anatolian Redifs',
+      'Arab Levies', 'Kurdish Hamidiye'
+    ],
+    fleet: [
+      'Osmanlı Donanması', 'Boğaz Filosu'
+    ]
+  }
+};
+
+function getUnitName(unit) {
+  return unit.name || unit.id;
+}
+
 const FACTION_COLORS = {
   germany:'#8b1a1a', france:'#1a3a6b', britain:'#1a3a6b',
   russia:'#1a3a6b', austria:'#8b1a1a', ottoman:'#2d5016',
@@ -5774,18 +5844,23 @@ function updateSubtitle() {
 function generateUnitsFromTroops(fid, troops, fleets) {
   const units = [];
   let idx = 0;
+  let armyIdx = 0;
+  let fleetIdx = 0;
+  const names = UNIT_NAMES[fid] || { army: [], fleet: [] };
   Object.keys(troops).forEach(region => {
     const count = troops[region] || 0;
     for (let i = 0; i < count; i++) {
-      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, type: 'army', state: 'deployed', region: region, createdTurn: 0 });
-      idx++;
+      const name = names.army[armyIdx] || ('Division ' + (armyIdx + 1));
+      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, name: name, type: 'army', state: 'deployed', region: region, createdTurn: 0 });
+      idx++; armyIdx++;
     }
   });
   Object.keys(fleets).forEach(region => {
     const count = fleets[region] || 0;
     for (let i = 0; i < count; i++) {
-      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, type: 'fleet', state: 'deployed', region: region, createdTurn: 0 });
-      idx++;
+      const name = names.fleet[fleetIdx] || ('Fleet ' + (fleetIdx + 1));
+      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, name: name, type: 'fleet', state: 'deployed', region: region, createdTurn: 0 });
+      idx++; fleetIdx++;
     }
   });
   return units;
@@ -6777,7 +6852,7 @@ function advanceTurn() {
     f.units.forEach(u => {
       if (u.state === 'reserve' && u.createdTurn < gameState.currentTurnNum) {
         u.state = 'mobilized';
-        logAction(fid, 'lifecycle', `${u.type === 'army' ? 'Division' : 'Fleet'} (${u.id}) mobilized from reserve — ready for deployment`);
+        logAction(fid, 'lifecycle', `${getUnitName(u)} mobilized from reserve — ready for deployment`);
       }
     });
     recomputeAggregates(fid);
@@ -6913,8 +6988,8 @@ function beginResolution() {
             f.gold = Math.max(0, f.gold - mobCost);
             recomputeAggregates(fid);
             const typeLabel = unit.type === 'army' ? 'division' : 'fleet';
-            gameState.resolutionLog.push({ fid, icon: '\u2691', text: `${FACTION_NAMES[fid]} mobilized ${typeLabel} (${unit.id}) — ready for deployment (-${mobCost}g)` });
-            logAction(fid, 'mobilize', `Mobilized ${typeLabel} (${unit.id}) (-${mobCost}g)`);
+            gameState.resolutionLog.push({ fid, icon: '\u2691', text: `${FACTION_NAMES[fid]} mobilized ${getUnitName(unit)} — ready for deployment (-${mobCost}g)` });
+            logAction(fid, 'mobilize', `Mobilized ${getUnitName(unit)} (-${mobCost}g)`);
           } else {
             gameState.resolutionLog.push({ fid, icon: '\u2717', text: `${FACTION_NAMES[fid]}: unit ${action.unitId} not in reserve`, error: true });
           }
@@ -6927,8 +7002,8 @@ function beginResolution() {
             unit.region = action.region;
             recomputeAggregates(fid);
             const typeLabel = unit.type === 'army' ? 'division' : 'fleet';
-            gameState.resolutionLog.push({ fid, icon: '\u2691', text: `${FACTION_NAMES[fid]} deployed ${typeLabel} to ${REGION_NAMES[action.region]}` });
-            logAction(fid, 'deploy', `Deployed ${typeLabel} to ${REGION_NAMES[action.region]}`);
+            gameState.resolutionLog.push({ fid, icon: '\u2691', text: `${FACTION_NAMES[fid]} deployed ${getUnitName(unit)} to ${REGION_NAMES[action.region]}` });
+            logAction(fid, 'deploy', `Deployed ${getUnitName(unit)} to ${REGION_NAMES[action.region]}`);
           } else if (action.region) {
             gameState.resolutionLog.push({ fid, icon: '\u2717', text: `${FACTION_NAMES[fid]}: unit ${action.unitId || '?'} not mobilized — cannot deploy`, error: true });
           }
@@ -8048,7 +8123,7 @@ function renderReadinessTab(fid) {
     const location = u.state === 'deployed' && u.region ? (REGION_NAMES[u.region] || u.region) : '\u2014';
     const typeIcon = u.type === 'army' ? '\u2694' : '\u2693';
     rows += `<tr>
-      <td>${typeIcon} ${u.id}</td>
+      <td>${typeIcon} ${getUnitName(u)}</td>
       <td>${u.type === 'army' ? 'Division' : 'Fleet'}</td>
       <td><span class="readiness-badge ${stateClass}">${stateLabel}</span></td>
       <td>${location}</td>
@@ -8103,8 +8178,8 @@ function renderActionTabContent(fid) {
         const icon = u.type === 'army' ? '\u2694' : '\u2693';
         const typeLabel = u.type === 'army' ? 'Division' : 'Fleet';
         html += '<div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border:1px solid var(--ink-light); margin-bottom:4px; background:var(--parchment);">';
-        html += '<span style="font-weight:700;">' + icon + ' ' + typeLabel + ' <span style="font-size:0.8em; color:var(--ink-light);">(' + u.id + ')</span></span>';
-        html += '<button class="action-btn" style="width:auto; margin:0; padding:6px 14px;" onclick="addOrder(\'' + fid + '\',{type:\'mobilize\',unitId:\'' + u.id + '\',desc:\'Mobilize ' + typeLabel + ' (' + u.id + ')\'})\" ' + (isSubmitted ? 'disabled' : '') + '><span>Mobilize</span><span class="action-cost">1g</span></button>';
+        html += '<span style="font-weight:700;">' + icon + ' ' + getUnitName(u) + '</span>';
+        html += '<button class="action-btn" style="width:auto; margin:0; padding:6px 14px;" onclick="addOrder(\'' + fid + '\',{type:\'mobilize\',unitId:\'' + u.id + '\',desc:\'Mobilize ' + getUnitName(u).replace(/'/g, "\\'") + '\'})\" ' + (isSubmitted ? 'disabled' : '') + '><span>Mobilize</span><span class="action-cost">1g</span></button>';
         html += '</div>';
       });
       html += '</div>';
@@ -8119,9 +8194,9 @@ function renderActionTabContent(fid) {
         const typeLabel = u.type === 'army' ? 'Division' : 'Fleet';
         const regionOptions = (u.type === 'army' ? LAND_REGIONS : SEA_REGIONS).map(r => '<option value="' + r + '">' + REGION_NAMES[r] + '</option>').join('');
         html += '<div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; padding:8px 12px; border:1px solid var(--ink-light); background:var(--parchment);">';
-        html += '<span style="font-weight:700; min-width:100px;">' + icon + ' ' + typeLabel + '</span>';
+        html += '<span style="font-weight:700; min-width:140px;">' + icon + ' ' + getUnitName(u) + '</span>';
         html += '<select id="deploy_' + u.id + '" style="flex:1; padding:6px; border:1px solid var(--ink-light); font-family:\'Crimson Text\',serif;">' + regionOptions + '</select>';
-        html += '<button class="action-btn" style="width:auto; margin:0; padding:6px 14px;" onclick="addOrder(\'' + fid + '\',{type:\'deploy\',unitId:\'' + u.id + '\',region:document.getElementById(\'deploy_' + u.id + '\').value,desc:\'Deploy ' + typeLabel + ' to \'+REGION_NAMES[document.getElementById(\'deploy_' + u.id + '\').value]})" ' + (isSubmitted ? 'disabled' : '') + '><span>Deploy</span></button>';
+        html += '<button class="action-btn" style="width:auto; margin:0; padding:6px 14px;" onclick="addOrder(\'' + fid + '\',{type:\'deploy\',unitId:\'' + u.id + '\',region:document.getElementById(\'deploy_' + u.id + '\').value,desc:\'Deploy ' + getUnitName(u).replace(/\'/g, "\\'") + ' to \'+REGION_NAMES[document.getElementById(\'deploy_' + u.id + '\').value]})" ' + (isSubmitted ? 'disabled' : '') + '><span>Deploy</span></button>';
         html += '</div>';
       });
       html += '</div>';
