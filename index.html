@@ -5759,35 +5759,7 @@ function renderMap() {
     svg += `<polygon class="${cls}" points="${reg.points}" onclick="mapClickRegion('${r}')"/>`;
   });
 
-  // Labels and troop strength
-  ALL_REGIONS.forEach(r => {
-    const reg = MAP_REGIONS[r];
-    if (!reg) return;
-
-    if (reg.sea) {
-      svg += `<text class="map-label sea-label" x="${reg.cx}" y="${reg.cy}">${REGION_NAMES[r]}</text>`;
-      let lineOffset = 0;
-      Object.keys(gameState.factions).forEach(fid => {
-        if (fid === 'krupp' || fid === 'schneider') return;
-        const fleets = gameState.factions[fid].fleets[r] || 0;
-        if (fleets > 0) {
-          lineOffset += 13;
-          svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${fleets} fleets ${fid.substring(0,3).toUpperCase()}</text>`;
-        }
-      });
-    } else {
-      svg += `<text class="map-label" x="${reg.cx}" y="${reg.cy - 6}">${REGION_NAMES[r]}</text>`;
-      let lineOffset = 0;
-      Object.keys(gameState.factions).forEach(fid => {
-        if (fid === 'krupp' || fid === 'schneider') return;
-        const troops = gameState.factions[fid].troops[r] || 0;
-        if (troops > 0) {
-          lineOffset += 13;
-          svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${troops} div. ${fid.substring(0,3).toUpperCase()}</text>`;
-        }
-      });
-    }
-  });
+  // Labels and troop strength removed — map image has its own labels
 
   svg += `</svg></div>`;
   container.innerHTML = svg;
