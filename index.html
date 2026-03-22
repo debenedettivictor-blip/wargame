@@ -897,6 +897,8 @@ body::before {
 .action-icon.upgrade { color: var(--gold-accent); }
 .action-icon.battle { color: var(--red-empire); }
 .action-icon.income { color: var(--ink-light); }
+.action-icon.blockade { color: var(--navy); }
+.action-icon.diplomacy { color: var(--green-neutral); }
 
 .no-actions {
   font-family: 'IM Fell English', serif;
@@ -2845,7 +2847,7 @@ body::before {
 
 <p><strong>Combat Resolution:</strong> When armies clash, each side totals their divisions. The GM rolls 1d6 for each side. Higher roll + more divisions wins. Ties go to the defender. Losing side loses divisions equal to half the difference (rounded up, minimum 1). Winner loses 1 division. Fortifications give the defender +2 to their roll.</p>
 
-<p><strong>Naval Combat:</strong> Same as above but with fleets. Naval superiority allows blockades (cut a nation's income by 2 Gold/turn) and troop transport across water (must control sea zone to move armies across the Channel, Mediterranean, etc.).</p>
+<p><strong>Naval Combat:</strong> Same as above but with fleets. Naval superiority allows <strong>blockades</strong> — deploy fleets to a sea zone and declare a blockade to cut an enemy's trade income. If the blockade persists, their industrial output suffers too. Break a blockade by winning a naval battle in that zone. Fleets also enable troop transport across water (must control sea zone to move armies across the Channel, Mediterranean, etc.).</p>
 
 <p style="margin-top:20px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">THE MAP (Simplified Regions)</strong></p>
 <p>The game uses an abstract map. The GM tracks troop positions. Key regions:</p>
@@ -2979,17 +2981,36 @@ body::before {
   <tr><td>6. Retreat</td><td>Losing army retreats to adjacent friendly region</td></tr>
 </table>
 
-<p><strong>Income Per Turn</strong></p>
+<p><strong>Income Per Turn = Industry + Trade + Bonuses – Blockade – Upkeep – Mobilization</strong></p>
 <table class="ref-table">
-  <tr><th>Faction</th><th>Base Income</th><th>Special</th></tr>
-  <tr><td>Germany</td><td>8 Gold</td><td>+2 if controlling Alsace-Lorraine</td></tr>
-  <tr><td>Britain</td><td>9 Gold</td><td>+3 from colonial trade (can be blockaded)</td></tr>
-  <tr><td>France</td><td>6 Gold</td><td>+2 if Lorraine recaptured</td></tr>
-  <tr><td>Russia</td><td>6 Gold</td><td>–2 if revolution ongoing</td></tr>
-  <tr><td>Austria-Hungary</td><td>5 Gold</td><td>–2 if internal rebellion</td></tr>
-  <tr><td>Ottoman Empire</td><td>4 Gold</td><td>+2 from Straits tolls (if open)</td></tr>
-  <tr><td>Krupp-Vickers</td><td>4 Gold</td><td>+ all sales revenue</td></tr>
-  <tr><td>Schneider-Skoda</td><td>3 Gold</td><td>+ all sales revenue</td></tr>
+  <tr><th>Faction</th><th>Industry</th><th>Trade</th><th>Total</th><th>Special</th></tr>
+  <tr><td>Germany</td><td>5</td><td>3</td><td>8 Gold</td><td>+2 if controlling Alsace-Lorraine. Trade via North Sea &amp; Baltic.</td></tr>
+  <tr><td>Britain</td><td>3</td><td>6</td><td>9 Gold</td><td>Heavily trade-dependent — vulnerable to naval blockade.</td></tr>
+  <tr><td>France</td><td>4</td><td>2</td><td>6 Gold</td><td>+2 if Lorraine recaptured. Trade via Channel &amp; Mediterranean.</td></tr>
+  <tr><td>Russia</td><td>4</td><td>2</td><td>6 Gold</td><td>–2 if revolution ongoing. Trade via Baltic only.</td></tr>
+  <tr><td>Austria-Hungary</td><td>4</td><td>1</td><td>5 Gold</td><td>–2 if internal rebellion. Trade via Mediterranean.</td></tr>
+  <tr><td>Ottoman Empire</td><td>2</td><td>2</td><td>4 Gold</td><td>+2 from Straits tolls (if Dardanelles held).</td></tr>
+  <tr><td>Krupp-Vickers</td><td>2</td><td>—</td><td>2 Gold</td><td>+ all sales revenue. +2 war dividend when 2+ powers at war.</td></tr>
+  <tr><td>Schneider-Skoda</td><td>1</td><td>—</td><td>1 Gold</td><td>+ all sales revenue. +2 war dividend when 2+ powers at war.</td></tr>
+</table>
+
+<p><strong>Blockade Rules</strong></p>
+<table class="ref-table">
+  <tr><th>Mechanic</th><th>Effect</th></tr>
+  <tr><td>Declaring a blockade</td><td>Must have fleets deployed in the target's trade sea zone. GM declares via control panel.</td></tr>
+  <tr><td>Turn 1 of blockade</td><td>Target loses ALL trade income. Industry unaffected.</td></tr>
+  <tr><td>Turn 2 of blockade</td><td>Trade still cut + 25% industry loss (imports drying up).</td></tr>
+  <tr><td>Turn 3+ of blockade</td><td>Trade still cut + 50% industry loss (raw materials exhausted).</td></tr>
+  <tr><td>Breaking a blockade</td><td>Win a naval battle in the blockaded sea zone.</td></tr>
+</table>
+
+<p><strong>Mobilization Surcharge</strong></p>
+<table class="ref-table">
+  <tr><th>Status</th><th>Extra Cost/Turn</th><th>Notes</th></tr>
+  <tr><td>Reserve (at rest)</td><td>0 Gold</td><td>No extra cost — troops are inactive.</td></tr>
+  <tr><td>Mobilized (readied)</td><td>+0.5 Gold/unit</td><td>Rounded up. Signals intent — other factions will notice.</td></tr>
+  <tr><td>Deployed (peacetime)</td><td>+0.5 Gold/unit</td><td>On top of base upkeep. Discourages early aggressive deployment.</td></tr>
+  <tr><td>Deployed (wartime)</td><td>Base upkeep only</td><td>No surcharge once war is declared — you're committed.</td></tr>
 </table>
 
 <p><strong>Arms Dealer Price List</strong></p>
@@ -3808,47 +3829,55 @@ function defaultGameState() {
       gold: 25, income: 8, army: 10, navy: 6, vp: 0,
       troops: { germany: 6, alsace_lorraine: 3, poland: 1 },
       fleets: { north_sea: 4, baltic: 2 },
-      alliances: ['austria'], status: [], upgrades: {}
+      alliances: ['austria'], status: [], upgrades: {},
+      blockadedBy: [], blockadeTurns: 0, atWar: false
     },
     france: {
       gold: 18, income: 6, army: 8, navy: 4, vp: 0,
       troops: { france: 5, paris: 3 },
       fleets: { mediterranean: 2, english_channel: 2 },
-      alliances: ['britain','russia'], status: [], upgrades: {}
+      alliances: ['britain','russia'], status: [], upgrades: {},
+      blockadedBy: [], blockadeTurns: 0, atWar: false
     },
     britain: {
       gold: 30, income: 9, army: 4, navy: 12, vp: 0,
       troops: { britain: 4 },
       fleets: { north_sea: 6, english_channel: 4, mediterranean: 2 },
-      alliances: ['france','russia'], status: [], upgrades: {}
+      alliances: ['france','russia'], status: [], upgrades: {},
+      blockadedBy: [], blockadeTurns: 0, atWar: false
     },
     russia: {
       gold: 16, income: 6, army: 12, navy: 3, vp: 0,
       troops: { russia: 8, poland: 3, balkans: 1 },
       fleets: { baltic: 2, mediterranean: 1 },
-      alliances: ['france','britain'], status: [], upgrades: {}
+      alliances: ['france','britain'], status: [], upgrades: {},
+      blockadedBy: [], blockadeTurns: 0, atWar: false
     },
     austria: {
       gold: 14, income: 5, army: 7, navy: 2, vp: 0,
       troops: { austria: 5, balkans: 2 },
       fleets: { mediterranean: 2 },
-      alliances: ['germany'], status: [], upgrades: {}
+      alliances: ['germany'], status: [], upgrades: {},
+      blockadedBy: [], blockadeTurns: 0, atWar: false
     },
     ottoman: {
       gold: 8, income: 4, army: 6, navy: 2, vp: 0,
       troops: { ottoman: 4, dardanelles: 2 },
       fleets: { mediterranean: 2 },
-      alliances: [], status: [], upgrades: {}
+      alliances: [], status: [], upgrades: {},
+      blockadedBy: [], blockadeTurns: 0, atWar: false
     },
     krupp: {
       gold: 22, income: 3, army: 0, navy: 0, vp: 0,
       troops: {}, fleets: {},
-      alliances: [], status: [], sales: 0, contracts: [], upgrades: {}
+      alliances: [], status: [], sales: 0, contracts: [], upgrades: {},
+      blockadedBy: [], blockadeTurns: 0, atWar: false
     },
     schneider: {
       gold: 16, income: 2, army: 0, navy: 0, vp: 0,
       troops: {}, fleets: {},
-      alliances: [], status: [], sales: 0, contracts: [], upgrades: {}
+      alliances: [], status: [], sales: 0, contracts: [], upgrades: {},
+      blockadedBy: [], blockadeTurns: 0, atWar: false
     }
   };
   // Generate units arrays from troops/fleets
@@ -3888,6 +3917,10 @@ function loadGameState() {
         if (!state.factions[fid].units) {
           state.factions[fid].units = generateUnitsFromTroops(fid, state.factions[fid].troops || {}, state.factions[fid].fleets || {});
         }
+        // Migrate: add economic fields
+        if (!state.factions[fid].blockadedBy) state.factions[fid].blockadedBy = [];
+        if (state.factions[fid].blockadeTurns === undefined) state.factions[fid].blockadeTurns = 0;
+        if (state.factions[fid].atWar === undefined) state.factions[fid].atWar = false;
       });
       return state;
     }
@@ -3925,6 +3958,204 @@ function resetGameState() {
 // Unit costs and upgrade definitions
 const UNIT_COSTS = { army: 3, fleet: 5 };
 const MAINTENANCE_COSTS = { army: 1, fleet: 1 };
+
+// ==================== ECONOMIC ENGINE ====================
+// Each faction's income = Industry + Trade + Bonuses - Mobilization Costs - Blockade Effects
+// Mobilizing/deploying troops costs extra — discourages early mobilization
+// Blockades cut trade income and (over time) hurt industry
+
+const MOBILIZATION_COSTS = {
+  reserve: 0,      // Troops at rest cost nothing extra
+  mobilized: 0.5,  // Mobilized but not deployed: +0.5g/unit (rounded)
+  deployed: 1      // Deployed troops: +1g/unit upkeep (same as MAINTENANCE)
+};
+
+// Which sea zones affect which factions' trade routes
+const TRADE_ROUTES = {
+  germany:  { seas: ['north_sea', 'baltic'], label: 'North Sea & Baltic trade' },
+  france:   { seas: ['english_channel', 'mediterranean'], label: 'Channel & Mediterranean trade' },
+  britain:  { seas: ['north_sea', 'english_channel', 'mediterranean'], label: 'Colonial & overseas trade' },
+  russia:   { seas: ['baltic'], label: 'Baltic trade' },
+  austria:  { seas: ['mediterranean'], label: 'Adriatic trade' },
+  ottoman:  { seas: ['mediterranean'], label: 'Straits & Mediterranean trade' }
+};
+
+// Faction economic profiles: industry (domestic production), trade (maritime commerce)
+const FACTION_ECONOMY = {
+  germany:  { industry: 5, trade: 3, bonusDesc: '+2 if controlling Alsace-Lorraine' },
+  france:   { industry: 4, trade: 2, bonusDesc: '+2 if Lorraine recaptured' },
+  britain:  { industry: 3, trade: 6, bonusDesc: 'Heavily trade-dependent — vulnerable to blockade' },
+  russia:   { industry: 4, trade: 2, bonusDesc: '–2 if revolution ongoing' },
+  austria:  { industry: 4, trade: 1, bonusDesc: '–2 if internal rebellion' },
+  ottoman:  { industry: 2, trade: 2, bonusDesc: '+2 from Straits tolls (if Dardanelles held)' },
+  krupp:    { industry: 2, trade: 0, bonusDesc: '+ all sales revenue' },
+  schneider:{ industry: 1, trade: 0, bonusDesc: '+ all sales revenue' }
+};
+
+// How blockades degrade over time: turn 1 = lose trade, turn 2+ = lose industry too
+const BLOCKADE_EFFECTS = {
+  1: { tradeLoss: 1.0, industryLoss: 0 },     // First turn: 100% trade cut, industry fine
+  2: { tradeLoss: 1.0, industryLoss: 0.25 },   // Turn 2: trade gone + 25% industry hit
+  3: { tradeLoss: 1.0, industryLoss: 0.50 },   // Turn 3+: trade gone + 50% industry hit
+};
+
+// Compute full income breakdown for a faction
+function computeEconomy(fid) {
+  const f = gameState.factions[fid];
+  const econ = FACTION_ECONOMY[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+
+  let industry = econ.industry;
+  let trade = econ.trade;
+  let bonus = 0;
+  let bonusLabel = '';
+  let tradeLoss = 0;
+  let industryLoss = 0;
+  let blockadeDetail = '';
+  let mobilizationCost = 0;
+
+  // --- Territorial bonuses ---
+  if (fid === 'germany' && f.troops && f.troops['alsace_lorraine'] > 0) {
+    bonus += 2; bonusLabel = 'Alsace-Lorraine controlled';
+  }
+  if (fid === 'france' && f.troops && f.troops['alsace_lorraine'] > 0) {
+    bonus += 2; bonusLabel = 'Lorraine recaptured';
+  }
+  if (fid === 'ottoman' && f.troops && f.troops['dardanelles'] > 0) {
+    bonus += 2; bonusLabel = 'Straits tolls';
+  }
+
+  // --- Status-based penalties ---
+  if (f.status && f.status.includes('revolution')) {
+    bonus -= 2; bonusLabel = (bonusLabel ? bonusLabel + ', ' : '') + 'Revolution!';
+  }
+  if (f.status && f.status.includes('rebellion')) {
+    bonus -= 2; bonusLabel = (bonusLabel ? bonusLabel + ', ' : '') + 'Rebellion!';
+  }
+
+  // --- Blockade effects ---
+  if (!isDealer && f.blockadedBy && f.blockadedBy.length > 0) {
+    const blockadeTurns = f.blockadeTurns || 1;
+    const tier = blockadeTurns >= 3 ? BLOCKADE_EFFECTS[3] : BLOCKADE_EFFECTS[blockadeTurns];
+    tradeLoss = Math.round(trade * tier.tradeLoss);
+    industryLoss = Math.round(industry * tier.industryLoss);
+    blockadeDetail = 'Blockaded (turn ' + blockadeTurns + '): –' + (tradeLoss + industryLoss) + 'g';
+  }
+
+  // --- Mobilization costs ---
+  // Peacetime troop deployments cost extra upkeep — incentivizes staying demobilized
+  if (!isDealer && f.units) {
+    const mobilizedCount = f.units.filter(u => u.state === 'mobilized').length;
+    const deployedCount = f.units.filter(u => u.state === 'deployed').length;
+    if (!f.atWar) {
+      mobilizationCost = Math.ceil(mobilizedCount * MOBILIZATION_COSTS.mobilized) +
+                          Math.ceil(deployedCount * 0.5); // peacetime surcharge
+    }
+  }
+
+  // --- War dividend for arms dealers ---
+  let warDividend = 0;
+  if (isDealer) {
+    const atWarFactions = Object.keys(gameState.factions).filter(fk => gameState.factions[fk].atWar);
+    if (atWarFactions.length >= 2) {
+      warDividend = 2;
+    }
+  }
+
+  const grossIncome = industry + trade + bonus + warDividend;
+  const blockadePenalty = tradeLoss + industryLoss;
+  const effectiveIncome = Math.max(0, grossIncome - blockadePenalty);
+  const baseUpkeep = f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet;
+  const totalUpkeep = baseUpkeep + mobilizationCost;
+  const net = effectiveIncome - totalUpkeep;
+
+  return {
+    industry, trade, bonus, bonusLabel,
+    tradeLoss, industryLoss, blockadeDetail,
+    mobilizationCost, warDividend,
+    grossIncome, blockadePenalty, effectiveIncome,
+    baseUpkeep, totalUpkeep, net,
+    isBlockaded: blockadePenalty > 0,
+    atWar: !!f.atWar
+  };
+}
+
+// Declare a blockade: blockading faction deploys fleets to sea zone
+function declareBlockade(blockaderFid, targetFid, seaZone) {
+  const blockader = gameState.factions[blockaderFid];
+  const target = gameState.factions[targetFid];
+
+  if (!blockader.fleets[seaZone] || blockader.fleets[seaZone] < 1) {
+    alert('You need fleets in ' + REGION_NAMES[seaZone] + ' to blockade!');
+    return false;
+  }
+
+  const routes = TRADE_ROUTES[targetFid];
+  if (!routes || !routes.seas.includes(seaZone)) {
+    alert(FACTION_NAMES[targetFid] + ' does not trade through ' + REGION_NAMES[seaZone]);
+    return false;
+  }
+
+  if (!target.blockadedBy) target.blockadedBy = [];
+  if (!target.blockadedBy.find(b => b.fid === blockaderFid && b.seaZone === seaZone)) {
+    target.blockadedBy.push({ fid: blockaderFid, seaZone: seaZone });
+  }
+  if (!target.blockadeTurns) target.blockadeTurns = 0;
+
+  logAction(blockaderFid, 'blockade', 'Declared blockade of ' + FACTION_NAMES[targetFid] + ' in ' + REGION_NAMES[seaZone]);
+  logAction(targetFid, 'blockade', 'Blockaded by ' + FACTION_NAMES[blockaderFid] + ' in ' + REGION_NAMES[seaZone]);
+
+  // Generate dramatic news headline
+  const headlines = [
+    FACTION_NAMES[blockaderFid].toUpperCase() + ' NAVY STEAMING TOWARD ' + REGION_NAMES[seaZone].toUpperCase() + '!',
+    'BLOCKADE DECLARED: ' + FACTION_NAMES[blockaderFid].toUpperCase() + ' CLOSES ' + REGION_NAMES[seaZone].toUpperCase(),
+    REGION_NAMES[seaZone].toUpperCase() + ' SEALED! ' + FACTION_NAMES[blockaderFid].toUpperCase() + ' WARSHIPS ENFORCE EMBARGO',
+    'TRADE ROUTES CUT: ' + FACTION_NAMES[targetFid].toUpperCase() + ' MERCHANTS TURNED AWAY AT ' + REGION_NAMES[seaZone].toUpperCase()
+  ];
+  const headline = headlines[Math.floor(Math.random() * headlines.length)];
+
+  if (!gameState.customNews) gameState.customNews = [];
+  gameState.customNews.push({
+    headline: headline,
+    body: FACTION_NAMES[blockaderFid] + ' has deployed warships to enforce a naval blockade in the ' + REGION_NAMES[seaZone] +
+          ', cutting off ' + FACTION_NAMES[targetFid] + '\'s maritime trade. ' +
+          'Merchant vessels have been warned: any ship attempting to run the blockade does so at its own peril.',
+    effect: 'BLOCKADE ACTIVE: ' + FACTION_NAMES[targetFid] + ' loses trade income from ' + REGION_NAMES[seaZone] +
+            '. If blockade persists, industrial output will also suffer. ' +
+            FACTION_NAMES[targetFid] + ' may break the blockade by winning a naval battle in the zone.',
+    turnNum: gameState.currentTurnNum,
+    faction: ''
+  });
+
+  saveGameState();
+  return true;
+}
+
+// Lift a blockade
+function liftBlockade(targetFid, seaZone) {
+  const target = gameState.factions[targetFid];
+  if (!target.blockadedBy) return;
+  const blockaderEntry = target.blockadedBy.find(b => b.seaZone === seaZone);
+  const blockaderFid = blockaderEntry ? blockaderEntry.fid : null;
+  target.blockadedBy = target.blockadedBy.filter(b => b.seaZone !== seaZone);
+  if (target.blockadedBy.length === 0) {
+    target.blockadeTurns = 0;
+  }
+  logAction(targetFid, 'blockade', 'Blockade lifted in ' + REGION_NAMES[seaZone]);
+  if (blockaderFid) logAction(blockaderFid, 'blockade', 'Blockade of ' + FACTION_NAMES[targetFid] + ' broken in ' + REGION_NAMES[seaZone]);
+  saveGameState();
+}
+
+// Toggle war status for a faction
+function toggleWarStatus(fid) {
+  const f = gameState.factions[fid];
+  f.atWar = !f.atWar;
+  logAction(fid, 'diplomacy', f.atWar ? FACTION_NAMES[fid] + ' is now AT WAR' : FACTION_NAMES[fid] + ' is now at PEACE');
+  saveGameState();
+  renderDashboard();
+  if (typeof renderGMControl === 'function') renderGMControl();
+}
+
 const HOME_REGIONS = {
   germany: 'germany', france: 'france', britain: 'britain',
   russia: 'russia', austria: 'austria', ottoman: 'ottoman'
@@ -4034,31 +4265,55 @@ function advanceTurn() {
   const summary = [];
   const factions = gameState.factions;
 
+  // Increment blockade turns for blockaded factions
   Object.keys(factions).forEach(fid => {
     const f = factions[fid];
-    const income = f.income;
-    const armyCost = f.army * MAINTENANCE_COSTS.army;
-    const navyCost = f.navy * MAINTENANCE_COSTS.fleet;
-    const maintenance = armyCost + navyCost;
-    const net = income - maintenance;
+    if (f.blockadedBy && f.blockadedBy.length > 0) {
+      f.blockadeTurns = (f.blockadeTurns || 0) + 1;
+    }
+  });
+
+  Object.keys(factions).forEach(fid => {
+    const f = factions[fid];
+    const econ = computeEconomy(fid);
     const oldGold = f.gold;
-    f.gold = Math.max(0, f.gold + net);
+    f.gold = Math.max(0, f.gold + econ.net);
+    // Update legacy income field for backward compat
+    f.income = econ.effectiveIncome;
 
     summary.push({
       faction: FACTION_NAMES[fid],
-      income: income,
-      maintenance: maintenance,
-      net: net,
+      income: econ.effectiveIncome,
+      industry: econ.industry,
+      trade: econ.trade,
+      bonus: econ.bonus,
+      bonusLabel: econ.bonusLabel,
+      tradeLoss: econ.tradeLoss,
+      industryLoss: econ.industryLoss,
+      blockadeDetail: econ.blockadeDetail,
+      mobilizationCost: econ.mobilizationCost,
+      warDividend: econ.warDividend,
+      maintenance: econ.totalUpkeep,
+      baseUpkeep: econ.baseUpkeep,
+      net: econ.net,
       oldGold: oldGold,
       newGold: f.gold
     });
   });
 
-  // Log income for each faction before incrementing turn
+  // Log detailed income for each faction
   summary.forEach(e => {
     const fid = Object.keys(gameState.factions).find(k => FACTION_NAMES[k] === e.faction);
     if (fid) {
-      logAction(fid, 'income', 'Turn ' + gameState.currentTurnNum + ' income: +' + e.income + 'g, upkeep: -' + e.maintenance + 'g, net: ' + (e.net >= 0 ? '+' : '') + e.net + 'g (' + e.oldGold + ' \u2192 ' + e.newGold + 'g)');
+      let detail = 'Turn ' + gameState.currentTurnNum + ': Industry ' + e.industry + 'g + Trade ' + e.trade + 'g';
+      if (e.bonus !== 0) detail += ' + Bonus ' + (e.bonus >= 0 ? '+' : '') + e.bonus + 'g';
+      if (e.warDividend > 0) detail += ' + War Dividend +' + e.warDividend + 'g';
+      if (e.tradeLoss > 0) detail += ' | Blockade: –' + e.tradeLoss + 'g trade';
+      if (e.industryLoss > 0) detail += ', –' + e.industryLoss + 'g industry';
+      detail += ' | Upkeep –' + e.baseUpkeep + 'g';
+      if (e.mobilizationCost > 0) detail += ' + Mobilization –' + e.mobilizationCost + 'g';
+      detail += ' | Net: ' + (e.net >= 0 ? '+' : '') + e.net + 'g (' + e.oldGold + ' → ' + e.newGold + 'g)';
+      logAction(fid, 'income', detail);
     }
   });
 
@@ -4382,10 +4637,17 @@ function renderPlayerTurnSummary(fid) {
         <div class="summary-section">
           <div class="summary-section-title">Income Statement — Turn ${lastLog.turn - 1}</div>
           <table class="income-table">
-            <tr><td>Income</td><td class="positive">+${entry.income}g</td></tr>
-            <tr><td>Total upkeep</td><td class="negative">-${entry.maintenance}g</td></tr>
+            <tr><td>Industry</td><td class="positive">+${entry.industry || entry.income}g</td></tr>
+            <tr><td>Trade</td><td class="positive">+${entry.trade || 0}g</td></tr>
+            ${entry.bonus ? `<tr><td>Bonus (${entry.bonusLabel || ''})</td><td class="${entry.bonus >= 0 ? 'positive' : 'negative'}">${entry.bonus >= 0 ? '+' : ''}${entry.bonus}g</td></tr>` : ''}
+            ${entry.warDividend > 0 ? `<tr><td>War Dividend</td><td class="positive">+${entry.warDividend}g</td></tr>` : ''}
+            ${entry.tradeLoss > 0 ? `<tr><td style="color:var(--red-empire);">⚓ Blockade (trade)</td><td class="negative">-${entry.tradeLoss}g</td></tr>` : ''}
+            ${entry.industryLoss > 0 ? `<tr><td style="color:var(--red-empire);">⚓ Blockade (industry)</td><td class="negative">-${entry.industryLoss}g</td></tr>` : ''}
+            <tr class="income-divider"><td>Effective income</td><td class="positive">+${entry.income}g</td></tr>
+            <tr><td>Base upkeep</td><td class="negative">-${entry.baseUpkeep || entry.maintenance}g</td></tr>
+            ${entry.mobilizationCost > 0 ? `<tr><td style="color:var(--gold-accent);">⚠ Mobilization surcharge</td><td class="negative">-${entry.mobilizationCost}g</td></tr>` : ''}
             <tr class="income-divider income-net"><td>Net</td><td class="${netCls}">${entry.net >= 0 ? '+' : ''}${entry.net}g</td></tr>
-            <tr><td>Treasury</td><td>${entry.oldGold} \u2192 ${entry.newGold}g</td></tr>
+            <tr><td>Treasury</td><td>${entry.oldGold} → ${entry.newGold}g</td></tr>
           </table>
         </div>`;
     }
@@ -4442,7 +4704,9 @@ function renderPlayerTurnSummary(fid) {
     purchase: '+',
     upgrade: '\u2605',
     battle: '\u2694',
-    income: '\u25CB'
+    income: '\u25CB',
+    blockade: '\u2693',
+    diplomacy: '\u2690'
   };
 
   const recentActions = (gameState.actionLog || [])
@@ -4671,18 +4935,37 @@ function renderPlayerDashboard(container) {
   const orders = getOrders(fid);
   const isSubmitted = orders.submitted;
 
-  // Compute economy
-  const upkeep = f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet;
-  const net = f.income - upkeep;
-  const netCls = net >= 0 ? 'positive' : 'negative';
+  // Compute economy using the new engine
+  const econ = computeEconomy(fid);
+  const netCls = econ.net >= 0 ? 'positive' : 'negative';
 
-  // Status strip
+  // Blockade warning
+  let blockadeWarning = '';
+  if (econ.isBlockaded) {
+    blockadeWarning = `<div style="background:#8b1a1a15; border:1px solid var(--red-empire); border-radius:6px; padding:8px 12px; margin-bottom:12px; font-size:0.9em;">
+      <strong style="color:var(--red-empire);">⚓ BLOCKADE ACTIVE</strong> — ${econ.blockadeDetail}
+    </div>`;
+  }
+
+  // Mobilization warning
+  let mobilizationWarning = '';
+  if (econ.mobilizationCost > 0) {
+    mobilizationWarning = `<div style="background:#b8860b15; border:1px solid var(--gold-accent); border-radius:6px; padding:8px 12px; margin-bottom:12px; font-size:0.9em;">
+      <strong style="color:var(--gold-accent);">⚠ MOBILIZATION SURCHARGE</strong> — Peacetime troop deployment costs extra +${econ.mobilizationCost}g/turn
+    </div>`;
+  }
+
+  // Status strip with detailed breakdown
   let statusStrip = `<div class="status-strip">
     <div class="strip-item"><span class="strip-label">Treasury</span><span class="strip-value">${f.gold}g</span></div>
-    <div class="strip-item"><span class="strip-label">Income</span><span class="strip-value positive">+${f.income}g</span></div>
-    <div class="strip-item"><span class="strip-label">Upkeep</span><span class="strip-value negative">-${upkeep}g</span></div>
-    <div class="strip-item"><span class="strip-label">Net/Turn</span><span class="strip-value ${netCls}">${net >= 0 ? '+' : ''}${net}g</span></div>
+    <div class="strip-item"><span class="strip-label">Industry</span><span class="strip-value positive">+${econ.industry}g</span></div>
+    <div class="strip-item"><span class="strip-label">Trade</span><span class="strip-value ${econ.tradeLoss > 0 ? 'negative' : 'positive'}">${econ.tradeLoss > 0 ? '✗' : '+'}${econ.trade - econ.tradeLoss}g</span></div>
+    ${econ.bonus !== 0 ? `<div class="strip-item"><span class="strip-label">Bonus</span><span class="strip-value ${econ.bonus >= 0 ? 'positive' : 'negative'}">${econ.bonus >= 0 ? '+' : ''}${econ.bonus}g</span></div>` : ''}
+    ${econ.warDividend > 0 ? `<div class="strip-item"><span class="strip-label">War Div.</span><span class="strip-value positive">+${econ.warDividend}g</span></div>` : ''}
+    <div class="strip-item"><span class="strip-label">Upkeep</span><span class="strip-value negative">-${econ.totalUpkeep}g</span></div>
+    <div class="strip-item"><span class="strip-label">Net/Turn</span><span class="strip-value ${netCls}">${econ.net >= 0 ? '+' : ''}${econ.net}g</span></div>
     <div class="strip-item"><span class="strip-label">VP</span><span class="strip-value">${f.vp}</span></div>
+    <div class="strip-item"><span class="strip-label">Status</span><span class="strip-value" style="font-size:0.8em;">${f.atWar ? '⚔ AT WAR' : '☮ Peace'}</span></div>
   </div>`;
 
   // Forces Pipeline
@@ -4754,6 +5037,8 @@ function renderPlayerDashboard(container) {
       <h3>${FACTION_NAMES[fid]}</h3>
       <div class="faction-type"><span class="alliance-badge ${allianceCls}">${allianceCls}</span></div>
       ${statusStrip}
+      ${blockadeWarning}
+      ${mobilizationWarning}
       ${pipelineHtml}
       ${f.alliances.length ? `<p style="margin-bottom:12px;"><strong>Alliances:</strong> ${f.alliances.map(a => FACTION_NAMES[a] || a).join(', ')}</p>` : ''}
 
@@ -4790,7 +5075,7 @@ function renderPlayerTurnSummaryContent(fid) {
     .filter(a => a.fid === fid && (a.turn === currentTurn || a.turn === currentTurn - 1))
     .reverse();
   if (recentActions.length === 0) return '<p class="no-actions">No history yet. Begin your campaign...</p>';
-  const actionIcons = { move: '\u2794', purchase: '+', upgrade: '\u2605', battle: '\u2694', income: '\u25CB', orders: '\u2691' };
+  const actionIcons = { move: '\u2794', purchase: '+', upgrade: '\u2605', battle: '\u2694', income: '\u25CB', orders: '\u2691', blockade: '\u2693', diplomacy: '\u2690' };
   return recentActions.map(a => `<div class="summary-entry"><span class="action-icon ${a.type}">${actionIcons[a.type] || '\u2022'}</span> ${a.description}</div>`).join('');
 }
 
@@ -5037,14 +5322,95 @@ function renderGMControl() {
     <div class="gm-section-body">${factionEditorHtml}</div>
   </div>`;
 
+  // 4.5 Economy, Blockade & War Management
+  const nationFids = Object.keys(FACTION_NAMES).filter(f => f !== 'krupp' && f !== 'schneider');
+  const blockaderOptions = nationFids.map(f => `<option value="${f}">${FACTION_NAMES[f]}</option>`).join('');
+  const targetOptions = nationFids.map(f => `<option value="${f}">${FACTION_NAMES[f]}</option>`).join('');
+  const seaOptions = SEA_REGIONS.map(r => `<option value="${r}">${REGION_NAMES[r]}</option>`).join('');
+
+  // Active blockades display
+  let activeBlockadesHtml = '';
+  let hasBlockades = false;
+  nationFids.forEach(fid => {
+    const f = gameState.factions[fid];
+    if (f.blockadedBy && f.blockadedBy.length > 0) {
+      hasBlockades = true;
+      f.blockadedBy.forEach(b => {
+        const econ = computeEconomy(fid);
+        activeBlockadesHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed var(--ink-light);">
+          <span><strong>${FACTION_NAMES[fid]}</strong> blockaded by <strong>${FACTION_NAMES[b.fid]}</strong> in ${REGION_NAMES[b.seaZone]} (turn ${f.blockadeTurns || 1})</span>
+          <button class="print-btn" style="font-size:0.7em; padding:4px 10px;" onclick="liftBlockade('${fid}','${b.seaZone}'); renderGMControl();">Lift Blockade</button>
+        </div>`;
+      });
+    }
+  });
+
+  // War status toggles
+  let warStatusHtml = nationFids.map(fid => {
+    const f = gameState.factions[fid];
+    const cls = f.atWar ? 'color:var(--red-empire); font-weight:700;' : '';
+    return `<button class="print-btn" style="font-size:0.75em; padding:6px 12px; margin:3px; ${cls}" onclick="toggleWarStatus('${fid}')">
+      ${f.atWar ? '⚔' : '☮'} ${FACTION_NAMES[fid]}
+    </button>`;
+  }).join('');
+
+  // Economy overview table
+  let econTableHtml = Object.keys(gameState.factions).map(fid => {
+    const econ = computeEconomy(fid);
+    const f = gameState.factions[fid];
+    return `<tr>
+      <td>${FACTION_NAMES[fid]}</td>
+      <td>${econ.industry}g</td>
+      <td>${econ.tradeLoss > 0 ? '<s>' + econ.trade + 'g</s> <span class="negative">0g</span>' : econ.trade + 'g'}</td>
+      <td>${econ.bonus !== 0 ? (econ.bonus >= 0 ? '+' : '') + econ.bonus + 'g' : '—'}</td>
+      <td class="${econ.isBlockaded ? 'negative' : ''}">${econ.effectiveIncome}g</td>
+      <td class="negative">${econ.totalUpkeep}g</td>
+      <td class="${econ.net >= 0 ? 'positive' : 'negative'}">${econ.net >= 0 ? '+' : ''}${econ.net}g</td>
+      <td>${f.gold}g</td>
+    </tr>`;
+  }).join('');
+
+  let economySection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Economy, Blockade &amp; War</span><span>▼</span>
+    </div>
+    <div class="gm-section-body">
+      <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; margin-bottom:8px;">Economic Overview</h4>
+      <div style="overflow-x:auto;">
+        <table class="overview-table">
+          <tr><th>Faction</th><th>Industry</th><th>Trade</th><th>Bonus</th><th>Income</th><th>Upkeep</th><th>Net</th><th>Treasury</th></tr>
+          ${econTableHtml}
+        </table>
+      </div>
+
+      <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; margin:16px 0 8px;">War Status</h4>
+      <p style="font-size:0.85em; color:var(--ink-light); margin-bottom:8px;">Toggle war status — at peace, deployed troops cost extra mobilization surcharge.</p>
+      <div style="display:flex; flex-wrap:wrap;">${warStatusHtml}</div>
+
+      <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; margin:16px 0 8px;">⚓ Declare Blockade</h4>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:12px;">
+        <div><label style="font-size:0.8em;">Blockading Power</label><select id="gmBlockader" style="display:block; width:100%;">${blockaderOptions}</select></div>
+        <div><label style="font-size:0.8em;">Target Nation</label><select id="gmBlockadeTarget" style="display:block; width:100%;">${targetOptions}</select></div>
+        <div><label style="font-size:0.8em;">Sea Zone</label><select id="gmBlockadeSea" style="display:block; width:100%;">${seaOptions}</select></div>
+        <div><button class="btn-broadcast" style="padding:8px 16px; font-size:0.85em;" onclick="if(declareBlockade(document.getElementById('gmBlockader').value, document.getElementById('gmBlockadeTarget').value, document.getElementById('gmBlockadeSea').value)){renderGMControl(); renderDashboard();}">⚓ Blockade!</button></div>
+      </div>
+
+      ${hasBlockades ? `
+        <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; margin:12px 0 8px;">Active Blockades</h4>
+        ${activeBlockadesHtml}
+      ` : ''}
+    </div>
+  </div>`;
+
   // 5. All Factions Overview
   let overviewHtml = `<div style="overflow-x:auto;">
     <table class="overview-table">
-      <tr><th>Faction</th><th>Gold</th><th>Income</th><th>Army</th><th>Navy</th><th>VP</th></tr>
+      <tr><th>Faction</th><th>Gold</th><th>Income</th><th>Army</th><th>Navy</th><th>VP</th><th>Status</th></tr>
       ${Object.keys(gameState.factions).map(k => {
         const fc = gameState.factions[k];
+        const econ = computeEconomy(k);
         const isGmCtrl = gameState.setup && gameState.setup.factionConfig[k] && gameState.setup.factionConfig[k].controlled === 'gm';
-        return `<tr><td>${FACTION_NAMES[k]}${isGmCtrl ? ' <span class="gm-badge">GM</span>' : ''}</td><td>${fc.gold}</td><td>${fc.income}</td><td>${fc.army}</td><td>${fc.navy}</td><td>${fc.vp}</td></tr>`;
+        return `<tr><td>${FACTION_NAMES[k]}${isGmCtrl ? ' <span class="gm-badge">GM</span>' : ''}</td><td>${fc.gold}</td><td>${econ.effectiveIncome}${econ.isBlockaded ? ' ⚓' : ''}</td><td>${fc.army}</td><td>${fc.navy}</td><td>${fc.vp}</td><td>${fc.atWar ? '⚔' : '☮'}${econ.mobilizationCost > 0 ? ' ⚠' : ''}</td></tr>`;
       }).join('')}
     </table>
   </div>`;
@@ -5097,7 +5463,7 @@ function renderGMControl() {
     </div>
   </div>`;
 
-  container.innerHTML = turnSection + turnTrackerSection + newsSection + newsEventsSection + orderSection + battleSection + factionSection + overviewSection + logSection;
+  container.innerHTML = turnSection + turnTrackerSection + newsSection + newsEventsSection + orderSection + battleSection + economySection + factionSection + overviewSection + logSection;
 
   // Render turn tracker into GM console
   renderGMTurnTracker();
