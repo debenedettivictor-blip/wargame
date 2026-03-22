@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta property="og:title" content="The Guns of August — A Grand Strategy Game">
+<meta property="og:description" content="A WWI grand strategy party game for 19 players across two boats. 8 factions, secret objectives, arms dealers, betrayal, and the fate of Europe.">
+<meta property="og:type" content="website">
+<title>The Guns of August — A Grand Strategy Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Text:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #f4eed5;
+  --parchment-dark: #e8dfc0;
+  --ink: #2a1f0e;
+  --ink-light: #5a4a2e;
+  --red-empire: #8b1a1a;
+  --blue-entente: #1a3a6b;
+  --gold-accent: #b8860b;
+  --green-neutral: #2d5016;
+  --steel: #4a4a4a;
+  --rust: #a0522d;
+  --navy: #0a1628;
+  --cream: #faf7e6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Crimson Text', serif;
+  background: var(--parchment);
+  color: var(--ink);
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(ellipse at 20% 50%, rgba(184, 134, 11, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 26, 26, 0.03) 0%, transparent 50%);
+}
+
+/* Aged paper texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Navigation */
+.nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0;
+}
+
+.nav-tab {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-bottom: none;
+  cursor: pointer;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: all 0.2s;
+  position: relative;
+  top: 2px;
+}
+
+.nav-tab:hover { background: var(--parchment-dark); }
+.nav-tab.active {
+  background: var(--ink);
+  color: var(--parchment);
+  border-color: var(--ink);
+}
+
+/* Header */
+.game-header {
+  text-align: center;
+  padding: 40px 20px 30px;
+  border-bottom: 3px double var(--ink);
+  margin-bottom: 40px;
+}
+
+.game-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.2em;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.game-header .subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 1.3em;
+  color: var(--ink-light);
+  margin-top: 8px;
+}
+
+.game-header .tagline {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.95em;
+  color: var(--rust);
+  margin-top: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 40px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-title .icon { font-size: 1.2em; }
+
+.section p, .section li {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.1em;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.section ul { list-style: none; padding-left: 20px; }
+.section ul li::before {
+  content: '◆';
+  color: var(--gold-accent);
+  font-size: 0.6em;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.section ol { padding-left: 24px; }
+.section ol li { padding-left: 6px; margin-bottom: 8px; }
+
+/* Faction Cards */
+.faction-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.faction-card {
+  border: 2px solid var(--ink);
+  padding: 24px;
+  position: relative;
+  background: var(--cream);
+  transition: transform 0.2s;
+}
+
+.faction-card::before {
+  content: '';
+  position: absolute;
+  top: 4px; left: 4px; right: -4px; bottom: -4px;
+  border: 1px solid var(--ink-light);
+  z-index: -1;
+  background: var(--parchment-dark);
+}
+
+.faction-card.central { border-left: 6px solid var(--red-empire); }
+.faction-card.entente { border-left: 6px solid var(--blue-entente); }
+.faction-card.neutral { border-left: 6px solid var(--green-neutral); }
+.faction-card.corp { border-left: 6px solid var(--gold-accent); }
+
+.faction-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.faction-players {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.85em;
+  color: var(--rust);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.faction-flavor {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 1.05em;
+  color: var(--ink-light);
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--parchment-dark);
+}
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.stat {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.9em;
+}
+
+.stat-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8em;
+  color: var(--ink-light);
+}
+
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.3em;
+}
+
+.objectives {
+  margin-top: 12px;
+}
+
+.obj-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.95em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.obj-list {
+  font-family: 'Crimson Text', serif;
+  font-size: 1em;
+  line-height: 1.6;
+}
+
+.obj-list div {
+  padding: 3px 0;
+  padding-left: 16px;
+  position: relative;
+}
+
+.obj-list div::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--gold-accent);
+}
+
+.secret-obj {
+  background: var(--parchment-dark);
+  border: 1px dashed var(--ink-light);
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.95em;
+}
+
+.secret-obj strong {
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85em;
+}
+
+/* Turn Tracker */
+.turn-tracker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.turn-dot {
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--cream);
+}
+
+.turn-dot:hover { background: var(--parchment-dark); }
+.turn-dot.active {
+  background: var(--ink);
+  color: var(--parchment);
+  transform: scale(1.15);
+}
+
+.turn-dot.completed {
+  background: var(--gold-accent);
+  color: white;
+  border-color: var(--gold-accent);
+}
+
+.turn-info {
+  border: 2px solid var(--ink);
+  padding: 24px;
+  background: var(--cream);
+  margin-bottom: 20px;
+}
+
+.turn-info h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.turn-info .year {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: var(--rust);
+  margin-bottom: 14px;
+}
+
+.phase-list {
+  display: grid;
+  gap: 8px;
+}
+
+.phase {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--gold-accent);
+  background: var(--parchment);
+}
+
+.phase-num {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 1.1em;
+  min-width: 24px;
+}
+
+.phase-text {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.05em;
+  line-height: 1.5;
+}
+
+/* News Events */
+.news-card {
+  border: 2px solid var(--ink);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  background: var(--cream);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.news-card:hover { transform: translateX(4px); }
+
+.news-card.revealed {
+  background: var(--parchment);
+  border-left: 5px solid var(--red-empire);
+}
+
+.news-turn {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--rust);
+  margin-bottom: 4px;
+}
+
+.news-headline {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 1.3em;
+  margin-bottom: 8px;
+}
+
+.news-body {
+  font-family: 'Crimson Text', serif;
+  font-size: 1.05em;
+  line-height: 1.6;
+  display: none;
+}
+
+.news-card.revealed .news-body { display: block; }
+
+.news-effect {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600;
+  font-size: 0.9em;
+  color: var(--red-empire);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--parchment-dark);
+}
+
+/* Quick Reference */
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-family: 'Crimson Text', serif;
+}
+
+.ref-table th {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85em;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--parchment-dark);
+}
+
+.ref-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--parchment-dark);
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+.ref-table tr:hover td { background: var(--cream); }
+
+/* Print styles */
+.print-btn {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 28px;
+  background: var(--ink);
+  color: var(--parchment);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.print-btn:hover {
+  background: var(--red-empire);
+}
+
+/* Tab content */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .game-header h1 { font-size: 1.7em; letter-spacing: 1px; }
+  .game-header .subtitle { font-size: 1.05em; }
+  .game-header .tagline { font-size: 0.8em; }
+  .game-header { padding: 24px 12px 20px; margin-bottom: 24px; }
+  .container { padding: 10px; }
+  .nav-tabs { gap: 3px; margin-bottom: 20px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 0; }
+  .nav-tab { font-size: 10px; padding: 8px 10px; white-space: nowrap; flex-shrink: 0; letter-spacing: 1px; }
+  .faction-card { padding: 14px; }
+  .faction-name { font-size: 1.2em; }
+  .faction-players { font-size: 0.8em; }
+  .stat-row { gap: 8px; }
+  .stat-value { font-size: 1.1em; }
+  .stat-label { font-size: 0.7em; }
+  .section-title { font-size: 1.2em; }
+  .section p, .section li { font-size: 1em; }
+  .role-card { padding: 12px 14px; }
+  .role-header { font-size: 1.05em; }
+  .role-desc { font-size: 0.9em; }
+  .role-secret { font-size: 0.88em; padding: 10px 12px; }
+  .role-card::after { font-size: 0.55em; }
+  .ref-table { font-size: 0.9em; }
+  .ref-table th { font-size: 0.75em; padding: 8px 6px; }
+  .ref-table td { padding: 6px; }
+  .news-headline { font-size: 1.1em; }
+  .turn-dot { width: 38px; height: 38px; font-size: 0.85em; }
+  .turn-info h3 { font-size: 1.15em; }
+  .highlight-box { padding: 12px 14px; font-size: 0.95em; }
+  .two-col { grid-template-columns: 1fr; gap: 12px; }
+  .print-btn { font-size: 0.75em; padding: 10px 20px; }
+  .secret-obj { font-size: 0.9em; }
+  .gm-note { font-size: 0.9em; }
+  .phase { padding: 6px 10px; }
+  .phase-text { font-size: 0.95em; }
+}
+
+.highlight-box {
+  border: 2px solid var(--gold-accent);
+  padding: 16px 20px;
+  margin: 16px 0;
+  background: linear-gradient(135deg, var(--cream), var(--parchment));
+}
+
+.highlight-box strong {
+  font-family: 'Playfair Display', serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9em;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 700px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+.alliance-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+.alliance-badge.central { background: var(--red-empire); color: white; }
+.alliance-badge.entente { background: var(--blue-entente); color: white; }
+.alliance-badge.neutral { background: var(--green-neutral); color: white; }
+.alliance-badge.corp { background: var(--gold-accent); color: white; }
+
+.gm-note {
+  background: #fff8dc;
+  border: 1px solid var(--gold-accent);
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.95em;
+}
+
+.gm-note::before {
+  content: 'GM NOTE: ';
+  font-style: normal;
+  font-weight: bold;
+  color: var(--red-empire);
+  font-family: 'Source Serif 4', serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.8em;
+}
+
+/* Role Cards */
+.role-card {
+  border: 1px solid var(--ink-light);
+  padding: 14px 18px;
+  background: var(--parchment);
+  position: relative;
+}
+
+.role-card::after {
+  content: 'CUT HERE — PERSONAL CARD';
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.65em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--rust);
+  background: var(--parchment);
+  padding: 0 6px;
+}
+
+.role-header {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15em;
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--ink-light);
+}
+
+.role-header em {
+  font-family: 'IM Fell English', serif;
+  font-weight: 400;
+  color: var(--ink-light);
+}
+
+.role-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.role-secret {
+  background: linear-gradient(135deg, #faf3d8, #f0e8c8);
+  border: 1px dashed var(--gold-accent);
+  padding: 12px 14px;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.92em;
+  line-height: 1.6;
+}
+
+.role-secret strong {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--red-empire);
+  display: block;
+  margin-bottom: 6px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="game-header">
+  <h1>The Guns of August</h1>
+  <div class="subtitle">A Grand Strategy Game for 19 Players</div>
+  <div class="tagline">Europe, 1910 — The Powder Keg Awaits a Spark</div>
+</div>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" data-tab="overview">Overview</button>
+  <button class="nav-tab" data-tab="factions">Factions</button>
+  <button class="nav-tab" data-tab="rules">Rules</button>
+  <button class="nav-tab" data-tab="turns">Turn Tracker</button>
+  <button class="nav-tab" data-tab="news">News Events</button>
+  <button class="nav-tab" data-tab="reference">Quick Ref</button>
+  <button class="nav-tab" data-tab="gm">GM Guide</button>
+</div>
+
+<!-- ==================== OVERVIEW ==================== -->
+<div id="overview" class="tab-content active">
+
+<div class="section">
+<div class="section-title"><span class="icon">⚔</span> The Premise</div>
+<p>The year is 1910. The great empires of Europe stand at the height of their power — and at the brink of catastrophe. Ancient rivalries fester, colonial ambitions collide, and arms manufacturers grow fat on the paranoia of nations. Each faction pursues its own vision for Europe's future. Some seek peace; most do not. <strong>War is not inevitable — but it is very, very likely.</strong></p>
+
+<p style="margin-top:16px;">Players represent the leaders, generals, diplomats, and industrialists who will decide the fate of millions. The game is played over <strong>6 turns</strong>, each representing roughly one year (1910–1915). Alliances will form, betrayals will occur, and the Game Master will ensure that history — or something like it — unfolds.</p>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon">👥</span> Player Count & Setup</div>
+<p><strong>19 players</strong> divided into <strong>8 factions</strong> plus <strong>1 Game Master</strong>. Each faction has 1–3 players who collectively make decisions. The game is designed for <strong>two boats</strong> — factions on separate boats must communicate via written dispatches (paper notes ferried between boats), adding delicious delays and the possibility of intercepted messages.</p>
+
+<div class="highlight-box">
+  <strong>Two-Boat Setup:</strong> Place the Central Powers (Germany, Austria-Hungary, Ottoman Empire) and one arms dealer on <strong>Boat A</strong>. Place the Entente (France, Britain, Russia) and the other arms dealer on <strong>Boat B</strong>. This forces diplomacy across the water — messengers must physically carry notes between boats. The GM floats between both.
+</div>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon">⏱</span> Time & Pacing</div>
+<p><strong>Total game time: 2.5–3 hours.</strong></p>
+<div class="two-col">
+  <div>
+    <strong>Turns 1–3</strong> (Peacetime): ~20 min each<br>
+    Diplomacy-heavy. Build armies, forge alliances, scheme.
+  </div>
+  <div>
+    <strong>Turns 4–6</strong> (Crisis/War): ~25 min each<br>
+    Faster. War erupts. Battles resolve. Empires crumble.
+  </div>
+</div>
+<p style="margin-top:12px;">Each turn has 4 phases: <em>News → Diplomacy → Orders → Resolution</em>. The GM keeps a timer and announces phase changes. Between turns, there is a 5-minute free diplomacy break.</p>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon">🏛</span> The Factions at a Glance</div>
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top:8px;">
+  <div><span class="alliance-badge central">Central</span> <strong>German Empire</strong> — 3 players</div>
+  <div><span class="alliance-badge central">Central</span> <strong>Austria-Hungary</strong> — 2 players</div>
+  <div><span class="alliance-badge entente">Entente</span> <strong>French Republic</strong> — 2 players</div>
+  <div><span class="alliance-badge entente">Entente</span> <strong>British Empire</strong> — 3 players</div>
+  <div><span class="alliance-badge entente">Entente</span> <strong>Russian Empire</strong> — 3 players</div>
+  <div><span class="alliance-badge neutral">Neutral</span> <strong>Ottoman Empire</strong> — 2 players</div>
+  <div><span class="alliance-badge corp">Corp</span> <strong>Krupp-Vickers Arms</strong> — 2 players ⚡</div>
+  <div><span class="alliance-badge corp">Corp</span> <strong>Schneider-Škoda Syndicate</strong> — 1 player ⚡⚡</div>
+</div>
+<p style="margin-top:12px;"><strong>+1 Game Master</strong> — controls the news, resolves disputes, and plays minor nations (Italy, Serbia, Belgium) as needed. <em>Total: 19.</em></p>
+<p style="margin-top:8px;">⚡ <em>Arms dealers are the chaos agents of this game. They fund coups, plant fake crises, run bidding wars for superweapons, lock nations into exclusive contracts, and earn a War Dividend every turn conflict is active. They NEED war to happen — and they have the tools to make it happen.</em></p>
+
+<div class="highlight-box" style="border-color: var(--red-empire);">
+  <strong>⚠ The Inner Game — Personal Secret Objectives:</strong><br>
+  Every player has a named historical role with their OWN personal secret objectives — often in tension with their teammates. The Chancellor wants to topple the Kaiser. The French General wants reckless offensives the President opposes. The Sultan and the Young Turk are fighting for control of the Ottoman Empire. <strong>One player inside Russia is a secret revolutionary</strong> — outwardly loyal, secretly sabotaging the war effort and trying to trigger revolution. The Schneider-Škoda arms dealer is a solo "Merchant of Death" who roams between both boats, funding coups and starting wars for profit. Final victory goes to the INDIVIDUAL player with the most VP — not the faction.
+</div>
+</div>
+</div>
+
+<!-- ==================== FACTIONS ==================== -->
+<div id="factions" class="tab-content">
+
+<div class="section">
+<div class="section-title"><span class="icon">🦅</span> Faction Dossiers</div>
+<p>Each faction card below is designed to be printed and handed to the relevant team. Secret objectives should be kept hidden from other factions.</p>
+<button class="print-btn" onclick="window.print()" style="margin-bottom:24px;">⎙ Print All Faction Sheets</button>
+</div>
+
+<div class="faction-grid">
+
+<!-- GERMANY -->
+<div class="faction-card central">
+  <div class="faction-name">The German Empire</div>
+  <div class="faction-players">3 Players — Kaiser Wilhelm II, Chancellor, Chief of General Staff</div>
+  <div class="faction-flavor">"Germany's place in the sun demands more than diplomacy. We must be prepared for the war that is surely coming — and we must win it swiftly."</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">25 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">8 Gold</div></div>
+    <div class="stat"><div class="stat-label">Army</div><div class="stat-value">10 Divisions</div></div>
+    <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">6 Fleets</div></div>
+    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">★★★★★</div></div>
+  </div>
+  <div class="objectives">
+    <div class="obj-title">Shared Faction Objectives (known to all)</div>
+    <div class="obj-list">
+      <div>Retain control of Alsace-Lorraine at game end (+3 VP to all German players)</div>
+      <div>Maintain the strongest army on the continent (+2 VP to all)</div>
+      <div>Secure alliance with Austria-Hungary or Ottoman Empire (+1 VP each, to all)</div>
+    </div>
+  </div>
+  <div class="secret-obj" style="margin-bottom:8px;">
+    <strong>🔒 Shared Secret Objectives (only Germany sees)</strong><br>
+    ◈ The Schlieffen Plan: If war begins, conquer France within 2 turns (+5 VP to all, –3 VP to all if it fails)
+  </div>
+  <div style="display:grid; gap:10px; margin-top:14px;">
+    <div class="role-card">
+      <div class="role-header">👑 KAISER WILHELM II — <em>The Impulsive Monarch</em></div>
+      <div class="role-desc">You are the All-Highest. Brilliant, erratic, and obsessed with matching your cousin King George's navy. <strong>You have final say on all German decisions</strong> — unless both the Chancellor AND Chief of Staff vote to overrule you (a "Constitutional Crisis").</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Navy Obsession:</strong> Build the fleet to 10+ ships. +4 personal VP. You MUST spend at least 2 Gold/turn on naval expansion.<br>
+        ◈ <strong>Cousin George:</strong> You secretly admire Britain. End the game at peace with or allied to Britain: +3 personal VP. At war with Britain: –2 personal VP.<br>
+        ◈ <strong>Fear of Weakness:</strong> If the Chancellor successfully overrules you, –2 personal VP. You must appear strong at all times.
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">🏛 THE CHANCELLOR — <em>The Pragmatist</em></div>
+      <div class="role-desc">Head of government. You handle diplomacy, alliances, and the treasury. The Kaiser is your sovereign but also a reckless fool. You believe Germany's future lies in careful diplomacy, not war.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Topple the Kaiser:</strong> Engineer a "Constitutional Crisis" — get the Chief of Staff to side with you against the Kaiser on a major decision. +4 personal VP for the first overrule, +2 for a second.<br>
+        ◈ <strong>Diplomatic Mastermind:</strong> Personally negotiate a treaty with ANY Entente power that lasts 2+ turns. +3 personal VP.<br>
+        ◈ <strong>Delay the War:</strong> If Germany enters Turn 4 without being at war, +2 personal VP.
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">⚔ CHIEF OF GENERAL STAFF — <em>The War Planner</em></div>
+      <div class="role-desc">Germany's top military mind. You control troop deployments and battle strategy. You have spent your career perfecting the Schlieffen Plan. You believe war is inevitable and Germany must strike first.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>My Legacy:</strong> If the Schlieffen Plan is executed (invasion through Belgium), +3 personal VP regardless of outcome. +3 more if it succeeds. You WANT war.<br>
+        ◈ <strong>Militarism:</strong> Germany must have 12+ army divisions by Turn 4. +2 personal VP. Every Gold the Kaiser wastes on ships is a soldier you don't have.<br>
+        ◈ <strong>The Kingmaker:</strong> The Chancellor needs your vote to overrule the Kaiser. Side with the Chancellor: +2 personal VP if it leads to a better military outcome. Stay loyal to the Kaiser: +1 personal VP (safe but boring).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FRANCE -->
+<div class="faction-card entente">
+  <div class="faction-name">The French Republic</div>
+  <div class="faction-players">2 Players — The President, The Commanding General</div>
+  <div class="faction-flavor">"Alsace and Lorraine cry out to return to the motherland. Forty years of German occupation is forty years too many. La Revanche is not a dream — it is a sacred duty."</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">18 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">6 Gold</div></div>
+    <div class="stat"><div class="stat-label">Army</div><div class="stat-value">8 Divisions</div></div>
+    <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">4 Fleets</div></div>
+    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">★★★★</div></div>
+  </div>
+  <div class="objectives">
+    <div class="obj-title">Shared Faction Objectives (known to all)</div>
+    <div class="obj-list">
+      <div>Recapture Alsace-Lorraine from Germany (+5 VP to both)</div>
+      <div>Maintain alliance with both Britain AND Russia (+2 VP to both)</div>
+      <div>Do not lose Paris (–6 VP to both if Paris falls)</div>
+    </div>
+  </div>
+  <div class="secret-obj" style="margin-bottom:8px;">
+    <strong>🔒 Shared Secret Objectives</strong><br>
+    ◈ Convince Britain to commit ground troops to a Continental war (+3 VP to both)
+  </div>
+  <div style="display:grid; gap:10px; margin-top:14px;">
+    <div class="role-card">
+      <div class="role-header">🗳 THE PRESIDENT — <em>The Cautious Republican</em></div>
+      <div class="role-desc">You lead the Third Republic. You control diplomacy and the treasury. You want Alsace-Lorraine back — but you also know that reckless war could destroy France. You prefer to build alliances, secure loans to Russia, and let Germany make the first mistake.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>The Banker:</strong> Loan Russia at least 5 Gold over the game. +3 personal VP. This cements the Franco-Russian alliance and gives you leverage over the Tsar.<br>
+        ◈ <strong>Fortress France:</strong> Build fortifications on the German border (4 Gold). +2 personal VP. You believe in defense, not the General's suicidal offensives.<br>
+        ◈ <strong>Control the General:</strong> If the Commanding General launches an attack you explicitly opposed, –2 personal VP. But if you can keep him on a leash and still win, +2 personal VP. The President controls diplomacy and spending; the General controls the army — but who really has power?
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">⚔ THE COMMANDING GENERAL — <em>L'Attaque à Outrance</em></div>
+      <div class="role-desc">You command the French Army. You are a disciple of the doctrine of "attack at all costs" — élan, spirit, the bayonet charge. You believe the only way to retake Lorraine is through overwhelming offensive action. Fortifications are for cowards.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Plan XVII:</strong> Launch an offensive into Lorraine in the FIRST turn of war. +3 personal VP for the audacity, +3 more if you hold it. Fail and the President will blame you — but glory demands risk.<br>
+        ◈ <strong>Offense Over Defense:</strong> If France spends Gold on fortifications instead of army divisions, –1 personal VP per fortification built. You despise the defensive mentality.<br>
+        ◈ <strong>Military Coup (Emergency):</strong> If France is losing badly (lost 4+ divisions), you may declare a military emergency and seize control from the President. Costs –3 personal VP but you now make ALL decisions for France. Use only in desperation — or ambition.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BRITAIN -->
+<div class="faction-card entente">
+  <div class="faction-name">The British Empire</div>
+  <div class="faction-players">3 Players — Prime Minister, First Lord of the Admiralty, Foreign Secretary</div>
+  <div class="faction-flavor">"Britannia rules the waves — and through the waves, the world. We have no permanent allies, only permanent interests. But a German-dominated Europe? That we cannot abide."</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">30 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">9 Gold</div></div>
+    <div class="stat"><div class="stat-label">Army</div><div class="stat-value">4 Divisions</div></div>
+    <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">12 Fleets</div></div>
+    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">★★★★</div></div>
+  </div>
+  <div class="objectives">
+    <div class="obj-title">Shared Faction Objectives (known to all)</div>
+    <div class="obj-list">
+      <div>Maintain naval supremacy — more fleets than any other nation (+3 VP to all)</div>
+      <div>Prevent any single power from dominating the Continent (+3 VP to all)</div>
+      <div>Protect Belgium's neutrality (+2 VP — or –2 VP if Belgium falls and Britain does nothing)</div>
+    </div>
+  </div>
+  <div style="display:grid; gap:10px; margin-top:14px;">
+    <div class="role-card">
+      <div class="role-header">🎩 THE PRIME MINISTER — <em>The Reluctant Warrior</em></div>
+      <div class="role-desc">You lead His Majesty's Government. You control the treasury and have final say on whether Britain goes to war. You are deeply reluctant to commit British soldiers to a Continental bloodbath — let France and Russia do the fighting. But if Belgium falls, the public will demand action.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Splendid Isolation:</strong> Keep the British Expeditionary Force to 3 or fewer divisions committed to the Continent. +4 personal VP. Let others bleed.<br>
+        ◈ <strong>War Profiteer (quiet):</strong> Maintain trade with ALL nations as long as possible, including Germany during wartime. +3 personal VP if trading with both sides in Turn 4+. The City of London demands it.<br>
+        ◈ <strong>Distrust the Admiralty:</strong> The First Lord wants to spend everything on ships. If the naval budget exceeds 8 Gold in any single turn, –1 personal VP. The empire has other needs.
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">⚓ FIRST LORD OF THE ADMIRALTY — <em>The Young Churchill</em></div>
+      <div class="role-desc">You run the Royal Navy — the greatest fleet in history. You are ambitious, aggressive, and convinced that naval power is the only power that matters. You want to crush the German High Seas Fleet, and you want to do it dramatically. You also have a secret obsession: the Dardanelles.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Sink the High Seas Fleet:</strong> Destroy or reduce Germany's navy by at least 4 ships. +4 personal VP. You dream of a new Trafalgar.<br>
+        ◈ <strong>The Dardanelles Gambit:</strong> Convince Britain to launch a naval attack on the Ottoman Straits. +4 personal VP if attempted, +3 more if successful. –2 if it's a disaster. The PM will think you're mad — prove him wrong.<br>
+        ◈ <strong>Naval Supremacy at All Costs:</strong> Spend at least 4 Gold/turn on the navy. +2 personal VP. The PM will resist — override him if you can convince the Foreign Secretary.
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">📜 THE FOREIGN SECRETARY — <em>The Web Spinner</em></div>
+      <div class="role-desc">You manage Britain's alliances and intelligence network. You are the one who talks to everyone — and trusts no one. You hold the balance of power within the British cabinet: the PM wants peace, the First Lord wants war, and you hold the deciding vote.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>The Entente Must Hold:</strong> Keep the alliance with France AND Russia intact through the entire game. +3 personal VP. If either alliance breaks, –2 personal VP.<br>
+        ◈ <strong>Intelligence Master:</strong> Successfully conduct espionage (3 Gold, GM rolls 4+) against at least 2 different nations over the game. +3 personal VP. Information is power.<br>
+        ◈ <strong>The Swing Vote:</strong> You are the tiebreaker in the British cabinet. If you side with the PM against the First Lord, gain +1 personal VP (for prudence). If you side with the First Lord against the PM, gain +1 personal VP (for boldness). You score either way — the game is choosing wisely.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUSTRIA-HUNGARY -->
+<div class="faction-card central">
+  <div class="faction-name">Austria-Hungary</div>
+  <div class="faction-players">2 Players — Emperor Franz Josef, The Hawk (Chief of Staff Conrad)</div>
+  <div class="faction-flavor">"The empire of many peoples holds together by the will of God and the House of Habsburg. But the Slavic nationalists threaten to tear us apart from within. Serbia must be humbled — or we are lost."</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">14 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">5 Gold</div></div>
+    <div class="stat"><div class="stat-label">Army</div><div class="stat-value">7 Divisions</div></div>
+    <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">2 Fleets</div></div>
+    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">★★★</div></div>
+  </div>
+  <div class="objectives">
+    <div class="obj-title">Shared Faction Objectives (known to all)</div>
+    <div class="obj-list">
+      <div>Subjugate or annex Serbia (+4 VP to both)</div>
+      <div>Maintain alliance with Germany (+2 VP to both)</div>
+      <div>Prevent internal rebellion — spend 2 Gold/turn on stability or lose 1 division/turn after Turn 3</div>
+    </div>
+  </div>
+  <div style="display:grid; gap:10px; margin-top:14px;">
+    <div class="role-card">
+      <div class="role-header">👑 EMPEROR FRANZ JOSEF — <em>The Aging Monarch</em></div>
+      <div class="role-desc">You have ruled for sixty years. You are tired, conservative, and desperate to hold the empire together. You fear war almost as much as you fear dissolution. Every Gold spent on the army is a Gold not spent keeping the Hungarians, Czechs, and Croats in line.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Hold the Empire Together:</strong> Austria-Hungary must still exist as a unified state at game end. +5 personal VP. If it fractures, –5 personal VP. This is your LIFE'S WORK.<br>
+        ◈ <strong>Spend on Stability:</strong> Spend at least 2 Gold/turn on internal stability every single turn. +2 personal VP. If you ever skip a payment, –2 personal VP (the nationalities are restless).<br>
+        ◈ <strong>Restrain the Hawk:</strong> Conrad wants war with everyone. If Austria starts a war before Turn 4, –2 personal VP. If you can keep the peace until events force your hand, +2 personal VP. Let Germany take the blame.
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">🦅 CHIEF OF STAFF CONRAD — <em>The Hawk</em></div>
+      <div class="role-desc">You are the most aggressive military mind in Europe. You have proposed preventive war against Serbia SEVENTEEN TIMES. You also want to attack Italy, Romania, and possibly Russia. The Emperor keeps vetoing you. But one day, he will have no choice — and on that day, you will be ready.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>War with Serbia NOW:</strong> If Austria declares war on Serbia before Turn 4, +4 personal VP. Every turn of delay is a turn Serbia grows stronger. The Emperor's caution is killing the empire.<br>
+        ◈ <strong>Annex Bosnia:</strong> Push for the formal annexation of Bosnia (3 Gold diplomatic action). +2 personal VP. It may trigger a crisis — you're counting on it.<br>
+        ◈ <strong>Undermine the Emperor:</strong> If you can convince Germany's Chief of Staff to pressure the Kaiser into supporting Austrian military action (back-channel between boats), +3 personal VP. Go behind the Emperor's back. When the war starts, he'll thank you — or he won't, and it won't matter.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RUSSIA -->
+<div class="faction-card entente">
+  <div class="faction-name">The Russian Empire</div>
+  <div class="faction-players">3 Players — Tsar Nicholas II, The War Minister, The Duma Representative</div>
+  <div class="faction-flavor">"Holy Russia is the protector of all Slavic peoples. Constantinople beckons. But the revolutionaries in St. Petersburg grow bolder each year. We must project strength abroad to maintain order at home."</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">16 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">6 Gold</div></div>
+    <div class="stat"><div class="stat-label">Army</div><div class="stat-value">12 Divisions</div></div>
+    <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">3 Fleets</div></div>
+    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">★★</div></div>
+  </div>
+  <div class="objectives">
+    <div class="obj-title">Shared Faction Objectives (known to all 3 Russian players)</div>
+    <div class="obj-list">
+      <div>Gain control of Constantinople / the Straits (+4 VP to all Russian players)</div>
+      <div>Protect Serbia from Austrian aggression (+2 VP to all)</div>
+      <div>Special Rule: Russia cannot fully mobilize until 1 turn after war is declared (half army first turn)</div>
+    </div>
+  </div>
+  <div style="display:grid; gap:10px; margin-top:14px;">
+    <div class="role-card">
+      <div class="role-header">👑 TSAR NICHOLAS II — <em>The Indecisive Autocrat</em></div>
+      <div class="role-desc">You are the Autocrat of All the Russias — in theory. In practice, you are pulled between your wife's mystic advisors, your generals' demands, and the parliamentarians in the Duma. You want to be a great Tsar, a war hero, a peacemaker — you want to be everything, and so you are nothing. Every decision agonizes you. You control diplomacy and the treasury.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Cousin Willy:</strong> You and Kaiser Wilhelm exchange warm letters. You may secretly negotiate a NON-AGGRESSION PACT with Germany behind France's back. +4 personal VP if such a pact lasts 2+ turns. –3 personal VP if France discovers it.<br>
+        ◈ <strong>Avoid Revolution:</strong> Spend at least 3 Gold/turn on domestic stability. If you skip 2 consecutive turns, revolution triggers — lose half your army, –6 personal VP. This is YOUR personal nightmare.<br>
+        ◈ <strong>The Mystic:</strong> Once per game, consult "the mystic" (ask the GM to flip a coin). Heads: gain 3 Gold from "divine providence." Tails: lose 2 Gold to "charitable donations." You believe in this deeply.<br>
+        ◈ <strong>Trust No One:</strong> If you ever suspect the Duma Representative is working against you, you may order the Okhrana (secret police) to investigate — spend 2 Gold, GM tells you ONE of their secret objectives. If you catch a traitor, you may EXILE them from the faction (they lose access to Russian Gold and armies but keep their personal VP track). But if they're innocent, you've wasted Gold and created an enemy.
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">⚔ THE WAR MINISTER — <em>The Pan-Slavist</em></div>
+      <div class="role-desc">You command the largest army in Europe — on paper. In reality, it is poorly equipped, slowly mobilizing, and spread across a vast empire. But you believe in Russia's destiny: to unite all Slavic peoples under Moscow's protection and seize Constantinople from the Turks. The Tsar is weak. You deal with the military; the Duma Representative handles the domestic situation — or so they claim.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Dominate the Balkans:</strong> Have the most influence over Serbia, Bulgaria, Romania (spend Gold to bribe, or commit troops). +4 personal VP. This is Russia's backyard.<br>
+        ◈ <strong>Secure French Loans:</strong> Get France to loan Russia at least 5 Gold over the game. +2 personal VP. You need their money to modernize the army.<br>
+        ◈ <strong>Mobilize Early:</strong> If you can convince the Tsar to begin mobilization BEFORE war is declared (pre-position troops), +3 personal VP. If the Tsar refuses, you may go behind his back by submitting secret orders to the GM — but if the Tsar finds out, –3 personal VP.<br>
+        ◈ <strong>Suspicious of the Duma:</strong> The Duma Representative talks of "reform" and "the people." You don't trust them. If revolution triggers and you can prove the Duma Representative contributed to it, the War Minister may declare martial law — you take sole command of the remaining army. +2 personal VP.
+      </div>
+    </div>
+    <div class="role-card" style="border: 1px solid var(--red-empire); background: linear-gradient(135deg, var(--parchment), #f5ece0);">
+      <div class="role-header" style="color: var(--red-empire);">☭ THE DUMA REPRESENTATIVE — <em>Voice of the People</em></div>
+      <div class="role-desc">You sit in the Russian Duma — the toothless parliament the Tsar grudgingly tolerates. You speak for reform, for the peasants, for a constitutional monarchy. The Tsar and the War Minister think you are a moderate liberal. They are wrong.</div>
+      <div class="role-secret" style="background: linear-gradient(135deg, #f8e8e8, #f0dcd0); border-color: var(--red-empire);">
+        <strong style="color: var(--red-empire);">🗝 DEEP SECRET — THE REVOLUTIONARY:</strong><br>
+        <em>You are not a liberal reformer. You are a revolutionary agent — a Bolshevik, a Socialist Revolutionary, an anarchist, pick your flavor. Your true goal is the destruction of the Tsarist state. You want Russia to LOSE the war, or better yet, to collapse into revolution so that you can seize power from the ashes.</em><br><br>
+
+        <strong>YOUR TRUE OBJECTIVES (worth far more than faction VP):</strong><br><br>
+
+        ◈ <strong>Trigger the Revolution (+8 personal VP):</strong> If revolution triggers in Russia (Tsar fails to pay stability 2 turns in a row, OR Russia loses a major battle while stability is low), you WIN BIG. You may declare yourself leader of the new Revolutionary Government. You take control of whatever remains of Russia's army. The Tsar and War Minister lose –6 VP each. This is your endgame.<br><br>
+
+        ◈ <strong>Sabotage the War Effort (+3 personal VP):</strong> Each turn, you may secretly submit a "sabotage order" to the GM. You pick one: (a) Divert 1 Gold from the treasury to "the people" (you pocket it — the GM quietly reduces Russia's Gold by 1), (b) Reduce one army's effectiveness (GM secretly applies –1 to Russia's next combat roll), or (c) Delay mobilization (add 1 extra turn to Russia's mobilization time). The Tsar doesn't know why things keep going wrong. +1 personal VP per successful sabotage.<br><br>
+
+        ◈ <strong>Agitate the Workers (+2 personal VP per success):</strong> During the Diplomacy phase, you may spend 1 Gold to "organize a strike" — the GM rolls d6. On 4+, Russia loses 1 Gold of income that turn (factory strikes). On 1-3, nothing happens. Either way, the Tsar doesn't know you caused it unless he investigates.<br><br>
+
+        ◈ <strong>Build the Network (+3 personal VP):</strong> Make secret contact with arms dealers. If an arms dealer uses FUND A COUP targeting Russia, and YOU are the junior player who receives the anonymous bribe — accept it. You and the arms dealer are now allies. If you can get 2+ arms dealers secretly funding your revolution, +3 personal VP.<br><br>
+
+        ◈ <strong>The Long Game:</strong> You still earn shared faction VP if Russia achieves its public objectives. So you're incentivized to HELP Russia early (build trust, gain access to decisions) and BETRAY Russia late (when revolution is most damaging). The Tsar may investigate you — act loyal. Attend meetings. Offer good military advice. Then, when the moment is right, burn it all down.<br><br>
+
+        <strong>⚠ IF YOU ARE DISCOVERED:</strong> If the Tsar uses the Okhrana to investigate you and learns one of your secrets, you may be EXILED from the faction. If exiled, you become an independent revolutionary — you keep your personal VP and any Gold you've stolen, but lose access to Russia's army. You may then openly ally with any faction, offer intelligence about Russian troop positions, or simply watch the empire burn. Exile is survivable — discovery is just the beginning of a new game.
+      </div>
+    </div>
+  </div>
+  <div class="gm-note" style="margin-top:12px;">
+    THE DUMA REPRESENTATIVE'S ROLE CARD MUST BE SEALED AND HANDED TO THEM PRIVATELY. The Tsar and War Minister should receive their cards together — the Duma Representative receives theirs separately, with instructions to read it alone. They should then join the Russian team acting as a loyal member. The GM should keep a close eye on this player's secret orders each turn. This role is for your best actor.
+  </div>
+</div>
+
+<!-- OTTOMAN EMPIRE -->
+<div class="faction-card neutral">
+  <div class="faction-name">The Ottoman Empire</div>
+  <div class="faction-players">2 Players — The Sultan, The Young Turk Leader</div>
+  <div class="faction-flavor">"The Sick Man of Europe? We shall see who is sick when the great powers come begging for our alliance. The straits of the Dardanelles are the most valuable real estate on earth — and they are ours."</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">8 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">4 Gold</div></div>
+    <div class="stat"><div class="stat-label">Army</div><div class="stat-value">6 Divisions</div></div>
+    <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">2 Fleets</div></div>
+    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">★★</div></div>
+  </div>
+  <div class="objectives">
+    <div class="obj-title">Shared Faction Objectives (known to all)</div>
+    <div class="obj-list">
+      <div>Maintain control of the Dardanelles Straits (+3 VP to both)</div>
+      <div>Choose a side wisely — gain at least 8 Gold in alliance payments from a great power (+2 VP to both)</div>
+      <div>Modernize: Purchase at least 4 army or navy units from arms dealers (+2 VP to both)</div>
+    </div>
+  </div>
+  <div class="secret-obj" style="margin-bottom:8px;">
+    <strong>🔒 Shared Secret Objectives</strong><br>
+    ◈ Play both sides: Receive payments from BOTH alliance blocs before committing (+4 VP to both)
+  </div>
+  <div style="display:grid; gap:10px; margin-top:14px;">
+    <div class="role-card">
+      <div class="role-header">👑 THE SULTAN — <em>The Traditionalist</em></div>
+      <div class="role-desc">You are the Caliph, Commander of the Faithful, Shadow of God on Earth. Your empire stretches from Libya to Mesopotamia. You believe in tradition, in the old ways, in Islam as the binding force of the empire. The Young Turks want to modernize — but modernization means YOUR power diminishes.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Traditional Authority:</strong> Keep military spending higher than reform spending over the game. +3 personal VP. Every Gold spent on "modernization" is a Gold wasted on Western nonsense.<br>
+        ◈ <strong>The Caliphate Card:</strong> Once per game, declare a Jihad — call all Muslims in enemy empires to resist. Costs 3 Gold. GM rolls d6: 4+, the target nation loses 1 division to internal unrest. +2 personal VP for playing it, regardless of outcome.<br>
+        ◈ <strong>Suppress the Young Turks:</strong> If the Young Turk player ever seizes power (see their card), –5 personal VP. Prevent this at all costs. You may secretly ask the GM to "discover a coup plot" (costs 2 Gold) — this strips the Young Turk player of 1 personal VP and publicly humiliates them.
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">🔥 THE YOUNG TURK LEADER — <em>The Revolutionary Modernizer</em></div>
+      <div class="role-desc">You represent the Committee of Union and Progress — the young officers and intellectuals who believe the Ottoman Empire can only survive through radical modernization. European-style armies, secular law, constitutional government. The Sultan is a relic. You need him — for now.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>Modernization Program:</strong> Spend at least 4 Gold on modernization (tell GM you're "investing in reform"). +4 personal VP. Each Gold spent on reform counts as a step toward your vision.<br>
+        ◈ <strong>Seize Power:</strong> If you have spent more on reform than the Sultan has spent on military, you may declare a COUP at any point after Turn 3. You take sole control of the Ottoman Empire. +3 personal VP. But the Sultan loses –5 VP and may sabotage you.<br>
+        ◈ <strong>German Alliance:</strong> You admire German military efficiency. Personally negotiate an alliance with Germany. +2 personal VP. The Sultan may prefer Britain — this is a source of conflict.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KRUPP-VICKERS -->
+<div class="faction-card corp">
+  <div class="faction-name">Krupp-Vickers Arms Consortium</div>
+  <div class="faction-players">2 Players — Krupp Director (German-aligned), Vickers Director (British-aligned)</div>
+  <div class="faction-flavor">"Patriotism is a fine thing, but profit is finer. Every army that marches, every fleet that sails — they all need our steel, our shells, our machines. Peace is bad for business. We don't start wars — we make sure they happen."</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">22 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">3 Gold (base) + sales</div></div>
+    <div class="stat"><div class="stat-label">Influence Tokens</div><div class="stat-value">3 (see below)</div></div>
+    <div class="stat"><div class="stat-label">Market Share</div><div class="stat-value">0 (track sales)</div></div>
+    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">MANUFACTURE</div></div>
+  </div>
+  <div class="objectives">
+    <div class="obj-title">Shared Faction Objectives (known to all)</div>
+    <div class="obj-list">
+      <div>Total Gold earned from ALL sources (sales, contracts, bribes, dividends): +1 VP per 6 Gold to both</div>
+      <div>Supply both sides of any active conflict (+4 VP to both — the ultimate profiteering prize)</div>
+      <div>Outsell Schneider-Skoda in total revenue (+3 VP to both)</div>
+    </div>
+  </div>
+  <div class="secret-obj" style="margin-bottom:8px;">
+    <strong>🔒 Shared Secret: THE WAR DIVIDEND</strong><br>
+    ◈ Every turn a MAJOR WAR is active (2+ great powers fighting), Krupp-Vickers earns +2 bonus Gold from "wartime demand" on top of any sales. <strong>War is literally your income.</strong> If the game ends without war ever breaking out, –5 VP to both. You NEED war — engineer it.
+  </div>
+
+  <div class="highlight-box" style="border-color: var(--gold-accent); margin-top:14px; margin-bottom:14px;">
+    <strong>⚡ ARMS DEALER SPECIAL POWERS (Krupp-Vickers)</strong><br><br>
+    <strong>💰 FUND A COUP (3 Gold):</strong> Pay 3 Gold to the GM to secretly fund internal opposition within any nation. The target nation's JUNIOR player (Chancellor, General, War Minister, Young Turk, Conrad, etc.) receives a secret note from the GM: <em>"An anonymous benefactor offers you 2 Gold to act against your leader this turn."</em> The junior player can accept or refuse. If they accept, you've just bought a betrayal. The senior player is never told who funded it.<br><br>
+    <strong>📰 PLANT A CRISIS (3 Gold):</strong> Pay 3 Gold to create a custom news event. Write a headline and give it to the GM, who reads it next turn as if it were real. Examples: "GERMAN SPY RING UNCOVERED IN PARIS" or "OTTOMAN FLEET SIGHTED OFF CRETE." It doesn't have to be true — it just has to cause panic and arms purchases.<br><br>
+    <strong>🎯 EXCLUSIVE CONTRACT (2 Gold):</strong> Offer a nation an "exclusive supply deal" — they pay you 1 Gold/turn for 3 turns and get a 1 Gold discount on all purchases from you. But the contract is exclusive: they cannot buy from Schneider-Skoda for the duration. If they break the contract, they pay you a 3 Gold penalty.<br><br>
+    <strong>🕵 INDUSTRIAL ESPIONAGE (2 Gold):</strong> Spy on Schneider-Skoda. The GM reveals their total sales, current treasury, and their most recent client. Use this to undercut them.
+  </div>
+
+  <div style="display:grid; gap:10px; margin-top:14px;">
+    <div class="role-card">
+      <div class="role-header">🔨 KRUPP DIRECTOR — <em>The Kaiser's Armourer</em></div>
+      <div class="role-desc">You run the greatest steel empire in Germany. The Kaiser calls you a personal friend. You supply Germany's artillery, armor plate, and railroad steel. Your loyalty to Germany is genuine — but your loyalty to profit is stronger. You sit on Boat A with the Central Powers, whispering in their ears.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>The Whisperer:</strong> You have the Kaiser's ear. Once per turn, you may privately advise the Kaiser on spending — and if he follows your advice, you earn 1 bonus Gold (from "consulting fees"). +2 personal VP if the Kaiser follows your advice 3+ times over the game.<br>
+        ◈ <strong>Sell to the Enemy:</strong> Secretly sell arms to France or Russia through intermediaries (tell GM privately, goods are delivered next turn). +2 personal VP per secret enemy sale. But if Germany discovers it (espionage or GM event), they can NATIONALIZE Krupp — you lose your next 2 turns of income and –4 personal VP.<br>
+        ◈ <strong>War Hawk:</strong> You earn +1 personal VP for every turn that a major war is active. You should be the loudest voice calling for confrontation. Whisper to Conrad. Whisper to the Kaiser's Chief of Staff. Make them afraid of falling behind. <em>Fear sells weapons.</em><br>
+        ◈ <strong>Destroy Schneider:</strong> If Schneider-Skoda's Schneider Director (your French rival) is nationalized, bankrupted, or loses 4+ personal VP, gain +3 personal VP. Ruin them.
+      </div>
+    </div>
+    <div class="role-card">
+      <div class="role-header">⚙ VICKERS DIRECTOR — <em>The Empire's Engineer</em></div>
+      <div class="role-desc">You run Vickers Ltd., builder of dreadnoughts and machine guns. The First Lord of the Admiralty is practically your best customer. You sit on Boat B with the Entente. Your job is to sell ships, sell guns, and make sure everyone is too afraid NOT to buy from you.</div>
+      <div class="role-secret">
+        <strong>🗝 PERSONAL SECRET:</strong><br>
+        ◈ <strong>The Admiralty Pipeline:</strong> You and the First Lord have a special relationship. Every fleet Britain buys through you earns you 3 Gold PLUS you earn +1 personal VP. Sell at least 4 fleets to Britain over the game for +4 personal VP. Push the naval arms race — it's YOUR arms race.<br>
+        ◈ <strong>Fear Campaign:</strong> Once per turn, you may spread a rumor to any nation on your boat: "Intelligence suggests [enemy nation] is building up forces near your border." This is free (no Gold cost) but must go through the GM. If the target nation buys arms from you as a result, +1 personal VP. Information warfare.<br>
+        ◈ <strong>Hostile Takeover:</strong> If Krupp-Vickers earns 35+ Gold total AND you personally negotiated more than half the deals, declare yourself Senior Partner. +3 personal VP. You now control the consortium's treasury. The Krupp Director must ask YOUR permission to spend consortium funds.<br>
+        ◈ <strong>Destroy Škoda:</strong> If Schneider-Skoda's Škoda Director (your Austrian rival) is nationalized or goes bankrupt, +3 personal VP. One less competitor.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHNEIDER-SKODA -->
+<div class="faction-card corp">
+  <div class="faction-name">Schneider-Škoda Arms Syndicate</div>
+  <div class="faction-players">1 Player — The Merchant of Death</div>
+  <div class="faction-flavor">"I am Schneider in Paris, Škoda in Prague, and a ghost everywhere else. Krupp-Vickers has two directors and twice the overhead. I have one mind, two factories, and no loyalty to anyone. They sell weapons. I sell wars."</div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">16 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">2 Gold (base) + sales</div></div>
+    <div class="stat"><div class="stat-label">Influence Tokens</div><div class="stat-value">4 (one more than Krupp!)</div></div>
+    <div class="stat"><div class="stat-label">Market Share</div><div class="stat-value">0 (track sales)</div></div>
+    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">MANUFACTURE</div></div>
+  </div>
+  <div class="objectives">
+    <div class="obj-title">Objectives (all personal — you are a solo faction)</div>
+    <div class="obj-list">
+      <div>Total Gold earned from ALL sources: +1 VP per 5 Gold (better rate than Krupp-Vickers since you're solo)</div>
+      <div>Corner the artillery and fortification market — sell to 4+ different nations (+5 VP)</div>
+      <div>Outsell Krupp-Vickers in total revenue (+4 VP — David beats Goliath)</div>
+    </div>
+  </div>
+  <div class="secret-obj" style="margin-bottom:8px;">
+    <strong>🔒 THE WAR DIVIDEND</strong><br>
+    ◈ Every turn a MAJOR WAR is active, earn +2 bonus Gold. No war = –5 VP. You need war.
+  </div>
+
+  <div class="highlight-box" style="border-color: var(--gold-accent); margin-top:14px; margin-bottom:14px;">
+    <strong>⚡ ARMS DEALER SPECIAL POWERS (Schneider-Škoda)</strong><br><br>
+    All the same powers as Krupp-Vickers (Fund a Coup, Plant a Crisis, Exclusive Contract, Industrial Espionage) — PLUS these solo-player advantages:<br><br>
+    <strong>🏰 FORTIFICATION RACKET (3 Gold to buyer):</strong> Your specialty. Sell forts to BOTH sides. Nation A buys a fort, then sell Nation B a fort. Then sell Nation B the gun that cracks Nation A's fort. Each fort sale earns 3 Gold.<br><br>
+    <strong>💣 THE SUPER-HEAVY SIEGE HOWITZER:</strong> Only ONE exists. You auction it. Starting price 6 Gold. +4 to ONE attack vs a fortified position. Run the auction personally — pit nations against each other. The markup is pure profit.<br><br>
+    <strong>🚶 LONE WOLF — FREE MOVEMENT:</strong> Because you are solo, you may physically move between BOTH BOATS at any time during the Diplomacy phase. You are the only non-GM player with this privilege. Krupp-Vickers is split between boats; you move freely. Use this to carry information, spread lies, and play both sides.<br><br>
+    <strong>🤝 THE DOUBLE BOOK:</strong> You may maintain two separate price lists — one for each boat. Sell armies to Germany for 2 Gold, tell France you're charging Germany 3 Gold. Nobody can verify unless they talk to each other (which requires dispatches between boats that you can intercept or delay). The GM tracks your real sales.<br><br>
+    <strong>🔥 REGIME CHANGE SPECIALIST:</strong> Fund a Coup costs you only 2 Gold (not 3). You're more efficient at destabilization because you answer to nobody. Each successful coup (junior player acts against their leader) earns +2 VP on top of everything else.
+  </div>
+
+  <div style="display:grid; gap:10px; margin-top:14px;">
+    <div class="role-card" style="border: 2px solid var(--gold-accent);">
+      <div class="role-header">💀 THE MERCHANT OF DEATH — <em>One Player to Rule Them All</em></div>
+      <div class="role-desc">You are the most dangerous person at this party. You have factories in France (Schneider) and Austria-Hungary (Škoda), which means you have access to both alliance blocs' secrets. You sit on neither boat permanently — you ROAM. You sell to everyone, lie to everyone, and fund chaos everywhere. Krupp-Vickers has two people who must agree; you make every decision alone, instantly.</div>
+      <div class="role-secret">
+        <strong>🗝 YOUR AGENDA:</strong><br>
+        ◈ <strong>War Architect (+6 VP):</strong> If you can prove to the GM that you directly contributed to war breaking out — by funding a coup that triggered a declaration, planting a crisis that escalated, selling weapons that enabled an invasion, or bribing a hawk into action — gain +6 VP. You don't just profit from war; you CAUSE it.<br><br>
+        ◈ <strong>Puppet Master (+4 VP):</strong> Have active exclusive contracts with nations on BOTH sides of a conflict simultaneously. You are arming both armies with your weapons. +4 VP.<br><br>
+        ◈ <strong>Bankroll the Revolution (+4 VP):</strong> If you discover (or suspect) that Russia's Duma Representative is a revolutionary, secretly fund them. Send Gold to the GM marked "for the Duma Representative." If revolution triggers in Russia and you contributed financially, +4 VP. Regime change is your product.<br><br>
+        ◈ <strong>Destroy Krupp-Vickers (+3 VP):</strong> Get at least one Krupp-Vickers director nationalized, bankrupted, or cut off from their home nation's contracts. Expose their secret enemy sales to the relevant government. Undercut their prices. Steal their clients. +3 VP per director you destroy.<br><br>
+        ◈ <strong>The Insurance Policy (+2 VP):</strong> If EITHER France or Austria-Hungary collapses, you lose a factory. But if you've earned 25+ Gold by that point, declare "corporate restructuring" — you keep all VP and remaining Gold regardless. Survive the empires you helped destroy.<br><br>
+        ◈ <strong>THE ULTIMATE WIN:</strong> If you end the game with the most total VP of ANY player (beating all nations' leaders, generals, and Krupp-Vickers), you are the true winner — the one who profited while empires burned. The Merchant of Death.
+      </div>
+    </div>
+  </div>
+  <div class="gm-note" style="margin-top:12px;">
+    GIVE THIS ROLE TO YOUR MOST SOCIALLY CHARISMATIC, DEVIOUS PLAYER. They will be running between boats, whispering in ears, making deals, and lying to everyone. They need to be comfortable talking to every group and keeping a poker face. This is the star role of the game.
+  </div>
+</div>
+
+</div><!-- end faction-grid -->
+</div>
+
+<!-- ==================== RULES ==================== -->
+<div id="rules" class="tab-content">
+
+<div class="section">
+<div class="section-title"><span class="icon">📜</span> Core Mechanics</div>
+
+<p><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">GOLD (💰)</strong></p>
+<p>Gold is the currency of power. You earn it each turn from your income, and spend it on armies, navies, diplomacy, bribes, and arms purchases. All transactions go through the GM. You may loan, gift, or bribe Gold to any other faction freely — just tell the GM.</p>
+
+<div class="highlight-box">
+  <strong>Spending Gold:</strong><br>
+  ◆ Buy 1 Army Division: 3 Gold (or 2 Gold via arms dealer)<br>
+  ◆ Buy 1 Fleet: 4 Gold (or 3 Gold via arms dealer)<br>
+  ◆ Buy Artillery Upgrade: 2 Gold via arms dealer (+1 to one attack)<br>
+  ◆ Fortify a region: 4 Gold direct (or 3 Gold from Schneider-Skoda, +2 defense)<br>
+  ◆ Diplomatic action (bribe minor nation, etc.): 2–5 Gold<br>
+  ◆ Espionage (learn another faction's troop positions or secret): 3 Gold → GM rolls d6, 4+ succeeds<br>
+  ◆ Domestic stability (Russia, Austria-Hungary special): 2–3 Gold/turn
+</div>
+
+<div class="highlight-box" style="border-color: var(--gold-accent);">
+  <strong>Arms Dealer Special Actions (dealers only):</strong><br>
+  ◆ Fund a Coup: 3 Gold → secretly bribe a junior player inside any nation to betray their leader<br>
+  ◆ Plant a Crisis: 3 Gold → write a fake news headline, GM reads it next turn as real<br>
+  ◆ Exclusive Contract: 2 Gold → lock a nation into buying only from you (3 turns, 1 Gold/turn fee)<br>
+  ◆ Industrial Espionage: 2 Gold → learn rival consortium's sales, treasury, and latest client<br>
+  ◆ War Dividend: passive +2 Gold/turn while any major war is active. <em>No war = –5 VP.</em>
+</div>
+
+<p style="margin-top:20px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">ARMIES & NAVIES (⚔ / ⚓)</strong></p>
+<p>Army Divisions represent ~100,000 troops. Fleets represent squadrons of warships. They are used to attack regions, defend territory, blockade ports, and project power.</p>
+
+<p><strong>Combat Resolution:</strong> When armies clash, each side totals their divisions. The GM rolls 1d6 for each side. Higher roll + more divisions wins. Ties go to the defender. Losing side loses divisions equal to half the difference (rounded up, minimum 1). Winner loses 1 division. Fortifications give the defender +2 to their roll.</p>
+
+<p><strong>Naval Combat:</strong> Same as above but with fleets. Naval superiority allows blockades (cut a nation's income by 2 Gold/turn) and troop transport across water (must control sea zone to move armies across the Channel, Mediterranean, etc.).</p>
+
+<p style="margin-top:20px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">THE MAP (Simplified Regions)</strong></p>
+<p>The game uses an abstract map. The GM tracks troop positions. Key regions:</p>
+
+<div class="two-col" style="margin-top:12px;">
+  <div>
+    <strong>Western Europe:</strong><br>
+    ◆ France (French home)<br>
+    ◆ Paris (French capital — lose this, lose the war)<br>
+    ◆ Alsace-Lorraine (German-held, French want it)<br>
+    ◆ Belgium (neutral — invading triggers British entry)<br>
+    ◆ Britain (island — safe unless naval invasion)
+  </div>
+  <div>
+    <strong>Central/Eastern Europe:</strong><br>
+    ◆ Germany (German home)<br>
+    ◆ Austria (Austrian home)<br>
+    ◆ Serbia (flashpoint — Austrian target, Russian protectorate)<br>
+    ◆ Russia (vast — can absorb invasion but slow to mobilize)<br>
+    ◆ Poland (contested borderland)
+  </div>
+</div>
+<div class="two-col" style="margin-top:12px;">
+  <div>
+    <strong>Southern/Mediterranean:</strong><br>
+    ◆ Ottoman Empire (controls the Straits)<br>
+    ◆ The Dardanelles (strategic chokepoint)<br>
+    ◆ Italy (neutral — can be swayed by either side)<br>
+    ◆ The Balkans (powder keg)
+  </div>
+  <div>
+    <strong>Seas:</strong><br>
+    ◆ North Sea (British–German naval rivalry)<br>
+    ◆ English Channel (must control to invade Britain)<br>
+    ◆ Mediterranean (Ottoman/French/British interests)<br>
+    ◆ Baltic Sea (Russian/German access)
+  </div>
+</div>
+
+<p style="margin-top:20px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">DIPLOMACY (🤝)</strong></p>
+<p>The heart of the game. During the Diplomacy phase, players can:</p>
+<p>◆ <strong>Form Alliances:</strong> Written, signed agreements (on paper!) between factions. Alliances are only binding if both parties present the signed document to the GM. Breaking an alliance costs –2 VP but is entirely legal.</p>
+<p>◆ <strong>Trade:</strong> Exchange Gold, promise future payments, or trade arms.</p>
+<p>◆ <strong>Threaten:</strong> Promise consequences if a faction takes a certain action.</p>
+<p>◆ <strong>Send Dispatches:</strong> Between boats, messages must be written on paper and physically carried. The GM may "intercept" a dispatch (roll 1d6: on a 1, the message is read aloud to all).</p>
+<p>◆ <strong>Secret Deals:</strong> Any deal not shown to the GM is not enforceable but IS possible. Gentleman's agreements, backroom deals, betrayals — all fair game.</p>
+
+<p style="margin-top:20px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">DECLARING WAR (🔥)</strong></p>
+<p>Any nation may declare war on any other during the Orders phase. When war is declared:</p>
+<p>◆ All existing alliances are tested — allied nations must declare if they honor their alliance within the same turn or break it.</p>
+<p>◆ Russia requires 1 full turn to mobilize (can only use half their army divisions in the first turn of war).</p>
+<p>◆ Britain automatically enters the war if Belgium is invaded.</p>
+<p>◆ Arms dealers may continue selling to all sides unless nationalized by their home government.</p>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon">🏆</span> Victory Conditions</div>
+<p>At the end of Turn 6, each player tallies their Victory Points. There are TWO types of VP:</p>
+
+<p style="margin-top:12px;"><strong style="font-family:'Playfair Display',serif;">Faction VP</strong> — earned from shared faction objectives. Every player in the faction receives these equally.</p>
+
+<p><strong style="font-family:'Playfair Display',serif;">Personal VP</strong> — earned from your individual role card's secret objectives. ONLY YOU receive these. Your teammates don't know what you're after — and their goals may conflict with yours.</p>
+
+<p style="margin-top:12px;"><strong>Final score = Faction VP + Personal VP.</strong> The INDIVIDUAL player with the highest combined total wins the game. Not the faction — the person. This means teammates are also competitors. The German Chancellor might sabotage the Kaiser to score personal VP, even if it hurts Germany slightly. The French General might launch a reckless offensive the President opposes. The Sultan and Young Turk might be tearing each other apart while Russia invades.</p>
+
+<div class="highlight-box">
+  <strong>Awards at Game End:</strong><br>
+  ◆ <strong>Grand Victor:</strong> Player with the most total VP<br>
+  ◆ <strong>Best Faction:</strong> Faction with the highest combined total across all members<br>
+  ◆ <strong>Merchant of Death:</strong> Arms dealer player with the most personal VP<br>
+  ◆ <strong>Best Betrayal:</strong> GM's award for the most dramatic backstab (faction VP or personal)<br>
+  ◆ <strong>The Peacemaker:</strong> GM's award for the player who tried hardest to prevent war (whether they succeeded or not)
+</div>
+</div>
+</div>
+
+<!-- ==================== TURNS ==================== -->
+<div id="turns" class="tab-content">
+
+<div class="section">
+<div class="section-title"><span class="icon">⏳</span> Turn Tracker</div>
+<p>Click a turn to see its details and events. Mark turns complete as you progress.</p>
+
+<div class="turn-tracker" id="turnTracker"></div>
+<div id="turnDetail"></div>
+</div>
+</div>
+
+<!-- ==================== NEWS ==================== -->
+<div id="news" class="tab-content">
+
+<div class="section">
+<div class="section-title"><span class="icon">📰</span> Breaking News Events</div>
+<p>The GM reads one news headline at the start of each turn. Click to reveal the full story and its game effects. These events are historical or historically-inspired and are designed to shake up the game and force difficult decisions.</p>
+
+<div class="gm-note">Read these dramatically! Stand up, clear your throat, and announce them like a newsboy on a London street corner. These events are the engine that keeps the game from stalling.</div>
+
+<div id="newsCards"></div>
+</div>
+</div>
+
+<!-- ==================== REFERENCE ==================== -->
+<div id="reference" class="tab-content">
+
+<div class="section">
+<div class="section-title"><span class="icon">📋</span> Quick Reference Sheet</div>
+
+<p><strong>Costs</strong></p>
+<table class="ref-table">
+  <tr><th>Action</th><th>Cost</th><th>Notes</th></tr>
+  <tr><td>Buy Army Division</td><td>3 Gold</td><td>Or 2 Gold via arms dealer</td></tr>
+  <tr><td>Buy Fleet</td><td>4 Gold</td><td>Or 3 Gold via arms dealer</td></tr>
+  <tr><td>Fortify Region</td><td>4 Gold</td><td>Or 3 Gold via Schneider-Skoda; gives +2 defense</td></tr>
+  <tr><td>Espionage</td><td>3 Gold</td><td>GM rolls d6; 4+ succeeds</td></tr>
+  <tr><td>Bribe Minor Nation</td><td>2–5 Gold</td><td>GM decides outcome based on amount</td></tr>
+  <tr><td>Plant News Story</td><td>3 Gold</td><td>Arms dealers only; GM adds a custom event</td></tr>
+  <tr><td>Domestic Stability</td><td>2–3 Gold/turn</td><td>Russia & Austria-Hungary must pay or face collapse</td></tr>
+  <tr><td>Break Alliance</td><td>–2 VP</td><td>But sometimes worth it</td></tr>
+</table>
+
+<p><strong>Combat Quick Reference</strong></p>
+<table class="ref-table">
+  <tr><th>Step</th><th>Details</th></tr>
+  <tr><td>1. Count Forces</td><td>Each side totals divisions (or fleets for naval)</td></tr>
+  <tr><td>2. Modifiers</td><td>Defender in fortified region: +2 to roll. Russia (turn 1 of war): half divisions</td></tr>
+  <tr><td>3. Roll</td><td>Each side rolls 1d6, adds division count + modifiers</td></tr>
+  <tr><td>4. Compare</td><td>Higher total wins. Ties favor defender.</td></tr>
+  <tr><td>5. Losses</td><td>Loser loses ½ the difference in divisions (min 1). Winner loses 1.</td></tr>
+  <tr><td>6. Retreat</td><td>Losing army retreats to adjacent friendly region</td></tr>
+</table>
+
+<p><strong>Income Per Turn</strong></p>
+<table class="ref-table">
+  <tr><th>Faction</th><th>Base Income</th><th>Special</th></tr>
+  <tr><td>Germany</td><td>8 Gold</td><td>+2 if controlling Alsace-Lorraine</td></tr>
+  <tr><td>Britain</td><td>9 Gold</td><td>+3 from colonial trade (can be blockaded)</td></tr>
+  <tr><td>France</td><td>6 Gold</td><td>+2 if Lorraine recaptured</td></tr>
+  <tr><td>Russia</td><td>6 Gold</td><td>–2 if revolution ongoing</td></tr>
+  <tr><td>Austria-Hungary</td><td>5 Gold</td><td>–2 if internal rebellion</td></tr>
+  <tr><td>Ottoman Empire</td><td>4 Gold</td><td>+2 from Straits tolls (if open)</td></tr>
+  <tr><td>Krupp-Vickers</td><td>4 Gold</td><td>+ all sales revenue</td></tr>
+  <tr><td>Schneider-Skoda</td><td>3 Gold</td><td>+ all sales revenue</td></tr>
+</table>
+
+<p><strong>Arms Dealer Price List</strong></p>
+<table class="ref-table">
+  <tr><th>Product</th><th>Buyer Pays</th><th>Dealer Earns</th><th>Notes</th></tr>
+  <tr><td>Army Division</td><td>2 Gold</td><td>2 Gold</td><td>Cheaper than buying direct (3 Gold)</td></tr>
+  <tr><td>Fleet</td><td>3 Gold</td><td>3 Gold</td><td>Cheaper than buying direct (4 Gold)</td></tr>
+  <tr><td>Artillery Upgrade</td><td>2 Gold</td><td>2 Gold</td><td>+1 to attack rolls for 1 battle</td></tr>
+  <tr><td>Fortification Kit</td><td>3 Gold</td><td>3 Gold</td><td>Schneider-Skoda specialty; +2 defense</td></tr>
+  <tr><td>Super-Heavy Siege Howitzer</td><td>6+ Gold (auction)</td><td>Full price</td><td>Only ONE exists. +4 vs fortified. Škoda Director runs auction.</td></tr>
+  <tr><td>Intelligence Report</td><td>2 Gold</td><td>2 Gold</td><td>Dealer may fabricate (GM verifies)</td></tr>
+</table>
+
+<p><strong>Arms Dealer Special Powers</strong></p>
+<table class="ref-table">
+  <tr><th>Power</th><th>Cost</th><th>Effect</th></tr>
+  <tr><td>Fund a Coup</td><td>3 Gold</td><td>Secretly offer 2 Gold to a junior player to act against their leader. GM delivers anonymous note.</td></tr>
+  <tr><td>Plant a Crisis</td><td>3 Gold</td><td>Write a fake news headline. GM reads it next turn as if real. Causes panic → arms sales.</td></tr>
+  <tr><td>Exclusive Contract</td><td>2 Gold</td><td>Lock a nation into buying only from you for 3 turns. 1 Gold/turn fee + discounts. Breach = 3 Gold penalty.</td></tr>
+  <tr><td>Industrial Espionage</td><td>2 Gold</td><td>GM reveals rival consortium's total sales, treasury, and most recent client.</td></tr>
+  <tr><td>Fear Campaign (Vickers only)</td><td>Free</td><td>Spread a rumor about enemy troop buildup. Must go through GM. May trigger purchases.</td></tr>
+  <tr><td>War Dividend (passive)</td><td>—</td><td>+2 Gold/turn to each consortium while a major war is active. No war ever = –5 VP.</td></tr>
+</table>
+</div>
+</div>
+
+<!-- ==================== GM GUIDE ==================== -->
+<div id="gm" class="tab-content">
+
+<div class="section">
+<div class="section-title"><span class="icon">🎩</span> Game Master's Guide</div>
+
+<p>You are the most important person in this game. You are the referee, the narrator, the minor nations, and the voice of history. Here is everything you need to run a smooth, dramatic, 2.5-hour experience.</p>
+
+<p style="margin-top:16px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">BEFORE THE GAME (30 min setup)</strong></p>
+<p>◆ Print faction sheets (from the Factions tab) — one per team. Fold secret objectives so they're hidden until the team opens them.</p>
+<p>◆ Prepare Gold tokens — use poker chips, coins, candy, or numbered slips of paper. Each faction starts with their listed treasury.</p>
+<p>◆ Set up a simple map — draw the regions on a large piece of paper or whiteboard. Use colored tokens (coins, game pieces, bottle caps) for armies and fleets.</p>
+<p>◆ Assign factions. Recommended: put your most theatrical players as Germany and Britain (they have the most to do). Put cunning players as arms dealers. Put competitive players as France and Russia.</p>
+<p>◆ Assign boats. Central Powers + Krupp-Vickers on Boat A. Entente + Schneider-Skoda on Boat B.</p>
+<p>◆ Get dice (at least 2d6), a timer (phone works), and paper for dispatches.</p>
+
+<p style="margin-top:16px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">RUNNING EACH TURN</strong></p>
+<p><strong>Phase 1 — NEWS (3 min):</strong> Read the headline for the current turn dramatically. Explain the game effect. Answer questions. Let it sink in.</p>
+<p><strong>Phase 2 — DIPLOMACY (8–10 min):</strong> Set a timer. Players talk, scheme, bribe, threaten. Move between boats to deliver dispatches. You should circulate and eavesdrop. Remind factions of their objectives if they seem lost. Stir the pot.</p>
+<p><strong>Phase 3 — ORDERS (3 min):</strong> Each faction writes their orders on paper and hands them to you simultaneously. Orders include: troop movements, purchases, declarations of war, alliance announcements, and any Gold transactions.</p>
+<p><strong>Phase 4 — RESOLUTION (5 min):</strong> Read all orders aloud. Resolve purchases first, then movements, then combat. Collect and distribute Gold. Announce results dramatically.</p>
+
+<div class="gm-note">If the game is going slowly, skip to the Assassination event early (Turn 3 instead of 4). If factions are too peaceful, have Serbia provoke Austria, or have an arms dealer leak intelligence. Your job is to create drama.</div>
+
+<p style="margin-top:16px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">PLAYING MINOR NATIONS</strong></p>
+<p>You control Italy, Serbia, Belgium, Bulgaria, Romania, and other minor nations. Use them to:</p>
+<p>◆ <strong>Serbia:</strong> Fiercely nationalist. Will resist Austria. May accept Russian protection. If Austria attacks without overwhelming force, Serbia fights back with 3 divisions.</p>
+<p>◆ <strong>Italy:</strong> Opportunistic. Will join whichever side offers the most territory. Default price: 8 Gold + promise of Austrian territory. Can be swayed by either bloc.</p>
+<p>◆ <strong>Belgium:</strong> Neutral. Will resist invasion with 2 divisions. If invaded, Britain MUST respond (per their objectives).</p>
+<p>◆ <strong>Bulgaria/Romania:</strong> Available for bidding. Whoever pays more Gold gets 2 extra divisions on their side.</p>
+
+<p style="margin-top:16px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">PACING TRICKS</strong></p>
+<p>◆ If Turn 3 ends with no war declared, read a BONUS crisis event: "Archduke Franz Ferdinand has been assassinated in Sarajevo." Austria MUST respond — either declare war on Serbia or suffer –3 VP and internal collapse.</p>
+<p>◆ If one side is dominating, introduce a neutral intervention: Italy joins the underdog, or the USA offers loans (5 Gold) to the weaker alliance.</p>
+<p>◆ In the final turn, announce that all secret objectives will be revealed — this creates a frenzy of last-minute betrayals and gambits.</p>
+<p>◆ End the game with a dramatic reading of the final state of Europe. Who won? Who lost? Who profited from the carnage? Award the VP, crown the victor, and raise a glass to the fallen empires.</p>
+
+<div class="highlight-box">
+  <strong>The Golden Rule of GMing:</strong> Your job is not to be fair. Your job is to make the game dramatic, memorable, and fun. If a rule doesn't serve the story, bend it. If a player has a brilliant idea not covered by the rules, say yes and roll a die.
+</div>
+</div>
+</div>
+
+</div><!-- end container -->
+
+<script>
+// Tab navigation — delegated for mobile reliability
+document.getElementById('navTabs').addEventListener('click', function(e) {
+  var btn = e.target.closest('.nav-tab');
+  if (!btn) return;
+  var tabId = btn.getAttribute('data-tab');
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Turn data
+const turns = [
+  {
+    num: 1, year: '1910', title: 'The Armed Peace',
+    desc: 'Europe is at peace — but it is a peace built on alliances, arms races, and fear. The great powers eye each other warily across borders bristling with guns.',
+    phases: [
+      { n: '1', text: 'NEWS: Read Turn 1 event. Collect income. Introduce factions.' },
+      { n: '2', text: 'DIPLOMACY: First meetings. Factions should introduce themselves, state public objectives, and begin feeling out alliances. Arms dealers should start pitching their wares.' },
+      { n: '3', text: 'ORDERS: Submit purchases, troop placements (initial deployment), and any diplomatic agreements to GM.' },
+      { n: '4', text: 'RESOLUTION: GM resolves orders. No combat expected this turn. Announce troop positions.' }
+    ]
+  },
+  {
+    num: 2, year: '1911', title: 'The Agadir Crisis',
+    desc: 'Colonial tensions flare. Germany tests France in Morocco. The arms race intensifies. Alliances solidify or shift.',
+    phases: [
+      { n: '1', text: 'NEWS: Read Turn 2 event. Collect income.' },
+      { n: '2', text: 'DIPLOMACY: Alliances should be forming now. Arms dealers should be closing deals. Push factions toward commitment.' },
+      { n: '3', text: 'ORDERS: Troop movements, purchases, diplomatic actions.' },
+      { n: '4', text: 'RESOLUTION: Resolve all orders. If any provocative moves were made, narrate the rising tension.' }
+    ]
+  },
+  {
+    num: 3, year: '1912', title: 'The Balkan Wars',
+    desc: 'The Balkans erupt in local conflict. Austria eyes Serbia with hunger. Russia pledges protection. The fuse is lit.',
+    phases: [
+      { n: '1', text: 'NEWS: Read Turn 3 event (Balkan Wars). Collect income. Austria must decide how to respond.' },
+      { n: '2', text: 'DIPLOMACY: Critical turn. War may be imminent. Last chance for peaceful solutions. Arms dealers should be doing brisk business.' },
+      { n: '3', text: 'ORDERS: War declarations possible. All orders submitted simultaneously.' },
+      { n: '4', text: 'RESOLUTION: If war is declared, resolve the first battles. If not, increase pressure next turn.' }
+    ]
+  },
+  {
+    num: 4, year: '1913–14', title: 'The Assassination',
+    desc: 'If war has not begun, the Archduke falls in Sarajevo. The ultimatums fly. The mobilization orders go out. There is no turning back.',
+    phases: [
+      { n: '1', text: 'NEWS: THE ASSASSINATION. If war hasn\'t started, it almost certainly will now. Austria must respond to the assassination of Franz Ferdinand.' },
+      { n: '2', text: 'DIPLOMACY: Frantic negotiations. Last-ditch peace efforts. Or gleeful war planning. Arms dealers in overdrive.' },
+      { n: '3', text: 'ORDERS: War declarations very likely. Russia begins mobilization (half forces this turn if just entering war).' },
+      { n: '4', text: 'RESOLUTION: The guns of August speak. Resolve all combat. Announce casualties dramatically.' }
+    ]
+  },
+  {
+    num: 5, year: '1914–15', title: 'The Great War',
+    desc: 'The trenches form. The offensives grind. Millions are committed to battle. The old world is dying.',
+    phases: [
+      { n: '1', text: 'NEWS: Read Turn 5 event. Collect income (blockades reduce enemy income). Check Russia/Austria stability.' },
+      { n: '2', text: 'DIPLOMACY: Wartime diplomacy — trying to bring neutrals in, negotiating with arms dealers, planning offensives with allies.' },
+      { n: '3', text: 'ORDERS: Major offensives, naval battles, blockades, arms purchases.' },
+      { n: '4', text: 'RESOLUTION: Resolve all combat. This should be dramatic and bloody. Read casualty lists.' }
+    ]
+  },
+  {
+    num: 6, year: '1915–16', title: 'Götterdämmerung',
+    desc: 'The twilight of empires. Final gambles, desperate offensives, and the reckoning of accounts. Who will stand when the smoke clears?',
+    phases: [
+      { n: '1', text: 'NEWS: Read final event. Last income collection. Announce that all secret objectives will be revealed after this turn.' },
+      { n: '2', text: 'DIPLOMACY: Last-minute deals, betrayals, and gambits. The arms dealers tally their profits. Factions make final pleas.' },
+      { n: '3', text: 'ORDERS: Final orders. Everything on the table.' },
+      { n: '4', text: 'RESOLUTION: Resolve all combat. Reveal all secret objectives. Tally VP. Crown the victor. Toast the fallen.' }
+    ]
+  }
+];
+
+// Render turns
+const tracker = document.getElementById('turnTracker');
+const detail = document.getElementById('turnDetail');
+let currentTurn = 0;
+let completedTurns = new Set();
+
+function renderTracker() {
+  tracker.innerHTML = '';
+  turns.forEach((t, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'turn-dot' + (i === currentTurn ? ' active' : '') + (completedTurns.has(i) ? ' completed' : '');
+    dot.textContent = t.num;
+    dot.onclick = () => { currentTurn = i; renderTracker(); renderDetail(); };
+    tracker.appendChild(dot);
+  });
+  
+  const completeBtn = document.createElement('button');
+  completeBtn.className = 'print-btn';
+  completeBtn.style.fontSize = '0.75em';
+  completeBtn.style.padding = '10px 16px';
+  completeBtn.style.marginLeft = '12px';
+  completeBtn.textContent = completedTurns.has(currentTurn) ? '↩ Reopen Turn' : '✓ Complete Turn';
+  completeBtn.onclick = () => {
+    if (completedTurns.has(currentTurn)) completedTurns.delete(currentTurn);
+    else completedTurns.add(currentTurn);
+    if (!completedTurns.has(currentTurn + 1) && currentTurn < turns.length - 1) currentTurn++;
+    renderTracker();
+    renderDetail();
+  };
+  tracker.appendChild(completeBtn);
+}
+
+function renderDetail() {
+  const t = turns[currentTurn];
+  detail.innerHTML = `
+    <div class="turn-info">
+      <h3>Turn ${t.num}: ${t.title}</h3>
+      <div class="year">${t.year}</div>
+      <p style="margin-bottom:16px; font-family:'IM Fell English',serif; font-style:italic;">${t.desc}</p>
+      <div class="phase-list">
+        ${t.phases.map(p => `
+          <div class="phase">
+            <div class="phase-num">${p.n}</div>
+            <div class="phase-text">${p.text}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+renderTracker();
+renderDetail();
+
+// News events
+const newsEvents = [
+  {
+    turn: 'Turn 1 — 1910',
+    headline: 'NAVAL ARMS RACE INTENSIFIES: BRITAIN LAUNCHES HMS DREADNOUGHT II',
+    body: 'The Royal Navy has unveiled its latest super-dreadnought, cementing British naval dominance — for now. Kaiser Wilhelm II has reportedly flown into a rage, demanding that the German High Seas Fleet be expanded immediately. "We must have our place upon the water," the Kaiser declared. Meanwhile, arms manufacturers on both sides of the Channel report record order books.',
+    effect: 'GAME EFFECT: Germany may immediately purchase 1 fleet at half price (2 Gold instead of 4). Britain gains +1 VP if they still have naval supremacy at end of Turn 2. Arms dealers may offer "rush orders" this turn — sell fleets at normal price but deliver instantly.'
+  },
+  {
+    turn: 'Turn 2 — 1911',
+    headline: 'AGADIR CRISIS: GERMAN GUNBOAT PANTHER ARRIVES IN MOROCCO',
+    body: 'Germany has sent the warship SMS Panther to the Moroccan port of Agadir, ostensibly to protect German commercial interests — but in reality to challenge French colonial dominance in North Africa. France is outraged. Britain has quietly signaled its support for France. The crisis tests the strength of the Entente Cordiale and reveals the depth of Franco-German rivalry.',
+    effect: 'GAME EFFECT: France and Germany must negotiate over Morocco. Germany demands 3 Gold as compensation or they will maintain their presence (straining Franco-German relations and giving Germany +1 VP). France can pay, refuse (escalating tensions — Germany gains a casus belli), or ask Britain to intervene diplomatically (costs Britain 2 Gold but strengthens the Entente, +1 VP for Franco-British alliance).'
+  },
+  {
+    turn: 'Turn 3 — 1912',
+    headline: 'BALKAN WARS ERUPT: SERBIA DOUBLES IN SIZE',
+    body: 'The Balkan League — Serbia, Greece, Bulgaria, and Montenegro — has attacked the Ottoman Empire and won a stunning victory. Serbia has nearly doubled its territory and is flush with nationalist pride. Austria-Hungary views this Serbian expansion as an existential threat. Russia celebrates its Slavic brothers\' triumph. The Ottoman Empire reels from the loss.',
+    effect: 'GAME EFFECT: Serbia gains 2 divisions (now 5 total, controlled by GM). Austria-Hungary must either (a) spend 3 Gold on a diplomatic ultimatum to Serbia (GM rolls d6: 1-3 Serbia resists, 4-6 Serbia backs down) or (b) begin mobilizing against Serbia. Ottoman Empire loses 2 army divisions and 1 Gold/turn income from lost Balkan territories. Russia gains +1 influence in the Balkans.'
+  },
+  {
+    turn: 'Turn 4 — 1914',
+    headline: '★ ARCHDUKE FRANZ FERDINAND ASSASSINATED IN SARAJEVO ★',
+    body: 'A Serbian nationalist has shot and killed Archduke Franz Ferdinand, heir to the Austro-Hungarian throne, and his wife Sophie during a state visit to Sarajevo. The empire demands justice. The world holds its breath. Austria-Hungary has issued an ultimatum to Serbia with demands so severe that acceptance would mean the end of Serbian sovereignty. The alliance system creaks under the strain.',
+    effect: 'GAME EFFECT: AUSTRIA-HUNGARY MUST ACT. Choose one: (A) Declare war on Serbia immediately — triggers alliance obligations. Russia must decide whether to mobilize. Germany must decide whether to support Austria. (B) Issue a humiliating ultimatum — spend 4 Gold. GM rolls d6: 1-2 Serbia accepts (Austria gains 3 VP), 3-6 Serbia refuses (war is declared anyway). (C) Do nothing — lose 3 VP and suffer internal collapse (lose 2 army divisions to nationalist rebellion). THIS EVENT FIRES EVEN IF WAR HAS ALREADY BEGUN — if so, it intensifies the conflict.'
+  },
+  {
+    turn: 'Turn 5 — 1914-15',
+    headline: 'CHRISTMAS TRUCE FAILS; POISON GAS DEPLOYED AT YPRES',
+    body: 'The initial movement has ground to a halt. Trenches stretch from the Swiss border to the English Channel. Germany has unleashed a terrible new weapon — chlorine gas — at Ypres, causing panic and horror. The war that was supposed to be "over by Christmas" shows no signs of ending. Casualties mount into the hundreds of thousands. At home, governments scramble to maintain public support.',
+    effect: 'GAME EFFECT: All combat this turn suffers "Trench Warfare" — defenders get an additional +1 to their roll (stacks with fortifications). Any faction that has been at war for 2+ turns must spend 1 Gold on "war weariness" or lose 1 army division to desertion. Arms dealers can sell "gas warfare kits" — 3 Gold, gives +2 to one attack roll this turn only. Chemical weapons are denounced but effective.'
+  },
+  {
+    turn: 'Turn 6 — 1915-16',
+    headline: 'LUSITANIA SUNK; REVOLUTION BREWING IN PETROGRAD',
+    body: 'A German U-boat has torpedoed the RMS Lusitania, killing 1,198 civilians including 128 Americans. International outrage mounts. Meanwhile, bread riots have erupted in Petrograd, and the Tsar\'s grip on power weakens by the day. The Ottoman Empire fights desperately at Gallipoli. Italy wavers. The old order is crumbling.',
+    effect: 'GAME EFFECT: If Germany has been using naval blockades, they must now face consequences: the GM offers the USA\'s entry as a possibility — any faction can spend 5 Gold to lobby for US involvement (adds 4 army divisions and 3 fleets to their side, but only in Turn 6). Russia must IMMEDIATELY pay 4 Gold for stability or face REVOLUTION — lose half their army, lose 3 VP, and exit the war. This is the final turn — all gambits, all betrayals, all desperate measures are now or never.'
+  }
+];
+
+const newsContainer = document.getElementById('newsCards');
+newsEvents.forEach((ev, i) => {
+  const card = document.createElement('div');
+  card.className = 'news-card';
+  card.innerHTML = `
+    <div class="news-turn">${ev.turn}</div>
+    <div class="news-headline">${ev.headline}</div>
+    <div class="news-body">
+      <p>${ev.body}</p>
+      <div class="news-effect">${ev.effect}</div>
+    </div>
+  `;
+  card.onclick = () => {
+    card.classList.toggle('revealed');
+  };
+  newsContainer.appendChild(card);
+});
+</script>
+
+</body>
+</html>
