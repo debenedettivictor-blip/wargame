@@ -658,6 +658,181 @@ body::before {
   color: var(--ink-light);
   cursor: not-allowed;
 }
+.btn-deploy-scenario.major {
+  border-color: #8b1a1a;
+  background: rgba(139,26,26,0.08);
+  font-weight: 700;
+}
+.btn-deploy-scenario.major:hover:not(:disabled) {
+  background: #8b1a1a;
+}
+
+/* Major event ribbon */
+.scenario-major-ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #8b1a1a, #a02020);
+  color: var(--cream);
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.65em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+  padding: 3px 0;
+}
+.scenario-card.major-event {
+  border-color: #8b1a1a;
+  border-width: 2px;
+  padding-top: 28px;
+}
+
+/* Scenario type filter bar */
+.scenario-type-filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.scenario-type-btn {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  padding: 6px 16px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.scenario-type-btn:hover {
+  background: var(--ink);
+  color: var(--parchment);
+}
+.scenario-type-btn.active {
+  background: var(--ink);
+  color: var(--parchment);
+}
+
+/* GM Turn Actions */
+.gm-turn-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.btn-gm-reset {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 20px;
+  border: 2px solid #8b1a1a;
+  background: transparent;
+  color: #8b1a1a;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-gm-reset:hover {
+  background: #8b1a1a;
+  color: var(--cream);
+}
+
+/* === Dispatch Feed (Player Dashboard) === */
+#dispatchFeed {
+  display: none;
+}
+.dispatch-feed {
+  border: 2px solid var(--gold-accent);
+  background: linear-gradient(135deg, #fdf6e3, #f5ecd5);
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.dispatch-feed-header {
+  background: linear-gradient(135deg, #3a3226, #2a2419);
+  color: var(--gold-accent);
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--gold-accent);
+}
+.dispatch-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(139,26,26,0.15);
+  animation: dispatchFadeIn 0.5s ease;
+}
+.dispatch-item:last-child {
+  border-bottom: none;
+}
+.dispatch-item.major {
+  background: rgba(139,26,26,0.06);
+  border-left: 4px solid #8b1a1a;
+}
+.dispatch-item.sub {
+  border-left: 4px solid var(--gold-accent);
+}
+.dispatch-major-banner {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #8b1a1a;
+  background: rgba(139,26,26,0.1);
+  display: inline-block;
+  padding: 2px 10px;
+  margin-bottom: 6px;
+}
+.dispatch-sub-banner {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gold-accent);
+  background: rgba(184,134,11,0.1);
+  display: inline-block;
+  padding: 2px 10px;
+  margin-bottom: 6px;
+}
+.dispatch-headline {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+.dispatch-meta {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.82em;
+  color: var(--rust);
+  margin-bottom: 6px;
+}
+.dispatch-body {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  color: var(--ink-light);
+  line-height: 1.45;
+  margin-bottom: 6px;
+}
+.dispatch-effect {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--red-empire);
+  background: rgba(139,26,26,0.06);
+  padding: 6px 10px;
+  border-left: 3px solid var(--red-empire);
+}
+@keyframes dispatchFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .btn-delete-news:hover { background: var(--red-empire); color: var(--cream); }
 
 /* Quick Reference */
@@ -2493,9 +2668,262 @@ body::before {
   white-space: nowrap;
 }
 
+/* Top-Level Dashboard Tabs */
+.dash-tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 3px solid var(--ink); }
+.dash-tab {
+  padding: 12px 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  background: var(--parchment-dark);
+  border: 2px solid var(--ink-light);
+  border-bottom: none;
+  color: var(--ink-light);
+  transition: all 0.2s;
+  position: relative;
+  top: 3px;
+}
+.dash-tab:hover { background: var(--cream); color: var(--ink); }
+.dash-tab.active {
+  background: var(--cream);
+  color: var(--ink);
+  border-color: var(--ink);
+  border-bottom: 3px solid var(--cream);
+  z-index: 1;
+}
+.dash-tab-content {
+  border: 2px solid var(--ink);
+  border-top: none;
+  padding: 20px;
+  background: var(--cream);
+  margin-bottom: 20px;
+}
+
+/* Compact Header */
+.dash-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  border: 2px solid var(--ink);
+  background: var(--parchment);
+}
+.dash-header-stat {
+  text-align: center;
+  min-width: 80px;
+}
+.dash-header-stat .stat-label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-light);
+  display: block;
+  margin-bottom: 2px;
+}
+.dash-header-stat .stat-value {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 2em;
+}
+.dash-header-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.dash-badge {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border: 1px solid;
+}
+.dash-badge.war { background: #8b1a1a20; border-color: var(--red-empire); color: var(--red-empire); }
+.dash-badge.peace { background: #2d501620; border-color: var(--green-neutral); color: var(--green-neutral); }
+.dash-badge.blockade { background: #b8860b20; border-color: var(--gold-accent); color: var(--gold-accent); }
+
+/* Finance Ledger */
+.finance-ledger { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.ledger-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 10px;
+}
+.ledger-title.income { color: var(--green-neutral); }
+.ledger-title.expenses { color: var(--red-empire); }
+.ledger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  font-family: 'Crimson Text', serif;
+  font-size: 1em;
+  border-bottom: 1px dotted var(--parchment-dark);
+}
+.ledger-row:last-child { border-bottom: none; }
+.ledger-row .ledger-value { font-weight: 700; font-family: 'Source Serif 4', serif; }
+.ledger-row .ledger-value.positive { color: var(--green-neutral); }
+.ledger-row .ledger-value.negative { color: var(--red-empire); }
+.ledger-row .ledger-value.zero { color: var(--ink-light); }
+.ledger-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0 4px;
+  margin-top: 8px;
+  border-top: 3px double var(--ink);
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 1.1em;
+}
+.ledger-note {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.85em;
+  color: var(--ink-light);
+  margin-top: 4px;
+}
+
+/* Readiness Table */
+.readiness-table { width: 100%; border-collapse: collapse; }
+.readiness-table th {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.75em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--ink);
+  color: var(--ink-light);
+}
+.readiness-table td {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--parchment-dark);
+}
+.readiness-badge {
+  display: inline-block;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border: 1px solid;
+}
+.readiness-badge.reserve { background: #88888820; border-color: #888; color: #666; }
+.readiness-badge.mobilized { background: #b8860b20; border-color: var(--gold-accent); color: var(--gold-accent); }
+.readiness-badge.deployed { background: #2d501620; border-color: var(--green-neutral); color: var(--green-neutral); }
+
+/* Ability Cards */
+.ability-card {
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border: 1px solid var(--ink-light);
+  border-left: 4px solid var(--ink-light);
+  background: var(--parchment);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ability-card.economic { border-left-color: var(--gold-accent); }
+.ability-card.military { border-left-color: var(--red-empire); }
+.ability-card.strategic { border-left-color: var(--blue-entente); }
+.ability-card.penalty { border-left-color: #8b1a1a; }
+.ability-card.dealer { border-left-color: var(--gold-accent); }
+.ability-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.95em;
+  margin-bottom: 4px;
+}
+.ability-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  color: var(--ink-light);
+  line-height: 1.4;
+}
+.ability-status {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.65em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.ability-status.active { background: #2d501620; border-color: var(--green-neutral); color: var(--green-neutral); }
+.ability-status.inactive { background: #88888815; border-color: #aaa; color: #999; }
+
+/* Trade Routes */
+.trade-route {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  border: 1px solid var(--ink-light);
+  background: var(--parchment);
+  font-family: 'Crimson Text', serif;
+}
+.trade-route-status {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border: 1px solid;
+}
+.trade-route-status.open { background: #2d501620; border-color: var(--green-neutral); color: var(--green-neutral); }
+.trade-route-status.blockaded { background: #8b1a1a20; border-color: var(--red-empire); color: var(--red-empire); }
+
+/* Alliance Cards */
+.alliance-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin: 0 8px 8px 0;
+  border: 2px solid var(--ink-light);
+  background: var(--parchment);
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 700;
+}
+.alliance-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Section divider for tabs */
+.tab-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink-light);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--parchment-dark);
+  margin-bottom: 12px;
+  margin-top: 20px;
+}
+.tab-section-title:first-child { margin-top: 0; }
+
 @media (max-width: 900px) {
   .dashboard-layout { grid-template-columns: 1fr; }
   .force-roster { position: static; max-height: none; }
+  .finance-ledger { grid-template-columns: 1fr; }
+  .dash-tab { padding: 10px 14px; font-size: 0.7em; letter-spacing: 1px; }
 }
 @media (max-width: 700px) {
   .status-strip { flex-wrap: wrap; }
@@ -2505,6 +2933,9 @@ body::before {
   .action-tabs { gap: 1px; }
   .action-tab { padding: 8px 10px; font-size: 0.65em; }
   .move-selector { grid-template-columns: 1fr; }
+  .dash-tabs { flex-wrap: wrap; }
+  .dash-tab { font-size: 0.65em; padding: 8px 10px; }
+  .dash-header { flex-wrap: wrap; gap: 16px; }
 }
 </style>
 </head>
@@ -3377,6 +3808,8 @@ body::before {
   <span class="save-indicator" id="saveIndicator">Saved!</span>
 </div>
 
+<div id="dispatchFeed"></div>
+
 <div class="dashboard-layout">
   <div class="dashboard-main">
     <div id="dashboardContent"></div>
@@ -4169,14 +4602,28 @@ const GM_SCENARIOS = [
   }
 ];
 
+// Auto-assign type based on severity: major → major-event, others → sub-event
+GM_SCENARIOS.forEach(s => {
+  if (!s.type) s.type = s.severity === 'major' ? 'major-event' : 'sub-event';
+});
+
 const SCENARIO_CATEGORIES = [...new Set(GM_SCENARIOS.map(s => s.category))];
+const SCENARIO_TYPES = [
+  { id: 'all', label: 'All' },
+  { id: 'sub-event', label: 'Sub-Events' },
+  { id: 'major-event', label: 'Major Events' }
+];
 
 function applyGMScenario(scenarioId) {
   const scenario = GM_SCENARIOS.find(s => s.id === scenarioId);
   if (!scenario) { alert('Scenario not found!'); return; }
 
   const targetName = scenario.target ? FACTION_NAMES[scenario.target] : 'All Powers';
-  if (!confirm(`Deploy scenario: "${scenario.name}"\nAffects: ${targetName}\n\n${scenario.effect}\n\nThis will apply game state changes AND broadcast the news. Continue?`)) return;
+  const isMajor = scenario.type === 'major-event';
+  const confirmMsg = isMajor
+    ? `⚠ MAJOR EVENT ⚠\n\n"${scenario.name}"\nAffects: ${targetName}\n\n${scenario.effect}\n\nThis is a MAJOR event with significant game impact. Deploy?`
+    : `Deploy sub-event: "${scenario.name}"\nAffects: ${targetName}\n\n${scenario.effect}\n\nContinue?`;
+  if (!confirm(confirmMsg)) return;
 
   // Apply game state changes
   scenario.apply();
@@ -4191,7 +4638,8 @@ function applyGMScenario(scenarioId) {
     faction: scenario.target || null,
     turnNum: gameState.currentTurnNum,
     timestamp: new Date().toISOString(),
-    scenarioId: scenario.id
+    scenarioId: scenario.id,
+    scenarioType: scenario.type
   });
 
   // Log the action
@@ -4206,6 +4654,7 @@ function applyGMScenario(scenarioId) {
   renderGMControl();
   renderCustomNewsCards();
   renderDashboard();
+  renderDispatchFeed();
 }
 
 function filterScenarios(btn, category) {
@@ -4218,6 +4667,63 @@ function filterScenarios(btn, category) {
       card.style.display = 'none';
     }
   });
+}
+
+function filterScenariosByType(btn, type) {
+  document.querySelectorAll('.scenario-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.scenario-card').forEach(card => {
+    if (type === 'all' || card.dataset.type === type) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+  // Reset category filter
+  document.querySelectorAll('.scenario-filter-btn').forEach(b => b.classList.remove('active'));
+  const allBtn = document.querySelector('.scenario-filter-btn');
+  if (allBtn) allBtn.classList.add('active');
+}
+
+// Dispatch Feed — renders scenario dispatches on the player Dashboard
+function renderDispatchFeed() {
+  const container = document.getElementById('dispatchFeed');
+  if (!container) return;
+  const dispatches = (gameState.customNews || []).filter(n => n.turnNum === gameState.currentTurnNum);
+  if (dispatches.length === 0) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div class="dispatch-feed">
+      <div class="dispatch-feed-header">DISPATCHES — TURN ${gameState.currentTurnNum}</div>
+      ${dispatches.map(d => {
+        const isMajor = d.scenarioType === 'major-event';
+        const factionLabel = d.faction ? FACTION_NAMES[d.faction] || d.faction : 'All Powers';
+        return `<div class="dispatch-item ${isMajor ? 'major' : 'sub'}">
+          ${isMajor ? '<div class="dispatch-major-banner">MAJOR EVENT</div>' : '<div class="dispatch-sub-banner">DISPATCH</div>'}
+          <div class="dispatch-headline">${d.headline}</div>
+          <div class="dispatch-meta">${factionLabel} — Turn ${d.turnNum}</div>
+          <div class="dispatch-body">${d.body}</div>
+          ${d.effect ? `<div class="dispatch-effect">GAME EFFECT: ${d.effect}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// GM Reset with multi-step confirmation
+function gmResetGame() {
+  if (!confirm('Are you sure you want to RESET the entire game?\\nAll progress, orders, battles, and news will be lost.')) return;
+  const answer = prompt('This is IRREVERSIBLE.\\n\\nType RESET to confirm:');
+  if (answer !== 'RESET') {
+    alert('Reset cancelled. You must type RESET exactly.');
+    return;
+  }
+  resetGameState();
+  renderGMControl();
+  alert('Game has been reset to starting values.');
 }
 
 // ==================== FACTION ROLES & SETUP ====================
@@ -4640,6 +5146,8 @@ function defaultGameState() {
 
 let gameState = loadGameState();
 let activeActionTab = 'recruit';
+let activeDashTab = 'military';
+let activeSubTab = 'recruit';
 
 function loadGameState() {
   try {
@@ -4692,6 +5200,7 @@ function resetGameState() {
   saveGameState();
   renderDashboard();
   renderMap();
+  renderCustomNewsCards();
 }
 
 // ==================== DASHBOARD ====================
@@ -4911,6 +5420,71 @@ const UPGRADES = {
   gas: { name: 'Gas Weapons', cost: 6, desc: '+2 to attack rolls', minTurn: 4 }
 };
 
+const FACTION_SPECIALS = {
+  germany: {
+    title: 'Imperial German Command',
+    abilities: [
+      { name: 'Schlieffen Plan', desc: 'Invade France through Belgium within 2 turns of war. Success: +5 VP. Failure: -3 VP.', type: 'strategic' },
+      { name: 'Alsace-Lorraine Control', desc: '+2 Gold/turn while controlling Alsace-Lorraine.', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } }
+    ]
+  },
+  france: {
+    title: 'French Republic Command',
+    abilities: [
+      { name: 'Lorraine Reconquest', desc: '+2 Gold/turn if you recapture Alsace-Lorraine from Germany.', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
+      { name: 'Fortress Paris', desc: 'Paris is always considered fortified (+2 defense) at no cost.', type: 'military' }
+    ]
+  },
+  britain: {
+    title: 'British Imperial Command',
+    abilities: [
+      { name: 'Naval Supremacy', desc: 'Largest fleet among all factions grants VP bonus at end of game.', type: 'strategic' },
+      { name: 'Colonial Trade Network', desc: 'Highest trade income (6 Gold) but most vulnerable to naval blockade.', type: 'economic' }
+    ]
+  },
+  russia: {
+    title: 'Russian Imperial Command',
+    abilities: [
+      { name: 'Mobilization Delay', desc: 'Only half forces available on Turn 1 of any war. The steamroller is slow to start.', type: 'penalty' },
+      { name: 'Revolution Risk', desc: 'Must pay 4 Gold for stability or face revolution — lose half army, -3 VP, exit the war.', type: 'penalty', check: function(f) { return f.status && f.status.includes('revolution'); } }
+    ]
+  },
+  austria: {
+    title: 'Dual Monarchy Command',
+    abilities: [
+      { name: 'Internal Rebellion', desc: 'Rebellion costs -2 Gold/turn and may cause unit desertion.', type: 'penalty', check: function(f) { return f.status && f.status.includes('rebellion'); } },
+      { name: 'Dual Monarchy', desc: 'Must balance Hungarian and Austrian interests or risk internal crisis and VP loss.', type: 'strategic' }
+    ]
+  },
+  ottoman: {
+    title: 'Ottoman Imperial Command',
+    abilities: [
+      { name: 'Straits Control', desc: '+2 Gold/turn from Dardanelles tolls while holding the region.', type: 'economic', check: function(f) { return f.troops && f.troops['dardanelles'] > 0; } },
+      { name: 'Gallipoli Defense', desc: 'Defenders in Dardanelles get +2 to defense rolls. The straits are a fortress.', type: 'military' }
+    ]
+  },
+  krupp: {
+    title: 'Krupp-Vickers Consortium',
+    abilities: [
+      { name: 'Arms Sales', desc: 'Sell armies (2 Gold) and fleets (3 Gold) to nations at discount prices.', type: 'dealer' },
+      { name: 'Fund a Coup', desc: 'Pay 3 Gold to secretly bribe a junior player to betray their faction leader.', type: 'dealer' },
+      { name: 'Plant a Crisis', desc: 'Pay 3 Gold to write a fake news headline. GM reads it next turn as if real.', type: 'dealer' },
+      { name: 'Fear Campaign', desc: 'Free (Vickers Director only): spread a rumor about enemy troop buildup to drive sales.', type: 'dealer' },
+      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war. No war = -5 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
+    ]
+  },
+  schneider: {
+    title: 'Schneider-Skoda Consortium',
+    abilities: [
+      { name: 'Arms & Fortifications', desc: 'Sell armies, fleets, and fortification kits to nations.', type: 'dealer' },
+      { name: 'Exclusive Contracts', desc: 'Pay 2 Gold to lock a nation into buying only from you for 3 turns.', type: 'dealer' },
+      { name: 'Industrial Espionage', desc: 'Pay 2 Gold to learn rival consortium\'s total sales, treasury, and latest client.', type: 'dealer' },
+      { name: 'Regime Change', desc: 'Fund a Coup costs only 2 Gold instead of 3 Gold.', type: 'dealer' },
+      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war. No war = -5 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
+    ]
+  }
+};
+
 function renderTurnBanner() {
   const banner = document.getElementById('turnBanner');
   const turnIdx = Math.min(gameState.currentTurnNum - 1, turns.length - 1);
@@ -5070,6 +5644,7 @@ function advanceTurn() {
   renderTurnBanner();
   renderDashboard();
   renderMap();
+  renderGMControl();
 }
 
 // ==================== CUSTOM NEWS ====================
@@ -5307,7 +5882,7 @@ function renderUpgradePanel(fid) {
     } else if (!available) {
       badges += `<button class="upgrade-badge" disabled title="Available from Turn ${upg.minTurn}">${upg.name} <span class="upgrade-cost">(Turn ${upg.minTurn}+)</span></button>`;
     } else {
-      badges += `<button class="upgrade-badge" onclick="purchaseUpgrade('${fid}','${uid}')" ${canAfford ? '' : 'disabled'} title="${upg.desc}">${upg.name} <span class="upgrade-cost">${upg.cost}g</span></button>`;
+      badges += `<button class="upgrade-badge" onclick="purchaseUpgrade('${fid}','${uid}')" ${canAfford ? '' : 'disabled'} title="${upg.desc}">${upg.name} <span class="upgrade-cost">${upg.cost} Gold</span></button>`;
     }
   });
 
@@ -5497,6 +6072,7 @@ function renderDashboard() {
   const container = document.getElementById('dashboardContent');
   renderPlayerDashboard(container);
   renderForceRoster();
+  renderDispatchFeed();
 }
 
 function renderForceRoster() {
@@ -5529,7 +6105,19 @@ function renderForceRoster() {
     if (regions.length > 0) {
       bodyHtml = regions.map(r => {
         let forces = [];
-        if (r.troops > 0) forces.push(`<span class="roster-troops">${r.troops} div</span>`);
+        if (r.troops > 0) {
+          if (isSelected && f.units) {
+            const regionUnits = f.units.filter(u => u.region === r.region && u.type === 'army' && u.state !== 'destroyed');
+            const deployed = regionUnits.filter(u => u.state === 'deployed').length;
+            const mobilized = regionUnits.filter(u => u.state === 'mobilized').length;
+            const breakdown = [];
+            if (deployed > 0) breakdown.push(`${deployed} deployed`);
+            if (mobilized > 0) breakdown.push(`${mobilized} mobilized`);
+            forces.push(`<span class="roster-troops">${r.troops} div${breakdown.length ? ' (' + breakdown.join(', ') + ')' : ''}</span>`);
+          } else {
+            forces.push(`<span class="roster-troops">${r.troops} div</span>`);
+          }
+        }
         if (r.fleets > 0) forces.push(`<span class="roster-fleets">${r.fleets} fleet</span>`);
         return `<div class="roster-region">
           <span class="roster-region-name">${REGION_NAMES[r.region]}</span>
@@ -5551,7 +6139,7 @@ function renderForceRoster() {
       <div class="roster-faction-body${isSelected ? '' : ' collapsed'}">
         ${bodyHtml}
         <div class="roster-totals">
-          <span>Gold: ${f.gold}g</span>
+          <span>Gold: ${f.gold}</span>
           <span>VP: ${f.vp}</span>
         </div>
       </div>
@@ -5564,17 +6152,17 @@ function renderForceRoster() {
     <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Recruit divisions or fleets</span>
-      <span class="roster-check-cost">3g / 5g</span>
+      <span class="roster-check-cost">3 / 5 Gold</span>
     </div>
     <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Deploy &amp; mobilize troops to regions</span>
-      <span class="roster-check-cost">1g/unit upkeep</span>
+      <span class="roster-check-cost">1 Gold/unit</span>
     </div>
     <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Move fleets to sea zones</span>
-      <span class="roster-check-cost">1g/fleet upkeep</span>
+      <span class="roster-check-cost">1 Gold/fleet</span>
     </div>
     <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
       <div class="roster-check-box"></div>
@@ -5584,7 +6172,7 @@ function renderForceRoster() {
     <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Purchase upgrades (artillery, trenches, gas)</span>
-      <span class="roster-check-cost">3-6g</span>
+      <span class="roster-check-cost">3-6 Gold</span>
     </div>
     <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
       <div class="roster-check-box"></div>
@@ -5596,9 +6184,270 @@ function renderForceRoster() {
   roster.innerHTML = html;
 }
 
+function setDashTab(tab) {
+  activeDashTab = tab;
+  renderDashboard();
+}
+
 function setActionTab(tab) {
   activeActionTab = tab;
   renderDashboard();
+}
+
+function renderMilitaryTab(fid) {
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  if (isDealer) return '<div class="empty-state">Arms dealers do not command military forces.</div>';
+
+  const tabs = ['recruit','deploy','move','attack','support','upgrades','readiness'];
+  const tabLabels = { recruit:'Recruit', deploy:'Deploy', move:'Move', attack:'Attack', support:'Support', upgrades:'Upgrades', readiness:'Readiness' };
+  if (!tabs.includes(activeActionTab)) activeActionTab = tabs[0];
+
+  const subTabBtns = tabs.map(t => `<button class="action-tab ${activeActionTab === t ? 'active' : ''}" onclick="setActionTab('${t}')">${tabLabels[t]}</button>`).join('');
+
+  let content = '';
+  if (activeActionTab === 'readiness') {
+    content = renderReadinessTab(fid);
+  } else {
+    content = renderActionTabContent(fid);
+  }
+
+  return `<div class="action-tabs">${subTabBtns}</div><div class="action-content">${content}</div>`;
+}
+
+function renderFinanceTab(fid) {
+  const f = gameState.factions[fid];
+  const econ = computeEconomy(fid);
+
+  let incomeRows = '';
+  incomeRows += `<div class="ledger-row"><span class="ledger-label">Industry</span><span class="ledger-value positive">+${econ.industry}</span></div>`;
+  incomeRows += `<div class="ledger-row"><span class="ledger-label">Trade</span><span class="ledger-value ${econ.trade > 0 ? 'positive' : 'zero'}">+${econ.trade}</span></div>`;
+  if (econ.bonus !== 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">${econ.bonusLabel || 'Territorial Bonus'}</span><span class="ledger-value ${econ.bonus > 0 ? 'positive' : 'negative'}">${econ.bonus > 0 ? '+' : ''}${econ.bonus}</span></div>`;
+  }
+  if (econ.warDividend > 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">War Dividend</span><span class="ledger-value positive">+${econ.warDividend}</span></div>`;
+  }
+
+  let expenseRows = '';
+  expenseRows += `<div class="ledger-row"><span class="ledger-label">Army Upkeep (${f.army} x 1)</span><span class="ledger-value negative">-${f.army}</span></div>`;
+  expenseRows += `<div class="ledger-row"><span class="ledger-label">Fleet Upkeep (${f.navy} x 1)</span><span class="ledger-value negative">-${f.navy}</span></div>`;
+  if (econ.mobilizationCost > 0) {
+    expenseRows += `<div class="ledger-row"><span class="ledger-label">Mobilization Surcharge</span><span class="ledger-value negative">-${econ.mobilizationCost}</span></div>`;
+  }
+  if (econ.tradeLoss > 0) {
+    expenseRows += `<div class="ledger-row"><span class="ledger-label">Trade Losses (Blockade)</span><span class="ledger-value negative">-${econ.tradeLoss}</span></div>`;
+  }
+  if (econ.industryLoss > 0) {
+    expenseRows += `<div class="ledger-row"><span class="ledger-label">Industry Damage (Blockade)</span><span class="ledger-value negative">-${econ.industryLoss}</span></div>`;
+  }
+
+  const netCls = econ.net >= 0 ? 'positive' : 'negative';
+
+  return `<div class="finance-ledger">
+    <div>
+      <div class="ledger-title income">Income</div>
+      ${incomeRows}
+      <div class="ledger-summary"><span>Gross Income</span><span class="positive">+${econ.grossIncome}</span></div>
+    </div>
+    <div>
+      <div class="ledger-title expenses">Expenses</div>
+      ${expenseRows}
+      <div class="ledger-summary"><span>Total Expenses</span><span class="negative">-${econ.totalUpkeep + (econ.blockadePenalty || 0)}</span></div>
+    </div>
+  </div>
+  <div style="margin-top:20px; padding:16px; border:2px solid var(--ink); background:var(--parchment); display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div style="font-family:'Source Serif 4',serif; font-size:0.75em; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-light);">Treasury</div>
+      <div style="font-family:'Playfair Display',serif; font-size:2em; font-weight:900;">${f.gold} <span style="font-size:0.4em; text-transform:uppercase; letter-spacing:2px; color:var(--ink-light);">Gold</span></div>
+    </div>
+    <div>
+      <div style="font-family:'Source Serif 4',serif; font-size:0.75em; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-light);">Net Per Turn</div>
+      <div style="font-family:'Playfair Display',serif; font-size:2em; font-weight:900;" class="${netCls}">${econ.net >= 0 ? '+' : ''}${econ.net} <span style="font-size:0.4em; text-transform:uppercase; letter-spacing:2px; color:var(--ink-light);">Gold</span></div>
+    </div>
+  </div>
+  ${econ.isBlockaded ? '<div class="ledger-note">' + econ.blockadeDetail + '</div>' : ''}`;
+}
+
+function renderTradeTab(fid) {
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  const econ = computeEconomy(fid);
+
+  let html = '<div class="tab-section-title" style="margin-top:0;">Trade Routes</div>';
+
+  if (isDealer) {
+    html += '<div class="empty-state">Arms dealers operate outside the traditional trade system. Your income comes from sales and contracts.</div>';
+    html += '<div class="tab-section-title">Sales & Contracts</div>';
+    html += `<div class="ledger-row"><span class="ledger-label">Total Sales Revenue</span><span class="ledger-value">${f.sales || 0} Gold</span></div>`;
+    html += `<div class="ledger-row"><span class="ledger-label">Active Contracts</span><span class="ledger-value">${(f.contracts || []).length}</span></div>`;
+    return html;
+  }
+
+  // Trade routes for this faction
+  const tradeRoutes = typeof TRADE_ROUTES !== 'undefined' ? (TRADE_ROUTES[fid] || []) : [];
+  const blockades = f.blockadedBy || [];
+
+  if (tradeRoutes.length > 0) {
+    tradeRoutes.forEach(function(sea) {
+      const isBlocked = blockades.some(function(b) { return b.seaZone === sea; });
+      const blocker = blockades.find(function(b) { return b.seaZone === sea; });
+      html += `<div class="trade-route">
+        <span>${REGION_NAMES[sea] || sea}</span>
+        ${isBlocked
+          ? '<span class="trade-route-status blockaded">Blockaded' + (blocker ? ' by ' + (FACTION_NAMES[blocker.fid] || blocker.fid) : '') + '</span>'
+          : '<span class="trade-route-status open">Open</span>'}
+      </div>`;
+    });
+  } else {
+    html += '<div class="empty-state">No major trade routes identified.</div>';
+  }
+
+  html += '<div class="tab-section-title">Trade Summary</div>';
+  html += `<div class="ledger-row"><span class="ledger-label">Base Trade Income</span><span class="ledger-value positive">+${econ.trade}</span></div>`;
+  if (econ.tradeLoss > 0) {
+    html += `<div class="ledger-row"><span class="ledger-label">Blockade Trade Losses</span><span class="ledger-value negative">-${econ.tradeLoss}</span></div>`;
+  }
+  html += `<div class="ledger-row"><span class="ledger-label">Effective Trade Income</span><span class="ledger-value ${econ.trade - econ.tradeLoss > 0 ? 'positive' : econ.trade - econ.tradeLoss < 0 ? 'negative' : 'zero'}">${econ.trade - econ.tradeLoss}</span></div>`;
+
+  html += '<div class="tab-section-title">Agreements</div>';
+  html += '<div class="empty-state" style="font-style:italic;">Negotiate trade agreements through diplomacy. Alliances can provide mutual economic benefits.</div>';
+
+  return html;
+}
+
+function renderDiplomacyTab(fid) {
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  const orders = getOrders(fid);
+  const isSubmitted = orders.submitted;
+
+  let html = '<div class="tab-section-title" style="margin-top:0;">Current Alliances</div>';
+
+  if (f.alliances && f.alliances.length > 0) {
+    f.alliances.forEach(function(allyId) {
+      html += `<div class="alliance-card">
+        <div class="alliance-dot" style="background:${FACTION_COLORS[allyId] || '#888'};"></div>
+        ${FACTION_NAMES[allyId] || allyId}
+      </div>`;
+    });
+  } else {
+    html += '<div class="empty-state">No formal alliances. You stand alone.</div>';
+  }
+
+  // Support section (moved from military for non-dealers)
+  if (!isDealer) {
+    html += '<div class="tab-section-title">Battle Support</div>';
+    const battles = gameState.battles || [];
+    const pendingBattles = battles.filter(function(b) { return b.status === 'pending'; });
+    if (pendingBattles.length > 0) {
+      pendingBattles.forEach(function(b) {
+        html += `<div class="trade-route">
+          <span>Battle at ${REGION_NAMES[b.targetRegion] || b.targetRegion}</span>
+          <button class="action-btn" style="width:auto; margin:0; padding:8px 14px;" onclick="addOrder('${fid}',{type:'support',battleId:'${b.id}',desc:'Support battle at ${REGION_NAMES[b.targetRegion] || b.targetRegion}'})" ${isSubmitted ? 'disabled' : ''}>Pledge Support</button>
+        </div>`;
+      });
+    } else {
+      html += '<div class="empty-state">No active battles to support.</div>';
+    }
+  }
+
+  // Diplomatic actions
+  html += '<div class="tab-section-title">Diplomatic Actions</div>';
+
+  if (isDealer) {
+    // Dealer-specific diplomatic actions
+    html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Fund a Coup (3 Gold)'})" ${isSubmitted ? 'disabled' : ''}>
+      <span>Fund a Coup &mdash; Bribe a junior player to betray their leader</span>
+      <span class="action-cost">${fid === 'schneider' ? '2' : '3'} Gold</span>
+    </button>`;
+    html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Plant a Crisis (3 Gold)'})" ${isSubmitted ? 'disabled' : ''}>
+      <span>Plant a Crisis &mdash; Write a fake news headline for GM to read</span>
+      <span class="action-cost">3 Gold</span>
+    </button>`;
+    html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Industrial Espionage (2 Gold)'})" ${isSubmitted ? 'disabled' : ''}>
+      <span>Industrial Espionage &mdash; Reveal rival consortium's finances</span>
+      <span class="action-cost">2 Gold</span>
+    </button>`;
+    if (fid === 'schneider') {
+      html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Exclusive Contract (2 Gold)'})" ${isSubmitted ? 'disabled' : ''}>
+        <span>Exclusive Contract &mdash; Lock a nation into buying from you for 3 turns</span>
+        <span class="action-cost">2 Gold</span>
+      </button>`;
+    }
+  } else {
+    html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Espionage Mission (3 Gold)'})" ${isSubmitted ? 'disabled' : ''}>
+      <span>Espionage &mdash; GM rolls d6; 4+ reveals enemy orders</span>
+      <span class="action-cost">3 Gold</span>
+    </button>`;
+    html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Bribe Minor Nation'})" ${isSubmitted ? 'disabled' : ''}>
+      <span>Bribe Minor Nation &mdash; GM decides outcome based on amount</span>
+      <span class="action-cost">2-5 Gold</span>
+    </button>`;
+  }
+
+  // Intelligence overview
+  html += '<div class="tab-section-title">Intelligence</div>';
+  html += '<div style="font-family:\'Crimson Text\',serif; font-size:0.95em;">';
+  Object.keys(FACTION_NAMES).forEach(function(otherId) {
+    if (otherId === fid || otherId === 'krupp' || otherId === 'schneider') return;
+    const other = gameState.factions[otherId];
+    if (!other) return;
+    const allyList = (other.alliances || []).map(function(a) { return FACTION_NAMES[a] || a; }).join(', ');
+    html += `<div class="ledger-row"><span>${FACTION_NAMES[otherId]}</span><span class="ledger-value" style="font-size:0.85em; color:var(--ink-light);">${other.atWar ? '\u2694 War' : '\u262E Peace'}${allyList ? ' \u2014 Allied: ' + allyList : ''}</span></div>`;
+  });
+  html += '</div>';
+
+  return html;
+}
+
+function renderSpecialTab(fid) {
+  const f = gameState.factions[fid];
+  const specials = FACTION_SPECIALS[fid];
+  if (!specials) return '<div class="empty-state">No special abilities defined for this faction.</div>';
+
+  let html = `<div class="tab-section-title" style="margin-top:0;">${specials.title}</div>`;
+
+  specials.abilities.forEach(function(ability) {
+    const isActive = ability.check ? ability.check(f) : null;
+    const statusHtml = isActive !== null
+      ? `<span class="ability-status ${isActive ? 'active' : 'inactive'}">${isActive ? 'Active' : 'Inactive'}</span>`
+      : '';
+    html += `<div class="ability-card ${ability.type || ''}">
+      <div>
+        <div class="ability-name">${ability.name}</div>
+        <div class="ability-desc">${ability.desc}</div>
+      </div>
+      ${statusHtml}
+    </div>`;
+  });
+
+  return html;
+}
+
+function renderReadinessTab(fid) {
+  const f = gameState.factions[fid];
+  const units = f.units || [];
+  if (units.length === 0) return '<div class="empty-state">No units in the army. Recruit forces first.</div>';
+
+  let rows = '';
+  units.forEach(function(u) {
+    if (u.state === 'destroyed') return;
+    const stateClass = u.state || 'reserve';
+    const stateLabel = stateClass.charAt(0).toUpperCase() + stateClass.slice(1);
+    const location = u.state === 'deployed' && u.region ? (REGION_NAMES[u.region] || u.region) : '\u2014';
+    const typeIcon = u.type === 'army' ? '\u2694' : '\u2693';
+    rows += `<tr>
+      <td>${typeIcon} ${u.id}</td>
+      <td>${u.type === 'army' ? 'Division' : 'Fleet'}</td>
+      <td><span class="readiness-badge ${stateClass}">${stateLabel}</span></td>
+      <td>${location}</td>
+    </tr>`;
+  });
+
+  return `<table class="readiness-table">
+    <tr><th>Unit</th><th>Type</th><th>Status</th><th>Location</th></tr>
+    ${rows}
+  </table>`;
 }
 
 function renderActionTabContent(fid) {
@@ -5614,11 +6463,11 @@ function renderActionTabContent(fid) {
     return `
       <button class="action-btn" onclick="addOrder('${fid}',{type:'recruit',unitType:'army',desc:'Recruit Army Division \u2192 ${REGION_NAMES[HOME_REGIONS[fid]]}'})" ${canArmy ? '' : 'disabled'}>
         <span>Buy Army Division \u2192 ${REGION_NAMES[HOME_REGIONS[fid]]}</span>
-        <span class="action-cost">${UNIT_COSTS.army}g</span>
+        <span class="action-cost">${UNIT_COSTS.army} Gold</span>
       </button>
       <button class="action-btn" onclick="addOrder('${fid}',{type:'recruit',unitType:'fleet',desc:'Recruit Fleet \u2192 ${REGION_NAMES[HOME_SEAS[fid]]}'})" ${canFleet ? '' : 'disabled'}>
         <span>Buy Fleet \u2192 ${REGION_NAMES[HOME_SEAS[fid]]}</span>
-        <span class="action-cost">${UNIT_COSTS.fleet}g</span>
+        <span class="action-cost">${UNIT_COSTS.fleet} Gold</span>
       </button>
     `;
   }
@@ -5713,7 +6562,7 @@ function renderActionTabContent(fid) {
       } else if (!available) {
         html += `<button class="action-btn" disabled><span>${upg.name} &mdash; ${upg.desc}</span><span class="action-cost">Turn ${upg.minTurn}+</span></button>`;
       } else {
-        html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'upgrade',upgradeId:'${uid}',desc:'Purchase ${upg.name}'})" ${canAfford && !isSubmitted ? '' : 'disabled'}><span>${upg.name} &mdash; ${upg.desc}</span><span class="action-cost">${upg.cost}g</span></button>`;
+        html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'upgrade',upgradeId:'${uid}',desc:'Purchase ${upg.name}'})" ${canAfford && !isSubmitted ? '' : 'disabled'}><span>${upg.name} &mdash; ${upg.desc}</span><span class="action-cost">${upg.cost} Gold</span></button>`;
       }
     });
     return html;
@@ -5773,41 +6622,27 @@ function renderPlayerDashboard(container) {
   const allianceCls = FACTION_ALLIANCE[fid];
   const orders = getOrders(fid);
   const isSubmitted = orders.submitted;
-
-  // Compute economy using the new engine
   const econ = computeEconomy(fid);
   const netCls = econ.net >= 0 ? 'positive' : 'negative';
 
-  // Blockade warning
-  let blockadeWarning = '';
-  if (econ.isBlockaded) {
-    blockadeWarning = `<div style="background:#8b1a1a15; border:1px solid var(--red-empire); border-radius:6px; padding:8px 12px; margin-bottom:12px; font-size:0.9em;">
-      <strong style="color:var(--red-empire);">⚓ BLOCKADE ACTIVE</strong> — ${econ.blockadeDetail}
-    </div>`;
-  }
+  // Compact Header
+  let badges = '';
+  if (f.atWar) badges += '<span class="dash-badge war">\u2694 At War</span>';
+  else badges += '<span class="dash-badge peace">\u262E Peace</span>';
+  if (econ.isBlockaded) badges += '<span class="dash-badge blockade">\u2693 Blockaded</span>';
 
-  // Mobilization warning
-  let mobilizationWarning = '';
-  if (econ.mobilizationCost > 0) {
-    mobilizationWarning = `<div style="background:#b8860b15; border:1px solid var(--gold-accent); border-radius:6px; padding:8px 12px; margin-bottom:12px; font-size:0.9em;">
-      <strong style="color:var(--gold-accent);">⚠ MOBILIZATION SURCHARGE</strong> — Peacetime troop deployment costs extra +${econ.mobilizationCost}g/turn
-    </div>`;
-  }
-
-  // Status strip with detailed breakdown
-  let statusStrip = `<div class="status-strip">
-    <div class="strip-item"><span class="strip-label">Treasury</span><span class="strip-value">${f.gold}g</span></div>
-    <div class="strip-item"><span class="strip-label">Industry</span><span class="strip-value positive">+${econ.industry}g</span></div>
-    <div class="strip-item"><span class="strip-label">Trade</span><span class="strip-value ${econ.tradeLoss > 0 ? 'negative' : 'positive'}">${econ.tradeLoss > 0 ? '✗' : '+'}${econ.trade - econ.tradeLoss}g</span></div>
-    ${econ.bonus !== 0 ? `<div class="strip-item"><span class="strip-label">Bonus</span><span class="strip-value ${econ.bonus >= 0 ? 'positive' : 'negative'}">${econ.bonus >= 0 ? '+' : ''}${econ.bonus}g</span></div>` : ''}
-    ${econ.warDividend > 0 ? `<div class="strip-item"><span class="strip-label">War Div.</span><span class="strip-value positive">+${econ.warDividend}g</span></div>` : ''}
-    <div class="strip-item"><span class="strip-label">Upkeep</span><span class="strip-value negative">-${econ.totalUpkeep}g</span></div>
-    <div class="strip-item"><span class="strip-label">Net/Turn</span><span class="strip-value ${netCls}">${econ.net >= 0 ? '+' : ''}${econ.net}g</span></div>
-    <div class="strip-item"><span class="strip-label">VP</span><span class="strip-value">${f.vp}</span></div>
-    <div class="strip-item"><span class="strip-label">Status</span><span class="strip-value" style="font-size:0.8em;">${f.atWar ? '⚔ AT WAR' : '☮ Peace'}</span></div>
+  let headerHtml = `<div class="dash-header" style="border-left: 6px solid ${FACTION_COLORS[fid]};">
+    <div>
+      <h3 style="margin:0; font-family:'Playfair Display',serif; font-size:1.3em;">${FACTION_NAMES[fid]}</h3>
+      <div class="faction-type"><span class="alliance-badge ${allianceCls}">${allianceCls}</span></div>
+    </div>
+    <div class="dash-header-stat"><span class="stat-label">Treasury</span><span class="stat-value">${f.gold}</span></div>
+    <div class="dash-header-stat"><span class="stat-label">Net / Turn</span><span class="stat-value ${netCls}">${econ.net >= 0 ? '+' : ''}${econ.net}</span></div>
+    <div class="dash-header-stat"><span class="stat-label">Victory</span><span class="stat-value">${f.vp}</span></div>
+    <div class="dash-header-badges">${badges}</div>
   </div>`;
 
-  // Forces Pipeline
+  // Pipeline (military factions only)
   let pipelineHtml = '';
   if (!isDealer) {
     const units = f.units || [];
@@ -5826,16 +6661,24 @@ function renderPlayerDashboard(container) {
     </div>`;
   }
 
-  // Action tabs
-  const tabs = isDealer ? ['upgrades'] : ['recruit','deploy','move','attack','support','upgrades'];
-  const tabLabels = { recruit:'Recruit', deploy:'Deploy', move:'Move', attack:'Attack', support:'Support', upgrades:'Upgrades' };
-  if (isDealer && activeActionTab !== 'upgrades') activeActionTab = 'upgrades';
-  if (!tabs.includes(activeActionTab)) activeActionTab = tabs[0];
+  // Top-level tab definitions
+  const dashTabs = isDealer
+    ? ['finance','trade','diplomacy','special']
+    : ['military','finance','trade','diplomacy','special'];
+  const dashTabLabels = { military:'Military', finance:'Finance', trade:'Trade', diplomacy:'Diplomacy', special:'Special' };
+  if (!dashTabs.includes(activeDashTab)) activeDashTab = dashTabs[0];
 
-  const actionTabBtns = tabs.map(t => `<button class="action-tab ${activeActionTab === t ? 'active' : ''}" onclick="setActionTab('${t}')">${tabLabels[t]}</button>`).join('');
-  const actionContent = renderActionTabContent(fid);
+  const tabBtns = dashTabs.map(t => `<button class="dash-tab ${activeDashTab === t ? 'active' : ''}" onclick="setDashTab('${t}')">${dashTabLabels[t]}</button>`).join('');
 
-  // Pending orders
+  // Tab content
+  let tabContent = '';
+  if (activeDashTab === 'military') tabContent = renderMilitaryTab(fid);
+  else if (activeDashTab === 'finance') tabContent = renderFinanceTab(fid);
+  else if (activeDashTab === 'trade') tabContent = renderTradeTab(fid);
+  else if (activeDashTab === 'diplomacy') tabContent = renderDiplomacyTab(fid);
+  else if (activeDashTab === 'special') tabContent = renderSpecialTab(fid);
+
+  // Pending orders (always visible)
   let ordersHtml = '';
   if (orders.actions.length > 0) {
     ordersHtml = `<div class="order-queue">
@@ -5848,57 +6691,24 @@ function renderPlayerDashboard(container) {
       `).join('')}
     </div>`;
   } else {
-    ordersHtml = `<div class="order-queue"><div class="empty-state">No orders queued yet. Use the action panel above.</div></div>`;
+    ordersHtml = '<div class="order-queue"><div class="empty-state">No orders queued yet.</div></div>';
   }
 
   // Submit button
   let submitHtml = '';
   if (isSubmitted) {
-    submitHtml = `<button class="submit-orders-btn submitted">ORDERS SUBMITTED &mdash; Awaiting Resolution</button>`;
+    submitHtml = '<button class="submit-orders-btn submitted">ORDERS SUBMITTED &mdash; Awaiting Resolution</button>';
   } else {
     submitHtml = `<button class="submit-orders-btn" onclick="submitOrders('${fid}')">Submit Orders to GM</button>`;
   }
 
-  // Troop table
-  let troopRows = '';
-  if (!isDealer) {
-    ALL_REGIONS.forEach(r => {
-      const troops = (f.troops[r] || 0);
-      const fleets = (f.fleets[r] || 0);
-      if (troops > 0 || fleets > 0) {
-        troopRows += `<tr><td>${REGION_NAMES[r]}</td><td>${troops || '\u2014'}</td><td>${fleets || '\u2014'}</td></tr>`;
-      }
-    });
-  }
-
   container.innerHTML = `
-    <div class="dashboard-card" style="border-left: 6px solid ${FACTION_COLORS[fid]};">
-      <h3>${FACTION_NAMES[fid]}</h3>
-      <div class="faction-type"><span class="alliance-badge ${allianceCls}">${allianceCls}</span></div>
-      ${statusStrip}
-      ${blockadeWarning}
-      ${mobilizationWarning}
-      ${pipelineHtml}
-      ${f.alliances.length ? `<p style="margin-bottom:12px;"><strong>Alliances:</strong> ${f.alliances.map(a => FACTION_NAMES[a] || a).join(', ')}</p>` : ''}
-
-      <div class="action-tabs">${actionTabBtns}</div>
-      <div class="action-content">${actionContent}</div>
-
-      ${ordersHtml}
-      ${submitHtml}
-
-      ${!isDealer && troopRows ? `
-        <details class="turn-summary" style="margin-top:20px;">
-          <summary>Troop Deployment Table</summary>
-          <div class="summary-content" style="max-height:none;">
-            <table class="troop-table">
-              <tr><th>Region</th><th>Divisions</th><th>Fleets</th></tr>
-              ${troopRows}
-            </table>
-          </div>
-        </details>
-      ` : ''}
-    </div>
+    ${headerHtml}
+    ${pipelineHtml}
+    <div class="dash-tabs">${tabBtns}</div>
+    <div class="dash-tab-content">${tabContent}</div>
+    ${ordersHtml}
+    ${submitHtml}
     <details class="turn-summary" style="margin-top:16px;">
       <summary>Turn Summary &amp; History</summary>
       <div class="summary-content">${renderPlayerTurnSummaryContent(fid)}</div>
@@ -5940,9 +6750,12 @@ function renderGMControl() {
           <span class="turn-title">${t.title}</span>
           <span class="turn-year">${t.year}</span>
         </div>
-        <button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
-          ${isLastTurn ? 'Final Turn' : 'Advance Turn \u2192'}
-        </button>
+        <div class="gm-turn-actions">
+          <button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
+            ${isLastTurn ? 'Final Turn' : 'Advance Turn \u2192'}
+          </button>
+          <button class="btn-gm-reset" onclick="gmResetGame()">Reset Game</button>
+        </div>
       </div>
     </div>
   </div>`;
@@ -6005,6 +6818,10 @@ function renderGMControl() {
   </div>`;
 
   // 2b. Scenario Launcher
+  let scenarioTypeFilterHtml = `<div class="scenario-type-filters">
+    ${SCENARIO_TYPES.map((t, i) => `<button class="scenario-type-btn ${i === 0 ? 'active' : ''}" onclick="filterScenariosByType(this, '${t.id}')">${t.label}</button>`).join('')}
+  </div>`;
+
   let scenarioFilterHtml = `<div class="scenario-filters">
     <button class="scenario-filter-btn active" onclick="filterScenarios(this, 'all')">All</button>
     ${SCENARIO_CATEGORIES.map(cat => `<button class="scenario-filter-btn" onclick="filterScenarios(this, '${cat}')">${cat}</button>`).join('')}
@@ -6013,17 +6830,20 @@ function renderGMControl() {
   let scenarioCardsHtml = GM_SCENARIOS.map(s => {
     const targetName = s.target ? FACTION_NAMES[s.target] : 'All Powers';
     const severityClass = s.severity || 'moderate';
+    const typeClass = s.type || 'sub-event';
+    const isMajor = typeClass === 'major-event';
     const alreadyUsed = (gameState.customNews || []).some(n => n.scenarioId === s.id);
-    return `<div class="scenario-card ${severityClass} ${alreadyUsed ? 'used' : ''}" data-category="${s.category}" data-target="${s.target || 'global'}">
+    return `<div class="scenario-card ${severityClass} ${typeClass} ${alreadyUsed ? 'used' : ''}" data-category="${s.category}" data-target="${s.target || 'global'}" data-type="${typeClass}">
+      ${isMajor ? '<div class="scenario-major-ribbon">MAJOR EVENT</div>' : ''}
       <div class="scenario-card-header">
         <span class="scenario-category-badge">${s.category}</span>
-        <span class="scenario-severity ${severityClass}">${severityClass}</span>
+        <span class="scenario-severity ${severityClass}">${isMajor ? 'MAJOR' : severityClass}</span>
       </div>
       <div class="scenario-card-name">${s.name}</div>
       <div class="scenario-card-target">${targetName}</div>
       <div class="scenario-card-effect">${s.effect}</div>
-      <button class="btn-deploy-scenario" onclick="applyGMScenario('${s.id}')" ${alreadyUsed ? 'disabled' : ''}>
-        ${alreadyUsed ? 'Already Deployed' : 'Deploy Scenario'}
+      <button class="btn-deploy-scenario ${isMajor ? 'major' : ''}" onclick="applyGMScenario('${s.id}')" ${alreadyUsed ? 'disabled' : ''}>
+        ${alreadyUsed ? 'Already Deployed' : (isMajor ? 'Deploy Major Event' : 'Deploy Sub-Event')}
       </button>
     </div>`;
   }).join('');
@@ -6034,8 +6854,9 @@ function renderGMControl() {
     </div>
     <div class="gm-section-body">
       <p style="font-family:'Crimson Text',serif; font-size:0.95em; color:var(--ink-light); margin-bottom:12px;">
-        Pre-loaded scenarios to rebalance the game. Each deploys a news event AND applies game-state changes (troop losses, gold costs, status effects). Use these to create pressure, punish runaway leaders, or inject historical chaos.
+        Pre-loaded scenarios to rebalance the game. <strong>Sub-events</strong> are minor intra-turn disruptions. <strong>Major events</strong> are significant game-changers with bigger impact.
       </p>
+      ${scenarioTypeFilterHtml}
       ${scenarioFilterHtml}
       <div class="scenario-grid" id="scenarioGrid">
         ${scenarioCardsHtml}
