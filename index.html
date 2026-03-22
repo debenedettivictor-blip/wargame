@@ -3494,11 +3494,11 @@ body::before {
   <div class="faction-players" data-faction-players="russia">3 Players — Tsar Nicholas II, The War Minister, The Duma Representative</div>
   <div class="faction-flavor">"Holy Russia is the protector of all Slavic peoples. Constantinople beckons. But the revolutionaries in St. Petersburg grow bolder each year. We must project strength abroad to maintain order at home."</div>
   <div class="stat-row">
-    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">16 Gold</div></div>
-    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">6 Gold</div></div>
-    <div class="stat"><div class="stat-label">Army</div><div class="stat-value">12 Divisions</div></div>
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">18 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">7 Gold</div></div>
+    <div class="stat"><div class="stat-label">Army</div><div class="stat-value">14 Divisions</div></div>
     <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">3 Fleets</div></div>
-    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">★★</div></div>
+    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+2/turn</div></div>
   </div>
   <div class="objectives">
     <div class="obj-title">Shared Faction Objectives (known to all 3 Russian players)</div>
@@ -3565,11 +3565,11 @@ body::before {
   <div class="faction-players" data-faction-players="ottoman">2 Players — The Sultan, The Young Turk Leader</div>
   <div class="faction-flavor">"The Sick Man of Europe? We shall see who is sick when the great powers come begging for our alliance. The straits of the Dardanelles are the most valuable real estate on earth — and they are ours."</div>
   <div class="stat-row">
-    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">8 Gold</div></div>
-    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">4 Gold</div></div>
+    <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">10 Gold</div></div>
+    <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">6 Gold</div></div>
     <div class="stat"><div class="stat-label">Army</div><div class="stat-value">6 Divisions</div></div>
     <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">2 Fleets</div></div>
-    <div class="stat"><div class="stat-label">Industry</div><div class="stat-value">★★</div></div>
+    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+2/turn</div></div>
   </div>
   <div class="objectives">
     <div class="obj-title">Shared Faction Objectives (known to all)</div>
@@ -3735,13 +3735,16 @@ body::before {
 
 <div class="highlight-box">
   <strong>Spending Gold:</strong><br>
-  ◆ Buy 1 Army Division: 3 Gold (or 2 Gold via arms dealer)<br>
-  ◆ Buy 1 Fleet: 4 Gold (or 3 Gold via arms dealer)<br>
-  ◆ Buy Artillery Upgrade: 2 Gold via arms dealer (+1 to one attack)<br>
-  ◆ Fortify a region: 4 Gold direct (or 3 Gold from Schneider-Skoda, +2 defense)<br>
+  ◆ Buy 1 Army Division: <strong>2 Gold</strong><br>
+  ◆ Buy 1 Fleet: <strong>6 Gold</strong> (navies are expensive!)<br>
+  ◆ Mobilize divisions for war: <strong>1 Gold/division</strong> (0.5 Gold/div if full mobilization)<br>
+  ◆ Modernization (faction-specific investment): <strong>3–5 Gold</strong> (+1g/turn permanently)<br>
+  ◆ Buy Artillery Upgrade: 4 Gold (+1 to attack rolls)<br>
+  ◆ Fortify a region: 3 Gold (+2 defense)<br>
   ◆ Diplomatic action (bribe minor nation, etc.): 2–5 Gold<br>
-  ◆ Espionage (learn another faction's troop positions or secret): 3 Gold → GM rolls d6, 4+ succeeds<br>
-  ◆ Domestic stability (Russia, Austria-Hungary special): 2–3 Gold/turn
+  ◆ Send economic aid to another faction: 1–5 Gold<br>
+  ◆ Espionage: 3 Gold → GM rolls d6, 4+ succeeds<br>
+  ◆ Domestic stability (Russia, Austria-Hungary): 2–4 Gold/turn
 </div>
 
 <div class="highlight-box" style="border-color: var(--gold-accent);">
@@ -3812,6 +3815,36 @@ body::before {
 <p>◆ Russia requires 1 full turn to mobilize (can only use half their army divisions in the first turn of war).</p>
 <p>◆ Britain automatically enters the war if Belgium is invaded.</p>
 <p>◆ Arms dealers may continue selling to all sides unless nationalized by their home government.</p>
+
+<p style="margin-top:20px;"><strong style="font-family:'Playfair Display',serif; font-size:1.15em;">THE ECONOMICS OF PEACE & WAR</strong></p>
+
+<p><strong>Maintenance:</strong> Each army division costs <strong>0.5 Gold/turn</strong> upkeep. Each fleet costs <strong>0.75 Gold/turn</strong>. Large militaries drain your treasury — especially navies.</p>
+
+<p><strong>Trade Agreements:</strong> Factions start with historical trade agreements (e.g. Entente Cordiale, Berlin-Baghdad Railway). Each agreement gives <strong>+1 Gold/turn to both parties</strong>. You can propose new agreements or break existing ones (breaking costs <strong>-2 VP</strong>). Trade agreements make war costly — going to war with a trade partner means losing that income.</p>
+
+<p><strong>Modernization:</strong> Factions can invest in long-term economic growth. Austria can <em>Accelerate Industrialization</em>, Russia can build <em>Railway Expansion</em>, and others have similar options. Each investment costs 3-5 Gold but adds +1 Gold/turn permanently (max 3 times).</p>
+
+<div class="highlight-box" style="border-color: #2d5016;">
+  <strong>Peace Victory Points — The Reward for Diplomacy:</strong><br>
+  Each turn at peace, factions earn VP based on how much they benefit from stability:<br><br>
+  ◆ <strong>Austria-Hungary: +3 VP/turn</strong> — "Imperial Harmony." War risks national disintegration.<br>
+  ◆ <strong>Russia: +2 VP/turn</strong> — "Reform & Stability." Needs peace to modernize and avoid revolution.<br>
+  ◆ <strong>Ottoman Empire: +2 VP/turn</strong> — "Ottoman Revival." Needs peace for reforms.<br>
+  ◆ <strong>Germany: +1 VP/turn</strong> — "Industrial Prosperity." Benefits from peace but strong enough for war.<br>
+  ◆ <strong>Britain: +1 VP/turn</strong> — "Pax Britannica." Trade thrives in peacetime (+2g/turn bonus too).<br>
+  ◆ <strong>France: 0 VP/turn</strong> — "Revanchism Simmers." France gains <em>nothing</em> from peace. They want Alsace-Lorraine back.<br><br>
+  <em>Over 6 turns: Austria earns +18 VP from peace vs France's 0. This creates radically different incentives.</em>
+</div>
+
+<div class="highlight-box" style="border-color: #8b1a1a;">
+  <strong>The Cost of War:</strong><br>
+  ◆ Lose 50% of your trade income (trade routes disrupted)<br>
+  ◆ War exhaustion: -1 Gold/turn (civilian economy suffers)<br>
+  ◆ After 2+ turns of war: Civilian unrest adds -1 Gold/turn on top<br>
+  ◆ Austria-Hungary SPECIAL: Risk losing 1-2 army divisions per turn to ethnic desertion<br>
+  ◆ All peace VP stops immediately — you lose that income forever<br>
+  ◆ Blockades become devastating: Turn 3+ cuts 60% of industrial output
+</div>
 </div>
 
 <div class="section">
@@ -3871,14 +3904,16 @@ body::before {
 <p><strong>Costs</strong></p>
 <table class="ref-table">
   <tr><th>Action</th><th>Cost</th><th>Notes</th></tr>
-  <tr><td>Buy Army Division</td><td>3 Gold</td><td>Or 2 Gold via arms dealer</td></tr>
-  <tr><td>Buy Fleet</td><td>4 Gold</td><td>Or 3 Gold via arms dealer</td></tr>
-  <tr><td>Fortify Region</td><td>4 Gold</td><td>Or 3 Gold via Schneider-Skoda; gives +2 defense</td></tr>
+  <tr><td>Buy Army Division</td><td>2 Gold</td><td>Cheap to raise — upkeep is 0.5g/turn</td></tr>
+  <tr><td>Buy Fleet</td><td>6 Gold</td><td>Expensive — upkeep is 0.75g/turn</td></tr>
+  <tr><td>Mobilize (partial)</td><td>1 Gold/div</td><td>One-time cost when preparing for war</td></tr>
+  <tr><td>Mobilize (full)</td><td>0.5 Gold/div</td><td>50% discount if mobilizing ALL divisions at once</td></tr>
+  <tr><td>Modernization</td><td>3–5 Gold</td><td>+1g/turn permanently (max 2-3 uses per faction)</td></tr>
+  <tr><td>Fortify Region</td><td>3 Gold</td><td>+2 defense bonus</td></tr>
   <tr><td>Espionage</td><td>3 Gold</td><td>GM rolls d6; 4+ succeeds</td></tr>
-  <tr><td>Bribe Minor Nation</td><td>2–5 Gold</td><td>GM decides outcome based on amount</td></tr>
-  <tr><td>Plant News Story</td><td>3 Gold</td><td>Arms dealers only; GM adds a custom event</td></tr>
-  <tr><td>Domestic Stability</td><td>2–3 Gold/turn</td><td>Russia & Austria-Hungary must pay or face collapse</td></tr>
+  <tr><td>Economic Aid</td><td>1–5 Gold</td><td>Transfer gold to any faction (subsidies, bribes)</td></tr>
   <tr><td>Break Alliance</td><td>–2 VP</td><td>But sometimes worth it</td></tr>
+  <tr><td>Break Trade Agreement</td><td>–2 VP</td><td>Lose +1g/turn income for both parties</td></tr>
 </table>
 
 <p><strong>Combat Quick Reference</strong></p>
@@ -3892,17 +3927,17 @@ body::before {
   <tr><td>6. Retreat</td><td>Losing army retreats to adjacent friendly region</td></tr>
 </table>
 
-<p><strong>Income Per Turn = Industry + Trade + Bonuses – Blockade – Upkeep – Mobilization</strong></p>
+<p><strong>Income Per Turn = Industry + Trade + Agreements + Bonuses + Peace VP – Blockade – Upkeep – War Costs</strong></p>
 <table class="ref-table">
-  <tr><th>Faction</th><th>Industry</th><th>Trade</th><th>Total</th><th>Special</th></tr>
-  <tr><td>Germany</td><td>5</td><td>3</td><td>8 Gold</td><td>+2 if controlling Alsace-Lorraine. Trade via North Sea &amp; Baltic.</td></tr>
-  <tr><td>Britain</td><td>3</td><td>6</td><td>9 Gold</td><td>Heavily trade-dependent — vulnerable to naval blockade.</td></tr>
-  <tr><td>France</td><td>4</td><td>2</td><td>6 Gold</td><td>+2 if Lorraine recaptured. Trade via Channel &amp; Mediterranean.</td></tr>
-  <tr><td>Russia</td><td>4</td><td>2</td><td>6 Gold</td><td>–2 if revolution ongoing. Trade via Baltic only.</td></tr>
-  <tr><td>Austria-Hungary</td><td>4</td><td>1</td><td>5 Gold</td><td>–2 if internal rebellion. Trade via Mediterranean.</td></tr>
-  <tr><td>Ottoman Empire</td><td>2</td><td>2</td><td>4 Gold</td><td>+2 from Straits tolls (if Dardanelles held).</td></tr>
-  <tr><td>Krupp-Vickers</td><td>2</td><td>—</td><td>2 Gold</td><td>+ all sales revenue. +2 war dividend when 2+ powers at war.</td></tr>
-  <tr><td>Schneider-Skoda</td><td>1</td><td>—</td><td>1 Gold</td><td>+ all sales revenue. +2 war dividend when 2+ powers at war.</td></tr>
+  <tr><th>Faction</th><th>Industry</th><th>Trade</th><th>Agreements</th><th>Peace VP</th><th>Special</th></tr>
+  <tr><td>Germany</td><td>8</td><td>3</td><td>+3</td><td>+1/turn</td><td>+4 from Alsace-Lorraine (contested if enemy present)</td></tr>
+  <tr><td>Britain</td><td>4</td><td>7</td><td>+2</td><td>+1/turn</td><td>+2g peace dividend. 14 fleets = blockade power.</td></tr>
+  <tr><td>France</td><td>5</td><td>3</td><td>+2</td><td>0</td><td>+4 if Alsace recaptured. No peace VP — wants war!</td></tr>
+  <tr><td>Russia</td><td>5</td><td>2</td><td>+2</td><td>+2/turn</td><td>–2 if revolution. Needs peace to reform.</td></tr>
+  <tr><td>Austria-Hungary</td><td>4</td><td>1</td><td>+1</td><td>+3/turn</td><td>+2g stability bonus at peace. War = desertion risk.</td></tr>
+  <tr><td>Ottoman Empire</td><td>2</td><td>2</td><td>+2</td><td>+2/turn</td><td>+2 from Straits tolls (if Dardanelles held).</td></tr>
+  <tr><td>Krupp-Vickers</td><td>2</td><td>—</td><td>—</td><td>—</td><td>+ sales + war dividend (+2/turn if 2+ at war).</td></tr>
+  <tr><td>Schneider-Skoda</td><td>1</td><td>—</td><td>—</td><td>—</td><td>+ sales + war dividend (+2/turn if 2+ at war).</td></tr>
 </table>
 
 <p><strong>Blockade Rules</strong></p>
@@ -3910,25 +3945,46 @@ body::before {
   <tr><th>Mechanic</th><th>Effect</th></tr>
   <tr><td>Declaring a blockade</td><td>Must have fleets deployed in the target's trade sea zone. GM declares via control panel.</td></tr>
   <tr><td>Turn 1 of blockade</td><td>Target loses ALL trade income. Industry unaffected.</td></tr>
-  <tr><td>Turn 2 of blockade</td><td>Trade still cut + 25% industry loss (imports drying up).</td></tr>
-  <tr><td>Turn 3+ of blockade</td><td>Trade still cut + 50% industry loss (raw materials exhausted).</td></tr>
+  <tr><td>Turn 2 of blockade</td><td>Trade still cut + 35% industry loss (shortages begin).</td></tr>
+  <tr><td>Turn 3+ of blockade</td><td>Trade still cut + 60% industry loss (starvation &amp; collapse).</td></tr>
   <tr><td>Breaking a blockade</td><td>Win a naval battle in the blockaded sea zone.</td></tr>
 </table>
 
-<p><strong>Mobilization Surcharge</strong></p>
+<p><strong>Maintenance &amp; Mobilization</strong></p>
 <table class="ref-table">
-  <tr><th>Status</th><th>Extra Cost/Turn</th><th>Notes</th></tr>
-  <tr><td>Reserve (at rest)</td><td>0 Gold</td><td>No extra cost — troops are inactive.</td></tr>
-  <tr><td>Mobilized (readied)</td><td>+0.5 Gold/unit</td><td>Rounded up. Signals intent — other factions will notice.</td></tr>
-  <tr><td>Deployed (peacetime)</td><td>+0.5 Gold/unit</td><td>On top of base upkeep. Discourages early aggressive deployment.</td></tr>
-  <tr><td>Deployed (wartime)</td><td>Base upkeep only</td><td>No surcharge once war is declared — you're committed.</td></tr>
+  <tr><th>Item</th><th>Cost</th><th>Notes</th></tr>
+  <tr><td>Army upkeep</td><td>0.5 Gold/div/turn</td><td>Ongoing maintenance for each division.</td></tr>
+  <tr><td>Fleet upkeep</td><td>0.75 Gold/fleet/turn</td><td>Navies are expensive to maintain.</td></tr>
+  <tr><td>Mobilize (partial)</td><td>1 Gold/division</td><td>One-time cost. Signals intent — other factions will notice.</td></tr>
+  <tr><td>Mobilize (full)</td><td>0.5 Gold/division</td><td>One-time cost. 50% discount for mobilizing ALL divisions at once.</td></tr>
+</table>
+
+<p><strong>War Costs (per turn while at war)</strong></p>
+<table class="ref-table">
+  <tr><th>Penalty</th><th>Effect</th><th>Notes</th></tr>
+  <tr><td>Trade disruption</td><td>Lose 50% trade income</td><td>Your own trade routes suffer in wartime.</td></tr>
+  <tr><td>War exhaustion</td><td>-1 Gold/turn</td><td>Civilian economy strained.</td></tr>
+  <tr><td>Civilian unrest (2+ turns)</td><td>-1 Gold/turn extra</td><td>Compounds after sustained war.</td></tr>
+  <tr><td>Peace VP lost</td><td>All peace VP stops</td><td>Austria loses 3 VP/turn, Russia 2 VP/turn.</td></tr>
+  <tr><td>Austria: Nationality Crisis</td><td>1-2 divisions desert</td><td>Ethnic minorities refuse to fight. Escalates each turn.</td></tr>
+</table>
+
+<p><strong>Peace VP Per Turn (while at peace)</strong></p>
+<table class="ref-table">
+  <tr><th>Faction</th><th>VP/Turn</th><th>Gold/Turn</th><th>Rationale</th></tr>
+  <tr><td>Austria-Hungary</td><td><strong>+3 VP</strong></td><td>+1g</td><td>Imperial harmony — war destroys the empire</td></tr>
+  <tr><td>Russia</td><td><strong>+2 VP</strong></td><td>+1g</td><td>Reform &amp; stability — needs time to modernize</td></tr>
+  <tr><td>Ottoman Empire</td><td><strong>+2 VP</strong></td><td>+1g</td><td>Ottoman revival — needs peace for reforms</td></tr>
+  <tr><td>Germany</td><td>+1 VP</td><td>+1g</td><td>Industrial prosperity — but can afford war</td></tr>
+  <tr><td>Britain</td><td>+1 VP</td><td>+2g</td><td>Pax Britannica — trade empire thrives in peace</td></tr>
+  <tr><td>France</td><td><strong>0 VP</strong></td><td>0g</td><td>Revanchism — peace gains France nothing</td></tr>
 </table>
 
 <p><strong>Arms Dealer Price List</strong></p>
 <table class="ref-table">
   <tr><th>Product</th><th>Buyer Pays</th><th>Dealer Earns</th><th>Notes</th></tr>
-  <tr><td>Army Division</td><td>2 Gold</td><td>2 Gold</td><td>Cheaper than buying direct (3 Gold)</td></tr>
-  <tr><td>Fleet</td><td>3 Gold</td><td>3 Gold</td><td>Cheaper than buying direct (4 Gold)</td></tr>
+  <tr><td>Army Division</td><td>2 Gold</td><td>2 Gold</td><td>Same as buying direct (2 Gold)</td></tr>
+  <tr><td>Fleet</td><td>5 Gold</td><td>5 Gold</td><td>Cheaper than buying direct (6 Gold)</td></tr>
   <tr><td>Artillery Upgrade</td><td>2 Gold</td><td>2 Gold</td><td>+1 to attack rolls for 1 battle</td></tr>
   <tr><td>Fortification Kit</td><td>3 Gold</td><td>3 Gold</td><td>Schneider-Skoda specialty; +2 defense</td></tr>
   <tr><td>Super-Heavy Siege Howitzer</td><td>6+ Gold (auction)</td><td>Full price</td><td>Only ONE exists. +4 vs fortified. Škoda Director runs auction.</td></tr>
@@ -3943,6 +3999,7 @@ body::before {
   <tr><td>Exclusive Contract</td><td>2 Gold</td><td>Lock a nation into buying only from you for 3 turns. 1 Gold/turn fee + discounts. Breach = 3 Gold penalty.</td></tr>
   <tr><td>Industrial Espionage</td><td>2 Gold</td><td>GM reveals rival consortium's total sales, treasury, and most recent client.</td></tr>
   <tr><td>Fear Campaign (Vickers only)</td><td>Free</td><td>Spread a rumor about enemy troop buildup. Must go through GM. May trigger purchases.</td></tr>
+  <tr><td>Lobby Austria</td><td>2 Gold</td><td>Pressure the Dual Monarchy toward war. Undermine their peace faction.</td></tr>
   <tr><td>War Dividend (passive)</td><td>—</td><td>+2 Gold/turn to each consortium while a major war is active. No war ever = –5 VP.</td></tr>
 </table>
 </div>
