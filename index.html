@@ -6050,10 +6050,19 @@ const WAR_PENALTIES = {
   unrestPenalty: 1          // Gold/turn penalty from civilian unrest (on top of exhaustion)
 };
 
-// Peace is profitable — factions NOT at war earn bonuses
+// Peace is profitable — factions NOT at war earn VP and gold each turn
+// Each faction values peace differently based on their strategic situation
 const PEACE_BONUSES = {
-  peaceDividend: 1,        // +1g/turn from neutral trade flourishing
-  endGameVP: 3             // +3 VP at game end for factions that never went to war
+  endGameVP: 3,            // +3 VP at game end for factions that never went to war
+  // Per-turn rewards while at peace: { gold: g/turn, vp: VP/turn }
+  perFaction: {
+    germany:  { gold: 1, vp: 1, label: 'Industrial prosperity' },
+    france:   { gold: 0, vp: 0, label: 'Revanchism simmers' },        // France gains NOTHING from peace — they want Alsace back
+    britain:  { gold: 2, vp: 1, label: 'Pax Britannica' },            // Britain profits most from stable trade
+    russia:   { gold: 1, vp: 2, label: 'Reform & stability' },        // Russia desperately needs peace to modernize and avoid revolution
+    austria:  { gold: 1, vp: 3, label: 'Imperial harmony' },          // Austria benefits ENORMOUSLY — war tears them apart
+    ottoman:  { gold: 1, vp: 2, label: 'Ottoman revival' }            // Ottoman needs peace to reform
+  }
 };
 
 // Which sea zones affect which factions' trade routes
@@ -6159,9 +6168,14 @@ function computeEconomy(fid) {
     }
   }
 
-  // --- Peace dividend — peace is PROFITABLE ---
-  if (!isDealer && !f.atWar) {
-    peaceDividend = PEACE_BONUSES.peaceDividend;
+  // --- Peace dividend — peace is PROFITABLE (varies by faction) ---
+  let peaceVP = 0;
+  let peaceLabel = '';
+  if (!isDealer && !f.atWar && PEACE_BONUSES.perFaction[fid]) {
+    const pb = PEACE_BONUSES.perFaction[fid];
+    peaceDividend = pb.gold;
+    peaceVP = pb.vp;
+    peaceLabel = pb.label;
   }
 
   // --- Blockade effects ---
@@ -6234,7 +6248,8 @@ function computeEconomy(fid) {
     industry, trade, bonus, bonusLabel,
     tradeLoss, industryLoss, blockadeDetail,
     mobilizationCost, warDividend, warPenalty, warPenaltyLabel,
-    peaceDividend, tradeAgreementIncome, dualMonarchyBonus,
+    peaceDividend, peaceVP, peaceLabel,
+    tradeAgreementIncome, dualMonarchyBonus,
     modernizationIncome, desertionRisk,
     grossIncome, blockadePenalty, effectiveIncome,
     baseUpkeep, totalUpkeep, net,
@@ -6732,6 +6747,11 @@ function advanceTurn() {
     f.gold = Math.max(0, f.gold + econ.net);
     // Update legacy income field for backward compat
     f.income = econ.effectiveIncome;
+    // Award peace VP
+    if (econ.peaceVP > 0) {
+      f.vp = (f.vp || 0) + econ.peaceVP;
+      logAction(fid, 'peace', 'Peace VP: +' + econ.peaceVP + ' (' + econ.peaceLabel + ')');
+    }
 
     summary.push({
       faction: FACTION_NAMES[fid],
