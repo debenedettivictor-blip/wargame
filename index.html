@@ -9101,7 +9101,10 @@ function renderGMControl() {
             <div class="coalition-label">Defender Coalition</div>
             ${defCoalHtml}
           </div>
-          <button class="roll-btn" onclick="resolveBattleFromGM('${b.id}')">\u2684 Resolve Battle \u2684</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="roll-btn" onclick="populateBattleSimulator('${b.id}')" style="background:var(--cream); color:var(--ink); border:2px solid var(--ink); flex:1;">Load in Simulator \u2193</button>
+            <button class="roll-btn" onclick="resolveBattleFromGM('${b.id}')" style="flex:1;">\u2684 Quick Resolve \u2684</button>
+          </div>
           <div id="battleResult_${b.id}"></div>
         </div>
       </div>`;
@@ -9529,7 +9532,577 @@ function applyGMEdits(fid) {
 
 // ==================== MAP ====================
 
-function renderMap() {}
+let theatreMap = null;
+let theatreMapLayers = [];
+
+const COUNTRY_COLORS = {
+  'Russian Empire': '#8B8B5E',
+  'Germany': '#9A8BB5',
+  'Austria Hungary': '#D4A76A',
+  'Ottoman Empire': '#C46B4E',
+  'France': '#7B9B8B',
+  'United Kingdom of Great Britain and Ireland': '#D4785A',
+  'Spain': '#C8B44E',
+  'Italy': '#6B8B5E',
+  'Sweden\u2013Norway': '#8B9BB5',
+  'Portugal': '#9BBB7B',
+  'Romania': '#B89B6B',
+  'Greece': '#A8C8D8',
+  'Bulgaria': '#C4A8C8',
+  'Serbia': '#D4A8A8',
+  'Montenegro': '#B88B8B',
+  'Belgium': '#D4C878',
+  'Netherlands': '#E8B84E',
+  'Denmark': '#C8A878',
+  'Switzerland': '#E8C8C8',
+  'Morocco': '#C8985E',
+  'Persia': '#C8C84E',
+  'Luxembourg': '#B8A8D4',
+  'Bosnia-Herzegovina': '#D4A76A',
+  'Iceland': '#C8D8E8',
+  'Tunisia': '#C8985E',
+  'Algeria': '#7B9B8B',
+  'Egypt': '#C46B4E',
+  'Albania': '#D4C8B8'
+};
+
+const COUNTRY_DISPLAY_NAMES = {
+  'Russian Empire': 'Russian Empire',
+  'Germany': 'German Empire (Deutsches Kaiserreich)',
+  'Austria Hungary': 'Austria-Hungary (\u00D6sterreich-Ungarn)',
+  'Ottoman Empire': 'Ottoman Empire (Devlet-i Aliyye)',
+  'France': 'French Republic (R\u00E9publique fran\u00E7aise)',
+  'United Kingdom of Great Britain and Ireland': 'United Kingdom of Great Britain and Ireland',
+  'Spain': 'Kingdom of Spain (Reino de Espa\u00F1a)',
+  'Italy': 'Kingdom of Italy (Regno d\'Italia)',
+  'Sweden\u2013Norway': 'United Kingdoms of Sweden and Norway',
+  'Portugal': 'Kingdom of Portugal (Reino de Portugal)',
+  'Romania': 'Kingdom of Romania (Regatul Rom\u00E2niei)',
+  'Greece': 'Kingdom of Greece',
+  'Bulgaria': 'Principality of Bulgaria',
+  'Serbia': 'Kingdom of Serbia',
+  'Montenegro': 'Principality of Montenegro',
+  'Belgium': 'Kingdom of Belgium',
+  'Netherlands': 'Kingdom of the Netherlands',
+  'Denmark': 'Kingdom of Denmark',
+  'Switzerland': 'Swiss Confederation',
+  'Morocco': 'Sultanate of Morocco',
+  'Persia': 'Sublime State of Persia (Qajar Dynasty)',
+  'Luxembourg': 'Grand Duchy of Luxembourg',
+  'Bosnia-Herzegovina': 'Bosnia-Herzegovina (Austro-Hungarian)',
+  'Iceland': 'Iceland (Danish dependency)',
+  'Tunisia': 'French Tunisia',
+  'Algeria': 'French Algeria',
+  'Egypt': 'Khedivate of Egypt (British occupied)'
+};
+
+const COUNTRY_DATA = {
+  'Russian Empire': {
+    formalName: 'Russian Empire (\u0420\u043E\u0441\u0441\u0438\u0439\u0441\u043A\u0430\u044F \u0418\u043C\u043F\u0435\u0440\u0438\u044F)',
+    headOfState: 'Tsar Nicholas II',
+    capital: 'Saint Petersburg',
+    government: 'Absolute monarchy',
+    population: '~132 million',
+    summary: 'The largest country in the world by area, spanning from Poland to the Pacific. Industrializing rapidly but facing growing social unrest that would eventually lead to the 1905 Revolution. A major European great power and member of the Franco-Russian Alliance.'
+  },
+  'Germany': {
+    formalName: 'German Empire (Deutsches Kaiserreich)',
+    headOfState: 'Kaiser Wilhelm II',
+    capital: 'Berlin',
+    government: 'Federal constitutional monarchy',
+    population: '~56 million',
+    summary: 'United in 1871 under Prussian leadership, the German Empire was the dominant industrial and military power in continental Europe. Under Wilhelm II, it pursued an aggressive foreign policy including naval expansion and colonial ambitions that increased tensions with Britain and France.'
+  },
+  'Austria Hungary': {
+    formalName: 'Austria-Hungary (\u00D6sterreichisch-Ungarische Monarchie)',
+    headOfState: 'Emperor Franz Joseph I',
+    capital: 'Vienna / Budapest',
+    government: 'Dual constitutional monarchy',
+    population: '~47 million',
+    summary: 'A multi-ethnic empire governing over a dozen nationalities under the Austro-Hungarian Compromise of 1867. Facing growing nationalist tensions among its Slavic, Romanian, and Italian populations while maintaining great power status in European diplomacy.'
+  },
+  'Ottoman Empire': {
+    formalName: 'Ottoman Empire (Devlet-i \u02BFAl\u012Bye-i \u02BFOsm\u0101n\u012Bye)',
+    headOfState: 'Sultan Abdul Hamid II',
+    capital: 'Constantinople (Istanbul)',
+    government: 'Absolute monarchy (suspended constitution)',
+    population: '~25 million',
+    summary: 'Once spanning three continents, the Ottoman Empire was in long decline by 1900, having lost most of its European territories. Sultan Abdul Hamid II ruled autocratically, suppressing the Young Turk reform movement while still controlling vast territories in the Middle East.'
+  },
+  'France': {
+    formalName: 'French Republic (R\u00E9publique fran\u00E7aise)',
+    headOfState: 'President \u00C9mile Loubet',
+    capital: 'Paris',
+    government: 'Parliamentary republic (Third Republic)',
+    population: '~39 million',
+    summary: 'The Third Republic was firmly established by 1900 despite political turbulence from the Dreyfus Affair. France possessed the second-largest colonial empire and was allied with Russia against the German-led Triple Alliance. Paris hosted the 1900 World\'s Fair and Olympic Games.'
+  },
+  'United Kingdom of Great Britain and Ireland': {
+    formalName: 'United Kingdom of Great Britain and Ireland',
+    headOfState: 'Queen Victoria (until Jan 1901)',
+    capital: 'London',
+    government: 'Constitutional monarchy and parliamentary democracy',
+    population: '~41 million',
+    summary: 'At the height of the British Empire, ruling over a quarter of the world\'s population. The Royal Navy dominated the seas and London was the center of global finance. The Boer War in South Africa was ongoing, exposing military weaknesses.'
+  },
+  'Spain': {
+    formalName: 'Kingdom of Spain (Reino de Espa\u00F1a)',
+    headOfState: 'King Alfonso XIII (regency of Maria Christina)',
+    capital: 'Madrid',
+    government: 'Constitutional monarchy',
+    population: '~18.6 million',
+    summary: 'Spain had just suffered a devastating defeat in the Spanish-American War of 1898, losing Cuba, Puerto Rico, Guam, and the Philippines. The nation was in a period of introspection and reform known as the Generation of \'98 movement.'
+  },
+  'Italy': {
+    formalName: 'Kingdom of Italy (Regno d\'Italia)',
+    headOfState: 'King Umberto I (assassinated July 1900)',
+    capital: 'Rome',
+    government: 'Constitutional monarchy',
+    population: '~32 million',
+    summary: 'A relatively young nation unified only in 1861, Italy was industrializing in the north while the south remained largely agrarian. It was a member of the Triple Alliance with Germany and Austria-Hungary, though relations with Austria were strained over irredentist claims.'
+  },
+  'Sweden\u2013Norway': {
+    formalName: 'United Kingdoms of Sweden and Norway',
+    headOfState: 'King Oscar II',
+    capital: 'Stockholm / Christiania (Oslo)',
+    government: 'Dual constitutional monarchy',
+    population: '~7.3 million',
+    summary: 'A personal union of two kingdoms sharing a monarch since 1814. Growing Norwegian nationalism and demands for an independent foreign policy were creating tension that would lead to the peaceful dissolution of the union in 1905.'
+  },
+  'Portugal': {
+    formalName: 'Kingdom of Portugal (Reino de Portugal)',
+    headOfState: 'King Carlos I',
+    capital: 'Lisbon',
+    government: 'Constitutional monarchy',
+    population: '~5.4 million',
+    summary: 'Portugal maintained a vast colonial empire in Africa, Asia, and South America despite being a relatively small European power. The British Ultimatum of 1890 over African territories had caused a constitutional crisis and rising republican sentiment.'
+  },
+  'Romania': {
+    formalName: 'Kingdom of Romania (Regatul Rom\u00E2niei)',
+    headOfState: 'King Carol I',
+    capital: 'Bucharest',
+    government: 'Constitutional monarchy',
+    population: '~6 million',
+    summary: 'Independent since 1877 and a kingdom since 1881, Romania was allied with the Triple Alliance through a secret treaty. The country was modernizing rapidly, though land reform remained a pressing issue for its largely peasant population.'
+  },
+  'Greece': {
+    formalName: 'Kingdom of Greece (\u0392\u03B1\u03C3\u03AF\u03BB\u03B5\u03B9\u03BF\u03BD \u03C4\u1FC6\u03C2 \u1F19\u03BB\u03BB\u03AC\u03B4\u03BF\u03C2)',
+    headOfState: 'King George I',
+    capital: 'Athens',
+    government: 'Constitutional monarchy',
+    population: '~2.4 million',
+    summary: 'Greece harbored the Megali Idea \u2014 the vision of uniting all Greek-speaking populations. Having lost the Greco-Turkish War of 1897, Greece was under international financial control but still aspired to incorporate Crete, Macedonia, and other Ottoman territories.'
+  },
+  'Bulgaria': {
+    formalName: 'Principality of Bulgaria',
+    headOfState: 'Prince Ferdinand I',
+    capital: 'Sofia',
+    government: 'Constitutional monarchy (nominal Ottoman suzerainty)',
+    population: '~3.7 million',
+    summary: 'Technically still an Ottoman vassal but effectively independent since 1878. Bulgaria aspired to unite all Bulgarian-speaking populations, particularly in Macedonia and Thrace, leading to intense rivalry with Serbia and Greece in the region.'
+  },
+  'Serbia': {
+    formalName: 'Kingdom of Serbia (\u041A\u0440\u0430\u0459\u0435\u0432\u0438\u043D\u0430 \u0421\u0440\u0431\u0438\u0458\u0430)',
+    headOfState: 'King Alexander I Obrenovi\u0107',
+    capital: 'Belgrade',
+    government: 'Constitutional monarchy',
+    population: '~2.5 million',
+    summary: 'A small but ambitious Balkan kingdom with aspirations of uniting all South Slavs. The unpopular Obrenovi\u0107 dynasty would be overthrown in a violent coup in 1903, replaced by the pro-Russian Kara\u0111or\u0111evi\u0107 dynasty.'
+  },
+  'Montenegro': {
+    formalName: 'Principality of Montenegro',
+    headOfState: 'Prince Nicholas I',
+    capital: 'Cetinje',
+    government: 'Absolute monarchy',
+    population: '~280,000',
+    summary: 'One of the smallest European states, Montenegro had maintained its independence through fierce resistance against the Ottomans. Prince Nicholas I ruled as an absolute monarch over a predominantly mountainous, warrior society closely allied with Serbia and Russia.'
+  },
+  'Belgium': {
+    formalName: 'Kingdom of Belgium',
+    headOfState: 'King Leopold II',
+    capital: 'Brussels',
+    government: 'Constitutional monarchy',
+    population: '~6.7 million',
+    summary: 'A neutral country guaranteed by the great powers since 1839. King Leopold II personally controlled the Congo Free State, where brutal exploitation of the native population was beginning to draw international condemnation.'
+  },
+  'Netherlands': {
+    formalName: 'Kingdom of the Netherlands',
+    headOfState: 'Queen Wilhelmina',
+    capital: 'The Hague / Amsterdam',
+    government: 'Constitutional monarchy',
+    population: '~5.1 million',
+    summary: 'A neutral colonial power with vast holdings in the Dutch East Indies (modern Indonesia). The Hague hosted the first Peace Conference in 1899, establishing the Permanent Court of Arbitration. The Netherlands maintained strict neutrality in European power politics.'
+  },
+  'Denmark': {
+    formalName: 'Kingdom of Denmark',
+    headOfState: 'King Christian IX',
+    capital: 'Copenhagen',
+    government: 'Constitutional monarchy',
+    population: '~2.4 million',
+    summary: 'Having lost Schleswig-Holstein to Prussia in 1864, Denmark had adopted a policy of neutrality and focused on domestic reforms. Known as the "father-in-law of Europe" due to Christian IX\'s children marrying into royal families across the continent.'
+  },
+  'Switzerland': {
+    formalName: 'Swiss Confederation (Confoederatio Helvetica)',
+    headOfState: 'Federal Council (collective presidency)',
+    capital: 'Bern',
+    government: 'Federal republic (direct democracy)',
+    population: '~3.3 million',
+    summary: 'A permanently neutral confederation since 1815, Switzerland was home to the International Red Cross (founded 1863) and had become a center for international organizations. Its unique system of direct democracy and cantonal federalism set it apart from European monarchies.'
+  },
+  'Morocco': {
+    formalName: 'Sultanate of Morocco',
+    headOfState: 'Sultan Abdelaziz',
+    capital: 'Fez / Marrakech',
+    government: 'Absolute monarchy',
+    population: '~5 million',
+    summary: 'One of the last independent states in Africa, Morocco was the subject of intense imperial rivalry between France and Germany. The young Sultan Abdelaziz faced internal rebellions and foreign pressure that would culminate in the First Moroccan Crisis of 1905.'
+  },
+  'Persia': {
+    formalName: 'Sublime State of Persia (Qajar Dynasty)',
+    headOfState: 'Shah Mozaffar ad-Din',
+    capital: 'Tehran',
+    government: 'Absolute monarchy',
+    population: '~9 million',
+    summary: 'The Qajar dynasty ruled a weakened but ancient empire caught between Russian expansion from the north and British interests from the south. The discovery of oil in 1908 would dramatically increase foreign interest in Persian affairs.'
+  },
+  'Luxembourg': {
+    formalName: 'Grand Duchy of Luxembourg',
+    headOfState: 'Grand Duke Adolphe',
+    capital: 'Luxembourg City',
+    government: 'Constitutional monarchy',
+    population: '~210,000',
+    summary: 'A tiny but strategically important state wedged between France, Germany, and Belgium. Though guaranteed neutrality like Belgium, Luxembourg was part of the German Zollverein (customs union) and its fortress had been dismantled by the Treaty of London in 1867.'
+  },
+  'Bosnia-Herzegovina': {
+    formalName: 'Bosnia-Herzegovina (Austro-Hungarian administration)',
+    headOfState: 'Administered by Austria-Hungary',
+    capital: 'Sarajevo',
+    government: 'Occupied territory (nominally Ottoman)',
+    population: '~1.6 million',
+    summary: 'Occupied and administered by Austria-Hungary since 1878 while nominally still Ottoman territory. This ambiguous status was a major source of tension in the Balkans, particularly with Serbia which viewed Bosnia\'s Serb population as unredeemed compatriots.'
+  }
+};
+
+const LABEL_POSITIONS = {
+  'Russian Empire': [55, 40],
+  'Germany': [51, 10.5],
+  'Austria Hungary': [47.5, 17],
+  'Ottoman Empire': [39, 35],
+  'France': [46.5, 2.5],
+  'United Kingdom of Great Britain and Ireland': [54, -2.5],
+  'Spain': [40, -3.5],
+  'Italy': [42.5, 12.5],
+  'Sweden\u2013Norway': [63, 15],
+  'Portugal': [39.5, -8],
+  'Romania': [45.5, 25],
+  'Greece': [38.5, 23],
+  'Bulgaria': [42.7, 25.5],
+  'Serbia': [44, 21],
+  'Montenegro': [42.5, 19.2],
+  'Belgium': [50.8, 4.5],
+  'Netherlands': [52.3, 5.5],
+  'Denmark': [56, 9.5],
+  'Switzerland': [46.8, 8.2],
+  'Morocco': [32, -6],
+  'Persia': [33, 53],
+  'Luxembourg': [49.75, 6.15],
+  'Bosnia-Herzegovina': [43.9, 17.8],
+  'Tunisia': [34, 9],
+  'Algeria': [33, 2.5],
+  'Egypt': [27, 30]
+};
+
+const LABEL_SIZES = {
+  'Russian Empire': 16,
+  'Germany': 13,
+  'Austria Hungary': 12,
+  'Ottoman Empire': 13,
+  'France': 13,
+  'United Kingdom of Great Britain and Ireland': 11,
+  'Spain': 13,
+  'Italy': 12,
+  'Sweden\u2013Norway': 11,
+  'Persia': 12,
+  'Morocco': 11,
+  'Algeria': 10,
+  'Egypt': 11,
+  'Tunisia': 9
+};
+
+const LABEL_SHORT_NAMES = {
+  'United Kingdom of Great Britain and Ireland': 'United Kingdom',
+  'Sweden\u2013Norway': 'Sweden-Norway',
+  'Bosnia-Herzegovina': 'Bosnia',
+  'Austria Hungary': 'Austria-Hungary'
+};
+
+const WATER_LABELS = [
+  { name: 'ATLANTIC OCEAN', lat: 45, lng: -18, size: 14, rotation: -30 },
+  { name: 'MEDITERRANEAN SEA', lat: 35.5, lng: 15, size: 12, rotation: -5 },
+  { name: 'BLACK SEA', lat: 43, lng: 34, size: 11, rotation: 0 },
+  { name: 'NORTH SEA', lat: 57, lng: 3, size: 10, rotation: -20 },
+  { name: 'BALTIC SEA', lat: 58, lng: 19, size: 10, rotation: -70 },
+  { name: 'CASPIAN SEA', lat: 41, lng: 51, size: 10, rotation: -20 },
+  { name: 'BAY OF BISCAY', lat: 45, lng: -5, size: 9, rotation: 0 },
+  { name: 'ADRIATIC SEA', lat: 42, lng: 16, size: 9, rotation: -50 }
+];
+
+const LEGEND_ENTRIES = [
+  ['Russian Empire', '#8B8B5E'],
+  ['German Empire', '#9A8BB5'],
+  ['Austria-Hungary', '#D4A76A'],
+  ['Ottoman Empire', '#C46B4E'],
+  ['France', '#7B9B8B'],
+  ['United Kingdom', '#D4785A'],
+  ['Spain', '#C8B44E'],
+  ['Italy', '#6B8B5E'],
+  ['Sweden-Norway', '#8B9BB5'],
+  ['Portugal', '#9BBB7B'],
+  ['Romania', '#B89B6B'],
+  ['Greece', '#A8C8D8'],
+  ['Bulgaria', '#C4A8C8'],
+  ['Serbia', '#D4A8A8'],
+  ['Montenegro', '#B88B8B'],
+  ['Belgium', '#D4C878'],
+  ['Netherlands', '#E8B84E'],
+  ['Denmark', '#C8A878'],
+  ['Switzerland', '#E8C8C8'],
+  ['Morocco', '#C8985E'],
+  ['Persia', '#C8C84E'],
+  ['Luxembourg', '#B8A8D4']
+];
+
+function getCountryColor(name) {
+  return COUNTRY_COLORS[name] || '#D4C8B8';
+}
+
+function closeCountryPanel() {
+  const panel = document.getElementById('countryInfoPanel');
+  if (panel) panel.classList.remove('open');
+}
+
+function toggleMapLegend() {
+  const legend = document.getElementById('mapLegend');
+  if (legend) legend.classList.toggle('collapsed');
+}
+
+function showCountryInfo(name) {
+  const panel = document.getElementById('countryInfoPanel');
+  const content = document.getElementById('countryInfoContent');
+  if (!panel || !content) return;
+
+  const data = COUNTRY_DATA[name];
+  const displayName = COUNTRY_DISPLAY_NAMES[name] || name;
+  const color = getCountryColor(name);
+
+  if (!data) {
+    content.innerHTML = `
+      <div class="panel-title">${displayName}</div>
+      <div class="panel-subtitle"><span class="panel-color-swatch" style="background:${color}"></span>${name}</div>
+      <hr class="panel-divider">
+      <div class="panel-summary">Detailed information not available for this territory.</div>`;
+  } else {
+    content.innerHTML = `
+      <div class="panel-title">${data.formalName}</div>
+      <div class="panel-subtitle"><span class="panel-color-swatch" style="background:${color}"></span>${displayName}</div>
+      <hr class="panel-divider">
+      <div class="panel-detail"><strong>Head of State:</strong> ${data.headOfState}</div>
+      <div class="panel-detail"><strong>Capital:</strong> ${data.capital}</div>
+      <div class="panel-detail"><strong>Government:</strong> ${data.government}</div>
+      <div class="panel-detail"><strong>Population:</strong> ${data.population}</div>
+      <hr class="panel-divider">
+      <div class="panel-summary">${data.summary}</div>`;
+  }
+  panel.classList.add('open');
+}
+
+function buildMapLegend() {
+  const body = document.getElementById('mapLegendBody');
+  if (!body) return;
+  body.innerHTML = LEGEND_ENTRIES.map(([name, color]) =>
+    `<div class="map-legend-item"><div class="map-legend-swatch" style="background:${color}"></div><span>${name}</span></div>`
+  ).join('');
+}
+
+function renderMap() {
+  const container = document.getElementById('mapLeaflet');
+  if (!container) return;
+
+  // Don't reinitialize if already built
+  if (theatreMap) {
+    theatreMap.invalidateSize();
+    return;
+  }
+
+  buildMapLegend();
+
+  theatreMap = L.map('mapLeaflet', {
+    center: [48, 15],
+    zoom: 4,
+    minZoom: 3,
+    maxZoom: 7,
+    maxBounds: [[20, -25], [75, 65]],
+    maxBoundsViscosity: 1.0,
+    zoomControl: true,
+    attributionControl: false
+  });
+
+  // Parchment background via a plain pane
+  const parchmentPane = theatreMap.createPane('parchment');
+  parchmentPane.style.zIndex = 100;
+  parchmentPane.style.background = '#F5F0E1';
+
+  // Load GeoJSON data
+  const urls = {
+    ocean: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_ocean.geojson',
+    lakes: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_lakes.geojson',
+    world: 'https://raw.githubusercontent.com/aourednik/historical-basemaps/master/geojson/world_1900.geojson'
+  };
+
+  Promise.all([
+    fetch(urls.ocean).then(r => r.json()),
+    fetch(urls.lakes).then(r => r.json()),
+    fetch(urls.world).then(r => r.json())
+  ]).then(([oceanData, lakesData, worldData]) => {
+    // Hide loading overlay
+    const overlay = document.getElementById('mapLoadingOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    // Render parchment background (full world rectangle behind everything)
+    L.rectangle([[-90, -180], [90, 180]], {
+      fillColor: '#F5F0E1',
+      fillOpacity: 1,
+      stroke: false,
+      pane: 'parchment',
+      interactive: false
+    }).addTo(theatreMap);
+
+    // Render ocean
+    L.geoJSON(oceanData, {
+      style: { fillColor: '#D8E4E8', fillOpacity: 1, weight: 0, stroke: false },
+      interactive: false
+    }).addTo(theatreMap);
+
+    // Render lakes
+    L.geoJSON(lakesData, {
+      style: { fillColor: '#C8D8E0', fillOpacity: 1, weight: 0.5, color: '#A8B8C0' },
+      interactive: false
+    }).addTo(theatreMap);
+
+    // Filter to Europe/MENA region and render countries
+    const europeBounds = { minLat: 25, maxLat: 72, minLng: -15, maxLng: 60 };
+    const europeNames = new Set(Object.keys(COUNTRY_COLORS));
+
+    let selectedLayer = null;
+
+    const defaultStyle = (feature) => ({
+      fillColor: getCountryColor(feature.properties.NAME),
+      weight: 1.5,
+      color: '#5A4A3A',
+      fillOpacity: 0.75,
+      opacity: 0.9
+    });
+
+    const hoverStyle = {
+      weight: 3,
+      color: '#2A1A0A',
+      fillOpacity: 0.9
+    };
+
+    const countryLayer = L.geoJSON(worldData, {
+      filter: (feature) => {
+        const name = feature.properties.NAME;
+        if (!europeNames.has(name)) return false;
+        // Additional bounding box check for multi-region empires
+        try {
+          const bounds = L.geoJSON(feature).getBounds();
+          const center = bounds.getCenter();
+          // For Russia/Persia/Ottoman show even if centroid is outside strict bounds
+          if (['Russian Empire', 'Ottoman Empire', 'Persia'].includes(name)) return true;
+          return center.lat >= europeBounds.minLat - 5 && center.lat <= europeBounds.maxLat + 5 &&
+                 center.lng >= europeBounds.minLng - 10 && center.lng <= europeBounds.maxLng + 10;
+        } catch(e) { return true; }
+      },
+      style: defaultStyle,
+      onEachFeature: (feature, layer) => {
+        const name = feature.properties.NAME;
+
+        layer.on('mouseover', function(e) {
+          if (selectedLayer !== this) {
+            this.setStyle(hoverStyle);
+            this.bringToFront();
+          }
+        });
+        layer.on('mouseout', function(e) {
+          if (selectedLayer !== this) {
+            countryLayer.resetStyle(this);
+          }
+        });
+        layer.on('click', function(e) {
+          // Reset previous selection
+          if (selectedLayer) {
+            countryLayer.resetStyle(selectedLayer);
+          }
+          selectedLayer = this;
+          this.setStyle({ weight: 3, color: '#2A1A0A', fillOpacity: 0.9 });
+          this.bringToFront();
+          showCountryInfo(name);
+          L.DomEvent.stopPropagation(e);
+        });
+
+        theatreMapLayers.push(layer);
+      }
+    }).addTo(theatreMap);
+
+    // Close panel when clicking on map background
+    theatreMap.on('click', () => {
+      closeCountryPanel();
+      if (selectedLayer) {
+        countryLayer.resetStyle(selectedLayer);
+        selectedLayer = null;
+      }
+    });
+
+    // Add country name labels
+    Object.keys(LABEL_POSITIONS).forEach(name => {
+      const pos = LABEL_POSITIONS[name];
+      if (!pos) return;
+      const shortName = LABEL_SHORT_NAMES[name] || name;
+      const size = LABEL_SIZES[name] || 10;
+      const icon = L.divIcon({
+        className: 'country-label',
+        html: `<span style="font-size:${size}px">${shortName}</span>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      });
+      L.marker(pos, { icon, interactive: false }).addTo(theatreMap);
+    });
+
+    // Add water labels
+    WATER_LABELS.forEach(w => {
+      const icon = L.divIcon({
+        className: 'water-label',
+        html: `<span style="font-size:${w.size}px;${w.rotation ? 'transform:rotate(' + w.rotation + 'deg);display:inline-block;' : ''}">${w.name}</span>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      });
+      L.marker([w.lat, w.lng], { icon, interactive: false }).addTo(theatreMap);
+    });
+
+  }).catch(err => {
+    console.error('Failed to load map data:', err);
+    const overlay = document.getElementById('mapLoadingOverlay');
+    if (overlay) {
+      overlay.innerHTML = `
+        <div style="color:#8b1a1a;font-family:Georgia,serif;text-align:center;">
+          <div style="font-size:2em;margin-bottom:12px;">&#9888;</div>
+          <div style="font-size:1.1em;margin-bottom:8px;">Failed to load historical borders</div>
+          <div style="font-size:0.85em;color:#8B7B6B;">${err.message || 'Network error'}</div>
+          <button onclick="theatreMap=null;renderMap()" style="margin-top:16px;padding:8px 16px;font-family:Georgia,serif;background:#F5F0E1;border:2px solid #8B7B6B;cursor:pointer;border-radius:4px;">Retry</button>
+        </div>`;
+    }
+  });
+}
 
 function mapClickRegion() {}
 function executeMove() {}
@@ -9538,6 +10111,71 @@ function clearMapSelection() {}
 // ==================== BATTLE SIMULATOR ====================
 
 let lastBattleResult = null;
+
+function populateBattleSimulator(battleId) {
+  const battle = (gameState.battles || []).find(b => b.id === battleId);
+  if (!battle) { alert('Battle not found.'); return; }
+
+  // Use the primary attacker and defender (first in each coalition)
+  const primaryAtk = battle.attackerCoalition[0];
+  const primaryDef = battle.defenderCoalition[0];
+  if (!primaryAtk || !primaryDef) { alert('Battle missing coalition data.'); return; }
+
+  // Total divisions from each coalition
+  const totalAtkDiv = battle.attackerCoalition.reduce(function(s, c) { return s + (c.divisions || 0); }, 0);
+  const totalDefDiv = battle.defenderCoalition.reduce(function(s, c) { return s + (c.divisions || 0); }, 0);
+
+  // Set attacker faction and trigger region population
+  const atkSelect = document.getElementById('atkFaction');
+  atkSelect.value = primaryAtk.fid;
+  updateBattleOptions();
+
+  // Set defender faction and trigger region population
+  const defSelect = document.getElementById('defFaction');
+  defSelect.value = primaryDef.fid;
+  updateBattleOptions();
+
+  // Set divisions
+  document.getElementById('atkDivisions').value = totalAtkDiv;
+  document.getElementById('defDivisions').value = totalDefDiv;
+
+  // Set regions
+  const atkRegionSel = document.getElementById('atkRegion');
+  if (primaryAtk.from) atkRegionSel.value = primaryAtk.from;
+
+  const defRegionSel = document.getElementById('defRegion');
+  defRegionSel.value = battle.targetRegion;
+
+  // Check modifiers based on faction upgrades
+  const atkFaction = gameState.factions[primaryAtk.fid];
+  const defFaction = gameState.factions[primaryDef.fid];
+  document.getElementById('modArtillery').checked = !!(atkFaction.upgrades && atkFaction.upgrades.artillery);
+  document.getElementById('modGas').checked = !!(atkFaction.upgrades && atkFaction.upgrades.gas);
+  document.getElementById('modTrench').checked = !!(defFaction.upgrades && defFaction.upgrades.trenches);
+
+  // Check fortification for Paris/Dardanelles
+  const isFortified = battle.targetRegion === 'paris' || battle.targetRegion === 'dardanelles' ||
+                      !!(defFaction.upgrades && defFaction.upgrades.fortification);
+  document.getElementById('modFortified').checked = isFortified;
+
+  // Russia mobilization check
+  document.getElementById('modRussiaMob').checked = (primaryDef.fid === 'russia' && (defFaction.warTurns || 0) === 0);
+
+  // Scroll to simulator
+  const simSection = document.getElementById('rollBtn');
+  if (simSection) simSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Show coalition info above the roll button
+  const coalInfo = document.getElementById('battleResult');
+  if (coalInfo) {
+    let info = '<div style="padding:12px; margin-bottom:12px; background:var(--cream); border:2px solid var(--ink-faint); border-radius:6px; font-family:\'Crimson Text\',serif;">';
+    info += '<strong>Battle at ' + (REGION_NAMES[battle.targetRegion] || battle.targetRegion) + '</strong><br>';
+    info += '<span style="color:var(--red-empire);">Attackers: ' + battle.attackerCoalition.map(function(c) { return FACTION_NAMES[c.fid] + ' (' + c.divisions + ' div)'; }).join(' + ') + ' = ' + totalAtkDiv + ' total</span><br>';
+    info += '<span style="color:var(--blue-entente);">Defenders: ' + battle.defenderCoalition.map(function(c) { return FACTION_NAMES[c.fid] + ' (' + c.divisions + ' div)'; }).join(' + ') + ' = ' + totalDefDiv + ' total</span>';
+    info += '</div>';
+    coalInfo.innerHTML = info;
+  }
+}
 
 function updateBattleOptions() {
   const atkFid = document.getElementById('atkFaction').value;
