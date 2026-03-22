@@ -852,67 +852,90 @@ body::before {
 
 .btn-danger:hover { background: #6a1010; }
 
-/* ==================== SVG MAP STYLES ==================== */
+/* ==================== MAP STYLES ==================== */
 .map-container {
   position: relative;
   width: 100%;
   margin: 20px 0;
 }
 
-.map-container svg {
+.map-image-wrapper {
+  position: relative;
+  width: 100%;
+  border: 3px solid var(--ink);
+  overflow: hidden;
+}
+
+.map-image-wrapper img {
   width: 100%;
   height: auto;
-}
-
-.map-region {
-  fill: var(--parchment-dark);
-  stroke: var(--ink);
-  stroke-width: 1.5;
-  cursor: pointer;
-  transition: fill 0.2s, stroke-width 0.2s;
-}
-
-.map-region:hover {
-  fill: #e0d6a8;
-  stroke-width: 2.5;
-}
-
-.map-region.selected {
-  fill: var(--gold-accent);
-  stroke-width: 3;
-  stroke: var(--ink);
-}
-
-.map-region.adjacent-highlight {
-  fill: #d4e8c0;
-  stroke: var(--green-neutral);
-  stroke-width: 2.5;
-}
-
-.map-region.sea-zone {
-  fill: #c8d8e8;
-  stroke: var(--blue-entente);
-}
-
-.map-region.sea-zone:hover {
-  fill: #b0c8e0;
-}
-
-.map-label {
-  font-family: 'Source Serif 4', serif;
-  font-size: 9px;
-  font-weight: 600;
-  fill: var(--ink);
+  display: block;
   pointer-events: none;
-  text-anchor: middle;
 }
 
-.map-troop-count {
+.map-overlay {
+  position: absolute;
+  cursor: pointer;
+  border: 2px solid rgba(30, 20, 10, 0.6);
+  border-radius: 6px;
+  background: rgba(215, 200, 170, 0.75);
+  padding: 4px 6px;
+  text-align: center;
+  transition: all 0.2s;
+  min-width: 60px;
+  backdrop-filter: blur(2px);
+  z-index: 2;
+}
+
+.map-overlay:hover {
+  background: rgba(230, 220, 190, 0.9);
+  border-color: var(--ink);
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+.map-overlay.selected {
+  background: rgba(184, 134, 11, 0.85);
+  border-color: var(--ink);
+  border-width: 3px;
+  z-index: 10;
+  box-shadow: 0 0 12px rgba(184, 134, 11, 0.6);
+}
+
+.map-overlay.adjacent-highlight {
+  background: rgba(100, 180, 80, 0.75);
+  border-color: var(--green-neutral);
+  border-width: 3px;
+  z-index: 5;
+  box-shadow: 0 0 8px rgba(45, 80, 22, 0.5);
+}
+
+.map-overlay.sea-zone {
+  background: rgba(160, 195, 225, 0.75);
+  border-color: var(--blue-entente);
+}
+
+.map-overlay.sea-zone:hover {
+  background: rgba(140, 180, 220, 0.9);
+}
+
+.map-overlay-label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+}
+
+.map-overlay-troops {
   font-family: 'Playfair Display', serif;
   font-size: 11px;
   font-weight: 900;
-  pointer-events: none;
-  text-anchor: middle;
+  white-space: nowrap;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
 }
 
 .movement-panel {
@@ -2609,85 +2632,76 @@ function applyGMEdits(fid) {
 
 // ==================== SVG MAP ====================
 
-// Map coordinates for each region (x, y, w, h for simplified rectangles)
+// Map image URL
+const MAP_IMAGE_URL = 'https://i.imgur.com/QXGJxfE.png';
+
+// Map coordinates as percentages (left%, top%) for overlay positioning on the real map
 const MAP_COORDS = {
-  britain:        { x: 80,  y: 30,  w: 90,  h: 70 },
-  north_sea:      { x: 190, y: 20,  w: 100, h: 60, sea: true },
-  baltic:         { x: 380, y: 20,  w: 100, h: 60, sea: true },
-  english_channel:{ x: 100, y: 110, w: 110, h: 40, sea: true },
-  belgium:        { x: 220, y: 95,  w: 70,  h: 55 },
-  germany:        { x: 300, y: 85,  w: 120, h: 80 },
-  france:         { x: 100, y: 160, w: 100, h: 100 },
-  paris:          { x: 145, y: 155, w: 55,  h: 40, inner: true },
-  alsace_lorraine:{ x: 210, y: 155, w: 80,  h: 50 },
-  poland:         { x: 430, y: 85,  w: 90,  h: 80 },
-  russia:         { x: 490, y: 20,  w: 130, h: 180 },
-  austria:        { x: 310, y: 175, w: 110, h: 70 },
-  italy:          { x: 200, y: 260, w: 90,  h: 80 },
-  balkans:        { x: 350, y: 260, w: 80,  h: 70 },
-  serbia:         { x: 340, y: 250, w: 60,  h: 50 },
-  ottoman:        { x: 440, y: 250, w: 120, h: 80 },
-  dardanelles:    { x: 430, y: 340, w: 70,  h: 40 },
-  mediterranean:  { x: 170, y: 350, w: 240, h: 50, sea: true }
+  britain:        { left: 14,  top: 18,  sea: false },
+  north_sea:      { left: 28,  top: 8,   sea: true },
+  baltic:         { left: 45,  top: 12,  sea: true },
+  english_channel:{ left: 20,  top: 38,  sea: true },
+  belgium:        { left: 27,  top: 40,  sea: false },
+  germany:        { left: 38,  top: 35,  sea: false },
+  france:         { left: 22,  top: 52,  sea: false },
+  paris:          { left: 22,  top: 45,  sea: false, inner: true },
+  alsace_lorraine:{ left: 31,  top: 48,  sea: false },
+  poland:         { left: 52,  top: 33,  sea: false },
+  russia:         { left: 68,  top: 22,  sea: false },
+  austria:        { left: 44,  top: 50,  sea: false },
+  italy:          { left: 34,  top: 63,  sea: false },
+  balkans:        { left: 50,  top: 63,  sea: false },
+  serbia:         { left: 48,  top: 57,  sea: false },
+  ottoman:        { left: 65,  top: 68,  sea: false },
+  dardanelles:    { left: 58,  top: 72,  sea: true },
+  mediterranean:  { left: 32,  top: 80,  sea: true }
 };
 
 let mapSelectedRegion = null;
 
 function renderMap() {
   const container = document.getElementById('mapContainer');
-  let svg = `<svg viewBox="0 0 650 420" xmlns="http://www.w3.org/2000/svg" style="background:#d4dce8; border:2px solid var(--ink);">`;
+  let html = `<div class="map-image-wrapper">`;
+  html += `<img src="${MAP_IMAGE_URL}" alt="Europe WWI Map" draggable="false">`;
 
-  // Draw regions
+  // Draw region overlays
   ALL_REGIONS.forEach(r => {
     const c = MAP_COORDS[r];
     if (!c) return;
-    let cls = 'map-region';
+    let cls = 'map-overlay';
     if (c.sea) cls += ' sea-zone';
     if (r === mapSelectedRegion) cls += ' selected';
     else if (mapSelectedRegion && ADJACENCY[mapSelectedRegion] && ADJACENCY[mapSelectedRegion].indexOf(r) !== -1) cls += ' adjacent-highlight';
 
-    svg += `<rect class="${cls}" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="3" data-region="${r}" onclick="mapClickRegion('${r}')"/>`;
-
-    // Region name
-    const cx = c.x + c.w/2;
-    const cy = c.y + 14;
-    svg += `<text class="map-label" x="${cx}" y="${cy}">${REGION_NAMES[r]}</text>`;
+    let content = `<div class="map-overlay-label">${REGION_NAMES[r]}</div>`;
 
     // Troop counts per faction
     if (!c.sea) {
-      let troopTexts = [];
       Object.keys(gameState.factions).forEach(fid => {
         if (fid === 'krupp' || fid === 'schneider') return;
         const troops = gameState.factions[fid].troops[r] || 0;
         if (troops > 0) {
-          troopTexts.push({ fid, count: troops, type: 'A' });
+          content += `<div class="map-overlay-troops" style="color:${FACTION_COLORS[fid]}">${troops}⚔ ${fid.substring(0,3).toUpperCase()}</div>`;
         }
-      });
-      troopTexts.forEach((t, i) => {
-        const ty = cy + 14 + i * 13;
-        svg += `<text class="map-troop-count" x="${cx}" y="${ty}" fill="${FACTION_COLORS[t.fid]}">${t.count}⚔ ${t.fid.substring(0,3).toUpperCase()}</text>`;
       });
     }
 
     // Fleet counts for sea zones and coastal
-    let fleetTexts = [];
-    Object.keys(gameState.factions).forEach(fid => {
-      if (fid === 'krupp' || fid === 'schneider') return;
-      const fleets = gameState.factions[fid].fleets[r] || 0;
-      if (fleets > 0) {
-        fleetTexts.push({ fid, count: fleets });
-      }
-    });
-    if (c.sea && fleetTexts.length) {
-      fleetTexts.forEach((t, i) => {
-        const ty = cy + 14 + i * 13;
-        svg += `<text class="map-troop-count" x="${cx}" y="${ty}" fill="${FACTION_COLORS[t.fid]}">${t.count}⚓ ${t.fid.substring(0,3).toUpperCase()}</text>`;
+    if (c.sea) {
+      Object.keys(gameState.factions).forEach(fid => {
+        if (fid === 'krupp' || fid === 'schneider') return;
+        const fleets = gameState.factions[fid].fleets[r] || 0;
+        if (fleets > 0) {
+          content += `<div class="map-overlay-troops" style="color:${FACTION_COLORS[fid]}">${fleets}⚓ ${fid.substring(0,3).toUpperCase()}</div>`;
+        }
       });
     }
+
+    html += `<div class="${cls}" style="left:${c.left}%; top:${c.top}%;" onclick="mapClickRegion('${r}')">${content}</div>`;
   });
 
-  svg += `</svg>`;
-  container.innerHTML = svg;
+  html += `</div>`;
+  container.innerHTML = html;
 }
 
 function mapClickRegion(region) {
