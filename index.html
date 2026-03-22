@@ -2036,6 +2036,94 @@ body::before {
 }
 
 .save-indicator.visible { opacity: 1; }
+
+/* ==================== NEW PLAYER DASHBOARD ==================== */
+.status-strip { display: flex; gap: 0; margin-bottom: 20px; }
+.status-strip .strip-item { flex: 1; text-align: center; padding: 14px 8px; border: 1px solid var(--ink); border-right: none; background: var(--cream); }
+.status-strip .strip-item:last-child { border-right: 1px solid var(--ink); }
+.strip-item .strip-label { font-family: 'Source Serif 4', serif; font-size: 0.7em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); display: block; margin-bottom: 2px; }
+.strip-item .strip-value { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.6em; }
+.strip-item .strip-value.positive { color: var(--green-neutral); }
+.strip-item .strip-value.negative { color: var(--red-empire); }
+
+.pipeline { display: flex; align-items: center; gap: 0; margin: 16px 0 24px; }
+.pipeline-stage { flex: 1; text-align: center; padding: 12px 8px; border: 2px solid var(--ink-light); background: var(--cream); position: relative; }
+.pipeline-stage .stage-label { font-family: 'Source Serif 4', serif; font-size: 0.7em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); display: block; }
+.pipeline-stage .stage-count { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.4em; }
+.pipeline-stage.has-units { background: var(--parchment-dark); border-color: var(--ink); }
+.pipeline-arrow { width: 36px; text-align: center; font-size: 1.4em; color: var(--gold-accent); flex-shrink: 0; }
+
+.action-tabs { display: flex; gap: 2px; margin-bottom: 0; flex-wrap: wrap; }
+.action-tab { padding: 10px 16px; font-family: 'Playfair Display', serif; font-size: 0.75em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; background: var(--cream); border: 1px solid var(--ink-light); border-bottom: none; color: var(--ink-light); transition: all 0.2s; }
+.action-tab:hover { background: var(--parchment-dark); }
+.action-tab.active { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
+.action-content { border: 2px solid var(--ink); padding: 20px; background: var(--cream); margin-bottom: 20px; }
+
+.action-btn { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border: 2px solid var(--ink); background: var(--parchment); cursor: pointer; transition: all 0.2s; margin-bottom: 8px; font-family: 'Crimson Text', serif; font-size: 1.05em; width: 100%; text-align: left; }
+.action-btn:hover:not(:disabled) { background: var(--gold-accent); color: white; }
+.action-btn:disabled { opacity: 0.35; cursor: not-allowed; border-style: dashed; }
+.action-btn .action-cost { font-weight: 700; background: var(--ink); color: var(--parchment); padding: 3px 10px; font-size: 0.85em; font-family: 'Playfair Display', serif; }
+
+.order-queue { margin-top: 20px; }
+.order-queue-header { font-family: 'Playfair Display', serif; font-size: 0.9em; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; color: var(--ink-light); }
+.order-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border: 1px solid var(--ink-light); margin-bottom: 4px; background: var(--parchment); font-family: 'Crimson Text', serif; font-size: 0.95em; }
+.order-item .order-desc { flex: 1; }
+.order-item .order-undo { background: var(--red-empire); color: white; border: none; padding: 4px 12px; cursor: pointer; font-family: 'Playfair Display', serif; font-size: 0.7em; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; }
+.order-item .order-undo:hover { background: #6a1010; }
+.order-item.type-recruit { border-left: 4px solid var(--green-neutral); }
+.order-item.type-deploy { border-left: 4px solid var(--blue-entente); }
+.order-item.type-move { border-left: 4px solid var(--gold-accent); }
+.order-item.type-attack { border-left: 4px solid var(--red-empire); }
+.order-item.type-support { border-left: 4px solid #7b2d8b; }
+.order-item.type-upgrade { border-left: 4px solid var(--steel); }
+
+.submit-orders-btn { display: block; width: 100%; padding: 18px; margin-top: 24px; font-family: 'Playfair Display', serif; font-size: 1.2em; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; background: var(--gold-accent); color: white; border: 3px solid var(--ink); cursor: pointer; transition: all 0.2s; }
+.submit-orders-btn:hover { background: var(--ink); }
+.submit-orders-btn.submitted { background: var(--green-neutral); cursor: default; pointer-events: none; }
+
+.empty-state { text-align: center; padding: 24px; font-family: 'IM Fell English', serif; font-style: italic; color: var(--ink-light); font-size: 1em; }
+
+/* GM Control Tab */
+.gm-section { margin-bottom: 24px; border: 2px solid var(--ink); background: var(--cream); }
+.gm-section-header { font-family: 'Playfair Display', serif; font-size: 1em; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; padding: 12px 16px; background: var(--ink); color: var(--parchment); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.gm-section-body { padding: 16px; }
+.gm-section-body.collapsed { display: none; }
+
+.order-review-faction { border: 1px solid var(--ink-light); margin-bottom: 8px; }
+.order-review-header { font-family: 'Playfair Display', serif; font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; background: var(--parchment-dark); cursor: pointer; display: flex; justify-content: space-between; }
+.order-review-body { padding: 10px 12px; }
+.order-review-badge { font-size: 0.75em; padding: 2px 8px; border-radius: 2px; }
+.order-review-badge.submitted { background: var(--green-neutral); color: white; }
+.order-review-badge.pending { background: var(--red-empire); color: white; }
+
+.battle-card { border: 2px solid var(--ink); margin-bottom: 16px; background: var(--parchment); }
+.battle-card-header { font-family: 'Playfair Display', serif; font-size: 1.1em; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px; background: linear-gradient(135deg, #faf0f0, var(--cream)); border-bottom: 2px solid var(--ink); }
+.battle-card-body { padding: 16px; }
+.coalition-side { margin-bottom: 12px; }
+.coalition-label { font-family: 'Source Serif 4', serif; font-size: 0.8em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); margin-bottom: 6px; }
+.coalition-entry { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: var(--cream); border: 1px solid var(--ink-light); margin-bottom: 4px; font-family: 'Crimson Text', serif; }
+.betrayal-btn { padding: 4px 12px; font-family: 'Playfair Display', serif; font-size: 0.7em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border: 1px solid; cursor: pointer; margin-left: 4px; }
+.betrayal-btn.honor { background: var(--green-neutral); color: white; border-color: var(--green-neutral); }
+.betrayal-btn.betray { background: var(--red-empire); color: white; border-color: var(--red-empire); }
+.betrayal-btn.revealed { opacity: 0.6; cursor: default; pointer-events: none; }
+
+.tier-result { text-align: center; padding: 20px; margin-top: 12px; border: 3px solid; }
+.tier-result h3 { font-family: 'Playfair Display', serif; font-size: 1.5em; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; }
+.tier-result .tier-icon { font-size: 2em; margin-bottom: 8px; }
+
+.move-selector { display: grid; grid-template-columns: 1fr auto 1fr auto; gap: 10px; align-items: end; margin-bottom: 12px; }
+.move-selector select, .move-selector input { padding: 8px 10px; border: 2px solid var(--ink); font-family: 'Crimson Text', serif; font-size: 1em; background: var(--parchment); width: 100%; }
+.move-selector label { font-family: 'Source Serif 4', serif; font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); display: block; margin-bottom: 4px; }
+
+@media (max-width: 700px) {
+  .status-strip { flex-wrap: wrap; }
+  .status-strip .strip-item { min-width: 45%; border-right: 1px solid var(--ink); margin-bottom: -1px; }
+  .pipeline { flex-wrap: wrap; gap: 4px; }
+  .pipeline-arrow { width: 24px; font-size: 1em; }
+  .action-tabs { gap: 1px; }
+  .action-tab { padding: 8px 10px; font-size: 0.65em; }
+  .move-selector { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -2057,7 +2145,7 @@ body::before {
   <button class="nav-tab" data-tab="news">News Events</button>
   <button class="nav-tab" data-tab="reference">Quick Ref</button>
   <button class="nav-tab" data-tab="dashboard">Dashboard</button>
-  <button class="nav-tab" data-tab="battle">Battle</button>
+  <button class="nav-tab" data-tab="gmcontrol">GM Control</button>
   <button class="nav-tab" data-tab="gm">GM Guide</button>
 </div>
 
@@ -2873,7 +2961,6 @@ body::before {
 <div class="turn-banner" id="turnBanner"></div>
 
 <div class="dashboard-controls">
-  <button class="mode-toggle" id="modeToggle" onclick="toggleDashboardMode()">Switch to GM Mode</button>
   <select id="factionSelect" onchange="renderDashboard()">
     <option value="germany">German Empire</option>
     <option value="france">French Republic</option>
@@ -2910,8 +2997,16 @@ body::before {
 </div>
 </div>
 
+<!-- ==================== GM CONTROL ==================== -->
+<div id="gmcontrol" class="tab-content">
+<div class="section">
+<div class="section-title"><span class="icon">&#9881;</span> GM Control Panel</div>
+<div id="gmControlContent"></div>
+</div>
+</div>
+
 <!-- ==================== BATTLE SIMULATOR ==================== -->
-<div id="battle" class="tab-content">
+<div id="battle" class="tab-content" style="display:none;">
 
 <div class="section">
 <div class="section-title"><span class="icon">⚔</span> Battle Simulator</div>
@@ -3016,6 +3111,8 @@ document.getElementById('navTabs').addEventListener('click', function(e) {
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
   document.getElementById(tabId).classList.add('active');
   btn.classList.add('active');
+  if (tabId === 'gmcontrol') renderGMControl();
+  if (tabId === 'dashboard') renderDashboard();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
@@ -3560,66 +3657,111 @@ function updateSubtitle() {
   }
 }
 
+function generateUnitsFromTroops(fid, troops, fleets) {
+  const units = [];
+  let idx = 0;
+  Object.keys(troops).forEach(region => {
+    const count = troops[region] || 0;
+    for (let i = 0; i < count; i++) {
+      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, type: 'army', state: 'deployed', region: region, createdTurn: 0 });
+      idx++;
+    }
+  });
+  Object.keys(fleets).forEach(region => {
+    const count = fleets[region] || 0;
+    for (let i = 0; i < count; i++) {
+      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, type: 'fleet', state: 'deployed', region: region, createdTurn: 0 });
+      idx++;
+    }
+  });
+  return units;
+}
+
+function recomputeAggregates(fid) {
+  const f = gameState.factions[fid];
+  if (!f || !f.units) return;
+  f.army = f.units.filter(u => u.type === 'army' && u.state !== 'destroyed').length;
+  f.navy = f.units.filter(u => u.type === 'fleet' && u.state !== 'destroyed').length;
+  f.troops = {};
+  f.fleets = {};
+  f.units.forEach(u => {
+    if (u.state === 'destroyed') return;
+    if (u.type === 'army' && u.state === 'deployed' && u.region) {
+      f.troops[u.region] = (f.troops[u.region] || 0) + 1;
+    }
+    if (u.type === 'fleet' && u.state === 'deployed' && u.region) {
+      f.fleets[u.region] = (f.fleets[u.region] || 0) + 1;
+    }
+  });
+}
+
 function defaultGameState() {
-  return {
-    factions: {
-      germany: {
-        gold: 25, income: 8, army: 10, navy: 6, vp: 0,
-        troops: { germany: 6, alsace_lorraine: 3, poland: 1 },
-        fleets: { north_sea: 4, baltic: 2 },
-        alliances: ['austria'], status: [], upgrades: {}
-      },
-      france: {
-        gold: 18, income: 6, army: 8, navy: 4, vp: 0,
-        troops: { france: 5, paris: 3 },
-        fleets: { mediterranean: 2, english_channel: 2 },
-        alliances: ['britain','russia'], status: [], upgrades: {}
-      },
-      britain: {
-        gold: 30, income: 9, army: 4, navy: 12, vp: 0,
-        troops: { britain: 4 },
-        fleets: { north_sea: 6, english_channel: 4, mediterranean: 2 },
-        alliances: ['france','russia'], status: [], upgrades: {}
-      },
-      russia: {
-        gold: 16, income: 6, army: 12, navy: 3, vp: 0,
-        troops: { russia: 8, poland: 3, balkans: 1 },
-        fleets: { baltic: 2, mediterranean: 1 },
-        alliances: ['france','britain'], status: [], upgrades: {}
-      },
-      austria: {
-        gold: 14, income: 5, army: 7, navy: 2, vp: 0,
-        troops: { austria: 5, balkans: 2 },
-        fleets: { mediterranean: 2 },
-        alliances: ['germany'], status: [], upgrades: {}
-      },
-      ottoman: {
-        gold: 8, income: 4, army: 6, navy: 2, vp: 0,
-        troops: { ottoman: 4, dardanelles: 2 },
-        fleets: { mediterranean: 2 },
-        alliances: [], status: [], upgrades: {}
-      },
-      krupp: {
-        gold: 22, income: 3, army: 0, navy: 0, vp: 0,
-        troops: {}, fleets: {},
-        alliances: [], status: [], sales: 0, contracts: [], upgrades: {}
-      },
-      schneider: {
-        gold: 16, income: 2, army: 0, navy: 0, vp: 0,
-        troops: {}, fleets: {},
-        alliances: [], status: [], sales: 0, contracts: [], upgrades: {}
-      }
+  const factions = {
+    germany: {
+      gold: 25, income: 8, army: 10, navy: 6, vp: 0,
+      troops: { germany: 6, alsace_lorraine: 3, poland: 1 },
+      fleets: { north_sea: 4, baltic: 2 },
+      alliances: ['austria'], status: [], upgrades: {}
     },
+    france: {
+      gold: 18, income: 6, army: 8, navy: 4, vp: 0,
+      troops: { france: 5, paris: 3 },
+      fleets: { mediterranean: 2, english_channel: 2 },
+      alliances: ['britain','russia'], status: [], upgrades: {}
+    },
+    britain: {
+      gold: 30, income: 9, army: 4, navy: 12, vp: 0,
+      troops: { britain: 4 },
+      fleets: { north_sea: 6, english_channel: 4, mediterranean: 2 },
+      alliances: ['france','russia'], status: [], upgrades: {}
+    },
+    russia: {
+      gold: 16, income: 6, army: 12, navy: 3, vp: 0,
+      troops: { russia: 8, poland: 3, balkans: 1 },
+      fleets: { baltic: 2, mediterranean: 1 },
+      alliances: ['france','britain'], status: [], upgrades: {}
+    },
+    austria: {
+      gold: 14, income: 5, army: 7, navy: 2, vp: 0,
+      troops: { austria: 5, balkans: 2 },
+      fleets: { mediterranean: 2 },
+      alliances: ['germany'], status: [], upgrades: {}
+    },
+    ottoman: {
+      gold: 8, income: 4, army: 6, navy: 2, vp: 0,
+      troops: { ottoman: 4, dardanelles: 2 },
+      fleets: { mediterranean: 2 },
+      alliances: [], status: [], upgrades: {}
+    },
+    krupp: {
+      gold: 22, income: 3, army: 0, navy: 0, vp: 0,
+      troops: {}, fleets: {},
+      alliances: [], status: [], sales: 0, contracts: [], upgrades: {}
+    },
+    schneider: {
+      gold: 16, income: 2, army: 0, navy: 0, vp: 0,
+      troops: {}, fleets: {},
+      alliances: [], status: [], sales: 0, contracts: [], upgrades: {}
+    }
+  };
+  // Generate units arrays from troops/fleets
+  Object.keys(factions).forEach(fid => {
+    factions[fid].units = generateUnitsFromTroops(fid, factions[fid].troops, factions[fid].fleets);
+  });
+  return {
+    factions: factions,
     battleLog: [],
     turnLog: [],
     actionLog: [],
+    orders: {},
+    battles: [],
     currentTurnNum: 1,
     setup: getDefaultSetup()
   };
 }
 
 let gameState = loadGameState();
-let dashboardMode = 'player'; // 'player' or 'gm'
+let activeActionTab = 'recruit';
 
 function loadGameState() {
   try {
@@ -3630,8 +3772,14 @@ function loadGameState() {
       if (!state.turnLog) state.turnLog = [];
       if (!state.actionLog) state.actionLog = [];
       if (!state.setup) state.setup = getDefaultSetup();
+      if (!state.orders) state.orders = {};
+      if (!state.battles) state.battles = [];
       Object.keys(state.factions).forEach(fid => {
         if (!state.factions[fid].upgrades) state.factions[fid].upgrades = {};
+        // Migrate: generate units from troops/fleets if missing
+        if (!state.factions[fid].units) {
+          state.factions[fid].units = generateUnitsFromTroops(fid, state.factions[fid].troops || {}, state.factions[fid].fleets || {});
+        }
       });
       return state;
     }
@@ -3687,19 +3835,88 @@ function renderTurnBanner() {
   const banner = document.getElementById('turnBanner');
   const turnIdx = Math.min(gameState.currentTurnNum - 1, turns.length - 1);
   const t = turns[turnIdx];
-  const isLastTurn = gameState.currentTurnNum >= turns.length;
   banner.innerHTML = `
     <div class="turn-info">
       <span class="turn-num">Turn ${t.num}</span>
       <span class="turn-title">${t.title}</span>
       <span class="turn-year">${t.year}</span>
     </div>
-    ${dashboardMode === 'gm' ? `
-      <button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
-        ${isLastTurn ? 'Final Turn' : 'Advance Turn →'}
-      </button>
-    ` : `<span class="turn-year">Turn ${gameState.currentTurnNum} of ${turns.length}</span>`}
+    <span class="turn-year">Turn ${gameState.currentTurnNum} of ${turns.length}</span>
   `;
+}
+
+// ==================== ORDER QUEUE SYSTEM ====================
+
+function generateOrderId() {
+  return 'ord_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
+}
+
+function initOrders(fid) {
+  if (!gameState.orders) gameState.orders = {};
+  gameState.orders[fid] = { turn: gameState.currentTurnNum, submitted: false, actions: [] };
+  return gameState.orders[fid];
+}
+
+function getOrders(fid) {
+  if (!gameState.orders) gameState.orders = {};
+  const o = gameState.orders[fid];
+  if (!o || o.turn !== gameState.currentTurnNum) return { turn: gameState.currentTurnNum, submitted: false, actions: [] };
+  return o;
+}
+
+function addOrder(fid, action) {
+  if (!gameState.orders) gameState.orders = {};
+  if (!gameState.orders[fid] || gameState.orders[fid].turn !== gameState.currentTurnNum) {
+    initOrders(fid);
+  }
+  if (gameState.orders[fid].submitted) return;
+  action.id = generateOrderId();
+  gameState.orders[fid].actions.push(action);
+  saveGameState();
+  renderDashboard();
+}
+
+function removeOrder(fid, orderId) {
+  const orders = getOrders(fid);
+  if (orders.submitted) return;
+  if (gameState.orders[fid]) {
+    gameState.orders[fid].actions = gameState.orders[fid].actions.filter(a => a.id !== orderId);
+    saveGameState();
+    renderDashboard();
+  }
+}
+
+function submitOrders(fid) {
+  if (!gameState.orders[fid]) return;
+  gameState.orders[fid].submitted = true;
+  logAction(fid, 'orders', 'Orders submitted for Turn ' + gameState.currentTurnNum + ' (' + gameState.orders[fid].actions.length + ' actions)');
+  saveGameState();
+  renderDashboard();
+}
+
+// ==================== BATTLE TIER SYSTEM ====================
+
+const BATTLE_TIERS = {
+  CRUSHING_VICTORY:  { minMargin: 6, atkLossPct: 0.10, defLossPct: 0.60, defRetreats: true, label: 'Crushing Victory', color: '#2d5016', icon: '\u2694\u2694\u2694' },
+  VICTORY:           { minMargin: 3, atkLossPct: 0.25, defLossPct: 0.40, defRetreats: true, label: 'Victory', color: '#2d5016', icon: '\u2694\u2694' },
+  STALEMATE:         { minMargin: -2, atkLossPct: 0.15, defLossPct: 0.15, defRetreats: false, label: 'Stalemate', color: '#b8860b', icon: '\u2696' },
+  DEFEAT:            { minMargin: -5, atkLossPct: 0.40, defLossPct: 0.25, atkRetreats: true, label: 'Defeat', color: '#8b1a1a', icon: '\u2620' },
+  CRUSHING_DEFEAT:   { minMargin: -Infinity, atkLossPct: 0.60, defLossPct: 0.10, atkRetreats: true, label: 'Crushing Defeat', color: '#8b1a1a', icon: '\u2620\u2620\u2620' }
+};
+
+function determineBattleTier(margin) {
+  if (margin >= 6) return BATTLE_TIERS.CRUSHING_VICTORY;
+  if (margin >= 3) return BATTLE_TIERS.VICTORY;
+  if (margin >= -2) return BATTLE_TIERS.STALEMATE;
+  if (margin >= -5) return BATTLE_TIERS.DEFEAT;
+  return BATTLE_TIERS.CRUSHING_DEFEAT;
+}
+
+function computeLosses(tier, atkDiv, defDiv) {
+  return {
+    atkLosses: Math.max(1, Math.round(atkDiv * tier.atkLossPct)),
+    defLosses: Math.max(1, Math.round(defDiv * tier.defLossPct))
+  };
 }
 
 function advanceTurn() {
@@ -3889,14 +4106,6 @@ function renderTurnSummary() {
   `;
 }
 
-function toggleDashboardMode() {
-  dashboardMode = dashboardMode === 'player' ? 'gm' : 'player';
-  const btn = document.getElementById('modeToggle');
-  btn.textContent = dashboardMode === 'gm' ? 'Switch to Player Mode' : 'Switch to GM Mode';
-  btn.classList.toggle('gm-active', dashboardMode === 'gm');
-  renderDashboard();
-}
-
 function renderPlayerTurnSummary(fid) {
   const f = gameState.factions[fid];
   const isDealer = fid === 'krupp' || fid === 'schneider';
@@ -4022,11 +4231,177 @@ function renderPlayerTurnSummary(fid) {
 function renderDashboard() {
   renderTurnBanner();
   const container = document.getElementById('dashboardContent');
-  if (dashboardMode === 'gm') {
-    renderGMDashboard(container);
-  } else {
-    renderPlayerDashboard(container);
+  renderPlayerDashboard(container);
+}
+
+function setActionTab(tab) {
+  activeActionTab = tab;
+  renderDashboard();
+}
+
+function renderActionTabContent(fid) {
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  const orders = getOrders(fid);
+  const isSubmitted = orders.submitted;
+
+  if (activeActionTab === 'recruit') {
+    if (isDealer) return '<div class="empty-state">Arms dealers do not recruit military units directly.</div>';
+    const canArmy = f.gold >= UNIT_COSTS.army && !isSubmitted;
+    const canFleet = f.gold >= UNIT_COSTS.fleet && !isSubmitted;
+    return `
+      <button class="action-btn" onclick="addOrder('${fid}',{type:'recruit',unitType:'army',desc:'Recruit Army Division \u2192 ${REGION_NAMES[HOME_REGIONS[fid]]}'})" ${canArmy ? '' : 'disabled'}>
+        <span>Buy Army Division \u2192 ${REGION_NAMES[HOME_REGIONS[fid]]}</span>
+        <span class="action-cost">${UNIT_COSTS.army}g</span>
+      </button>
+      <button class="action-btn" onclick="addOrder('${fid}',{type:'recruit',unitType:'fleet',desc:'Recruit Fleet \u2192 ${REGION_NAMES[HOME_SEAS[fid]]}'})" ${canFleet ? '' : 'disabled'}>
+        <span>Buy Fleet \u2192 ${REGION_NAMES[HOME_SEAS[fid]]}</span>
+        <span class="action-cost">${UNIT_COSTS.fleet}g</span>
+      </button>
+    `;
   }
+
+  if (activeActionTab === 'deploy') {
+    if (isDealer) return '<div class="empty-state">Arms dealers have no units to deploy.</div>';
+    const mobilized = (f.units || []).filter(u => u.state === 'mobilized');
+    if (mobilized.length === 0) return '<div class="empty-state">No mobilized units awaiting deployment. Recruit units first.</div>';
+    let html = '';
+    mobilized.forEach(u => {
+      const regionOptions = (u.type === 'army' ? LAND_REGIONS : SEA_REGIONS).map(r => `<option value="${r}">${REGION_NAMES[r]}</option>`).join('');
+      html += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <span style="font-weight:700;">${u.type === 'army' ? '\u2694' : '\u2693'} ${u.id}</span>
+        <select id="deploy_${u.id}">${regionOptions}</select>
+        <button class="action-btn" style="width:auto; margin:0;" onclick="addOrder('${fid}',{type:'deploy',unitId:'${u.id}',region:document.getElementById('deploy_${u.id}').value,desc:'Deploy '+document.getElementById('deploy_${u.id}').value})" ${isSubmitted ? 'disabled' : ''}>Deploy</button>
+      </div>`;
+    });
+    return html;
+  }
+
+  if (activeActionTab === 'move') {
+    if (isDealer) return '<div class="empty-state">Arms dealers cannot move troops.</div>';
+    // Build source region options where faction has troops
+    const sourceRegions = ALL_REGIONS.filter(r => (f.troops[r] || 0) > 0 || (f.fleets[r] || 0) > 0);
+    if (sourceRegions.length === 0) return '<div class="empty-state">No forces to move. Deploy units first.</div>';
+    const srcOpts = sourceRegions.map(r => `<option value="${r}">${REGION_NAMES[r]} (${f.troops[r]||0} div, ${f.fleets[r]||0} fleets)</option>`).join('');
+    setTimeout(function() { initMoveSelector(); }, 0);
+    return `
+      <div class="move-selector">
+        <div><label>From Region</label><select id="moveFrom" onchange="updateMoveDestinations()">${srcOpts}</select></div>
+        <div style="text-align:center; padding-top:18px;">\u2192</div>
+        <div><label>To Region</label><select id="moveTo"><option value="">Select source first</option></select></div>
+        <div><label>Count</label><input type="number" id="moveCount" min="1" value="1"></div>
+      </div>
+      <button class="action-btn" style="max-width:200px;" onclick="queueMoveOrder('${fid}')" ${isSubmitted ? 'disabled' : ''}>
+        <span>Queue Move</span>
+      </button>
+    `;
+  }
+
+  if (activeActionTab === 'attack') {
+    if (isDealer) return '<div class="empty-state">Arms dealers do not attack.</div>';
+    const sourceRegions = ALL_REGIONS.filter(r => (f.troops[r] || 0) > 0);
+    if (sourceRegions.length === 0) return '<div class="empty-state">No army divisions deployed. Deploy troops to attack.</div>';
+    const srcOpts = sourceRegions.map(r => `<option value="${r}">${REGION_NAMES[r]} (${f.troops[r]||0} div)</option>`).join('');
+    setTimeout(function() { initAttackSelector(); }, 0);
+    return `
+      <div class="move-selector">
+        <div><label>Attack From</label><select id="atkFrom" onchange="updateAttackTargets()">${srcOpts}</select></div>
+        <div style="text-align:center; padding-top:18px;">\u2694</div>
+        <div><label>Target Region</label><select id="atkTarget"><option value="">Select source first</option></select></div>
+        <div><label>Divisions</label><input type="number" id="atkCount" min="1" value="1"></div>
+      </div>
+      <button class="action-btn" style="max-width:200px;" onclick="queueAttackOrder('${fid}')" ${isSubmitted ? 'disabled' : ''}>
+        <span>Queue Attack</span>
+      </button>
+    `;
+  }
+
+  if (activeActionTab === 'support') {
+    // Show pending battles that allies can support
+    const battles = gameState.battles || [];
+    const pendingBattles = battles.filter(b => b.status === 'pending');
+    if (pendingBattles.length === 0) return '<div class="empty-state">No active battles to support. Attacks must be queued first.</div>';
+    let html = '';
+    pendingBattles.forEach(b => {
+      html += `<div class="battle-card" style="margin-bottom:12px;">
+        <div class="battle-card-header">Battle at ${REGION_NAMES[b.targetRegion] || b.targetRegion}</div>
+        <div class="battle-card-body">
+          <p>Attacker: ${b.attackerCoalition.map(c => FACTION_NAMES[c.fid]).join(', ')}</p>
+          <p>Defender: ${b.defenderCoalition.map(c => FACTION_NAMES[c.fid]).join(', ')}</p>
+          <button class="action-btn" style="max-width:250px; margin-top:8px;" onclick="addOrder('${fid}',{type:'support',battleId:'${b.id}',desc:'Support battle at ${REGION_NAMES[b.targetRegion] || b.targetRegion}'})" ${isSubmitted ? 'disabled' : ''}>
+            <span>Pledge Support</span>
+          </button>
+        </div>
+      </div>`;
+    });
+    return html;
+  }
+
+  if (activeActionTab === 'upgrades') {
+    if (isDealer) return '<div class="empty-state">Arms dealers sell upgrades, not buy them.</div>';
+    if (!f.upgrades) f.upgrades = {};
+    let html = '';
+    Object.keys(UPGRADES).forEach(uid => {
+      const upg = UPGRADES[uid];
+      const owned = f.upgrades[uid];
+      const available = gameState.currentTurnNum >= upg.minTurn;
+      const canAfford = f.gold >= upg.cost;
+      if (owned) {
+        html += `<button class="action-btn" disabled style="border-color:var(--green-neutral); border-left:4px solid var(--green-neutral);"><span>${upg.name} \u2714 &mdash; ${upg.desc}</span><span class="action-cost" style="background:var(--green-neutral);">Owned</span></button>`;
+      } else if (!available) {
+        html += `<button class="action-btn" disabled><span>${upg.name} &mdash; ${upg.desc}</span><span class="action-cost">Turn ${upg.minTurn}+</span></button>`;
+      } else {
+        html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'upgrade',upgradeId:'${uid}',desc:'Purchase ${upg.name}'})" ${canAfford && !isSubmitted ? '' : 'disabled'}><span>${upg.name} &mdash; ${upg.desc}</span><span class="action-cost">${upg.cost}g</span></button>`;
+      }
+    });
+    return html;
+  }
+
+  return '';
+}
+
+function updateMoveDestinations() {
+  var sel = document.getElementById('moveFrom');
+  if (!sel) return;
+  var src = sel.value;
+  var adj = ADJACENCY[src] || [];
+  var dest = document.getElementById('moveTo');
+  if (!dest) return;
+  dest.innerHTML = adj.map(function(r) { return '<option value="'+r+'">'+(REGION_NAMES[r]||r)+'</option>'; }).join('');
+}
+
+function updateAttackTargets() {
+  var sel = document.getElementById('atkFrom');
+  if (!sel) return;
+  var src = sel.value;
+  var adj = ADJACENCY[src] || [];
+  var dest = document.getElementById('atkTarget');
+  if (!dest) return;
+  dest.innerHTML = adj.map(function(r) { return '<option value="'+r+'">'+(REGION_NAMES[r]||r)+'</option>'; }).join('');
+}
+
+function initMoveSelector() {
+  updateMoveDestinations();
+}
+
+function initAttackSelector() {
+  updateAttackTargets();
+}
+
+function queueMoveOrder(fid) {
+  const from = document.getElementById('moveFrom').value;
+  const to = document.getElementById('moveTo').value;
+  const count = parseInt(document.getElementById('moveCount').value) || 1;
+  if (!from || !to) { alert('Select both source and destination regions.'); return; }
+  addOrder(fid, { type: 'move', from: from, to: to, count: count, desc: 'Move ' + count + ' \u2192 ' + (REGION_NAMES[from]||from) + ' to ' + (REGION_NAMES[to]||to) });
+}
+
+function queueAttackOrder(fid) {
+  const from = document.getElementById('atkFrom').value;
+  const target = document.getElementById('atkTarget').value;
+  const count = parseInt(document.getElementById('atkCount').value) || 1;
+  if (!from || !target) { alert('Select both source and target regions.'); return; }
+  addOrder(fid, { type: 'attack', from: from, target: target, divisions: count, desc: 'Attack ' + (REGION_NAMES[target]||target) + ' from ' + (REGION_NAMES[from]||from) + ' (' + count + ' div)' });
 }
 
 function renderPlayerDashboard(container) {
@@ -4034,77 +4409,391 @@ function renderPlayerDashboard(container) {
   const f = gameState.factions[fid];
   const isDealer = fid === 'krupp' || fid === 'schneider';
   const allianceCls = FACTION_ALLIANCE[fid];
+  const orders = getOrders(fid);
+  const isSubmitted = orders.submitted;
 
+  // Compute economy
+  const upkeep = f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet;
+  const net = f.income - upkeep;
+  const netCls = net >= 0 ? 'positive' : 'negative';
+
+  // Status strip
+  let statusStrip = `<div class="status-strip">
+    <div class="strip-item"><span class="strip-label">Treasury</span><span class="strip-value">${f.gold}g</span></div>
+    <div class="strip-item"><span class="strip-label">Income</span><span class="strip-value positive">+${f.income}g</span></div>
+    <div class="strip-item"><span class="strip-label">Upkeep</span><span class="strip-value negative">-${upkeep}g</span></div>
+    <div class="strip-item"><span class="strip-label">Net/Turn</span><span class="strip-value ${netCls}">${net >= 0 ? '+' : ''}${net}g</span></div>
+    <div class="strip-item"><span class="strip-label">VP</span><span class="strip-value">${f.vp}</span></div>
+  </div>`;
+
+  // Forces Pipeline
+  let pipelineHtml = '';
+  if (!isDealer) {
+    const units = f.units || [];
+    const reserve = units.filter(u => u.state === 'reserve').length;
+    const mobilized = units.filter(u => u.state === 'mobilized').length;
+    const deployed = units.filter(u => u.state === 'deployed').length;
+    const attacking = orders.actions.filter(a => a.type === 'attack').reduce((s, a) => s + (a.divisions || 0), 0);
+    pipelineHtml = `<div class="pipeline">
+      <div class="pipeline-stage ${reserve > 0 ? 'has-units' : ''}"><span class="stage-label">Reserve</span><span class="stage-count">${reserve}</span></div>
+      <div class="pipeline-arrow">\u2192</div>
+      <div class="pipeline-stage ${mobilized > 0 ? 'has-units' : ''}"><span class="stage-label">Mobilized</span><span class="stage-count">${mobilized}</span></div>
+      <div class="pipeline-arrow">\u2192</div>
+      <div class="pipeline-stage ${deployed > 0 ? 'has-units' : ''}"><span class="stage-label">Deployed</span><span class="stage-count">${deployed}</span></div>
+      <div class="pipeline-arrow">\u2192</div>
+      <div class="pipeline-stage ${attacking > 0 ? 'has-units' : ''}"><span class="stage-label">Attacking</span><span class="stage-count">${attacking}</span></div>
+    </div>`;
+  }
+
+  // Action tabs
+  const tabs = isDealer ? ['upgrades'] : ['recruit','deploy','move','attack','support','upgrades'];
+  const tabLabels = { recruit:'Recruit', deploy:'Deploy', move:'Move', attack:'Attack', support:'Support', upgrades:'Upgrades' };
+  if (isDealer && activeActionTab !== 'upgrades') activeActionTab = 'upgrades';
+  if (!tabs.includes(activeActionTab)) activeActionTab = tabs[0];
+
+  const actionTabBtns = tabs.map(t => `<button class="action-tab ${activeActionTab === t ? 'active' : ''}" onclick="setActionTab('${t}')">${tabLabels[t]}</button>`).join('');
+  const actionContent = renderActionTabContent(fid);
+
+  // Pending orders
+  let ordersHtml = '';
+  if (orders.actions.length > 0) {
+    ordersHtml = `<div class="order-queue">
+      <div class="order-queue-header">Pending Orders (${orders.actions.length})</div>
+      ${orders.actions.map(a => `
+        <div class="order-item type-${a.type}">
+          <span class="order-desc">${a.desc || a.type}</span>
+          ${!isSubmitted ? `<button class="order-undo" onclick="removeOrder('${fid}','${a.id}')">\u2715</button>` : ''}
+        </div>
+      `).join('')}
+    </div>`;
+  } else {
+    ordersHtml = `<div class="order-queue"><div class="empty-state">No orders queued yet. Use the action panel above.</div></div>`;
+  }
+
+  // Submit button
+  let submitHtml = '';
+  if (isSubmitted) {
+    submitHtml = `<button class="submit-orders-btn submitted">ORDERS SUBMITTED &mdash; Awaiting Resolution</button>`;
+  } else {
+    submitHtml = `<button class="submit-orders-btn" onclick="submitOrders('${fid}')">Submit Orders to GM</button>`;
+  }
+
+  // Troop table
   let troopRows = '';
   if (!isDealer) {
     ALL_REGIONS.forEach(r => {
       const troops = (f.troops[r] || 0);
       const fleets = (f.fleets[r] || 0);
       if (troops > 0 || fleets > 0) {
-        troopRows += `<tr><td>${REGION_NAMES[r]}</td><td>${troops || '—'}</td><td>${fleets || '—'}</td></tr>`;
+        troopRows += `<tr><td>${REGION_NAMES[r]}</td><td>${troops || '\u2014'}</td><td>${fleets || '\u2014'}</td></tr>`;
       }
     });
   }
 
   container.innerHTML = `
-    <div class="dashboard-card">
+    <div class="dashboard-card" style="border-left: 6px solid ${FACTION_COLORS[fid]};">
       <h3>${FACTION_NAMES[fid]}</h3>
       <div class="faction-type"><span class="alliance-badge ${allianceCls}">${allianceCls}</span></div>
-      <div class="stats-grid">
-        <div class="stat-box"><span class="stat-label">Treasury</span><span class="stat-value">${f.gold} 💰</span></div>
-        <div class="stat-box"><span class="stat-label">Income/Turn</span><span class="stat-value">${f.income}</span></div>
-        <div class="stat-box"><span class="stat-label">Total Army</span><span class="stat-value">${f.army} ⚔</span></div>
-        <div class="stat-box"><span class="stat-label">Total Navy</span><span class="stat-value">${f.navy} ⚓</span></div>
-        <div class="stat-box"><span class="stat-label">Victory Points</span><span class="stat-value">${f.vp}</span></div>
-        ${isDealer ? `<div class="stat-box"><span class="stat-label">Total Sales</span><span class="stat-value">${f.sales || 0}</span></div>` : ''}
-      </div>
-      ${f.alliances.length ? `<p style="margin-bottom:8px;"><strong>Alliances:</strong> ${f.alliances.map(a => FACTION_NAMES[a] || a).join(', ')}</p>` : ''}
-      ${f.status && f.status.length ? `<p><strong>Status:</strong> ${f.status.join(', ')}</p>` : ''}
+      ${statusStrip}
+      ${pipelineHtml}
+      ${f.alliances.length ? `<p style="margin-bottom:12px;"><strong>Alliances:</strong> ${f.alliances.map(a => FACTION_NAMES[a] || a).join(', ')}</p>` : ''}
+
+      <div class="action-tabs">${actionTabBtns}</div>
+      <div class="action-content">${actionContent}</div>
+
+      ${ordersHtml}
+      ${submitHtml}
+
       ${!isDealer && troopRows ? `
-        <table class="troop-table">
-          <tr><th>Region</th><th>Divisions</th><th>Fleets</th></tr>
-          ${troopRows}
-        </table>
+        <details class="turn-summary" style="margin-top:20px;">
+          <summary>Troop Deployment Table</summary>
+          <div class="summary-content" style="max-height:none;">
+            <table class="troop-table">
+              <tr><th>Region</th><th>Divisions</th><th>Fleets</th></tr>
+              ${troopRows}
+            </table>
+          </div>
+        </details>
       ` : ''}
-      ${renderPurchasePanel(fid)}
-      ${renderUpgradePanel(fid)}
-      ${renderPowerInfo()}
     </div>
-    ${renderPlayerTurnSummary(fid)}
+    <details class="turn-summary" style="margin-top:16px;">
+      <summary>Turn Summary &amp; History</summary>
+      <div class="summary-content">${renderPlayerTurnSummaryContent(fid)}</div>
+    </details>
   `;
 }
 
-function renderGMDashboard(container) {
-  const fid = document.getElementById('factionSelect').value;
+function renderPlayerTurnSummaryContent(fid) {
+  // Reuse logic from renderPlayerTurnSummary but just return inner content
+  const f = gameState.factions[fid];
+  const currentTurn = gameState.currentTurnNum;
+  const recentActions = (gameState.actionLog || [])
+    .filter(a => a.fid === fid && (a.turn === currentTurn || a.turn === currentTurn - 1))
+    .reverse();
+  if (recentActions.length === 0) return '<p class="no-actions">No history yet. Begin your campaign...</p>';
+  const actionIcons = { move: '\u2794', purchase: '+', upgrade: '\u2605', battle: '\u2694', income: '\u25CB', orders: '\u2691' };
+  return recentActions.map(a => `<div class="summary-entry"><span class="action-icon ${a.type}">${actionIcons[a.type] || '\u2022'}</span> ${a.description}</div>`).join('');
+}
+
+// ==================== GM CONTROL ====================
+
+function renderGMControl() {
+  const container = document.getElementById('gmControlContent');
+  if (!container) return;
+
+  const turnIdx = Math.min(gameState.currentTurnNum - 1, turns.length - 1);
+  const t = turns[turnIdx];
+  const isLastTurn = gameState.currentTurnNum >= turns.length;
+
+  // 1. Turn Banner
+  let turnSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Turn Management</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">
+      <div class="turn-banner">
+        <div class="turn-info">
+          <span class="turn-num">Turn ${t.num}</span>
+          <span class="turn-title">${t.title}</span>
+          <span class="turn-year">${t.year}</span>
+        </div>
+        <button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
+          ${isLastTurn ? 'Final Turn' : 'Advance Turn \u2192'}
+        </button>
+      </div>
+    </div>
+  </div>`;
+
+  // 2. Order Review
+  let orderReviewHtml = '';
+  Object.keys(FACTION_NAMES).forEach(fid => {
+    const orders = getOrders(fid);
+    const badge = orders.submitted
+      ? '<span class="order-review-badge submitted">Submitted</span>'
+      : '<span class="order-review-badge pending">Pending</span>';
+    let actionsHtml = '';
+    if (orders.actions.length > 0) {
+      actionsHtml = orders.actions.map(a => `<div class="order-item type-${a.type}"><span class="order-desc">${a.desc || a.type}</span></div>`).join('');
+    } else {
+      actionsHtml = '<div class="empty-state">No orders this turn.</div>';
+    }
+    orderReviewHtml += `<div class="order-review-faction">
+      <div class="order-review-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+        <span>${FACTION_NAMES[fid]}</span>${badge}
+      </div>
+      <div class="order-review-body">${actionsHtml}</div>
+    </div>`;
+  });
+
+  let orderSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Order Review</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">${orderReviewHtml}</div>
+  </div>`;
+
+  // 3. Battle Resolution
+  const battles = gameState.battles || [];
+  const pendingBattles = battles.filter(b => b.status === 'pending');
+  let battleHtml = '';
+  if (pendingBattles.length > 0) {
+    pendingBattles.forEach(b => {
+      let atkCoalHtml = b.attackerCoalition.map(c => {
+        let supportBtns = '';
+        if (c.supportPledged && c.actualSupport === null) {
+          supportBtns = `<button class="betrayal-btn honor" onclick="revealSupport('${b.id}','${c.fid}',true)">Honor</button>
+            <button class="betrayal-btn betray" onclick="revealSupport('${b.id}','${c.fid}',false)">Betray</button>`;
+        } else if (c.actualSupport !== null) {
+          supportBtns = c.actualSupport
+            ? '<span class="betrayal-btn honor revealed">Honored</span>'
+            : '<span class="betrayal-btn betray revealed">Betrayed!</span>';
+        }
+        return `<div class="coalition-entry">
+          <span>${FACTION_NAMES[c.fid]} \u2014 ${c.divisions} div from ${REGION_NAMES[c.from] || c.from}</span>
+          <span>${supportBtns}</span>
+        </div>`;
+      }).join('');
+
+      let defCoalHtml = b.defenderCoalition.map(c => {
+        return `<div class="coalition-entry">
+          <span>${FACTION_NAMES[c.fid]} \u2014 ${c.divisions} div from ${REGION_NAMES[c.from] || c.from}</span>
+        </div>`;
+      }).join('');
+
+      battleHtml += `<div class="battle-card">
+        <div class="battle-card-header">Battle at ${REGION_NAMES[b.targetRegion] || b.targetRegion} (Turn ${b.turn})</div>
+        <div class="battle-card-body">
+          <div class="coalition-side">
+            <div class="coalition-label">Attacker Coalition</div>
+            ${atkCoalHtml}
+          </div>
+          <div class="coalition-side">
+            <div class="coalition-label">Defender Coalition</div>
+            ${defCoalHtml}
+          </div>
+          <button class="roll-btn" onclick="resolveBattleFromGM('${b.id}')">\u2684 Resolve Battle \u2684</button>
+          <div id="battleResult_${b.id}"></div>
+        </div>
+      </div>`;
+    });
+  } else {
+    battleHtml = '<div class="empty-state">No pending battles. Create battles from faction attack orders above.</div>';
+  }
+
+  // Add manual battle creation with the old battle simulator inline
+  battleHtml += `
+    <div style="margin-top:16px; padding-top:16px; border-top:2px solid var(--ink-light);">
+      <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.9em; margin-bottom:12px;">Quick Battle Simulator</h4>
+      <div class="battle-setup">
+        <div class="battle-side attacker">
+          <h4>Attacker</h4>
+          <div class="battle-field"><label>Faction</label>
+            <select id="atkFaction" onchange="updateBattleOptions()">
+              <option value="">\u2014 Select \u2014</option>
+              ${Object.keys(FACTION_NAMES).filter(f => f !== 'krupp' && f !== 'schneider').map(f => `<option value="${f}">${FACTION_NAMES[f]}</option>`).join('')}
+            </select>
+          </div>
+          <div class="battle-field"><label>Divisions Committed</label><input type="number" id="atkDivisions" min="1" value="1"></div>
+          <div class="battle-field"><label>Attacking From</label><select id="atkRegion"><option value="">\u2014 Select attacker first \u2014</option></select></div>
+          <div class="modifiers-list">
+            <label><input type="checkbox" id="modArtillery"> Artillery Upgrade (+1)</label>
+            <label><input type="checkbox" id="modGas"> Gas Warfare (+2)</label>
+          </div>
+        </div>
+        <div class="battle-vs">VS</div>
+        <div class="battle-side defender">
+          <h4>Defender</h4>
+          <div class="battle-field"><label>Faction</label>
+            <select id="defFaction" onchange="updateBattleOptions()">
+              <option value="">\u2014 Select \u2014</option>
+              ${Object.keys(FACTION_NAMES).filter(f => f !== 'krupp' && f !== 'schneider').map(f => `<option value="${f}">${FACTION_NAMES[f]}</option>`).join('')}
+            </select>
+          </div>
+          <div class="battle-field"><label>Divisions Committed</label><input type="number" id="defDivisions" min="1" value="1"></div>
+          <div class="battle-field"><label>Defending Region</label><select id="defRegion"><option value="">\u2014 Select defender first \u2014</option></select></div>
+          <div class="modifiers-list">
+            <label><input type="checkbox" id="modFortified"> Fortified (+2 defense)</label>
+            <label><input type="checkbox" id="modTrench"> Trench Warfare (+1 defense)</label>
+            <label><input type="checkbox" id="modRussiaMob"> Russia 1st-turn mobilization (half forces)</label>
+          </div>
+        </div>
+      </div>
+      <button class="roll-btn" id="rollBtn" onclick="rollBattle()">\u2684 Roll for Battle \u2684</button>
+      <div class="dice-display" id="diceDisplay" style="display:none;">
+        <div>
+          <div style="text-align:center; font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; color:var(--red-empire); margin-bottom:6px;">Attacker</div>
+          <div class="die attacker-die" id="atkDie">?</div>
+        </div>
+        <div>
+          <div style="text-align:center; font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; color:var(--blue-entente); margin-bottom:6px;">Defender</div>
+          <div class="die defender-die" id="defDie">?</div>
+        </div>
+      </div>
+      <div class="battle-result" id="battleResult"></div>
+      <div class="battle-log" id="battleLog">
+        <h4>Battle Log</h4>
+        <div id="battleLogEntries"><em style="font-family:'IM Fell English',serif;">No battles yet. The peace holds \u2014 for now.</em></div>
+      </div>
+    </div>
+  `;
+
+  let battleSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Battle Resolution</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">${battleHtml}</div>
+  </div>`;
+
+  // 4. Faction Editor
+  let factionEditorHtml = `
+    <div style="margin-bottom:12px;">
+      <select id="gmFactionSelect" onchange="renderGMFactionEditor()" style="font-family:'Crimson Text',serif; font-size:1em; padding:8px 14px; border:2px solid var(--ink); background:var(--cream);">
+        ${Object.keys(FACTION_NAMES).map(f => `<option value="${f}">${FACTION_NAMES[f]}</option>`).join('')}
+      </select>
+    </div>
+    <div id="gmFactionEditorContent"></div>
+  `;
+
+  let factionSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Faction Editor</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">${factionEditorHtml}</div>
+  </div>`;
+
+  // 5. All Factions Overview
+  let overviewHtml = `<div style="overflow-x:auto;">
+    <table class="overview-table">
+      <tr><th>Faction</th><th>Gold</th><th>Income</th><th>Army</th><th>Navy</th><th>VP</th></tr>
+      ${Object.keys(gameState.factions).map(k => {
+        const fc = gameState.factions[k];
+        const isGmCtrl = gameState.setup && gameState.setup.factionConfig[k] && gameState.setup.factionConfig[k].controlled === 'gm';
+        return `<tr><td>${FACTION_NAMES[k]}${isGmCtrl ? ' <span class="gm-badge">GM</span>' : ''}</td><td>${fc.gold}</td><td>${fc.income}</td><td>${fc.army}</td><td>${fc.navy}</td><td>${fc.vp}</td></tr>`;
+      }).join('')}
+    </table>
+  </div>`;
+
+  let overviewSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>All Factions Overview</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">${overviewHtml}</div>
+  </div>`;
+
+  // 6. Action Log
+  const actionLog = (gameState.actionLog || []).slice().reverse().slice(0, 50);
+  let logHtml = '';
+  if (actionLog.length > 0) {
+    logHtml = actionLog.map(a => `<div class="summary-entry"><strong>T${a.turn} ${FACTION_NAMES[a.fid] || a.fid}:</strong> ${a.description}</div>`).join('');
+  } else {
+    logHtml = '<div class="empty-state">No actions recorded yet.</div>';
+  }
+
+  let logSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Full Action Log</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body" style="max-height:400px; overflow-y:auto;">${logHtml}</div>
+  </div>`;
+
+  container.innerHTML = turnSection + orderSection + battleSection + factionSection + overviewSection + logSection;
+
+  // Render the faction editor for the currently selected faction
+  renderGMFactionEditor();
+  renderBattleLog();
+}
+
+function renderGMFactionEditor() {
+  const sel = document.getElementById('gmFactionSelect');
+  if (!sel) return;
+  const fid = sel.value;
   const f = gameState.factions[fid];
   const isDealer = fid === 'krupp' || fid === 'schneider';
+  const editorContainer = document.getElementById('gmFactionEditorContent');
+  if (!editorContainer) return;
 
   let troopInputs = '';
   if (!isDealer) {
-    ALL_REGIONS.forEach(r => {
+    LAND_REGIONS.forEach(r => {
       const troops = f.troops[r] || 0;
       const fleets = f.fleets[r] || 0;
-      if (troops > 0 || fleets > 0 || SEA_REGIONS.indexOf(r) === -1) {
-        if (LAND_REGIONS.indexOf(r) !== -1) {
-          troopInputs += `<tr>
-            <td>${REGION_NAMES[r]}</td>
-            <td><input type="number" min="0" value="${troops}" data-region="${r}" data-type="troops"></td>
-            <td><input type="number" min="0" value="${fleets}" data-region="${r}" data-type="fleets"></td>
-          </tr>`;
-        }
-      }
+      troopInputs += `<tr>
+        <td>${REGION_NAMES[r]}</td>
+        <td><input type="number" min="0" value="${troops}" data-region="${r}" data-type="troops"></td>
+        <td><input type="number" min="0" value="${fleets}" data-region="${r}" data-type="fleets"></td>
+      </tr>`;
     });
     SEA_REGIONS.forEach(r => {
       const fleets = f.fleets[r] || 0;
       troopInputs += `<tr>
         <td>${REGION_NAMES[r]}</td>
-        <td>—</td>
+        <td>\u2014</td>
         <td><input type="number" min="0" value="${fleets}" data-region="${r}" data-type="fleets"></td>
       </tr>`;
     });
   }
 
-  container.innerHTML = `
+  editorContainer.innerHTML = `
     <div class="dashboard-card" style="border-left: 6px solid ${FACTION_COLORS[fid]};">
       <h3>GM EDIT: ${FACTION_NAMES[fid]}</h3>
       <div class="stats-grid">
@@ -4124,23 +4813,103 @@ function renderGMDashboard(container) {
       ` : ''}
       <button class="btn-save" onclick="applyGMEdits('${fid}')" style="margin-top:16px;">Apply Changes</button>
     </div>
-
-    ${renderTurnSummary()}
-
-    <div style="margin-top:24px;">
-      <div class="section-title" style="font-size:1.2em;"><span class="icon">📋</span> All Factions Overview</div>
-      <div style="overflow-x:auto;">
-        <table class="overview-table">
-          <tr><th>Faction</th><th>Gold</th><th>Income</th><th>Army</th><th>Navy</th><th>VP</th></tr>
-          ${Object.keys(gameState.factions).map(k => {
-            const fc = gameState.factions[k];
-            const isGmCtrl = gameState.setup && gameState.setup.factionConfig[k] && gameState.setup.factionConfig[k].controlled === 'gm';
-            return `<tr><td>${FACTION_NAMES[k]}${isGmCtrl ? ' <span class="gm-badge">GM</span>' : ''}</td><td>${fc.gold}</td><td>${fc.income}</td><td>${fc.army}</td><td>${fc.navy}</td><td>${fc.vp}</td></tr>`;
-          }).join('')}
-        </table>
-      </div>
-    </div>
   `;
+}
+
+function revealSupport(battleId, fid, honored) {
+  const battles = gameState.battles || [];
+  const battle = battles.find(b => b.id === battleId);
+  if (!battle) return;
+  const entry = battle.attackerCoalition.find(c => c.fid === fid);
+  if (entry) {
+    entry.actualSupport = honored;
+    if (!honored) {
+      entry.divisions = 0; // Betrayed - remove divisions
+    }
+  }
+  saveGameState();
+  renderGMControl();
+}
+
+function resolveBattleFromGM(battleId) {
+  const battles = gameState.battles || [];
+  const battle = battles.find(b => b.id === battleId);
+  if (!battle) return;
+
+  // Calculate totals
+  const atkDiv = battle.attackerCoalition.reduce((s, c) => s + c.divisions, 0);
+  const defDiv = battle.defenderCoalition.reduce((s, c) => s + c.divisions, 0);
+  const atkRoll = Math.ceil(Math.random() * 6);
+  const defRoll = Math.ceil(Math.random() * 6);
+  const atkTotal = atkDiv + atkRoll;
+  const defTotal = defDiv + defRoll;
+  const margin = atkTotal - defTotal;
+  const tier = determineBattleTier(margin);
+  const losses = computeLosses(tier, atkDiv, defDiv);
+
+  battle.status = 'resolved';
+  battle.result = { tier: tier.label, margin, atkTotal, defTotal, atkRoll, defRoll, atkLosses: losses.atkLosses, defLosses: losses.defLosses };
+
+  const resultEl = document.getElementById('battleResult_' + battleId);
+  if (resultEl) {
+    resultEl.innerHTML = `
+      <div class="tier-result" style="border-color:${tier.color}; color:${tier.color};">
+        <div class="tier-icon">${tier.icon}</div>
+        <h3>${tier.label}</h3>
+        <p>Attacker: ${atkDiv} div + d6(${atkRoll}) = ${atkTotal} | Defender: ${defDiv} div + d6(${defRoll}) = ${defTotal}</p>
+        <p>Margin: ${margin >= 0 ? '+' : ''}${margin}</p>
+        <p style="color:var(--red-empire);">Attacker loses: ${losses.atkLosses} div | Defender loses: ${losses.defLosses} div</p>
+        ${tier.defRetreats ? '<p><em>Defender retreats!</em></p>' : ''}
+        ${tier.atkRetreats ? '<p><em>Attacker retreats!</em></p>' : ''}
+        <button class="apply-btn" onclick="applyGMBattleResult('${battleId}')" style="margin-top:12px;">Apply Results</button>
+      </div>
+    `;
+  }
+
+  saveGameState();
+}
+
+function applyGMBattleResult(battleId) {
+  const battles = gameState.battles || [];
+  const battle = battles.find(b => b.id === battleId);
+  if (!battle || !battle.result) return;
+
+  // Apply losses to attacker coalition
+  let atkLossRemaining = battle.result.atkLosses;
+  battle.attackerCoalition.forEach(c => {
+    if (atkLossRemaining <= 0) return;
+    const f = gameState.factions[c.fid];
+    if (!f) return;
+    const loss = Math.min(atkLossRemaining, c.divisions);
+    f.army = Math.max(0, f.army - loss);
+    if (f.troops[c.from]) {
+      f.troops[c.from] = Math.max(0, f.troops[c.from] - loss);
+      if (f.troops[c.from] <= 0) delete f.troops[c.from];
+    }
+    logAction(c.fid, 'battle', 'Battle at ' + (REGION_NAMES[battle.targetRegion] || battle.targetRegion) + ': Lost ' + loss + ' div. Result: ' + battle.result.tier);
+    atkLossRemaining -= loss;
+  });
+
+  // Apply losses to defender coalition
+  let defLossRemaining = battle.result.defLosses;
+  battle.defenderCoalition.forEach(c => {
+    if (defLossRemaining <= 0) return;
+    const f = gameState.factions[c.fid];
+    if (!f) return;
+    const loss = Math.min(defLossRemaining, c.divisions);
+    f.army = Math.max(0, f.army - loss);
+    if (f.troops[c.from]) {
+      f.troops[c.from] = Math.max(0, f.troops[c.from] - loss);
+      if (f.troops[c.from] <= 0) delete f.troops[c.from];
+    }
+    logAction(c.fid, 'battle', 'Battle at ' + (REGION_NAMES[battle.targetRegion] || battle.targetRegion) + ': Lost ' + loss + ' div. Result: ' + battle.result.tier);
+    defLossRemaining -= loss;
+  });
+
+  battle.status = 'applied';
+  saveGameState();
+  renderGMControl();
+  renderMap();
 }
 
 function applyGMEdits(fid) {
@@ -4525,59 +5294,53 @@ function rollBattle() {
 function resolveBattle(atkFid, defFid, atkDiv, defDiv, atkRoll, defRoll, atkMod, defMod, atkRegion, defRegion) {
   const atkTotal = atkDiv + atkRoll + atkMod;
   const defTotal = defDiv + defRoll + defMod;
+  const margin = atkTotal - defTotal;
+  const tier = determineBattleTier(margin);
+  const losses = computeLosses(tier, atkDiv, defDiv);
 
-  const attackerWins = atkTotal > defTotal;
-  const difference = Math.abs(atkTotal - defTotal);
-  const loserLoss = Math.max(1, Math.ceil(difference / 2));
-  const winnerLoss = 1;
-
-  let atkLosses, defLosses, headline;
-
-  if (attackerWins) {
-    atkLosses = winnerLoss;
-    defLosses = loserLoss;
-    headline = `VICTORY FOR ${FACTION_NAMES[atkFid].toUpperCase()}!`;
-  } else {
-    atkLosses = loserLoss;
-    defLosses = winnerLoss;
-    headline = defTotal === atkTotal
-      ? `${FACTION_NAMES[defFid].toUpperCase()} HOLDS THE LINE! (Tie → Defender)`
-      : `${FACTION_NAMES[defFid].toUpperCase()} HOLDS THE LINE!`;
-  }
+  const attackerWins = margin > 0;
 
   lastBattleResult = {
     atkFid, defFid, atkRegion, defRegion,
-    atkLosses: Math.min(atkLosses, atkDiv),
-    defLosses: Math.min(defLosses, defDiv),
-    attackerWins
+    atkLosses: Math.min(losses.atkLosses, atkDiv),
+    defLosses: Math.min(losses.defLosses, defDiv),
+    attackerWins,
+    tier
   };
 
   const resultDiv = document.getElementById('battleResult');
   resultDiv.className = 'battle-result visible ' + (attackerWins ? 'attacker-wins' : 'defender-wins');
   resultDiv.innerHTML = `
-    <h3>${headline}</h3>
-    <div class="casualties">
-      <p><strong>${FACTION_NAMES[atkFid]}:</strong> ${atkDiv} divisions + d6(${document.getElementById('atkDie').textContent}) ${atkMod ? '+ ' + atkMod + ' mods' : ''} = <strong>${atkTotal}</strong></p>
-      <p><strong>${FACTION_NAMES[defFid]}:</strong> ${defDiv} divisions + d6(${document.getElementById('defDie').textContent}) ${defMod ? '+ ' + defMod + ' mods' : ''} = <strong>${defTotal}</strong></p>
+    <div class="tier-result" style="border-color:${tier.color}; color:${tier.color};">
+      <div class="tier-icon">${tier.icon}</div>
+      <h3>${tier.label}</h3>
+    </div>
+    <div class="casualties" style="margin-top:16px;">
+      <p><strong>${FACTION_NAMES[atkFid]}:</strong> ${atkDiv} div + d6(${atkRoll}) ${atkMod ? '+ ' + atkMod + ' mods' : ''} = <strong>${atkTotal}</strong></p>
+      <p><strong>${FACTION_NAMES[defFid]}:</strong> ${defDiv} div + d6(${defRoll}) ${defMod ? '+ ' + defMod + ' mods' : ''} = <strong>${defTotal}</strong></p>
+      <p style="margin-top:4px;">Margin: ${margin >= 0 ? '+' : ''}${margin}</p>
       <hr style="margin:12px 0; border:1px solid var(--parchment-dark);">
-      <p style="color:var(--red-empire);"><strong>${FACTION_NAMES[atkFid]} loses:</strong> ${lastBattleResult.atkLosses} division(s)</p>
-      <p style="color:var(--blue-entente);"><strong>${FACTION_NAMES[defFid]} loses:</strong> ${lastBattleResult.defLosses} division(s)</p>
-      ${!attackerWins ? `<p style="margin-top:8px;"><em>Attacker retreats to ${REGION_NAMES[atkRegion]}</em></p>` : `<p style="margin-top:8px;"><em>Defender retreats from ${REGION_NAMES[defRegion]}</em></p>`}
+      <p style="color:var(--red-empire);"><strong>${FACTION_NAMES[atkFid]} loses:</strong> ${lastBattleResult.atkLosses} division(s) (${Math.round(tier.atkLossPct*100)}%)</p>
+      <p style="color:var(--blue-entente);"><strong>${FACTION_NAMES[defFid]} loses:</strong> ${lastBattleResult.defLosses} division(s) (${Math.round(tier.defLossPct*100)}%)</p>
+      ${tier.defRetreats ? `<p style="margin-top:8px;"><em>Defender retreats from ${REGION_NAMES[defRegion]}</em></p>` : ''}
+      ${tier.atkRetreats ? `<p style="margin-top:8px;"><em>Attacker retreats to ${REGION_NAMES[atkRegion]}</em></p>` : ''}
+      ${!tier.defRetreats && !tier.atkRetreats ? `<p style="margin-top:8px;"><em>Lines hold. No retreat.</em></p>` : ''}
     </div>
     <button class="apply-btn" onclick="applyBattleResult()">Apply Results to Game State</button>
   `;
 
   // Add to log
-  const logEntry = `${FACTION_NAMES[atkFid]} (${atkTotal}) vs ${FACTION_NAMES[defFid]} (${defTotal}) at ${REGION_NAMES[defRegion]} — ${attackerWins ? FACTION_NAMES[atkFid] + ' wins' : FACTION_NAMES[defFid] + ' holds'}. Losses: ${lastBattleResult.atkLosses}/${lastBattleResult.defLosses}`;
+  const logEntry = `${FACTION_NAMES[atkFid]} (${atkTotal}) vs ${FACTION_NAMES[defFid]} (${defTotal}) at ${REGION_NAMES[defRegion]} \u2014 ${tier.label}. Losses: ${lastBattleResult.atkLosses}/${lastBattleResult.defLosses}`;
   gameState.battleLog.push(logEntry);
   renderBattleLog();
 }
 
 function applyBattleResult() {
   if (!lastBattleResult) return;
-  const { atkFid, defFid, atkRegion, defRegion, atkLosses, defLosses, attackerWins } = lastBattleResult;
+  const { atkFid, defFid, atkRegion, defRegion, atkLosses, defLosses, attackerWins, tier } = lastBattleResult;
   const atkF = gameState.factions[atkFid];
   const defF = gameState.factions[defFid];
+  const tierLabel = tier ? tier.label : (attackerWins ? 'Victory' : 'Defeat');
 
   // Apply losses
   atkF.army = Math.max(0, atkF.army - atkLosses);
@@ -4594,28 +5357,25 @@ function applyBattleResult() {
   }
 
   // Log battle for both factions
-  if (attackerWins) {
-    logAction(atkFid, 'battle', 'Victory at ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[defFid] + '! Lost ' + atkLosses + ' div, enemy lost ' + defLosses + ' div.');
-    logAction(defFid, 'battle', 'Defeat at ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[atkFid] + '. Lost ' + defLosses + ' div, enemy lost ' + atkLosses + ' div.');
-  } else {
-    logAction(defFid, 'battle', 'Held ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[atkFid] + '! Lost ' + defLosses + ' div, enemy lost ' + atkLosses + ' div.');
-    logAction(atkFid, 'battle', 'Repulsed at ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[defFid] + '. Lost ' + atkLosses + ' div, enemy lost ' + defLosses + ' div.');
-  }
+  logAction(atkFid, 'battle', tierLabel + ' at ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[defFid] + '. Lost ' + atkLosses + ' div, enemy lost ' + defLosses + ' div.');
+  logAction(defFid, 'battle', tierLabel + ' at ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[atkFid] + '. Lost ' + defLosses + ' div, enemy lost ' + atkLosses + ' div.');
 
   saveGameState();
   lastBattleResult = null;
 
   const resultDiv = document.getElementById('battleResult');
   resultDiv.innerHTML += `<p style="margin-top:12px; color:var(--green-neutral); font-weight:700; font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px;">Results Applied</p>`;
-  resultDiv.querySelector('.apply-btn').style.display = 'none';
+  const applyBtn = resultDiv.querySelector('.apply-btn');
+  if (applyBtn) applyBtn.style.display = 'none';
 
   renderMap();
 }
 
 function renderBattleLog() {
   const entries = document.getElementById('battleLogEntries');
+  if (!entries) return;
   if (gameState.battleLog.length === 0) {
-    entries.innerHTML = '<em style="font-family:\'IM Fell English\',serif;">No battles yet. The peace holds — for now.</em>';
+    entries.innerHTML = '<em style="font-family:\'IM Fell English\',serif;">No battles yet. The peace holds \u2014 for now.</em>';
     return;
   }
   entries.innerHTML = gameState.battleLog.map((e, i) =>
@@ -5112,12 +5872,12 @@ function updatePrintButtons() {
 // ==================== INIT NEW FEATURES ====================
 renderDashboard();
 renderMap();
-renderBattleLog();
 renderSetupGrid();
 renderFactionDossiers();
 renderOverviewFactions();
 updateSubtitle();
 updatePrintButtons();
+// GM Control will render on tab switch
 </script>
 
 </body>
