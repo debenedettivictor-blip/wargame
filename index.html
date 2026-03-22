@@ -563,8 +563,25 @@ body::before {
   border-color: var(--gold-accent);
 }
 
-.faction-setup-row.disabled-faction {
+.faction-setup-row.faction-disabled {
   opacity: 0.5;
+  background: #eee;
+  border-color: #999;
+}
+
+.optional-badge {
+  display: inline-block;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.65em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 1px 6px;
+  background: transparent;
+  color: var(--ink-light);
+  border: 1px solid var(--ink-light);
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
 .faction-setup-name {
@@ -1862,6 +1879,7 @@ body::before {
 
 <div class="highlight-box" style="margin-top:20px; border-color: var(--ink-light);">
   <strong>How it works:</strong><br>
+  &#9679; <strong>Not In Game:</strong> Optional factions (Ottoman Empire, Schneider-Skoda) can be removed entirely for smaller or simpler games.<br>
   &#9679; <strong>GM-Controlled:</strong> The GM plays this faction as an NPC — great for arms dealers who stir chaos!<br>
   &#9679; <strong>Fewer players than roles:</strong> Players pick their primary role. Other role cards are greyed out.<br>
   &#9679; <strong>More players (24):</strong> Extra "devious" roles unlock — spies, agitators, and double agents with chaotic secret objectives.
@@ -3006,7 +3024,7 @@ const FACTION_ROLES = {
     ]
   },
   ottoman: {
-    min: 1, max: 4,
+    min: 1, max: 4, optional: true,
     roles: [
       { id: 'sultan', name: 'The Sultan', title: 'The Traditionalist', core: true, devious: false },
       { id: 'young_turk', name: 'The Young Turk Leader', title: 'The Revolutionary Modernizer', core: true, devious: false },
@@ -3023,7 +3041,7 @@ const FACTION_ROLES = {
     ]
   },
   schneider: {
-    min: 1, max: 2,
+    min: 1, max: 2, optional: true,
     roles: [
       { id: 'merchant', name: 'The Merchant of Death', title: 'One Player to Rule Them All', core: true, devious: false },
       { id: 'fence', name: 'The Fence', title: 'The Arms Smuggler', core: false, devious: true }
@@ -3131,20 +3149,28 @@ function renderSetupGrid() {
     }).join(', ');
 
     // Build select options
-    let options = `<option value="gm" ${isGM ? 'selected' : ''}>GM-Controlled</option>`;
+    const isDisabled = fc.controlled === 'disabled';
+    let options = '';
+    if (fr.optional) {
+      options += `<option value="disabled" ${isDisabled ? 'selected' : ''}>Not In Game</option>`;
+    }
+    options += `<option value="gm" ${isGM ? 'selected' : ''}>GM-Controlled</option>`;
     for (let n = fr.min; n <= fr.max; n++) {
       const hasDevious = n > fr.roles.filter(r => r.core).length;
       const label = n + ' player' + (n > 1 ? 's' : '') + (hasDevious ? ' +chaos' : '');
-      options += `<option value="${n}" ${!isGM && fc.players === n ? 'selected' : ''}>${label}</option>`;
+      options += `<option value="${n}" ${!isGM && !isDisabled && fc.players === n ? 'selected' : ''}>${label}</option>`;
     }
 
+    const rowClass = isGM ? 'gm-controlled' : (isDisabled ? 'faction-disabled' : '');
     html += `
-      <div class="faction-setup-row ${isGM ? 'gm-controlled' : ''}" style="border-left: 4px solid ${FACTION_COLORS[fid]};">
+      <div class="faction-setup-row ${rowClass}" style="border-left: 4px solid ${isDisabled ? '#666' : FACTION_COLORS[fid]};">
         <div class="faction-setup-name">
           ${FACTION_NAMES[fid]}
           ${isGM ? '<span class="gm-badge">GM</span>' : ''}
+          ${isDisabled ? '<span class="gm-badge" style="background:#666;">REMOVED</span>' : ''}
+          ${fr.optional ? '<span class="optional-badge">Optional</span>' : ''}
         </div>
-        <div class="faction-setup-roles">${roleDisplay}</div>
+        <div class="faction-setup-roles">${isDisabled ? '<span class="role-inactive">Faction excluded from game</span>' : roleDisplay}</div>
         <div class="faction-setup-control">
           <select onchange="updateFactionSetup('${fid}', this.value)">${options}</select>
         </div>
@@ -3157,7 +3183,9 @@ function renderSetupGrid() {
 
 function updateFactionSetup(fid, value) {
   if (!gameState.setup) gameState.setup = getDefaultSetup();
-  if (value === 'gm') {
+  if (value === 'disabled') {
+    gameState.setup.factionConfig[fid] = { players: 0, controlled: 'disabled' };
+  } else if (value === 'gm') {
     gameState.setup.factionConfig[fid] = { players: 0, controlled: 'gm' };
   } else {
     gameState.setup.factionConfig[fid] = { players: parseInt(value), controlled: 'players' };
@@ -3177,15 +3205,53 @@ function updateSetupTotal() {
   totalEl.className = assigned === gameState.setup.totalPlayers ? 'count-ok' : 'count-over';
 }
 
+function refreshFactionSelects() {
+  if (!gameState.setup) return;
+  const config = gameState.setup.factionConfig;
+  // Update main faction select dropdown
+  const sel = document.getElementById('factionSelect');
+  if (sel) {
+    const prev = sel.value;
+    sel.innerHTML = '';
+    Object.keys(FACTION_NAMES).forEach(fid => {
+      const fc = config[fid];
+      if (fc && fc.controlled === 'disabled') return;
+      const opt = document.createElement('option');
+      opt.value = fid;
+      opt.textContent = FACTION_NAMES[fid];
+      sel.appendChild(opt);
+    });
+    if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+  }
+  // Update map faction select dropdown
+  const mapSel = document.getElementById('mapFactionSelect');
+  if (mapSel) {
+    const prev = mapSel.value;
+    mapSel.innerHTML = '';
+    const dealerIds = ['krupp', 'schneider'];
+    Object.keys(FACTION_NAMES).forEach(fid => {
+      if (dealerIds.includes(fid)) return;
+      const fc = config[fid];
+      if (fc && fc.controlled === 'disabled') return;
+      const opt = document.createElement('option');
+      opt.value = fid;
+      opt.textContent = FACTION_NAMES[fid];
+      mapSel.appendChild(opt);
+    });
+    if ([...mapSel.options].some(o => o.value === prev)) mapSel.value = prev;
+  }
+}
+
 function applySetup() {
   if (!gameState.setup) gameState.setup = getDefaultSetup();
   // Build activeRoles for each faction
   const config = gameState.setup.factionConfig;
   Object.keys(config).forEach(fid => {
     const fc = config[fid];
-    fc.activeRoles = fc.controlled === 'gm' ? [] : getActiveRoles(fid, fc.players);
+    fc.activeRoles = fc.controlled === 'gm' || fc.controlled === 'disabled' ? [] : getActiveRoles(fid, fc.players);
   });
   saveGameState();
+  refreshFactionSelects();
   renderFactionDossiers();
   renderDashboard();
   renderOverviewFactions();
@@ -3204,8 +3270,10 @@ function updateSubtitle() {
   if (gameState.setup) {
     const total = getTotalAssigned(gameState.setup.factionConfig);
     const gmCount = Object.values(gameState.setup.factionConfig).filter(f => f.controlled === 'gm').length;
+    const disabledCount = Object.values(gameState.setup.factionConfig).filter(f => f.controlled === 'disabled').length;
     let sub = `A Grand Strategy Game for ${total} Players`;
     if (gmCount > 0) sub += ` + ${gmCount} GM Faction${gmCount > 1 ? 's' : ''}`;
+    if (disabledCount > 0) sub += ` (${disabledCount} faction${disabledCount > 1 ? 's' : ''} removed)`;
     el.textContent = sub;
   }
 }
@@ -3920,7 +3988,7 @@ function renderMap() {
   let svg = `<div class="map-svg-wrapper"><svg viewBox="0 0 1080 736" xmlns="http://www.w3.org/2000/svg">`;
 
   // 1910 Europe map image as background
-  svg += `<image href="https://preview.redd.it/map-of-europe-1910-with-population-of-countries-listed-v0-wyqk6b5whp731.jpg?width=1080&crop=smart&auto=webp&s=5d254ba93d88a56bdd1f68bd79d4b4fc5c431bb9" x="0" y="0" width="1080" height="736" preserveAspectRatio="xMidYMid slice"/>`;
+  svg += `<image href="europe1910.jpg" x="0" y="0" width="1080" height="736" preserveAspectRatio="xMidYMid slice"/>`;
 
   // Draw interactive game region polygons (semi-transparent overlays)
   ALL_REGIONS.forEach(r => {
@@ -4458,11 +4526,16 @@ function renderFactionDossiers() {
     if (!fc) return;
 
     const isGM = fc.controlled === 'gm';
-    const playerCount = isGM ? 0 : fc.players;
+    const isDisabled = fc.controlled === 'disabled';
+    const playerCount = isGM || isDisabled ? 0 : fc.players;
     const fr = FACTION_ROLES[fid];
-    const activeRoles = isGM ? [] : getActiveRoles(fid, playerCount);
+    const activeRoles = isGM || isDisabled ? [] : getActiveRoles(fid, playerCount);
 
-    // Show/hide faction card
+    // Show/hide faction card — hide disabled factions entirely
+    if (isDisabled) {
+      card.style.display = 'none';
+      return;
+    }
     card.style.display = '';
 
     // Add/remove GM badge
@@ -4552,6 +4625,7 @@ function renderOverviewFactions() {
   let html = '';
   Object.keys(FACTION_NAMES).forEach(fid => {
     const fc = config[fid] || { players: 0, controlled: 'gm' };
+    if (fc.controlled === 'disabled') return;
     const alliance = FACTION_ALLIANCE[fid];
     const isGM = fc.controlled === 'gm';
     const isDealer = dealerIds.includes(fid);
