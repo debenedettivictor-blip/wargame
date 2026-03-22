@@ -486,6 +486,202 @@ body::before {
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
+/* ==================== SETUP TAB ==================== */
+.setup-container {
+  max-width: 900px;
+}
+
+.setup-presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.preset-card {
+  border: 2px solid var(--ink-light);
+  padding: 16px;
+  background: var(--cream);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.preset-card:hover {
+  border-color: var(--gold-accent);
+  background: var(--parchment-dark);
+}
+
+.preset-card.selected {
+  border-color: var(--gold-accent);
+  background: var(--parchment-dark);
+  box-shadow: 0 0 0 2px var(--gold-accent);
+}
+
+.preset-card .preset-count {
+  font-family: 'Playfair Display', serif;
+  font-size: 2em;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.preset-card .preset-label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-light);
+  margin-top: 4px;
+}
+
+.preset-card .preset-desc {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  color: var(--ink-light);
+  margin-top: 8px;
+  line-height: 1.3;
+}
+
+.faction-setup-grid {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.faction-setup-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 120px;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1px solid var(--parchment-dark);
+  background: var(--cream);
+}
+
+.faction-setup-row.gm-controlled {
+  background: linear-gradient(135deg, var(--cream), #f0e8d0);
+  border-color: var(--gold-accent);
+}
+
+.faction-setup-row.disabled-faction {
+  opacity: 0.5;
+}
+
+.faction-setup-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1em;
+}
+
+.faction-setup-roles {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  color: var(--ink-light);
+  line-height: 1.3;
+}
+
+.faction-setup-roles .role-active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.faction-setup-roles .role-inactive {
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.faction-setup-roles .role-devious {
+  color: var(--red-empire);
+  font-weight: 600;
+}
+
+.faction-setup-control select {
+  font-family: 'Crimson Text', serif;
+  font-size: 1em;
+  padding: 6px 10px;
+  border: 2px solid var(--ink-light);
+  background: var(--parchment);
+  width: 100%;
+}
+
+.setup-total {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3em;
+  font-weight: 700;
+  text-align: center;
+  padding: 16px;
+  margin: 20px 0;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+}
+
+.setup-total .count-ok { color: var(--green-neutral); }
+.setup-total .count-over { color: var(--red-empire); }
+
+.btn-apply-setup {
+  font-family: 'Playfair Display', serif;
+  font-size: 1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 14px 32px;
+  background: var(--gold-accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: block;
+  margin: 0 auto;
+}
+
+.btn-apply-setup:hover { background: #9a7209; }
+
+.gm-badge {
+  display: inline-block;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  background: var(--gold-accent);
+  color: white;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.role-card.inactive-role {
+  opacity: 0.4;
+  position: relative;
+}
+
+.role-card.inactive-role::before {
+  content: 'NOT IN PLAY';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5em;
+  font-weight: 900;
+  color: var(--red-empire);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (max-width: 700px) {
+  .faction-setup-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .setup-presets {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* Responsive */
 @media (max-width: 700px) {
   .game-header h1 { font-size: 1.7em; letter-spacing: 1px; }
@@ -852,6 +1048,238 @@ body::before {
 
 .btn-danger:hover { background: #6a1010; }
 
+/* ==================== TURN BANNER ==================== */
+.turn-banner {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 16px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border: 2px solid var(--gold-accent);
+}
+
+.turn-banner .turn-info {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.turn-banner .turn-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8em;
+  font-weight: 900;
+  color: var(--gold-accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.turn-banner .turn-title {
+  font-family: 'IM Fell English', serif;
+  font-size: 1.2em;
+  font-style: italic;
+  color: var(--parchment);
+}
+
+.turn-banner .turn-year {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.9em;
+  color: var(--gold-accent);
+  letter-spacing: 1px;
+}
+
+.btn-advance {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 10px 24px;
+  background: var(--gold-accent);
+  color: var(--ink);
+  border: 2px solid var(--gold-accent);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-advance:hover { background: #d4a017; }
+.btn-advance:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ==================== PURCHASE PANEL ==================== */
+.purchase-panel {
+  margin-top: 20px;
+  padding: 16px;
+  border: 2px solid var(--ink-light);
+  background: var(--parchment);
+}
+
+.purchase-panel h4 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9em;
+  margin-bottom: 12px;
+}
+
+.purchase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.purchase-btn {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+  padding: 10px 16px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.purchase-btn:hover:not(:disabled) { background: var(--gold-accent); color: var(--ink); }
+.purchase-btn:disabled { opacity: 0.4; cursor: not-allowed; border-style: dashed; }
+
+.purchase-btn .cost {
+  font-weight: 700;
+  color: var(--gold-accent);
+  background: var(--ink);
+  padding: 2px 8px;
+  font-size: 0.85em;
+}
+
+.purchase-btn:disabled .cost { background: var(--ink-light); }
+
+/* ==================== UPGRADE BADGES ==================== */
+.upgrade-panel {
+  margin-top: 16px;
+  padding: 16px;
+  border: 2px solid var(--ink-light);
+  background: var(--parchment);
+}
+
+.upgrade-panel h4 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9em;
+  margin-bottom: 12px;
+}
+
+.upgrade-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upgrade-badge {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  padding: 8px 16px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upgrade-badge:hover:not(:disabled):not(.owned) { background: var(--gold-accent); }
+.upgrade-badge:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.upgrade-badge.owned {
+  background: var(--green-neutral);
+  color: white;
+  border-color: var(--green-neutral);
+  cursor: default;
+}
+
+.upgrade-badge .upgrade-cost {
+  font-weight: 700;
+  font-size: 0.8em;
+  margin-left: 6px;
+  opacity: 0.8;
+}
+
+/* ==================== POWER INFO ==================== */
+.power-info {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--ink-light);
+  background: var(--cream);
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  line-height: 1.6;
+}
+
+.power-info h4 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85em;
+  margin-bottom: 8px;
+}
+
+.power-info dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+}
+
+.power-info dt {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.power-info dd { margin: 0; }
+
+/* ==================== TURN SUMMARY ==================== */
+.turn-summary {
+  margin-top: 16px;
+  border: 1px solid var(--ink-light);
+  background: var(--cream);
+}
+
+.turn-summary summary {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85em;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: var(--parchment-dark);
+}
+
+.turn-summary .summary-content {
+  padding: 12px 14px;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.turn-summary .summary-entry {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--parchment-dark);
+}
+
+.turn-summary .summary-entry:last-child { border-bottom: none; }
+
+.positive { color: var(--green-neutral); }
+.negative { color: var(--red-empire); }
+
 /* ==================== MAP STYLES ==================== */
 .map-container {
   position: relative;
@@ -859,83 +1287,59 @@ body::before {
   margin: 20px 0;
 }
 
-.map-image-wrapper {
-  position: relative;
+.map-svg-wrapper {
   width: 100%;
   border: 3px solid var(--ink);
-  overflow: hidden;
+  background: #b8cfe0;
 }
 
-.map-image-wrapper img {
+.map-svg-wrapper svg {
   width: 100%;
   height: auto;
   display: block;
-  pointer-events: none;
 }
 
-.map-overlay {
-  position: absolute;
+.map-region {
+  stroke: var(--ink);
+  stroke-width: 1.5;
   cursor: pointer;
-  border: 2px solid rgba(30, 20, 10, 0.6);
-  border-radius: 6px;
-  background: rgba(215, 200, 170, 0.75);
-  padding: 4px 6px;
-  text-align: center;
-  transition: all 0.2s;
-  min-width: 60px;
-  backdrop-filter: blur(2px);
-  z-index: 2;
+  transition: fill 0.15s, stroke-width 0.15s;
 }
 
-.map-overlay:hover {
-  background: rgba(230, 220, 190, 0.9);
-  border-color: var(--ink);
-  transform: scale(1.05);
-  z-index: 10;
-}
+.map-region.land { fill: #d7c8aa; }
+.map-region.sea { fill: #a0c3e1; }
+.map-region.land:hover { fill: #e0d5b8; stroke-width: 2.5; }
+.map-region.sea:hover { fill: #8fb8d9; stroke-width: 2.5; }
+.map-region.selected { fill: #b8860b; stroke: var(--ink); stroke-width: 3; }
+.map-region.adjacent { fill: #7ab85a; stroke: var(--green-neutral); stroke-width: 2.5; }
+.map-region.sea.selected { fill: #c9a825; }
+.map-region.sea.adjacent { fill: #6aad4a; }
 
-.map-overlay.selected {
-  background: rgba(184, 134, 11, 0.85);
-  border-color: var(--ink);
-  border-width: 3px;
-  z-index: 10;
-  box-shadow: 0 0 12px rgba(184, 134, 11, 0.6);
-}
-
-.map-overlay.adjacent-highlight {
-  background: rgba(100, 180, 80, 0.75);
-  border-color: var(--green-neutral);
-  border-width: 3px;
-  z-index: 5;
-  box-shadow: 0 0 8px rgba(45, 80, 22, 0.5);
-}
-
-.map-overlay.sea-zone {
-  background: rgba(160, 195, 225, 0.75);
-  border-color: var(--blue-entente);
-}
-
-.map-overlay.sea-zone:hover {
-  background: rgba(140, 180, 220, 0.9);
-}
-
-.map-overlay-label {
+.map-label {
   font-family: 'Source Serif 4', serif;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  color: var(--ink);
+  fill: var(--ink);
+  text-anchor: middle;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  white-space: nowrap;
-  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(255,255,255,0.7);
+  stroke-width: 2.5px;
 }
 
-.map-overlay-troops {
+.map-label.sea-label { fill: #1a3a6b; font-style: italic; }
+
+.map-troops {
   font-family: 'Playfair Display', serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
-  white-space: nowrap;
-  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(255,255,255,0.8);
+  stroke-width: 2px;
 }
 
 .movement-panel {
@@ -1235,12 +1639,13 @@ body::before {
 
 <div class="game-header">
   <h1>The Guns of August</h1>
-  <div class="subtitle">A Grand Strategy Game for 19 Players</div>
+  <div class="subtitle" id="gameSubtitle">A Grand Strategy Game</div>
   <div class="tagline">Europe, 1910 — The Powder Keg Awaits a Spark</div>
 </div>
 
 <div class="nav-tabs" id="navTabs">
   <button class="nav-tab active" data-tab="overview">Overview</button>
+  <button class="nav-tab" data-tab="setup">Setup</button>
   <button class="nav-tab" data-tab="factions">Factions</button>
   <button class="nav-tab" data-tab="rules">Rules</button>
   <button class="nav-tab" data-tab="turns">Turn Tracker</button>
@@ -1263,7 +1668,7 @@ body::before {
 
 <div class="section">
 <div class="section-title"><span class="icon">👥</span> Player Count & Setup</div>
-<p><strong>19 players</strong> divided into <strong>8 factions</strong> plus <strong>1 Game Master</strong>. Each faction has 1–3 players who collectively make decisions. The game is designed for <strong>two boats</strong> — factions on separate boats must communicate via written dispatches (paper notes ferried between boats), adding delicious delays and the possibility of intercepted messages.</p>
+<p id="overviewPlayerCount"><strong>12-24 players</strong> divided into <strong>8 factions</strong> plus <strong>1 Game Master</strong>. Each faction has 1–5 players who collectively make decisions. Configure your player count in the <strong>Setup</strong> tab. The game is designed for <strong>two boats</strong> — factions on separate boats must communicate via written dispatches (paper notes ferried between boats), adding delicious delays and the possibility of intercepted messages.</p>
 
 <div class="highlight-box">
   <strong>Two-Boat Setup:</strong> Place the Central Powers (Germany, Austria-Hungary, Ottoman Empire) and one arms dealer on <strong>Boat A</strong>. Place the Entente (France, Britain, Russia) and the other arms dealer on <strong>Boat B</strong>. This forces diplomacy across the water — messengers must physically carry notes between boats. The GM floats between both.
@@ -1288,17 +1693,10 @@ body::before {
 
 <div class="section">
 <div class="section-title"><span class="icon">🏛</span> The Factions at a Glance</div>
-<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top:8px;">
-  <div><span class="alliance-badge central">Central</span> <strong>German Empire</strong> — 3 players</div>
-  <div><span class="alliance-badge central">Central</span> <strong>Austria-Hungary</strong> — 2 players</div>
-  <div><span class="alliance-badge entente">Entente</span> <strong>French Republic</strong> — 2 players</div>
-  <div><span class="alliance-badge entente">Entente</span> <strong>British Empire</strong> — 3 players</div>
-  <div><span class="alliance-badge entente">Entente</span> <strong>Russian Empire</strong> — 3 players</div>
-  <div><span class="alliance-badge neutral">Neutral</span> <strong>Ottoman Empire</strong> — 2 players</div>
-  <div><span class="alliance-badge corp">Corp</span> <strong>Krupp-Vickers Arms</strong> — 2 players ⚡</div>
-  <div><span class="alliance-badge corp">Corp</span> <strong>Schneider-Škoda Syndicate</strong> — 1 player ⚡⚡</div>
+<div id="overviewFactionGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top:8px;">
+  <!-- Rendered dynamically by JS -->
 </div>
-<p style="margin-top:12px;"><strong>+1 Game Master</strong> — controls the news, resolves disputes, and plays minor nations (Italy, Serbia, Belgium) as needed. <em>Total: 19.</em></p>
+<p id="overviewGMNote" style="margin-top:12px;"><strong>+1 Game Master</strong> — controls the news, resolves disputes, and plays minor nations (Italy, Serbia, Belgium) as needed.</p>
 <p style="margin-top:8px;">⚡ <em>Arms dealers are the chaos agents of this game. They fund coups, plant fake crises, run bidding wars for superweapons, lock nations into exclusive contracts, and earn a War Dividend every turn conflict is active. They NEED war to happen — and they have the tools to make it happen.</em></p>
 
 <div class="highlight-box" style="border-color: var(--red-empire);">
@@ -1306,6 +1704,58 @@ body::before {
   Every player has a named historical role with their OWN personal secret objectives — often in tension with their teammates. The Chancellor wants to topple the Kaiser. The French General wants reckless offensives the President opposes. The Sultan and the Young Turk are fighting for control of the Ottoman Empire. <strong>One player inside Russia is a secret revolutionary</strong> — outwardly loyal, secretly sabotaging the war effort and trying to trigger revolution. The Schneider-Škoda arms dealer is a solo "Merchant of Death" who roams between both boats, funding coups and starting wars for profit. Final victory goes to the INDIVIDUAL player with the most VP — not the faction.
 </div>
 </div>
+</div>
+
+<!-- ==================== SETUP ==================== -->
+<div id="setup" class="tab-content">
+
+<div class="section setup-container">
+<div class="section-title"><span class="icon">&#9881;</span> Game Setup — Player Allocation</div>
+<p>Configure how many players you have and how they're distributed across factions. Pick a preset or customize manually. Any faction can be marked as <strong>GM-controlled</strong> (the GM plays them as an NPC).</p>
+
+<div class="section-title" style="font-size:1em; margin-top:24px;"><span class="icon">&#9733;</span> Presets</div>
+<div class="setup-presets" id="setupPresets">
+  <div class="preset-card" data-preset="12" onclick="applyPreset(12)">
+    <div class="preset-count">12</div>
+    <div class="preset-label">Compact</div>
+    <div class="preset-desc">1-2 per faction. Every faction playable. Tight, fast game.</div>
+  </div>
+  <div class="preset-card" data-preset="16" onclick="applyPreset(16)">
+    <div class="preset-count">16</div>
+    <div class="preset-label">Standard</div>
+    <div class="preset-desc">2-3 per faction. Schneider GM-controlled. Good internal drama.</div>
+  </div>
+  <div class="preset-card selected" data-preset="18" onclick="applyPreset(18)">
+    <div class="preset-count">18</div>
+    <div class="preset-label">Classic</div>
+    <div class="preset-desc">The original experience. Every role filled. Maximum betrayal.</div>
+  </div>
+  <div class="preset-card" data-preset="24" onclick="applyPreset(24)">
+    <div class="preset-count">24</div>
+    <div class="preset-label">Grand</div>
+    <div class="preset-desc">Extra devious roles added. More spies, agitators, and chaos agents.</div>
+  </div>
+</div>
+
+<div class="section-title" style="font-size:1em;"><span class="icon">&#9998;</span> Per-Faction Allocation</div>
+<div class="faction-setup-grid" id="factionSetupGrid">
+  <!-- Rendered by JS -->
+</div>
+
+<div class="setup-total" id="setupTotal">
+  Players Assigned: <span id="setupAssigned">19</span> / <span id="setupTarget">19</span>
+</div>
+
+<button class="btn-apply-setup" onclick="applySetup()">Apply Setup &amp; Configure Game</button>
+
+<div class="highlight-box" style="margin-top:20px; border-color: var(--ink-light);">
+  <strong>How it works:</strong><br>
+  &#9679; <strong>GM-Controlled:</strong> The GM plays this faction as an NPC — great for arms dealers who stir chaos!<br>
+  &#9679; <strong>Fewer players than roles:</strong> Players pick their primary role. Other role cards are greyed out.<br>
+  &#9679; <strong>More players (24):</strong> Extra "devious" roles unlock — spies, agitators, and double agents with chaotic secret objectives.
+</div>
+</div>
+
 </div>
 
 <!-- ==================== FACTIONS ==================== -->
@@ -1317,12 +1767,12 @@ body::before {
 <button class="print-btn" onclick="window.print()" style="margin-bottom:24px;">⎙ Print All Faction Sheets</button>
 </div>
 
-<div class="faction-grid">
+<div class="faction-grid" id="factionGrid">
 
 <!-- GERMANY -->
-<div class="faction-card central">
+<div class="faction-card central" data-faction="germany">
   <div class="faction-name">The German Empire</div>
-  <div class="faction-players">3 Players — Kaiser Wilhelm II, Chancellor, Chief of General Staff</div>
+  <div class="faction-players" data-faction-players="germany">3 Players — Kaiser Wilhelm II, Chancellor, Chief of General Staff</div>
   <div class="faction-flavor">"Germany's place in the sun demands more than diplomacy. We must be prepared for the war that is surely coming — and we must win it swiftly."</div>
   <div class="stat-row">
     <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">25 Gold</div></div>
@@ -1344,7 +1794,7 @@ body::before {
     ◈ The Schlieffen Plan: If war begins, conquer France within 2 turns (+5 VP to all, –3 VP to all if it fails)
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
-    <div class="role-card">
+    <div class="role-card" data-role="kaiser">
       <div class="role-header">👑 KAISER WILHELM II — <em>The Impulsive Monarch</em></div>
       <div class="role-desc">You are the All-Highest. Brilliant, erratic, and obsessed with matching your cousin King George's navy. <strong>You have final say on all German decisions</strong> — unless both the Chancellor AND Chief of Staff vote to overrule you (a "Constitutional Crisis").</div>
       <div class="role-secret">
@@ -1354,7 +1804,7 @@ body::before {
         ◈ <strong>Fear of Weakness:</strong> If the Chancellor successfully overrules you, –2 personal VP. You must appear strong at all times.
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="chancellor">
       <div class="role-header">🏛 THE CHANCELLOR — <em>The Pragmatist</em></div>
       <div class="role-desc">Head of government. You handle diplomacy, alliances, and the treasury. The Kaiser is your sovereign but also a reckless fool. You believe Germany's future lies in careful diplomacy, not war.</div>
       <div class="role-secret">
@@ -1364,7 +1814,7 @@ body::before {
         ◈ <strong>Delay the War:</strong> If Germany enters Turn 4 without being at war, +2 personal VP.
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="chief_staff">
       <div class="role-header">⚔ CHIEF OF GENERAL STAFF — <em>The War Planner</em></div>
       <div class="role-desc">Germany's top military mind. You control troop deployments and battle strategy. You have spent your career perfecting the Schlieffen Plan. You believe war is inevitable and Germany must strike first.</div>
       <div class="role-secret">
@@ -1378,9 +1828,9 @@ body::before {
 </div>
 
 <!-- FRANCE -->
-<div class="faction-card entente">
+<div class="faction-card entente" data-faction="france">
   <div class="faction-name">The French Republic</div>
-  <div class="faction-players">2 Players — The President, The Commanding General</div>
+  <div class="faction-players" data-faction-players="france">2 Players — The President, The Commanding General</div>
   <div class="faction-flavor">"Alsace and Lorraine cry out to return to the motherland. Forty years of German occupation is forty years too many. La Revanche is not a dream — it is a sacred duty."</div>
   <div class="stat-row">
     <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">18 Gold</div></div>
@@ -1402,7 +1852,7 @@ body::before {
     ◈ Convince Britain to commit ground troops to a Continental war (+3 VP to both)
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
-    <div class="role-card">
+    <div class="role-card" data-role="president">
       <div class="role-header">🗳 THE PRESIDENT — <em>The Cautious Republican</em></div>
       <div class="role-desc">You lead the Third Republic. You control diplomacy and the treasury. You want Alsace-Lorraine back — but you also know that reckless war could destroy France. You prefer to build alliances, secure loans to Russia, and let Germany make the first mistake.</div>
       <div class="role-secret">
@@ -1412,7 +1862,7 @@ body::before {
         ◈ <strong>Control the General:</strong> If the Commanding General launches an attack you explicitly opposed, –2 personal VP. But if you can keep him on a leash and still win, +2 personal VP. The President controls diplomacy and spending; the General controls the army — but who really has power?
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="general">
       <div class="role-header">⚔ THE COMMANDING GENERAL — <em>L'Attaque à Outrance</em></div>
       <div class="role-desc">You command the French Army. You are a disciple of the doctrine of "attack at all costs" — élan, spirit, the bayonet charge. You believe the only way to retake Lorraine is through overwhelming offensive action. Fortifications are for cowards.</div>
       <div class="role-secret">
@@ -1426,9 +1876,9 @@ body::before {
 </div>
 
 <!-- BRITAIN -->
-<div class="faction-card entente">
+<div class="faction-card entente" data-faction="britain">
   <div class="faction-name">The British Empire</div>
-  <div class="faction-players">3 Players — Prime Minister, First Lord of the Admiralty, Foreign Secretary</div>
+  <div class="faction-players" data-faction-players="britain">3 Players — Prime Minister, First Lord of the Admiralty, Foreign Secretary</div>
   <div class="faction-flavor">"Britannia rules the waves — and through the waves, the world. We have no permanent allies, only permanent interests. But a German-dominated Europe? That we cannot abide."</div>
   <div class="stat-row">
     <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">30 Gold</div></div>
@@ -1446,7 +1896,7 @@ body::before {
     </div>
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
-    <div class="role-card">
+    <div class="role-card" data-role="pm">
       <div class="role-header">🎩 THE PRIME MINISTER — <em>The Reluctant Warrior</em></div>
       <div class="role-desc">You lead His Majesty's Government. You control the treasury and have final say on whether Britain goes to war. You are deeply reluctant to commit British soldiers to a Continental bloodbath — let France and Russia do the fighting. But if Belgium falls, the public will demand action.</div>
       <div class="role-secret">
@@ -1456,7 +1906,7 @@ body::before {
         ◈ <strong>Distrust the Admiralty:</strong> The First Lord wants to spend everything on ships. If the naval budget exceeds 8 Gold in any single turn, –1 personal VP. The empire has other needs.
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="admiralty">
       <div class="role-header">⚓ FIRST LORD OF THE ADMIRALTY — <em>The Young Churchill</em></div>
       <div class="role-desc">You run the Royal Navy — the greatest fleet in history. You are ambitious, aggressive, and convinced that naval power is the only power that matters. You want to crush the German High Seas Fleet, and you want to do it dramatically. You also have a secret obsession: the Dardanelles.</div>
       <div class="role-secret">
@@ -1466,7 +1916,7 @@ body::before {
         ◈ <strong>Naval Supremacy at All Costs:</strong> Spend at least 4 Gold/turn on the navy. +2 personal VP. The PM will resist — override him if you can convince the Foreign Secretary.
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="foreign_sec">
       <div class="role-header">📜 THE FOREIGN SECRETARY — <em>The Web Spinner</em></div>
       <div class="role-desc">You manage Britain's alliances and intelligence network. You are the one who talks to everyone — and trusts no one. You hold the balance of power within the British cabinet: the PM wants peace, the First Lord wants war, and you hold the deciding vote.</div>
       <div class="role-secret">
@@ -1480,9 +1930,9 @@ body::before {
 </div>
 
 <!-- AUSTRIA-HUNGARY -->
-<div class="faction-card central">
+<div class="faction-card central" data-faction="austria">
   <div class="faction-name">Austria-Hungary</div>
-  <div class="faction-players">2 Players — Emperor Franz Josef, The Hawk (Chief of Staff Conrad)</div>
+  <div class="faction-players" data-faction-players="austria">2 Players — Emperor Franz Josef, The Hawk (Chief of Staff Conrad)</div>
   <div class="faction-flavor">"The empire of many peoples holds together by the will of God and the House of Habsburg. But the Slavic nationalists threaten to tear us apart from within. Serbia must be humbled — or we are lost."</div>
   <div class="stat-row">
     <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">14 Gold</div></div>
@@ -1500,7 +1950,7 @@ body::before {
     </div>
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
-    <div class="role-card">
+    <div class="role-card" data-role="emperor">
       <div class="role-header">👑 EMPEROR FRANZ JOSEF — <em>The Aging Monarch</em></div>
       <div class="role-desc">You have ruled for sixty years. You are tired, conservative, and desperate to hold the empire together. You fear war almost as much as you fear dissolution. Every Gold spent on the army is a Gold not spent keeping the Hungarians, Czechs, and Croats in line.</div>
       <div class="role-secret">
@@ -1510,7 +1960,7 @@ body::before {
         ◈ <strong>Restrain the Hawk:</strong> Conrad wants war with everyone. If Austria starts a war before Turn 4, –2 personal VP. If you can keep the peace until events force your hand, +2 personal VP. Let Germany take the blame.
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="conrad">
       <div class="role-header">🦅 CHIEF OF STAFF CONRAD — <em>The Hawk</em></div>
       <div class="role-desc">You are the most aggressive military mind in Europe. You have proposed preventive war against Serbia SEVENTEEN TIMES. You also want to attack Italy, Romania, and possibly Russia. The Emperor keeps vetoing you. But one day, he will have no choice — and on that day, you will be ready.</div>
       <div class="role-secret">
@@ -1524,9 +1974,9 @@ body::before {
 </div>
 
 <!-- RUSSIA -->
-<div class="faction-card entente">
+<div class="faction-card entente" data-faction="russia">
   <div class="faction-name">The Russian Empire</div>
-  <div class="faction-players">3 Players — Tsar Nicholas II, The War Minister, The Duma Representative</div>
+  <div class="faction-players" data-faction-players="russia">3 Players — Tsar Nicholas II, The War Minister, The Duma Representative</div>
   <div class="faction-flavor">"Holy Russia is the protector of all Slavic peoples. Constantinople beckons. But the revolutionaries in St. Petersburg grow bolder each year. We must project strength abroad to maintain order at home."</div>
   <div class="stat-row">
     <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">16 Gold</div></div>
@@ -1544,7 +1994,7 @@ body::before {
     </div>
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
-    <div class="role-card">
+    <div class="role-card" data-role="tsar">
       <div class="role-header">👑 TSAR NICHOLAS II — <em>The Indecisive Autocrat</em></div>
       <div class="role-desc">You are the Autocrat of All the Russias — in theory. In practice, you are pulled between your wife's mystic advisors, your generals' demands, and the parliamentarians in the Duma. You want to be a great Tsar, a war hero, a peacemaker — you want to be everything, and so you are nothing. Every decision agonizes you. You control diplomacy and the treasury.</div>
       <div class="role-secret">
@@ -1555,7 +2005,7 @@ body::before {
         ◈ <strong>Trust No One:</strong> If you ever suspect the Duma Representative is working against you, you may order the Okhrana (secret police) to investigate — spend 2 Gold, GM tells you ONE of their secret objectives. If you catch a traitor, you may EXILE them from the faction (they lose access to Russian Gold and armies but keep their personal VP track). But if they're innocent, you've wasted Gold and created an enemy.
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="war_minister">
       <div class="role-header">⚔ THE WAR MINISTER — <em>The Pan-Slavist</em></div>
       <div class="role-desc">You command the largest army in Europe — on paper. In reality, it is poorly equipped, slowly mobilizing, and spread across a vast empire. But you believe in Russia's destiny: to unite all Slavic peoples under Moscow's protection and seize Constantinople from the Turks. The Tsar is weak. You deal with the military; the Duma Representative handles the domestic situation — or so they claim.</div>
       <div class="role-secret">
@@ -1566,7 +2016,7 @@ body::before {
         ◈ <strong>Suspicious of the Duma:</strong> The Duma Representative talks of "reform" and "the people." You don't trust them. If revolution triggers and you can prove the Duma Representative contributed to it, the War Minister may declare martial law — you take sole command of the remaining army. +2 personal VP.
       </div>
     </div>
-    <div class="role-card" style="border: 1px solid var(--red-empire); background: linear-gradient(135deg, var(--parchment), #f5ece0);">
+    <div class="role-card" data-role="duma" style="border: 1px solid var(--red-empire); background: linear-gradient(135deg, var(--parchment), #f5ece0);">
       <div class="role-header" style="color: var(--red-empire);">☭ THE DUMA REPRESENTATIVE — <em>Voice of the People</em></div>
       <div class="role-desc">You sit in the Russian Duma — the toothless parliament the Tsar grudgingly tolerates. You speak for reform, for the peasants, for a constitutional monarchy. The Tsar and the War Minister think you are a moderate liberal. They are wrong.</div>
       <div class="role-secret" style="background: linear-gradient(135deg, #f8e8e8, #f0dcd0); border-color: var(--red-empire);">
@@ -1595,9 +2045,9 @@ body::before {
 </div>
 
 <!-- OTTOMAN EMPIRE -->
-<div class="faction-card neutral">
+<div class="faction-card neutral" data-faction="ottoman">
   <div class="faction-name">The Ottoman Empire</div>
-  <div class="faction-players">2 Players — The Sultan, The Young Turk Leader</div>
+  <div class="faction-players" data-faction-players="ottoman">2 Players — The Sultan, The Young Turk Leader</div>
   <div class="faction-flavor">"The Sick Man of Europe? We shall see who is sick when the great powers come begging for our alliance. The straits of the Dardanelles are the most valuable real estate on earth — and they are ours."</div>
   <div class="stat-row">
     <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">8 Gold</div></div>
@@ -1619,7 +2069,7 @@ body::before {
     ◈ Play both sides: Receive payments from BOTH alliance blocs before committing (+4 VP to both)
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
-    <div class="role-card">
+    <div class="role-card" data-role="sultan">
       <div class="role-header">👑 THE SULTAN — <em>The Traditionalist</em></div>
       <div class="role-desc">You are the Caliph, Commander of the Faithful, Shadow of God on Earth. Your empire stretches from Libya to Mesopotamia. You believe in tradition, in the old ways, in Islam as the binding force of the empire. The Young Turks want to modernize — but modernization means YOUR power diminishes.</div>
       <div class="role-secret">
@@ -1629,7 +2079,7 @@ body::before {
         ◈ <strong>Suppress the Young Turks:</strong> If the Young Turk player ever seizes power (see their card), –5 personal VP. Prevent this at all costs. You may secretly ask the GM to "discover a coup plot" (costs 2 Gold) — this strips the Young Turk player of 1 personal VP and publicly humiliates them.
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="young_turk">
       <div class="role-header">🔥 THE YOUNG TURK LEADER — <em>The Revolutionary Modernizer</em></div>
       <div class="role-desc">You represent the Committee of Union and Progress — the young officers and intellectuals who believe the Ottoman Empire can only survive through radical modernization. European-style armies, secular law, constitutional government. The Sultan is a relic. You need him — for now.</div>
       <div class="role-secret">
@@ -1643,9 +2093,9 @@ body::before {
 </div>
 
 <!-- KRUPP-VICKERS -->
-<div class="faction-card corp">
+<div class="faction-card corp" data-faction="krupp">
   <div class="faction-name">Krupp-Vickers Arms Consortium</div>
-  <div class="faction-players">2 Players — Krupp Director (German-aligned), Vickers Director (British-aligned)</div>
+  <div class="faction-players" data-faction-players="krupp">2 Players — Krupp Director (German-aligned), Vickers Director (British-aligned)</div>
   <div class="faction-flavor">"Patriotism is a fine thing, but profit is finer. Every army that marches, every fleet that sails — they all need our steel, our shells, our machines. Peace is bad for business. We don't start wars — we make sure they happen."</div>
   <div class="stat-row">
     <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">22 Gold</div></div>
@@ -1676,7 +2126,7 @@ body::before {
   </div>
 
   <div style="display:grid; gap:10px; margin-top:14px;">
-    <div class="role-card">
+    <div class="role-card" data-role="krupp_dir">
       <div class="role-header">🔨 KRUPP DIRECTOR — <em>The Kaiser's Armourer</em></div>
       <div class="role-desc">You run the greatest steel empire in Germany. The Kaiser calls you a personal friend. You supply Germany's artillery, armor plate, and railroad steel. Your loyalty to Germany is genuine — but your loyalty to profit is stronger. You sit on Boat A with the Central Powers, whispering in their ears.</div>
       <div class="role-secret">
@@ -1687,7 +2137,7 @@ body::before {
         ◈ <strong>Destroy Schneider:</strong> If Schneider-Skoda's Schneider Director (your French rival) is nationalized, bankrupted, or loses 4+ personal VP, gain +3 personal VP. Ruin them.
       </div>
     </div>
-    <div class="role-card">
+    <div class="role-card" data-role="vickers_dir">
       <div class="role-header">⚙ VICKERS DIRECTOR — <em>The Empire's Engineer</em></div>
       <div class="role-desc">You run Vickers Ltd., builder of dreadnoughts and machine guns. The First Lord of the Admiralty is practically your best customer. You sit on Boat B with the Entente. Your job is to sell ships, sell guns, and make sure everyone is too afraid NOT to buy from you.</div>
       <div class="role-secret">
@@ -1702,9 +2152,9 @@ body::before {
 </div>
 
 <!-- SCHNEIDER-SKODA -->
-<div class="faction-card corp">
+<div class="faction-card corp" data-faction="schneider">
   <div class="faction-name">Schneider-Škoda Arms Syndicate</div>
-  <div class="faction-players">1 Player — The Merchant of Death</div>
+  <div class="faction-players" data-faction-players="schneider">1 Player — The Merchant of Death</div>
   <div class="faction-flavor">"I am Schneider in Paris, Škoda in Prague, and a ghost everywhere else. Krupp-Vickers has two directors and twice the overhead. I have one mind, two factories, and no loyalty to anyone. They sell weapons. I sell wars."</div>
   <div class="stat-row">
     <div class="stat"><div class="stat-label">Treasury</div><div class="stat-value">16 Gold</div></div>
@@ -1737,7 +2187,7 @@ body::before {
   </div>
 
   <div style="display:grid; gap:10px; margin-top:14px;">
-    <div class="role-card" style="border: 2px solid var(--gold-accent);">
+    <div class="role-card" data-role="merchant" style="border: 2px solid var(--gold-accent);">
       <div class="role-header">💀 THE MERCHANT OF DEATH — <em>One Player to Rule Them All</em></div>
       <div class="role-desc">You are the most dangerous person at this party. You have factories in France (Schneider) and Austria-Hungary (Škoda), which means you have access to both alliance blocs' secrets. You sit on neither boat permanently — you ROAM. You sell to everyone, lie to everyone, and fund chaos everywhere. Krupp-Vickers has two people who must agree; you make every decision alone, instantly.</div>
       <div class="role-secret">
@@ -2010,6 +2460,8 @@ body::before {
 
 <div class="section">
 <div class="section-title"><span class="icon">📊</span> War Room Dashboard</div>
+
+<div class="turn-banner" id="turnBanner"></div>
 
 <div class="dashboard-controls">
   <button class="mode-toggle" id="modeToggle" onclick="toggleDashboardMode()">Switch to GM Mode</button>
@@ -2390,6 +2842,262 @@ const FACTION_ALLIANCE = {
   krupp:'corp', schneider:'corp'
 };
 
+// ==================== FACTION ROLES & SETUP ====================
+
+const FACTION_ROLES = {
+  germany: {
+    min: 1, max: 5,
+    roles: [
+      { id: 'kaiser', name: 'Kaiser Wilhelm II', title: 'The Impulsive Monarch', core: true, devious: false },
+      { id: 'chancellor', name: 'The Chancellor', title: 'The Pragmatist', core: true, devious: false },
+      { id: 'chief_staff', name: 'Chief of General Staff', title: 'The War Planner', core: true, devious: false },
+      { id: 'grand_admiral', name: 'Grand Admiral von Tirpitz', title: 'The Kaiser\'s Shadow', core: false, devious: true },
+      { id: 'spymaster', name: 'The Spymaster', title: 'The Invisible Hand', core: false, devious: true }
+    ]
+  },
+  france: {
+    min: 1, max: 4,
+    roles: [
+      { id: 'president', name: 'The President', title: 'The Cautious Republican', core: true, devious: false },
+      { id: 'general', name: 'The Commanding General', title: "L'Attaque a Outrance", core: true, devious: false },
+      { id: 'socialist', name: 'The Socialist Agitator', title: 'Voice of the Workers', core: false, devious: true },
+      { id: 'colonial_gov', name: 'The Colonial Governor', title: 'The Empire Builder', core: false, devious: true }
+    ]
+  },
+  britain: {
+    min: 1, max: 5,
+    roles: [
+      { id: 'pm', name: 'The Prime Minister', title: 'The Reluctant Warrior', core: true, devious: false },
+      { id: 'admiralty', name: 'First Lord of the Admiralty', title: 'The Young Churchill', core: true, devious: false },
+      { id: 'foreign_sec', name: 'The Foreign Secretary', title: 'The Spymaster of Whitehall', core: true, devious: false },
+      { id: 'press_baron', name: 'The Press Baron', title: 'Lord of the Headlines', core: false, devious: true },
+      { id: 'india_sec', name: 'The India Secretary', title: 'Guardian of the Jewel', core: false, devious: true }
+    ]
+  },
+  russia: {
+    min: 1, max: 5,
+    roles: [
+      { id: 'tsar', name: 'Tsar Nicholas II', title: 'The Indecisive Autocrat', core: true, devious: false },
+      { id: 'war_minister', name: 'The War Minister', title: 'The Pan-Slavist', core: true, devious: false },
+      { id: 'duma', name: 'The Duma Representative', title: 'Voice of the People', core: true, devious: false },
+      { id: 'okhrana', name: 'The Okhrana Chief', title: 'The Secret Police', core: false, devious: true },
+      { id: 'industrialist', name: 'The Industrialist', title: 'The Oligarch', core: false, devious: true }
+    ]
+  },
+  austria: {
+    min: 1, max: 4,
+    roles: [
+      { id: 'emperor', name: 'Emperor Franz Josef', title: 'The Aging Monarch', core: true, devious: false },
+      { id: 'conrad', name: 'Chief of Staff Conrad', title: 'The Hawk', core: true, devious: false },
+      { id: 'hungarian', name: 'The Hungarian Minister', title: 'The Separatist', core: false, devious: true },
+      { id: 'archdukes_aide', name: "The Archduke's Aide", title: 'The Man Who Knows', core: false, devious: true }
+    ]
+  },
+  ottoman: {
+    min: 1, max: 4,
+    roles: [
+      { id: 'sultan', name: 'The Sultan', title: 'The Traditionalist', core: true, devious: false },
+      { id: 'young_turk', name: 'The Young Turk Leader', title: 'The Revolutionary Modernizer', core: true, devious: false },
+      { id: 'grand_vizier', name: 'The Grand Vizier', title: 'The Broker of Empires', core: false, devious: true },
+      { id: 'german_advisor', name: 'The German Military Advisor', title: 'The Double Agent', core: false, devious: true }
+    ]
+  },
+  krupp: {
+    min: 1, max: 3,
+    roles: [
+      { id: 'krupp_dir', name: 'Krupp Director', title: "The Kaiser's Armourer", core: true, devious: false },
+      { id: 'vickers_dir', name: 'Vickers Director', title: "The Empire's Engineer", core: true, devious: false },
+      { id: 'lobbyist', name: 'The Lobbyist', title: 'The Shadow Advisor', core: false, devious: true }
+    ]
+  },
+  schneider: {
+    min: 1, max: 2,
+    roles: [
+      { id: 'merchant', name: 'The Merchant of Death', title: 'One Player to Rule Them All', core: true, devious: false },
+      { id: 'fence', name: 'The Fence', title: 'The Arms Smuggler', core: false, devious: true }
+    ]
+  }
+};
+
+const SETUP_PRESETS = {
+  12: {
+    // 2+1+2+2+1+2+1+1 = 12
+    germany: { players: 2, controlled: 'players' },
+    france: { players: 1, controlled: 'players' },
+    britain: { players: 2, controlled: 'players' },
+    russia: { players: 2, controlled: 'players' },
+    austria: { players: 1, controlled: 'players' },
+    ottoman: { players: 2, controlled: 'players' },
+    krupp: { players: 1, controlled: 'players' },
+    schneider: { players: 1, controlled: 'players' }
+  },
+  16: {
+    // 3+2+2+3+2+2+1+1 = 16
+    germany: { players: 3, controlled: 'players' },
+    france: { players: 2, controlled: 'players' },
+    britain: { players: 2, controlled: 'players' },
+    russia: { players: 3, controlled: 'players' },
+    austria: { players: 2, controlled: 'players' },
+    ottoman: { players: 2, controlled: 'players' },
+    krupp: { players: 1, controlled: 'players' },
+    schneider: { players: 0, controlled: 'gm' }
+  },
+  18: {
+    // 3+2+3+3+2+2+2+1 = 18 (the classic "19" included GM)
+    germany: { players: 3, controlled: 'players' },
+    france: { players: 2, controlled: 'players' },
+    britain: { players: 3, controlled: 'players' },
+    russia: { players: 3, controlled: 'players' },
+    austria: { players: 2, controlled: 'players' },
+    ottoman: { players: 2, controlled: 'players' },
+    krupp: { players: 2, controlled: 'players' },
+    schneider: { players: 1, controlled: 'players' }
+  },
+  24: {
+    // 4+4+4+4+3+2+2+1 = 24
+    germany: { players: 4, controlled: 'players' },
+    france: { players: 4, controlled: 'players' },
+    britain: { players: 4, controlled: 'players' },
+    russia: { players: 4, controlled: 'players' },
+    austria: { players: 3, controlled: 'players' },
+    ottoman: { players: 2, controlled: 'players' },
+    krupp: { players: 2, controlled: 'players' },
+    schneider: { players: 1, controlled: 'players' }
+  }
+};
+
+function getDefaultSetup() {
+  return {
+    totalPlayers: 18,
+    factionConfig: JSON.parse(JSON.stringify(SETUP_PRESETS[18]))
+  };
+}
+
+function getActiveRoles(factionId, playerCount) {
+  const roles = FACTION_ROLES[factionId].roles;
+  return roles.slice(0, playerCount).map(r => r.id);
+}
+
+function getTotalAssigned(config) {
+  return Object.values(config).reduce((sum, f) => sum + (f.controlled === 'gm' ? 0 : f.players), 0);
+}
+
+function applyPreset(count) {
+  const preset = SETUP_PRESETS[count];
+  if (!preset) return;
+  const config = JSON.parse(JSON.stringify(preset));
+  gameState.setup = {
+    totalPlayers: getTotalAssigned(config),
+    factionConfig: config
+  };
+  // Highlight preset card
+  document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+  const card = document.querySelector(`.preset-card[data-preset="${count}"]`);
+  if (card) card.classList.add('selected');
+  renderSetupGrid();
+}
+
+function renderSetupGrid() {
+  if (!gameState.setup) gameState.setup = getDefaultSetup();
+  const config = gameState.setup.factionConfig;
+  const grid = document.getElementById('factionSetupGrid');
+
+  let html = '';
+  Object.keys(FACTION_ROLES).forEach(fid => {
+    const fr = FACTION_ROLES[fid];
+    const fc = config[fid] || { players: 0, controlled: 'gm' };
+    const isGM = fc.controlled === 'gm';
+    const activeCount = isGM ? 0 : fc.players;
+    const alliance = FACTION_ALLIANCE[fid];
+
+    // Build role list display
+    const roleDisplay = fr.roles.map((r, i) => {
+      if (i < activeCount) {
+        return `<span class="${r.devious ? 'role-devious' : 'role-active'}">${r.name}</span>`;
+      }
+      return `<span class="role-inactive">${r.name}</span>`;
+    }).join(', ');
+
+    // Build select options
+    let options = `<option value="gm" ${isGM ? 'selected' : ''}>GM-Controlled</option>`;
+    for (let n = fr.min; n <= fr.max; n++) {
+      const hasDevious = n > fr.roles.filter(r => r.core).length;
+      const label = n + ' player' + (n > 1 ? 's' : '') + (hasDevious ? ' +chaos' : '');
+      options += `<option value="${n}" ${!isGM && fc.players === n ? 'selected' : ''}>${label}</option>`;
+    }
+
+    html += `
+      <div class="faction-setup-row ${isGM ? 'gm-controlled' : ''}" style="border-left: 4px solid ${FACTION_COLORS[fid]};">
+        <div class="faction-setup-name">
+          ${FACTION_NAMES[fid]}
+          ${isGM ? '<span class="gm-badge">GM</span>' : ''}
+        </div>
+        <div class="faction-setup-roles">${roleDisplay}</div>
+        <div class="faction-setup-control">
+          <select onchange="updateFactionSetup('${fid}', this.value)">${options}</select>
+        </div>
+      </div>`;
+  });
+
+  grid.innerHTML = html;
+  updateSetupTotal();
+}
+
+function updateFactionSetup(fid, value) {
+  if (!gameState.setup) gameState.setup = getDefaultSetup();
+  if (value === 'gm') {
+    gameState.setup.factionConfig[fid] = { players: 0, controlled: 'gm' };
+  } else {
+    gameState.setup.factionConfig[fid] = { players: parseInt(value), controlled: 'players' };
+  }
+  // Deselect preset cards since user is customizing
+  document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+  renderSetupGrid();
+}
+
+function updateSetupTotal() {
+  if (!gameState.setup) return;
+  const config = gameState.setup.factionConfig;
+  const assigned = getTotalAssigned(config);
+  document.getElementById('setupAssigned').textContent = assigned;
+  document.getElementById('setupTarget').textContent = gameState.setup.totalPlayers;
+  const totalEl = document.getElementById('setupAssigned');
+  totalEl.className = assigned === gameState.setup.totalPlayers ? 'count-ok' : 'count-over';
+}
+
+function applySetup() {
+  if (!gameState.setup) gameState.setup = getDefaultSetup();
+  // Build activeRoles for each faction
+  const config = gameState.setup.factionConfig;
+  Object.keys(config).forEach(fid => {
+    const fc = config[fid];
+    fc.activeRoles = fc.controlled === 'gm' ? [] : getActiveRoles(fid, fc.players);
+  });
+  saveGameState();
+  renderFactionDossiers();
+  renderDashboard();
+  renderOverviewFactions();
+  updateSubtitle();
+  // Switch to factions tab
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('factions').classList.add('active');
+  document.querySelector('.nav-tab[data-tab="factions"]').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateSubtitle() {
+  const el = document.getElementById('gameSubtitle');
+  if (!el) return;
+  if (gameState.setup) {
+    const total = getTotalAssigned(gameState.setup.factionConfig);
+    const gmCount = Object.values(gameState.setup.factionConfig).filter(f => f.controlled === 'gm').length;
+    let sub = `A Grand Strategy Game for ${total} Players`;
+    if (gmCount > 0) sub += ` + ${gmCount} GM Faction${gmCount > 1 ? 's' : ''}`;
+    el.textContent = sub;
+  }
+}
+
 function defaultGameState() {
   return {
     factions: {
@@ -2397,51 +3105,53 @@ function defaultGameState() {
         gold: 25, income: 8, army: 10, navy: 6, vp: 0,
         troops: { germany: 6, alsace_lorraine: 3, poland: 1 },
         fleets: { north_sea: 4, baltic: 2 },
-        alliances: ['austria'], status: []
+        alliances: ['austria'], status: [], upgrades: {}
       },
       france: {
         gold: 18, income: 6, army: 8, navy: 4, vp: 0,
         troops: { france: 5, paris: 3 },
         fleets: { mediterranean: 2, english_channel: 2 },
-        alliances: ['britain','russia'], status: []
+        alliances: ['britain','russia'], status: [], upgrades: {}
       },
       britain: {
         gold: 30, income: 9, army: 4, navy: 12, vp: 0,
         troops: { britain: 4 },
         fleets: { north_sea: 6, english_channel: 4, mediterranean: 2 },
-        alliances: ['france','russia'], status: []
+        alliances: ['france','russia'], status: [], upgrades: {}
       },
       russia: {
         gold: 16, income: 6, army: 12, navy: 3, vp: 0,
         troops: { russia: 8, poland: 3, balkans: 1 },
         fleets: { baltic: 2, mediterranean: 1 },
-        alliances: ['france','britain'], status: []
+        alliances: ['france','britain'], status: [], upgrades: {}
       },
       austria: {
         gold: 14, income: 5, army: 7, navy: 2, vp: 0,
         troops: { austria: 5, balkans: 2 },
         fleets: { mediterranean: 2 },
-        alliances: ['germany'], status: []
+        alliances: ['germany'], status: [], upgrades: {}
       },
       ottoman: {
         gold: 8, income: 4, army: 6, navy: 2, vp: 0,
         troops: { ottoman: 4, dardanelles: 2 },
         fleets: { mediterranean: 2 },
-        alliances: [], status: []
+        alliances: [], status: [], upgrades: {}
       },
       krupp: {
         gold: 22, income: 3, army: 0, navy: 0, vp: 0,
         troops: {}, fleets: {},
-        alliances: [], status: [], sales: 0, contracts: []
+        alliances: [], status: [], sales: 0, contracts: [], upgrades: {}
       },
       schneider: {
         gold: 16, income: 2, army: 0, navy: 0, vp: 0,
         troops: {}, fleets: {},
-        alliances: [], status: [], sales: 0, contracts: []
+        alliances: [], status: [], sales: 0, contracts: [], upgrades: {}
       }
     },
     battleLog: [],
-    currentTurnNum: 1
+    turnLog: [],
+    currentTurnNum: 1,
+    setup: getDefaultSetup()
   };
 }
 
@@ -2451,7 +3161,16 @@ let dashboardMode = 'player'; // 'player' or 'gm'
 function loadGameState() {
   try {
     const saved = localStorage.getItem('gunsOfAugust_gameState');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const state = JSON.parse(saved);
+      // Migrate: ensure upgrades, turnLog, and setup exist
+      if (!state.turnLog) state.turnLog = [];
+      if (!state.setup) state.setup = getDefaultSetup();
+      Object.keys(state.factions).forEach(fid => {
+        if (!state.factions[fid].upgrades) state.factions[fid].upgrades = {};
+      });
+      return state;
+    }
   } catch(e) {}
   return defaultGameState();
 }
@@ -2472,6 +3191,218 @@ function resetGameState() {
 
 // ==================== DASHBOARD ====================
 
+// Unit costs and upgrade definitions
+const UNIT_COSTS = { army: 3, fleet: 5 };
+const MAINTENANCE_COSTS = { army: 1, fleet: 1 };
+const HOME_REGIONS = {
+  germany: 'germany', france: 'france', britain: 'britain',
+  russia: 'russia', austria: 'austria', ottoman: 'ottoman'
+};
+const HOME_SEAS = {
+  germany: 'north_sea', france: 'mediterranean', britain: 'english_channel',
+  russia: 'baltic', austria: 'mediterranean', ottoman: 'mediterranean'
+};
+const UPGRADES = {
+  artillery: { name: 'Artillery', cost: 4, desc: '+1 to attack rolls', minTurn: 1 },
+  trenches: { name: 'Trench Networks', cost: 3, desc: '+1 to defense rolls', minTurn: 1 },
+  gas: { name: 'Gas Weapons', cost: 6, desc: '+2 to attack rolls', minTurn: 4 }
+};
+
+function renderTurnBanner() {
+  const banner = document.getElementById('turnBanner');
+  const turnIdx = Math.min(gameState.currentTurnNum - 1, turns.length - 1);
+  const t = turns[turnIdx];
+  const isLastTurn = gameState.currentTurnNum >= turns.length;
+  banner.innerHTML = `
+    <div class="turn-info">
+      <span class="turn-num">Turn ${t.num}</span>
+      <span class="turn-title">${t.title}</span>
+      <span class="turn-year">${t.year}</span>
+    </div>
+    ${dashboardMode === 'gm' ? `
+      <button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
+        ${isLastTurn ? 'Final Turn' : 'Advance Turn →'}
+      </button>
+    ` : `<span class="turn-year">Turn ${gameState.currentTurnNum} of ${turns.length}</span>`}
+  `;
+}
+
+function advanceTurn() {
+  if (gameState.currentTurnNum >= turns.length) return;
+  if (!confirm('Advance to next turn? This will collect income and deduct maintenance for ALL factions.')) return;
+
+  const summary = [];
+  const factions = gameState.factions;
+
+  Object.keys(factions).forEach(fid => {
+    const f = factions[fid];
+    const income = f.income;
+    const armyCost = f.army * MAINTENANCE_COSTS.army;
+    const navyCost = f.navy * MAINTENANCE_COSTS.fleet;
+    const maintenance = armyCost + navyCost;
+    const net = income - maintenance;
+    const oldGold = f.gold;
+    f.gold = Math.max(0, f.gold + net);
+
+    summary.push({
+      faction: FACTION_NAMES[fid],
+      income: income,
+      maintenance: maintenance,
+      net: net,
+      oldGold: oldGold,
+      newGold: f.gold
+    });
+  });
+
+  gameState.currentTurnNum++;
+  if (!gameState.turnLog) gameState.turnLog = [];
+  gameState.turnLog.push({
+    turn: gameState.currentTurnNum,
+    timestamp: new Date().toISOString(),
+    entries: summary
+  });
+
+  saveGameState();
+  renderTurnBanner();
+  renderDashboard();
+  renderMap();
+}
+
+function purchaseUnit(fid, type) {
+  const f = gameState.factions[fid];
+  if (!f) return;
+  const cost = type === 'army' ? UNIT_COSTS.army : UNIT_COSTS.fleet;
+  if (f.gold < cost) return;
+
+  f.gold -= cost;
+  if (type === 'army') {
+    f.army++;
+    const home = HOME_REGIONS[fid];
+    if (home) f.troops[home] = (f.troops[home] || 0) + 1;
+  } else {
+    f.navy++;
+    const homeSea = HOME_SEAS[fid];
+    if (homeSea) f.fleets[homeSea] = (f.fleets[homeSea] || 0) + 1;
+  }
+
+  saveGameState();
+  renderDashboard();
+  renderMap();
+}
+
+function purchaseUpgrade(fid, upgradeId) {
+  const f = gameState.factions[fid];
+  const upg = UPGRADES[upgradeId];
+  if (!f || !upg) return;
+  if (!f.upgrades) f.upgrades = {};
+  if (f.upgrades[upgradeId]) return;
+  if (f.gold < upg.cost) return;
+  if (gameState.currentTurnNum < upg.minTurn) return;
+
+  f.gold -= upg.cost;
+  f.upgrades[upgradeId] = true;
+
+  saveGameState();
+  renderDashboard();
+}
+
+function renderPurchasePanel(fid) {
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  if (isDealer) return '';
+
+  const canArmy = f.gold >= UNIT_COSTS.army;
+  const canFleet = f.gold >= UNIT_COSTS.fleet;
+
+  return `
+    <div class="purchase-panel">
+      <h4>Recruit Units</h4>
+      <div class="purchase-grid">
+        <button class="purchase-btn" onclick="purchaseUnit('${fid}','army')" ${canArmy ? '' : 'disabled'}>
+          Army Division → ${REGION_NAMES[HOME_REGIONS[fid]]}
+          <span class="cost">${UNIT_COSTS.army} Gold</span>
+        </button>
+        <button class="purchase-btn" onclick="purchaseUnit('${fid}','fleet')" ${canFleet ? '' : 'disabled'}>
+          Fleet → ${REGION_NAMES[HOME_SEAS[fid]]}
+          <span class="cost">${UNIT_COSTS.fleet} Gold</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderUpgradePanel(fid) {
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  if (isDealer) return '';
+  if (!f.upgrades) f.upgrades = {};
+
+  let badges = '';
+  Object.keys(UPGRADES).forEach(uid => {
+    const upg = UPGRADES[uid];
+    const owned = f.upgrades[uid];
+    const available = gameState.currentTurnNum >= upg.minTurn;
+    const canAfford = f.gold >= upg.cost;
+
+    if (owned) {
+      badges += `<span class="upgrade-badge owned" title="${upg.desc}">${upg.name} ✓</span>`;
+    } else if (!available) {
+      badges += `<button class="upgrade-badge" disabled title="Available from Turn ${upg.minTurn}">${upg.name} <span class="upgrade-cost">(Turn ${upg.minTurn}+)</span></button>`;
+    } else {
+      badges += `<button class="upgrade-badge" onclick="purchaseUpgrade('${fid}','${uid}')" ${canAfford ? '' : 'disabled'} title="${upg.desc}">${upg.name} <span class="upgrade-cost">${upg.cost}g</span></button>`;
+    }
+  });
+
+  return `
+    <div class="upgrade-panel">
+      <h4>Upgrades</h4>
+      <div class="upgrade-grid">${badges}</div>
+    </div>
+  `;
+}
+
+function renderPowerInfo() {
+  return `
+    <div class="power-info">
+      <h4>Unit Power Reference</h4>
+      <dl>
+        <dt>Army Division</dt>
+        <dd>1 division = 1 combat strength. Battle = committed divisions + 1d6 + modifiers. Costs ${UNIT_COSTS.army}g to recruit, ${MAINTENANCE_COSTS.army}g/turn upkeep.</dd>
+        <dt>Fleet</dt>
+        <dd>Controls sea zones, enables blockades. 1 fleet = 1 naval combat strength. Costs ${UNIT_COSTS.fleet}g to recruit, ${MAINTENANCE_COSTS.fleet}g/turn upkeep.</dd>
+        <dt>Artillery</dt>
+        <dd>+1 to all attack rolls. One-time purchase: ${UPGRADES.artillery.cost}g.</dd>
+        <dt>Trench Networks</dt>
+        <dd>+1 to all defense rolls. One-time purchase: ${UPGRADES.trenches.cost}g.</dd>
+        <dt>Gas Weapons</dt>
+        <dd>+2 to attack rolls. Available Turn 4+. One-time purchase: ${UPGRADES.gas.cost}g.</dd>
+      </dl>
+    </div>
+  `;
+}
+
+function renderTurnSummary() {
+  if (!gameState.turnLog || gameState.turnLog.length === 0) return '';
+
+  const logs = gameState.turnLog.slice().reverse();
+  let entries = '';
+  logs.forEach(log => {
+    entries += `<div class="summary-entry"><strong>Turn ${log.turn} Resolution:</strong><br>`;
+    log.entries.forEach(e => {
+      const cls = e.net >= 0 ? 'positive' : 'negative';
+      entries += `${e.faction}: +${e.income} income, -${e.maintenance} upkeep = <span class="${cls}">${e.net >= 0 ? '+' : ''}${e.net}</span> (${e.oldGold} → ${e.newGold}g)<br>`;
+    });
+    entries += `</div>`;
+  });
+
+  return `
+    <details class="turn-summary">
+      <summary>Turn Economy Log (${logs.length} entries)</summary>
+      <div class="summary-content">${entries}</div>
+    </details>
+  `;
+}
+
 function toggleDashboardMode() {
   dashboardMode = dashboardMode === 'player' ? 'gm' : 'player';
   const btn = document.getElementById('modeToggle');
@@ -2481,6 +3412,7 @@ function toggleDashboardMode() {
 }
 
 function renderDashboard() {
+  renderTurnBanner();
   const container = document.getElementById('dashboardContent');
   if (dashboardMode === 'gm') {
     renderGMDashboard(container);
@@ -2526,6 +3458,9 @@ function renderPlayerDashboard(container) {
           ${troopRows}
         </table>
       ` : ''}
+      ${renderPurchasePanel(fid)}
+      ${renderUpgradePanel(fid)}
+      ${renderPowerInfo()}
     </div>
   `;
 }
@@ -2581,6 +3516,8 @@ function renderGMDashboard(container) {
       <button class="btn-save" onclick="applyGMEdits('${fid}')" style="margin-top:16px;">Apply Changes</button>
     </div>
 
+    ${renderTurnSummary()}
+
     <div style="margin-top:24px;">
       <div class="section-title" style="font-size:1.2em;"><span class="icon">📋</span> All Factions Overview</div>
       <div style="overflow-x:auto;">
@@ -2588,7 +3525,8 @@ function renderGMDashboard(container) {
           <tr><th>Faction</th><th>Gold</th><th>Income</th><th>Army</th><th>Navy</th><th>VP</th></tr>
           ${Object.keys(gameState.factions).map(k => {
             const fc = gameState.factions[k];
-            return `<tr><td>${FACTION_NAMES[k]}</td><td>${fc.gold}</td><td>${fc.income}</td><td>${fc.army}</td><td>${fc.navy}</td><td>${fc.vp}</td></tr>`;
+            const isGmCtrl = gameState.setup && gameState.setup.factionConfig[k] && gameState.setup.factionConfig[k].controlled === 'gm';
+            return `<tr><td>${FACTION_NAMES[k]}${isGmCtrl ? ' <span class="gm-badge">GM</span>' : ''}</td><td>${fc.gold}</td><td>${fc.income}</td><td>${fc.army}</td><td>${fc.navy}</td><td>${fc.vp}</td></tr>`;
           }).join('')}
         </table>
       </div>
@@ -2632,76 +3570,165 @@ function applyGMEdits(fid) {
 
 // ==================== SVG MAP ====================
 
-// Map image URL
-const MAP_IMAGE_URL = 'https://i.imgur.com/QXGJxfE.png';
+// Geographically accurate map of Europe — viewBox 0 0 1000 700
+// Coordinates mapped to real geography: x≈(lon+12)*18, y≈(71-lat)*18
+// Interactive game regions + decorative background regions
 
-// Map coordinates as percentages (left%, top%) for overlay positioning on the real map
-const MAP_COORDS = {
-  britain:        { left: 14,  top: 18,  sea: false },
-  north_sea:      { left: 28,  top: 8,   sea: true },
-  baltic:         { left: 45,  top: 12,  sea: true },
-  english_channel:{ left: 20,  top: 38,  sea: true },
-  belgium:        { left: 27,  top: 40,  sea: false },
-  germany:        { left: 38,  top: 35,  sea: false },
-  france:         { left: 22,  top: 52,  sea: false },
-  paris:          { left: 22,  top: 45,  sea: false, inner: true },
-  alsace_lorraine:{ left: 31,  top: 48,  sea: false },
-  poland:         { left: 52,  top: 33,  sea: false },
-  russia:         { left: 68,  top: 22,  sea: false },
-  austria:        { left: 44,  top: 50,  sea: false },
-  italy:          { left: 34,  top: 63,  sea: false },
-  balkans:        { left: 50,  top: 63,  sea: false },
-  serbia:         { left: 48,  top: 57,  sea: false },
-  ottoman:        { left: 65,  top: 68,  sea: false },
-  dardanelles:    { left: 58,  top: 72,  sea: true },
-  mediterranean:  { left: 32,  top: 80,  sea: true }
+const MAP_REGIONS = {
+  // === INTERACTIVE GAME REGIONS ===
+  britain: {
+    points: '128,388 140,393 155,390 168,384 182,376 195,368 205,358 212,345 218,330 216,314 212,300 210,288 215,275 222,265 228,255 225,244 218,236 208,232 196,232 186,238 178,248 170,262 164,278 158,295 152,312 146,332 140,350 134,368 130,382',
+    cx: 182, cy: 312, sea: false
+  },
+  belgium: {
+    points: '282,348 298,340 318,338 332,345 330,358 315,368 295,370 282,362',
+    cx: 308, cy: 355, sea: false
+  },
+  paris: {
+    points: '250,400 268,395 282,402 282,418 268,425 250,420 245,412',
+    cx: 264, cy: 410, sea: false
+  },
+  france: {
+    points: '142,422 152,410 165,398 178,388 192,378 205,370 220,368 240,370 258,368 275,362 282,348 282,362 295,370 315,368 330,358 340,368 348,385 282,402 268,395 250,400 245,412 250,420 268,425 282,418 282,402 308,415 348,385 355,408 352,432 345,458 335,480 320,500 302,515 282,525 260,530 238,528 218,520 200,508 185,492 172,475 160,455 150,438',
+    cx: 262, cy: 470, sea: false
+  },
+  alsace_lorraine: {
+    points: '348,385 372,378 388,392 385,418 372,438 358,430 352,412 355,398',
+    cx: 368, cy: 408, sea: false
+  },
+  germany: {
+    points: '318,338 342,328 368,320 392,315 418,318 442,325 458,335 465,352 465,372 458,392 445,408 428,415 410,412 392,405 375,398 372,378 348,385 340,368 330,358 332,345',
+    cx: 398, cy: 368, sea: false
+  },
+  poland: {
+    points: '465,335 488,325 515,322 538,330 552,342 558,362 555,382 548,402 538,415 522,420 505,415 490,405 478,392 470,375 465,355',
+    cx: 515, cy: 370, sea: false
+  },
+  russia: {
+    points: '562,148 608,100 655,68 705,48 758,40 815,48 872,72 918,115 948,172 965,238 968,308 955,375 932,432 900,475 862,502 818,515 772,518 728,510 688,495 655,472 628,445 608,415 592,382 580,348 572,312 568,275 565,238 562,198',
+    cx: 772, cy: 295, sea: false
+  },
+  austria: {
+    points: '372,378 392,405 410,412 428,415 445,408 458,392 478,392 490,405 505,415 522,420 538,430 548,452 542,478 528,500 510,512 488,518 465,515 442,508 422,498 405,485 392,468 382,448 372,432 365,415 368,398',
+    cx: 458, cy: 452, sea: false
+  },
+  serbia: {
+    points: '510,512 528,505 548,512 552,532 538,545 522,542 510,530',
+    cx: 530, cy: 525, sea: false
+  },
+  italy: {
+    points: '335,480 348,465 365,455 382,448 392,468 398,492 405,518 408,545 405,572 398,595 388,612 375,622 362,618 352,600 345,580 342,558 348,538 352,518 348,500 340,488 328,482 318,485 308,492 302,500',
+    cx: 370, cy: 540, sea: false
+  },
+  balkans: {
+    points: '552,532 572,518 595,512 618,518 638,530 648,548 645,568 635,585 618,595 600,592 582,582 568,565 558,548',
+    cx: 602, cy: 555, sea: false
+  },
+  ottoman: {
+    points: '662,512 692,498 722,490 758,488 795,492 832,502 865,518 892,540 902,565 895,588 878,605 855,615 828,618 798,615 768,608 740,598 715,585 695,568 678,548 665,528',
+    cx: 785, cy: 555, sea: false
+  },
+  // === SEA ZONES ===
+  dardanelles: {
+    points: '638,530 660,525 670,542 668,565 655,578 640,570 635,550',
+    cx: 652, cy: 550, sea: true
+  },
+  north_sea: {
+    points: '180,230 218,210 258,195 298,188 335,192 365,202 385,218 392,242 395,272 392,302 385,325 368,338 348,345 328,345 318,338 298,340 282,348 275,342 268,335 258,325 248,318 238,308 228,298 218,288 212,275 208,262 202,248 195,238',
+    cx: 310, cy: 275, sea: true
+  },
+  english_channel: {
+    points: '130,382 148,372 168,362 188,355 205,350 220,348 240,348 258,348 275,348 282,348 275,362 258,368 240,370 220,368 205,370 192,378 178,388 165,395 152,405 142,415 135,408',
+    cx: 210, cy: 375, sea: true
+  },
+  baltic: {
+    points: '418,218 445,205 478,195 512,188 548,185 575,192 582,215 578,242 572,268 568,295 565,322 558,342 548,332 535,325 518,322 498,322 482,325 468,330 455,335 445,335 435,330 425,325 418,318 415,302 412,280 412,258 415,238',
+    cx: 505, cy: 268, sea: true
+  },
+  mediterranean: {
+    points: '160,530 210,535 260,538 302,540 340,548 375,558 405,572 440,580 480,578 520,572 560,568 600,565 640,572 680,578 720,575 760,572 800,578 840,582 880,575 920,565 960,558 1000,555 1000,700 0,700 0,545 80,538 120,535',
+    cx: 500, cy: 645, sea: true
+  }
+};
+
+// Decorative background regions (non-interactive, for geographic context)
+const DECO_REGIONS = {
+  ireland: '72,292 85,278 100,272 115,278 122,295 120,315 115,332 108,345 96,350 82,348 72,335 68,318 68,305',
+  scandinavia: '348,310 340,292 338,272 345,250 355,230 365,212 378,192 395,172 415,152 438,132 465,112 495,92 530,72 568,55 608,42 648,35 668,42 665,62 658,85 648,108 638,132 628,155 618,178 612,202 605,225 598,248 588,268 578,285 565,298 548,310 532,318 518,322 502,322 485,325 468,330 455,332 442,328 430,322 418,315 408,310 398,305 385,302 372,305 358,310',
+  denmark: '358,298 368,288 382,285 395,290 402,302 398,312 388,318 375,320 365,315 358,308',
+  spain: '112,520 132,508 152,498 170,492 185,492 200,498 215,508 228,518 238,528 260,530 282,525 302,530 318,535 335,540 348,542 352,548 348,562 338,578 325,592 310,605 292,615 270,622 248,628 225,632 202,635 178,638 155,638 132,635 112,628 95,618 82,605 72,588 65,572 62,555 65,538 72,525 85,518 98,518',
+  switzerland: '348,430 362,425 375,432 372,445 358,448 348,442',
+  netherlands: '265,332 278,325 292,328 298,340 290,350 275,348 265,342',
+  n_africa: '0,668 100,662 200,655 300,650 400,648 500,648 600,652 700,658 800,662 900,668 1000,672 1000,700 0,700'
 };
 
 let mapSelectedRegion = null;
 
 function renderMap() {
   const container = document.getElementById('mapContainer');
-  let html = `<div class="map-image-wrapper">`;
-  html += `<img src="${MAP_IMAGE_URL}" alt="Europe WWI Map" draggable="false">`;
+  let svg = `<div class="map-svg-wrapper"><svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">`;
 
-  // Draw region overlays
+  // Ocean background
+  svg += `<rect x="0" y="0" width="1000" height="700" fill="#8fb4d2"/>`;
+
+  // Decorative non-interactive regions (geographic context)
+  Object.keys(DECO_REGIONS).forEach(k => {
+    const fill = k === 'n_africa' ? '#c8b88a' : '#c5b898';
+    svg += `<polygon points="${DECO_REGIONS[k]}" fill="${fill}" stroke="#8a7d65" stroke-width="0.8" opacity="0.65"/>`;
+  });
+
+  // Continent silhouette — fills gaps between game region polygons
+  svg += `<polygon points="282,348 298,340 318,338 342,328 368,320 392,315 418,318 442,325 458,335 465,335 488,325 515,322 538,330 552,342 558,362 565,238 562,198 562,148 608,100 655,68 705,48 758,40 815,48 872,72 918,115 948,172 965,238 968,308 955,375 932,432 900,475 862,502 818,515 772,518 728,510 688,495 655,472 638,530 648,548 648,578 635,585 618,595 600,592 582,582 568,565 552,532 538,545 522,542 510,530 510,512 488,518 465,515 442,508 422,498 405,485 392,468 398,492 405,518 408,545 405,572 398,595 388,612 375,622 362,618 352,600 345,580 342,558 348,538 352,518 348,500 340,488 328,482 318,485 308,492 302,500 282,525 260,530 238,528 218,520 200,508 185,492 172,475 160,455 150,438 142,422 148,405 165,390 192,375 205,370 220,368 240,370 258,368 275,362" fill="#d7c8aa" stroke="none"/>`;
+  svg += `<polygon points="662,512 692,498 722,490 758,488 795,492 832,502 865,518 892,540 902,565 895,588 878,605 855,615 828,618 798,615 768,608 740,598 715,585 695,568 678,548 665,528" fill="#d7c8aa" stroke="none"/>`;
+  svg += `<polygon points="128,388 140,393 155,390 168,384 182,376 195,368 205,358 212,345 218,330 216,314 212,300 210,288 215,275 222,265 228,255 225,244 218,236 208,232 196,232 186,238 178,248 170,262 164,278 158,295 152,312 146,332 140,350 134,368 130,382" fill="#d7c8aa" stroke="none"/>`;
+
+  // Draw interactive game region polygons
   ALL_REGIONS.forEach(r => {
-    const c = MAP_COORDS[r];
-    if (!c) return;
-    let cls = 'map-overlay';
-    if (c.sea) cls += ' sea-zone';
+    const reg = MAP_REGIONS[r];
+    if (!reg) return;
+    let cls = 'map-region ' + (reg.sea ? 'sea' : 'land');
     if (r === mapSelectedRegion) cls += ' selected';
-    else if (mapSelectedRegion && ADJACENCY[mapSelectedRegion] && ADJACENCY[mapSelectedRegion].indexOf(r) !== -1) cls += ' adjacent-highlight';
+    else if (mapSelectedRegion && ADJACENCY[mapSelectedRegion] && ADJACENCY[mapSelectedRegion].indexOf(r) !== -1) cls += ' adjacent';
+    svg += `<polygon class="${cls}" points="${reg.points}" onclick="mapClickRegion('${r}')"/>`;
+  });
 
-    let content = `<div class="map-overlay-label">${REGION_NAMES[r]}</div>`;
+  // Decorative labels
+  svg += `<text class="map-label" x="95" y="315" opacity="0.5" font-size="7">Ireland</text>`;
+  svg += `<text class="map-label" x="500" y="180" opacity="0.5" font-size="7">Scandinavia</text>`;
+  svg += `<text class="map-label" x="210" y="580" opacity="0.5" font-size="7">Spain</text>`;
+  svg += `<text class="map-label" x="500" y="680" opacity="0.4" font-size="7">North Africa</text>`;
 
-    // Troop counts per faction
-    if (!c.sea) {
+  // Game region labels and troop counts
+  ALL_REGIONS.forEach(r => {
+    const reg = MAP_REGIONS[r];
+    if (!reg) return;
+    const labelCls = reg.sea ? 'map-label sea-label' : 'map-label';
+    svg += `<text class="${labelCls}" x="${reg.cx}" y="${reg.cy - 5}">${REGION_NAMES[r]}</text>`;
+    let lineOffset = 0;
+    if (!reg.sea) {
       Object.keys(gameState.factions).forEach(fid => {
         if (fid === 'krupp' || fid === 'schneider') return;
         const troops = gameState.factions[fid].troops[r] || 0;
         if (troops > 0) {
-          content += `<div class="map-overlay-troops" style="color:${FACTION_COLORS[fid]}">${troops}⚔ ${fid.substring(0,3).toUpperCase()}</div>`;
+          lineOffset += 12;
+          svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${troops}⚔ ${fid.substring(0,3).toUpperCase()}</text>`;
         }
       });
     }
-
-    // Fleet counts for sea zones and coastal
-    if (c.sea) {
+    if (reg.sea) {
       Object.keys(gameState.factions).forEach(fid => {
         if (fid === 'krupp' || fid === 'schneider') return;
         const fleets = gameState.factions[fid].fleets[r] || 0;
         if (fleets > 0) {
-          content += `<div class="map-overlay-troops" style="color:${FACTION_COLORS[fid]}">${fleets}⚓ ${fid.substring(0,3).toUpperCase()}</div>`;
+          lineOffset += 12;
+          svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${fleets}⚓ ${fid.substring(0,3).toUpperCase()}</text>`;
         }
       });
     }
-
-    html += `<div class="${cls}" style="left:${c.left}%; top:${c.top}%;" onclick="mapClickRegion('${r}')">${content}</div>`;
   });
 
-  html += `</div>`;
-  container.innerHTML = html;
+  svg += `</svg></div>`;
+  container.innerHTML = svg;
 }
 
 function mapClickRegion(region) {
@@ -2737,8 +3764,8 @@ function mapClickRegion(region) {
 
     const srcTroops = f.troops[mapSelectedRegion] || 0;
     const srcFleets = f.fleets[mapSelectedRegion] || 0;
-    const isSea = !!MAP_COORDS[region].sea;
-    const srcIsSea = !!MAP_COORDS[mapSelectedRegion].sea;
+    const isSea = !!MAP_REGIONS[region].sea;
+    const srcIsSea = !!MAP_REGIONS[mapSelectedRegion].sea;
 
     panel.innerHTML = `<div class="movement-panel">
       <h4>Move: ${REGION_NAMES[mapSelectedRegion]} → ${REGION_NAMES[region]}</h4>
@@ -2996,10 +4023,319 @@ function renderBattleLog() {
   ).reverse().join('');
 }
 
+// ==================== DEVIOUS ROLE CARD HTML ====================
+const DEVIOUS_ROLE_HTML = {
+  // GERMANY
+  grand_admiral: `
+    <div class="role-card" data-role="grand_admiral" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#9875; GRAND ADMIRAL VON TIRPITZ — <em>The Kaiser's Shadow</em></div>
+      <div class="role-desc">You command the High Seas Fleet and share the Kaiser's obsession with matching British naval power. But secretly, you believe a naval incident — a provocation at sea — is the fastest way to draw Britain into a war that Germany can win on land. You whisper in the Kaiser's ear, and he listens.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Provoke the Incident (+5 VP):</strong> Engineer a naval confrontation with Britain (move German fleets into disputed waters, "accidentally" fire on a British ship). Tell the GM you're provoking. If Britain declares war as a result, +5 personal VP. You wanted this.<br>
+        &#9670; <strong>Leak German Plans (+3 VP):</strong> Secretly pass German military plans to France or Russia via the GM. Each leak: +1 personal VP. You're not a traitor — you're accelerating the inevitable. But if the Kaiser discovers it, -4 VP and you're stripped of command.<br>
+        &#9670; <strong>Undermine the Chancellor (+2 VP):</strong> The Chancellor wants peace. You want war. If you can get the Kaiser to overrule the Chancellor on military spending, +2 personal VP. The fleet must grow.
+      </div>
+    </div>`,
+  spymaster: `
+    <div class="role-card" data-role="spymaster" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#128373; THE SPYMASTER — <em>The Invisible Hand</em></div>
+      <div class="role-desc">You run Germany's intelligence network from the shadows. You forge documents, intercept dispatches, and run double agents in every capital. The Kaiser doesn't even know half of what you do. Nobody does.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Forge Dispatches (+2 VP each):</strong> Once per turn, write a fake dispatch "from" any faction and give it to the GM. The GM delivers it as if intercepted. If the receiving faction acts on the false information, +2 VP. Pure disinformation warfare.<br>
+        &#9670; <strong>Double Agent Network (+4 VP):</strong> Recruit agents in 3+ factions (spend 2 Gold each via GM). Each agent reports their faction's troop positions to you. If you have agents in 3+ factions by game end, +4 VP.<br>
+        &#9670; <strong>Blackmail (+3 VP):</strong> If you learn another player's personal secret (via espionage or deduction), you may blackmail them — demand 3 Gold or threaten to expose them. +3 VP per successful blackmail. Power in the shadows.
+      </div>
+    </div>`,
+
+  // FRANCE
+  socialist: `
+    <div class="role-card" data-role="socialist" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#9760; THE SOCIALIST AGITATOR — <em>Voice of the Workers</em></div>
+      <div class="role-desc">You represent the French Socialist Party and the labor unions. You despise the militarism of the generals and the cowardice of the politicians. War is a capitalist racket — the workers will be the ones who die. You sit in the French delegation, ostensibly loyal, secretly working to prevent war — or to make sure it fails spectacularly enough to trigger revolution.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Peace at Any Price (+6 VP):</strong> If France never goes to war, +6 personal VP. You are the loudest voice against mobilization. Organize protests (1 Gold, GM rolls d6: 4+ reduces French income by 1 that turn).<br>
+        &#9670; <strong>Defeatism (+4 VP):</strong> If France goes to war AND loses a major battle, you gain +4 VP. You told them so. War is folly. If France collapses, you declare a Workers' Republic.<br>
+        &#9670; <strong>International Solidarity (+3 VP):</strong> Make secret contact with Russia's Duma Representative. If you discover they share your revolutionary goals, coordinate. If both France and Russia experience political crises in the same turn, +3 VP each.
+      </div>
+    </div>`,
+  colonial_gov: `
+    <div class="role-card" data-role="colonial_gov" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#127758; THE COLONIAL GOVERNOR — <em>The Empire Builder</em></div>
+      <div class="role-desc">You govern French North Africa and dream of expanding the empire southward. European wars are a distraction — the real wealth is in Africa, the Middle East, and Indochina. Every Gold spent on the Rhine is a Gold not spent on colonial expansion.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Colonial Diversion (+4 VP):</strong> Convince France to spend at least 6 Gold on "colonial investments" (tell GM). This Gold is removed from France's war chest. +4 VP. The empire grows while Europe burns.<br>
+        &#9670; <strong>Ottoman Back Channel (+3 VP):</strong> Secretly negotiate with the Ottoman Empire for territorial concessions in North Africa. Spend 3 Gold via GM. +3 VP. The President doesn't need to know.<br>
+        &#9670; <strong>Sabotage the War Effort (+2 VP):</strong> If France goes to war, you may "delay reinforcements" — tell the GM that 1 division is "stuck in transit from Algeria." That division doesn't fight this turn. +2 VP. Colonial needs come first.
+      </div>
+    </div>`,
+
+  // BRITAIN
+  press_baron: `
+    <div class="role-card" data-role="press_baron" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#128240; THE PRESS BARON — <em>Lord of the Headlines</em></div>
+      <div class="role-desc">You own the newspapers. You control what the British public believes. The PM may run the government, but you run the conversation. A well-placed headline can start a war, topple a government, or make an arms dealer very rich. You don't report the news — you create it.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Fabricate Headlines (+2 VP each):</strong> Once per turn, write a sensational headline and give it to the GM. It becomes "public knowledge" — all factions hear it. Examples: "GERMAN FLEET SPOTTED OFF DOVER!" or "SECRET FRANCO-RUSSIAN PACT REVEALED!" If any faction changes their plans because of your headline, +2 VP.<br>
+        &#9670; <strong>War Sells Papers (+4 VP):</strong> If a major war breaks out, +4 VP. Wartime circulation is through the roof. You should be the loudest voice demanding intervention — regardless of whether it's wise.<br>
+        &#9670; <strong>Kingmaker (+3 VP):</strong> If the PM follows your advice on a major decision (war/peace, alliance, spending), +1 VP per instance. If the PM IGNORES your advice, you may "run a scandal" — spend 2 Gold, the PM loses 1 VP. The pen is mightier.
+      </div>
+    </div>`,
+  india_sec: `
+    <div class="role-card" data-role="india_sec" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#127987; THE INDIA SECRETARY — <em>Guardian of the Jewel</em></div>
+      <div class="role-desc">India is the crown jewel of the British Empire, and you are its guardian. You see European entanglements as a dangerous distraction. Every fleet sent to the North Sea is a fleet not protecting the trade routes to Bombay. Every soldier sent to France is a soldier not keeping order in the Raj.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Protect the Raj (+4 VP):</strong> Keep at least 2 British fleets in the Mediterranean throughout the game. +4 VP. The Suez route must be protected at all costs — even if the Admiralty screams for them in the North Sea.<br>
+        &#9670; <strong>Divert Resources (+3 VP):</strong> Secretly redirect 4+ Gold to "colonial defense" (tell GM). This Gold is removed from Britain's European war chest. +3 VP. India matters more than Belgium.<br>
+        &#9670; <strong>Ottoman Alliance (+3 VP):</strong> Negotiate an Anglo-Ottoman agreement to keep the Dardanelles open for British trade. Spend 3 Gold. +3 VP. This directly conflicts with Russia's ambitions — you don't care.
+      </div>
+    </div>`,
+
+  // RUSSIA
+  okhrana: `
+    <div class="role-card" data-role="okhrana" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#128065; THE OKHRANA CHIEF — <em>The Secret Police</em></div>
+      <div class="role-desc">You command the Tsar's secret police — the most feared organization in Russia. Your agents are everywhere: in the factories, in the Duma, in the army, even in the revolutionary cells. You see conspiracies everywhere because conspiracies ARE everywhere. Your job is to find the traitors — and sometimes, to create them.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Expose the Traitor (+5 VP):</strong> If you correctly identify the Duma Representative as a revolutionary and provide evidence to the Tsar, +5 VP. You may investigate once per turn (free — you run the secret police). GM tells you one clue each time.<br>
+        &#9670; <strong>Fabricate Evidence (+3 VP):</strong> Frame an innocent player as a traitor. Give the GM a "report" naming any Russian player. If the Tsar exiles them based on your evidence, +3 VP. Justice is whatever serves the state.<br>
+        &#9670; <strong>Agent Provocateur (+2 VP per success):</strong> Plant agents in revolutionary cells (1 Gold via GM). Each turn, GM rolls d6: 4+ you "discover" a plot, gaining the Tsar's trust (+2 VP). On 1-2, your agent is exposed and you lose 1 VP. The revolution is your job security — you need it to exist, but never to succeed.
+      </div>
+    </div>`,
+  industrialist: `
+    <div class="role-card" data-role="industrialist" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#128176; THE INDUSTRIALIST — <em>The Oligarch</em></div>
+      <div class="role-desc">You are one of Russia's wealthiest men — owner of factories, mines, and railroads. The Tsar needs your money to fund his army. You need the Tsar to keep the workers in line. It's a beautiful arrangement, as long as nobody looks too closely at the books.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Skim the Budget (+1 VP/turn):</strong> Each turn, you "manage" Russia's military procurement. Secretly tell the GM to divert 1 Gold from military spending to your personal accounts. +1 VP per turn this succeeds. If the Tsar audits you (investigation), -3 VP and you pay it all back.<br>
+        &#9670; <strong>Arms Dealer Alliance (+4 VP):</strong> Make a secret deal with any arms dealer — you'll steer Russian purchases to them in exchange for a 1 Gold kickback per sale. +4 VP if you complete 3+ such deals. War is profit for you too.<br>
+        &#9670; <strong>Hedge Your Bets (+3 VP):</strong> If revolution seems likely, secretly move your wealth abroad (tell GM). If revolution triggers, you escape with +3 VP and all your stolen Gold. You are the rat that leaves the sinking ship — but a very rich rat.
+      </div>
+    </div>`,
+
+  // AUSTRIA-HUNGARY
+  hungarian: `
+    <div class="role-card" data-role="hungarian" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#127464;&#127466; THE HUNGARIAN MINISTER — <em>The Separatist</em></div>
+      <div class="role-desc">You represent the Hungarian half of the Dual Monarchy. You tolerate the Habsburgs because they keep the Slavic minorities in check — but your patience is wearing thin. Hungarian boys dying in Serbian wars? Hungarian taxes funding Austrian vanity? Perhaps it's time for a different arrangement.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Hungarian Autonomy (+5 VP):</strong> Negotiate a secret deal with ANY Entente power guaranteeing Hungarian independence in exchange for withdrawing from the war. If Austria-Hungary fractures (loses 4+ divisions or loses Austria region), you may declare Hungarian independence. +5 VP.<br>
+        &#9670; <strong>Block Serbian War (+3 VP):</strong> You oppose Conrad's war. Every turn you successfully argue against attacking Serbia, +1 VP. If Austria never attacks Serbia, +3 VP. Hungarian soldiers shouldn't die for Austrian pride.<br>
+        &#9670; <strong>Trigger Internal Crisis (+4 VP):</strong> Spend 3 Gold to "organize Hungarian protests." GM rolls d6: 4+ Austria loses 1 division to internal unrest AND must spend 2 extra Gold on stability. +2 VP per successful crisis. The empire cracks from within.
+      </div>
+    </div>`,
+  archdukes_aide: `
+    <div class="role-card" data-role="archdukes_aide" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#128161; THE ARCHDUKE'S AIDE — <em>The Man Who Knows</em></div>
+      <div class="role-desc">You serve Archduke Franz Ferdinand directly. You know his schedule, his habits, his vulnerabilities. You also know that powerful forces within Austria want him dead — his reforms threaten too many interests. When Turn 4 arrives and the assassination happens... did you fail to prevent it, or did you choose not to?</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Prevent the Assassination (+6 VP, -3 to Conrad):</strong> Before Turn 4, spend 3 Gold to "increase security." Tell the GM. If you do, the assassination DOESN'T happen. War may still come, but Austria loses its casus belli. +6 VP. Conrad loses -3 VP (no war trigger). This completely changes the game.<br>
+        &#9670; <strong>Exploit the Assassination (+4 VP):</strong> Alternatively, let it happen. If you have evidence that Conrad or another faction helped arrange it (through espionage or GM clues), expose them for +4 VP. Knowledge is power.<br>
+        &#9670; <strong>The Archduke's Reformer (+2 VP):</strong> Push for internal reforms that would give minorities more rights. Spend 2 Gold. Each reform reduces the stability cost by 1 Gold/turn but makes Conrad furious (-1 VP to him). You are the future the old guard fears.
+      </div>
+    </div>`,
+
+  // OTTOMAN
+  grand_vizier: `
+    <div class="role-card" data-role="grand_vizier" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#128142; THE GRAND VIZIER — <em>The Broker of Empires</em></div>
+      <div class="role-desc">You are the Sultan's chief minister — his voice, his hand, his deal-maker. Both the Sultan and the Young Turk think you're loyal to them. Neither is correct. You are loyal to whoever pays the most. The Dardanelles are the most valuable strait in the world, and you hold the key.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Sell the Straits (+5 VP):</strong> Secretly auction Dardanelles access to the highest bidder. Russia wants it. Britain wants it closed to Russia. France wants it open for trade. Take payments from ALL of them — promise each one exclusive access. +1 VP per 3 Gold received. If you collect from 3+ nations, +5 VP bonus. Nobody needs to know about the others.<br>
+        &#9670; <strong>Play Both Sides (+3 VP):</strong> Accept alliance payments from BOTH Central and Entente powers in the same turn. +3 VP. When they find out, simply switch to whoever offers more.<br>
+        &#9670; <strong>Survive (+2 VP):</strong> If the Sultan falls (Young Turk coup) AND the Young Turks fall (failed coup), you're still standing. +2 VP. You serve whoever sits on the throne.
+      </div>
+    </div>`,
+  german_advisor: `
+    <div class="role-card" data-role="german_advisor" style="border: 1px dashed var(--red-empire);">
+      <div class="role-header" style="color: var(--red-empire);">&#128481; THE GERMAN MILITARY ADVISOR — <em>The Double Agent</em></div>
+      <div class="role-desc">You are a German officer "loaned" to the Ottoman Empire to modernize their army. The Sultan trusts you. The Young Turks admire you. But your true loyalty is to Berlin. You are Germany's eyes and ears inside the Ottoman court — and when the time is right, you will steer the Ottomans into Germany's war.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>German Agent (+4 VP):</strong> Report Ottoman military plans to Germany each turn (send a note via GM). Each report: +1 VP. If you successfully steer the Ottoman Empire into a German alliance, +4 VP. Berlin will be very pleased.<br>
+        &#9670; <strong>Sabotage Entente Deal (-3 VP risk):</strong> If the Ottomans are about to ally with the Entente, intervene. Spend 2 Gold to "discover evidence" that Russia plans to seize Constantinople. GM announces it to Ottoman leadership. If the Ottomans break off Entente talks, +3 VP. If you're exposed as the source, -3 VP.<br>
+        &#9670; <strong>Dual Loyalty (+2 VP):</strong> You sit in Ottoman war councils AND report to Germany. If a war breaks out between Ottoman and German allies, you must choose. Whichever side you choose, +2 VP if they win.
+      </div>
+    </div>`,
+
+  // KRUPP-VICKERS
+  lobbyist: `
+    <div class="role-card" data-role="lobbyist" style="border: 1px dashed var(--gold-accent);">
+      <div class="role-header" style="color: var(--gold-accent);">&#127917; THE LOBBYIST — <em>The Shadow Advisor</em></div>
+      <div class="role-desc">You are Krupp-Vickers' man inside the corridors of power. You attend faction meetings uninvited. You "advise" leaders on military spending. You whisper that their enemies are building up arms. You are everywhere and nowhere — officially, you don't exist.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Shadow Advisor (+2 VP per faction):</strong> Attend any faction's diplomacy meeting and offer "strategic advice." If they purchase arms from Krupp-Vickers that turn, +2 VP. You can attend up to 2 different factions' meetings per turn.<br>
+        &#9670; <strong>Fear Monger (+3 VP):</strong> Once per turn, whisper to any faction leader: "Your rivals just bought [weapons]." It doesn't have to be true. If they buy arms from Krupp-Vickers as a result, +3 VP. Arms races are good for business.<br>
+        &#9670; <strong>Policy Steering (+4 VP):</strong> If you successfully convince 3+ factions to increase military spending in the same turn, +4 VP. The world arms together, and Krupp-Vickers supplies them all.
+      </div>
+    </div>`,
+
+  // SCHNEIDER-SKODA
+  fence: `
+    <div class="role-card" data-role="fence" style="border: 1px dashed var(--gold-accent);">
+      <div class="role-header" style="color: var(--gold-accent);">&#128481; THE FENCE — <em>The Arms Smuggler</em></div>
+      <div class="role-desc">You work the black market. While the Merchant of Death sells openly, you sell in the shadows — cheaper weapons, no questions asked, delivery not guaranteed. Revolutionaries, minor nations, desperate generals who've spent their official budget — they all come to you.</div>
+      <div class="role-secret">
+        <strong>&#128477; PERSONAL SECRET:</strong><br>
+        &#9670; <strong>Black Market Sales (+1 VP each):</strong> Sell arms at 1 Gold below market rate (armies for 1 Gold, fleets for 2 Gold). But delivery is unreliable — GM rolls d6: 4+ delivered normally, 2-3 delivered next turn, 1 never delivered (you keep the Gold). +1 VP per sale regardless of delivery.<br>
+        &#9670; <strong>Arm the Revolution (+4 VP):</strong> Sell weapons to revolutionary elements (Duma Rep, Socialist Agitator, Hungarian Minister). Each sale: +2 VP. If any revolution succeeds and you supplied them, +4 VP bonus. Chaos is your market.<br>
+        &#9670; <strong>Undercut Krupp-Vickers (+3 VP):</strong> If a faction breaks an exclusive Krupp-Vickers contract to buy from you instead, +3 VP. Steal their clients. The penalty clause is Krupp's problem, not yours.
+      </div>
+    </div>`
+};
+
+// ==================== FACTION DOSSIER RENDERING ====================
+
+function renderFactionDossiers() {
+  if (!gameState.setup) gameState.setup = getDefaultSetup();
+  const config = gameState.setup.factionConfig;
+
+  // Process each faction card
+  document.querySelectorAll('.faction-card[data-faction]').forEach(card => {
+    const fid = card.getAttribute('data-faction');
+    const fc = config[fid];
+    if (!fc) return;
+
+    const isGM = fc.controlled === 'gm';
+    const playerCount = isGM ? 0 : fc.players;
+    const fr = FACTION_ROLES[fid];
+    const activeRoles = isGM ? [] : getActiveRoles(fid, playerCount);
+
+    // Show/hide faction card
+    card.style.display = '';
+
+    // Add/remove GM badge
+    const nameEl = card.querySelector('.faction-name');
+    const existingBadge = nameEl.querySelector('.gm-badge');
+    if (isGM && !existingBadge) {
+      nameEl.innerHTML += ' <span class="gm-badge">GM-CONTROLLED</span>';
+    } else if (!isGM && existingBadge) {
+      existingBadge.remove();
+    }
+
+    // Update player count text
+    const playersEl = card.querySelector('.faction-players[data-faction-players]');
+    if (playersEl) {
+      const activeRoleNames = fr.roles.slice(0, playerCount).map(r => r.name);
+      if (isGM) {
+        playersEl.textContent = 'GM-Controlled Faction';
+      } else {
+        playersEl.textContent = playerCount + ' Player' + (playerCount !== 1 ? 's' : '') + ' \u2014 ' + activeRoleNames.join(', ');
+      }
+    }
+
+    // Handle existing role cards
+    card.querySelectorAll('.role-card[data-role]').forEach(roleCard => {
+      const roleId = roleCard.getAttribute('data-role');
+      const isActive = activeRoles.includes(roleId);
+      const isDevious = FACTION_ROLES[fid].roles.find(r => r.id === roleId)?.devious;
+
+      if (isGM) {
+        roleCard.style.display = 'none';
+      } else if (isActive) {
+        roleCard.style.display = '';
+        roleCard.classList.remove('inactive-role');
+      } else if (isDevious) {
+        // Devious roles that aren't active should be hidden
+        roleCard.style.display = 'none';
+      } else {
+        // Core role that's inactive (fewer players)
+        roleCard.style.display = '';
+        roleCard.classList.add('inactive-role');
+      }
+    });
+
+    // Inject devious role cards if needed
+    const roleContainer = card.querySelector('div[style*="display:grid"][style*="gap:10px"]');
+    if (roleContainer) {
+      // Remove previously injected devious cards
+      roleContainer.querySelectorAll('.role-card.injected-devious').forEach(el => el.remove());
+
+      // Add devious role cards that are active
+      if (!isGM) {
+        activeRoles.forEach(roleId => {
+          const roleData = fr.roles.find(r => r.id === roleId);
+          if (roleData && roleData.devious && DEVIOUS_ROLE_HTML[roleId]) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = DEVIOUS_ROLE_HTML[roleId].trim();
+            const newCard = tempDiv.firstElementChild;
+            newCard.classList.add('injected-devious');
+            roleContainer.appendChild(newCard);
+          }
+        });
+      }
+    }
+
+    // Handle GM note visibility
+    const gmNote = card.querySelector('.gm-note');
+    if (gmNote) {
+      gmNote.style.display = isGM ? 'none' : '';
+    }
+  });
+
+  // Update print button text
+  const gmFactions = Object.entries(config).filter(([_, f]) => f.controlled === 'gm').map(([fid]) => FACTION_NAMES[fid]);
+  const printBtn = document.querySelector('#factions .print-btn');
+  if (printBtn) {
+    const activeFactions = Object.entries(config).filter(([_, f]) => f.controlled !== 'gm').length;
+    printBtn.textContent = '\u2399 Print ' + activeFactions + ' Faction Sheets';
+  }
+}
+
+function renderOverviewFactions() {
+  const grid = document.getElementById('overviewFactionGrid');
+  if (!grid) return;
+  const config = gameState.setup ? gameState.setup.factionConfig : SETUP_PRESETS[19];
+  const dealerIds = ['krupp', 'schneider'];
+
+  let html = '';
+  Object.keys(FACTION_NAMES).forEach(fid => {
+    const fc = config[fid] || { players: 0, controlled: 'gm' };
+    const alliance = FACTION_ALLIANCE[fid];
+    const isGM = fc.controlled === 'gm';
+    const isDealer = dealerIds.includes(fid);
+    const count = isGM ? 'GM' : fc.players + ' player' + (fc.players !== 1 ? 's' : '');
+    const deviousCount = isGM ? 0 : FACTION_ROLES[fid].roles.filter((r, i) => i < fc.players && r.devious).length;
+
+    html += `<div${isGM ? ' style="opacity:0.6"' : ''}>`;
+    html += `<span class="alliance-badge ${alliance}">${alliance}</span> `;
+    html += `<strong>${FACTION_NAMES[fid]}</strong> \u2014 ${count}`;
+    if (isDealer && !isGM) html += ' \u26A1';
+    if (isGM) html += ' <span class="gm-badge">GM</span>';
+    if (deviousCount > 0) html += ` <span style="color:var(--red-empire); font-size:0.85em;">(+${deviousCount} chaos)</span>`;
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+
+  // Update total
+  const total = getTotalAssigned(config);
+  const gmCount = Object.values(config).filter(f => f.controlled === 'gm').length;
+  const noteEl = document.getElementById('overviewGMNote');
+  if (noteEl) {
+    noteEl.innerHTML = `<strong>+1 Game Master</strong> \u2014 controls the news, resolves disputes${gmCount > 0 ? `, and runs ${gmCount} GM-controlled faction${gmCount > 1 ? 's' : ''}` : ''} as needed. <em>Total: ${total} players + GM.</em>`;
+  }
+}
+
 // ==================== INIT NEW FEATURES ====================
 renderDashboard();
 renderMap();
 renderBattleLog();
+renderSetupGrid();
+renderFactionDossiers();
+renderOverviewFactions();
+updateSubtitle();
 </script>
 
 </body>
