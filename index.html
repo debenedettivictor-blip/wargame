@@ -3332,20 +3332,7 @@ body::before {
 </div>
 
 <div class="section-title" style="margin-top:30px;"><span class="icon">🗺</span> Theatre of War</div>
-<p style="margin-bottom:8px;">Click a region to select it. Then click an adjacent region to move troops. The map shows all troop positions.</p>
-<div class="dashboard-controls" style="margin-bottom:8px;">
-  <label style="font-family:'Source Serif 4',serif; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Moving faction:</label>
-  <select id="mapFactionSelect" onchange="clearMapSelection()">
-    <option value="germany">Germany</option>
-    <option value="france">France</option>
-    <option value="britain">Britain</option>
-    <option value="russia">Russia</option>
-    <option value="austria">Austria-Hungary</option>
-    <option value="ottoman">Ottoman Empire</option>
-  </select>
-</div>
 <div class="map-container" id="mapContainer"></div>
-<div id="movementPanel"></div>
 
 </div>
 </div>
@@ -6547,123 +6534,17 @@ let mapSelectedRegion = null;
 
 function renderMap() {
   const container = document.getElementById('mapContainer');
-  let svg = `<div class="map-svg-wrapper"><svg viewBox="0 0 1080 736" xmlns="http://www.w3.org/2000/svg">`;
-
-  // 1910 Europe map as background
-  svg += `<image href="europe1910.jpg" x="0" y="0" width="1080" height="736" preserveAspectRatio="xMidYMid slice"/>`;
-
-  // Clickable region overlays (transparent until hover/select)
-  ALL_REGIONS.forEach(r => {
-    const reg = MAP_REGIONS[r];
-    if (!reg) return;
-    let cls = 'map-region';
-    if (r === mapSelectedRegion) cls += ' selected';
-    else if (mapSelectedRegion && ADJACENCY[mapSelectedRegion] && ADJACENCY[mapSelectedRegion].indexOf(r) !== -1) cls += ' adjacent';
-    svg += `<polygon class="${cls}" points="${reg.points}" onclick="mapClickRegion('${r}')"/>`;
-  });
-
-  // Labels and troop strength removed — map image has its own labels
-
-  svg += `</svg></div>`;
-  container.innerHTML = svg;
+  if (!container) return;
+  container.innerHTML = `<div class="map-svg-wrapper">
+    <svg viewBox="0 0 1080 736" xmlns="http://www.w3.org/2000/svg">
+      <image href="europe1910.jpg" x="0" y="0" width="1080" height="736" preserveAspectRatio="xMidYMid slice"/>
+    </svg>
+  </div>`;
 }
 
-function mapClickRegion(region) {
-  const fid = document.getElementById('mapFactionSelect').value;
-  const f = gameState.factions[fid];
-  const panel = document.getElementById('movementPanel');
-
-  if (!mapSelectedRegion) {
-    // First click — select source
-    const hasTroops = (f.troops[region] || 0) > 0;
-    const hasFleets = (f.fleets[region] || 0) > 0;
-    if (!hasTroops && !hasFleets) {
-      panel.innerHTML = `<div class="movement-panel"><p style="color:var(--red-empire);">${FACTION_NAMES[fid]} has no forces in ${REGION_NAMES[region]}. Select a region where you have troops.</p></div>`;
-      return;
-    }
-    mapSelectedRegion = region;
-    renderMap();
-    const troops = f.troops[region] || 0;
-    const fleets = f.fleets[region] || 0;
-    panel.innerHTML = `<div class="movement-panel">
-      <h4>Selected: ${REGION_NAMES[region]}</h4>
-      <p>${troops} division(s), ${fleets} fleet(s) here. Click an adjacent <span style="color:var(--green-neutral); font-weight:700;">highlighted</span> region to move forces there.</p>
-      <button class="btn-cancel" onclick="clearMapSelection()">Cancel</button>
-    </div>`;
-  } else if (region === mapSelectedRegion) {
-    clearMapSelection();
-  } else {
-    // Second click — destination
-    if (!ADJACENCY[mapSelectedRegion] || ADJACENCY[mapSelectedRegion].indexOf(region) === -1) {
-      panel.innerHTML = `<div class="movement-panel"><p style="color:var(--red-empire);">${REGION_NAMES[region]} is not adjacent to ${REGION_NAMES[mapSelectedRegion]}. Pick a highlighted region.</p><button class="btn-cancel" onclick="clearMapSelection()">Cancel</button></div>`;
-      return;
-    }
-
-    const srcTroops = f.troops[mapSelectedRegion] || 0;
-    const srcFleets = f.fleets[mapSelectedRegion] || 0;
-    const isSea = !!MAP_REGIONS[region].sea;
-    const srcIsSea = !!MAP_REGIONS[mapSelectedRegion].sea;
-
-    panel.innerHTML = `<div class="movement-panel">
-      <h4>Move: ${REGION_NAMES[mapSelectedRegion]} → ${REGION_NAMES[region]}</h4>
-      ${!srcIsSea && !isSea && srcTroops > 0 ? `
-        <div style="margin-bottom:8px;">
-          <label style="font-family:'Source Serif 4',serif; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Divisions to move (max ${srcTroops}):</label>
-          <input type="number" id="moveTroops" min="0" max="${srcTroops}" value="${srcTroops}">
-        </div>` : ''}
-      ${(srcFleets > 0) ? `
-        <div style="margin-bottom:8px;">
-          <label style="font-family:'Source Serif 4',serif; font-size:0.85em; text-transform:uppercase; letter-spacing:1px;">Fleets to move (max ${srcFleets}):</label>
-          <input type="number" id="moveFleets" min="0" max="${srcFleets}" value="${isSea ? srcFleets : 0}">
-        </div>` : ''}
-      <button class="btn-confirm" onclick="executeMove('${fid}','${mapSelectedRegion}','${region}')">Confirm Move</button>
-      <button class="btn-cancel" onclick="clearMapSelection()">Cancel</button>
-    </div>`;
-  }
-}
-
-function executeMove(fid, src, dest) {
-  const f = gameState.factions[fid];
-  const troopInput = document.getElementById('moveTroops');
-  const fleetInput = document.getElementById('moveFleets');
-  const moveTroops = troopInput ? Math.min(parseInt(troopInput.value) || 0, f.troops[src] || 0) : 0;
-  const moveFleets = fleetInput ? Math.min(parseInt(fleetInput.value) || 0, f.fleets[src] || 0) : 0;
-
-  if (moveTroops === 0 && moveFleets === 0) {
-    alert('Select at least some forces to move.');
-    return;
-  }
-
-  // Move troops
-  if (moveTroops > 0) {
-    f.troops[src] = (f.troops[src] || 0) - moveTroops;
-    f.troops[dest] = (f.troops[dest] || 0) + moveTroops;
-    if (f.troops[src] <= 0) delete f.troops[src];
-  }
-
-  // Move fleets
-  if (moveFleets > 0) {
-    f.fleets[src] = (f.fleets[src] || 0) - moveFleets;
-    f.fleets[dest] = (f.fleets[dest] || 0) + moveFleets;
-    if (f.fleets[src] <= 0) delete f.fleets[src];
-  }
-
-  // Log the move
-  const parts = [];
-  if (moveTroops > 0) parts.push(moveTroops + ' division' + (moveTroops > 1 ? 's' : ''));
-  if (moveFleets > 0) parts.push(moveFleets + ' fleet' + (moveFleets > 1 ? 's' : ''));
-  logAction(fid, 'move', 'Moved ' + parts.join(' and ') + ': ' + REGION_NAMES[src] + ' \u2192 ' + REGION_NAMES[dest]);
-
-  saveGameState();
-  clearMapSelection();
-  renderDashboard();
-}
-
-function clearMapSelection() {
-  mapSelectedRegion = null;
-  document.getElementById('movementPanel').innerHTML = '';
-  renderMap();
-}
+function mapClickRegion() {}
+function executeMove() {}
+function clearMapSelection() { renderMap(); }
 
 // ==================== BATTLE SIMULATOR ====================
 
