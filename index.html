@@ -5203,6 +5203,7 @@ function loadGameState() {
         if (!state.factions[fid].blockadedBy) state.factions[fid].blockadedBy = [];
         if (state.factions[fid].blockadeTurns === undefined) state.factions[fid].blockadeTurns = 0;
         if (state.factions[fid].atWar === undefined) state.factions[fid].atWar = false;
+        if (state.factions[fid].warTurns === undefined) state.factions[fid].warTurns = 0;
       });
       return state;
     }
@@ -5528,27 +5529,32 @@ const FACTION_SPECIALS = {
     title: 'Imperial German Command',
     abilities: [
       { name: 'Schlieffen Plan', desc: 'Invade France through Belgium within 2 turns of war. Success: +5 VP. Failure: -3 VP.', type: 'strategic' },
-      { name: 'Alsace-Lorraine Control', desc: '+2 Gold/turn while controlling Alsace-Lorraine.', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } }
+      { name: 'Industrial Powerhouse', desc: 'Highest industry (8g). +4 Gold/turn from Alsace-Lorraine — but income drops if enemy troops contest the region.', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
+      { name: 'Naval Vulnerability', desc: 'Only 4 starting fleets vs Britain\'s 14. Must invest heavily in fleet (6g each) to break a British blockade — or face economic strangulation.', type: 'penalty' },
+      { name: 'Two-Front Dilemma', desc: '14 divisions are the largest army — but splitting between France and Russia means losing on both fronts. Neutralize one enemy first.', type: 'strategic' }
     ]
   },
   france: {
     title: 'French Republic Command',
     abilities: [
-      { name: 'Lorraine Reconquest', desc: '+2 Gold/turn if you recapture Alsace-Lorraine from Germany.', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
-      { name: 'Fortress Paris', desc: 'Paris is always considered fortified (+2 defense) at no cost.', type: 'military' }
+      { name: 'Lorraine Reconquest', desc: '+4 Gold/turn if you retake Alsace-Lorraine. Moving troops there also denies Germany their +4g bonus — a 8g swing!', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
+      { name: 'Fortress Paris', desc: 'Paris is always considered fortified (+2 defense) at no cost.', type: 'military' },
+      { name: 'Entente Coordination', desc: 'Combined with Britain (16 army + 18 fleet), you outmatch Germany on land and sea. Coordinate to overwhelm.', type: 'strategic' }
     ]
   },
   britain: {
     title: 'British Imperial Command',
     abilities: [
-      { name: 'Naval Supremacy', desc: 'Largest fleet among all factions grants VP bonus at end of game.', type: 'strategic' },
-      { name: 'Colonial Trade Network', desc: 'Highest trade income (6 Gold) but most vulnerable to naval blockade.', type: 'economic' }
+      { name: 'Naval Supremacy', desc: '14 fleets dominate the seas. Blockading Germany cuts their trade immediately and crushes their industry over time.', type: 'strategic' },
+      { name: 'Colonial Trade Network', desc: 'Highest trade income (7g) but expensive navy. War disrupts your own trade too — peace keeps the money flowing.', type: 'economic' },
+      { name: 'Expeditionary Force', desc: '6 army divisions can reinforce France via the Channel — but losing them is costly to replace (2g each).', type: 'military' }
     ]
   },
   russia: {
     title: 'Russian Imperial Command',
     abilities: [
       { name: 'Mobilization Delay', desc: 'Only half forces available on Turn 1 of any war. The steamroller is slow to start.', type: 'penalty' },
+      { name: 'The Steamroller', desc: '14 divisions — tied for largest army. If Germany fights France, your eastern front forces can overwhelm them.', type: 'military' },
       { name: 'Revolution Risk', desc: 'Must pay 4 Gold for stability or face revolution — lose half army, -3 VP, exit the war.', type: 'penalty', check: function(f) { return f.status && f.status.includes('revolution'); } }
     ]
   },
@@ -5556,7 +5562,8 @@ const FACTION_SPECIALS = {
     title: 'Dual Monarchy Command',
     abilities: [
       { name: 'Internal Rebellion', desc: 'Rebellion costs -2 Gold/turn and may cause unit desertion.', type: 'penalty', check: function(f) { return f.status && f.status.includes('rebellion'); } },
-      { name: 'Dual Monarchy', desc: 'Must balance Hungarian and Austrian interests or risk internal crisis and VP loss.', type: 'strategic' }
+      { name: 'Dual Monarchy', desc: 'Must balance Hungarian and Austrian interests or risk internal crisis and VP loss.', type: 'strategic' },
+      { name: 'German Alliance', desc: '8 divisions support Germany. Together you field 22 army — but splitting between fronts is dangerous.', type: 'military' }
     ]
   },
   ottoman: {
@@ -6431,15 +6438,23 @@ function renderFinanceTab(fid) {
   if (econ.warDividend > 0) {
     incomeRows += `<div class="ledger-row"><span class="ledger-label">War Dividend</span><span class="ledger-value positive">+${econ.warDividend}</span></div>`;
   }
+  if (econ.peaceDividend > 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">Peace Dividend</span><span class="ledger-value positive">+${econ.peaceDividend}</span></div>`;
+  }
 
   let expenseRows = '';
-  expenseRows += `<div class="ledger-row"><span class="ledger-label">Army Upkeep (${f.army} x 1)</span><span class="ledger-value negative">-${f.army}</span></div>`;
-  expenseRows += `<div class="ledger-row"><span class="ledger-label">Fleet Upkeep (${f.navy} x 1)</span><span class="ledger-value negative">-${f.navy}</span></div>`;
+  const armyUpkeep = Math.ceil(f.army * MAINTENANCE_COSTS.army);
+  const fleetUpkeep = Math.ceil(f.navy * MAINTENANCE_COSTS.fleet);
+  expenseRows += `<div class="ledger-row"><span class="ledger-label">Army Upkeep (${f.army} x ${MAINTENANCE_COSTS.army})</span><span class="ledger-value negative">-${armyUpkeep}</span></div>`;
+  expenseRows += `<div class="ledger-row"><span class="ledger-label">Fleet Upkeep (${f.navy} x ${MAINTENANCE_COSTS.fleet})</span><span class="ledger-value negative">-${fleetUpkeep}</span></div>`;
   if (econ.mobilizationCost > 0) {
-    expenseRows += `<div class="ledger-row"><span class="ledger-label">Mobilization Surcharge</span><span class="ledger-value negative">-${econ.mobilizationCost}</span></div>`;
+    expenseRows += `<div class="ledger-row"><span class="ledger-label">Mobilization Cost (per division)</span><span class="ledger-value negative">-${econ.mobilizationCost}</span></div>`;
+  }
+  if (econ.warPenalty > 0) {
+    expenseRows += `<div class="ledger-row"><span class="ledger-label">${econ.warPenaltyLabel || 'War Costs'}</span><span class="ledger-value negative">-${econ.warPenalty}</span></div>`;
   }
   if (econ.tradeLoss > 0) {
-    expenseRows += `<div class="ledger-row"><span class="ledger-label">Trade Losses (Blockade)</span><span class="ledger-value negative">-${econ.tradeLoss}</span></div>`;
+    expenseRows += `<div class="ledger-row"><span class="ledger-label">Trade Losses${econ.isBlockaded ? ' (Blockade)' : ' (War)'}</span><span class="ledger-value negative">-${econ.tradeLoss}</span></div>`;
   }
   if (econ.industryLoss > 0) {
     expenseRows += `<div class="ledger-row"><span class="ledger-label">Industry Damage (Blockade)</span><span class="ledger-value negative">-${econ.industryLoss}</span></div>`;
