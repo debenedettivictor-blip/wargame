@@ -5788,6 +5788,8 @@ function defaultGameState() {
     battles: [],
     customNews: [],
     storylineChoices: {},
+    turnPhase: 'orders',
+    resolutionLog: [],
     tradeAgreements: [
       { parties: ['germany','austria'], value: 1, label: 'Central Powers Cooperation' },
       { parties: ['france','russia'],   value: 1, label: 'Franco-Russian Alliance Trade' },
@@ -6427,16 +6429,79 @@ function showOrderConfirmation(fid) {
     sectionsHtml += '</div>';
   });
 
+  // Calculate costs from these orders
+  const f = gameState.factions[fid];
+  const econ = computeEconomy(fid);
+  let orderCost = 0;
+  let newArmies = 0;
+  let newFleets = 0;
+  actions.forEach(function(a) {
+    if (a.type === 'recruit') {
+      if (a.unitType === 'army') { orderCost += UNIT_COSTS.army; newArmies++; }
+      else if (a.unitType === 'fleet') { orderCost += UNIT_COSTS.fleet; newFleets++; }
+    }
+    if (a.type === 'upgrade' && a.upgradeId && UPGRADES[a.upgradeId]) {
+      orderCost += UPGRADES[a.upgradeId].cost;
+    }
+    if (a.type === 'diplomacy') {
+      // Extract cost from desc if present
+      var costMatch = (a.desc || '').match(/\((\d+)\s*Gold\)/);
+      if (costMatch) orderCost += parseInt(costMatch[1]);
+    }
+  });
+
+  // Calculate new upkeep after orders
+  const newArmyTotal = f.army + newArmies;
+  const newFleetTotal = f.navy + newFleets;
+  const newUpkeep = Math.ceil(newArmyTotal * MAINTENANCE_COSTS.army + newFleetTotal * MAINTENANCE_COSTS.fleet);
+  const currentUpkeep = econ.totalUpkeep;
+  const upkeepDelta = newUpkeep - currentUpkeep;
+  const treasuryAfter = f.gold - orderCost;
+  const newNet = econ.grossIncome - (econ.blockadePenalty || 0) - newUpkeep;
+  const netDelta = newNet - econ.net;
+
+  // Financial summary
+  let finSummaryHtml = '<div class="order-modal-section">' +
+    '<div class="order-modal-section-title">Financial Impact</div>' +
+    '<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">' +
+      '<div style="padding:10px; border:1px solid var(--ink-light); background:var(--parchment);">' +
+        '<div style="font-family:\'Source Serif 4\',serif; font-size:0.7em; text-transform:uppercase; letter-spacing:1px; color:var(--ink-light);">Order Cost</div>' +
+        '<div style="font-family:\'Playfair Display\',serif; font-size:1.5em; font-weight:900; color:var(--red-empire);">-' + orderCost + '</div>' +
+      '</div>' +
+      '<div style="padding:10px; border:1px solid var(--ink-light); background:var(--parchment);">' +
+        '<div style="font-family:\'Source Serif 4\',serif; font-size:0.7em; text-transform:uppercase; letter-spacing:1px; color:var(--ink-light);">Treasury After</div>' +
+        '<div style="font-family:\'Playfair Display\',serif; font-size:1.5em; font-weight:900; color:' + (treasuryAfter >= 0 ? 'var(--ink)' : 'var(--red-empire)') + ';">' + treasuryAfter + '</div>' +
+      '</div>' +
+    '</div>';
+
+  // Upkeep & Net impact
+  if (upkeepDelta !== 0 || netDelta !== 0) {
+    finSummaryHtml += '<div style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">';
+    if (upkeepDelta !== 0) {
+      finSummaryHtml += '<div style="padding:10px; border:1px solid var(--ink-light); background:var(--parchment);">' +
+        '<div style="font-family:\'Source Serif 4\',serif; font-size:0.7em; text-transform:uppercase; letter-spacing:1px; color:var(--ink-light);">Upkeep Change</div>' +
+        '<div style="font-family:\'Playfair Display\',serif; font-size:1.2em; font-weight:900; color:var(--red-empire);">' + currentUpkeep + ' &rarr; ' + newUpkeep + ' <span style="font-size:0.7em;">(+' + upkeepDelta + '/turn)</span></div>' +
+      '</div>';
+    }
+    finSummaryHtml += '<div style="padding:10px; border:1px solid var(--ink-light); background:var(--parchment);">' +
+      '<div style="font-family:\'Source Serif 4\',serif; font-size:0.7em; text-transform:uppercase; letter-spacing:1px; color:var(--ink-light);">Net Per Turn</div>' +
+      '<div style="font-family:\'Playfair Display\',serif; font-size:1.2em; font-weight:900; color:' + (newNet >= 0 ? 'var(--green-neutral)' : 'var(--red-empire)') + ';">' + (econ.net >= 0 ? '+' : '') + econ.net + ' &rarr; ' + (newNet >= 0 ? '+' : '') + newNet + '</div>' +
+    '</div>';
+    finSummaryHtml += '</div>';
+  }
+  finSummaryHtml += '</div>';
+
   const modal = document.createElement('div');
   modal.className = 'order-modal-overlay';
   modal.id = 'orderConfirmModal';
   modal.innerHTML = '<div class="order-modal">' +
-    '<div class="order-modal-header">Confirm Orders — Turn ' + gameState.currentTurnNum + '</div>' +
+    '<div class="order-modal-header">Confirm Orders \u2014 Turn ' + gameState.currentTurnNum + '</div>' +
     '<div class="order-modal-body">' +
       '<p style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-light); margin-bottom:16px; text-align:center;">' +
         'Review your orders carefully. Once submitted, they cannot be changed.' +
       '</p>' +
       sectionsHtml +
+      finSummaryHtml +
       '<div style="text-align:center; margin-top:12px; font-family:\'Playfair Display\',serif; font-weight:700;">' +
         actions.length + ' order' + (actions.length !== 1 ? 's' : '') + ' for ' + FACTION_NAMES[fid] +
       '</div>' +
