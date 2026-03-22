@@ -6944,7 +6944,11 @@ function beginResolution() {
             f.gold -= cost;
             const unitId = 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
             const home = action.unitType === 'army' ? (HOME_REGIONS[fid] || fid) : (HOME_SEAS[fid] || 'mediterranean');
-            f.units.push({ id: unitId, type: action.unitType, state: 'reserve', region: home, createdTurn: gameState.currentTurnNum });
+            const existingCount = f.units.filter(u => u.type === action.unitType).length;
+            const names = UNIT_NAMES[fid] || { army: [], fleet: [] };
+            const nameList = action.unitType === 'army' ? names.army : names.fleet;
+            const unitName = nameList[existingCount] || ((action.unitType === 'army' ? 'Division' : 'Fleet') + ' ' + (existingCount + 1));
+            f.units.push({ id: unitId, name: unitName, type: action.unitType, state: 'reserve', region: home, createdTurn: gameState.currentTurnNum });
             recomputeAggregates(fid);
             const typeLabel = action.unitType === 'army' ? 'army division' : 'fleet';
             gameState.resolutionLog.push({ fid, icon: '+', text: `${FACTION_NAMES[fid]} recruited 1 ${typeLabel} → Reserve (-${cost}g). Will mobilize next turn.` });
