@@ -2440,6 +2440,59 @@ body::before {
   padding: 4px 0;
 }
 
+.roster-checklist {
+  padding: 12px 14px;
+  border-top: 2px solid var(--ink);
+  background: var(--parchment);
+}
+.roster-checklist-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.75em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.roster-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dotted var(--parchment-dark);
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  line-height: 1.35;
+}
+.roster-check-item:last-child { border-bottom: none; }
+.roster-check-box {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  cursor: pointer;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7em;
+  transition: all 0.15s;
+}
+.roster-check-box.checked {
+  background: var(--green-neutral);
+  border-color: var(--green-neutral);
+  color: white;
+}
+.roster-check-text { flex: 1; }
+.roster-check-cost {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--gold-accent);
+  white-space: nowrap;
+}
+
 @media (max-width: 900px) {
   .dashboard-layout { grid-template-columns: 1fr; }
   .force-roster { position: static; max-height: none; }
@@ -5504,6 +5557,41 @@ function renderForceRoster() {
       </div>
     </div>`;
   });
+
+  // Turn Action Checklist
+  html += `<div class="roster-checklist">
+    <div class="roster-checklist-title">Turn Checklist</div>
+    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+      <div class="roster-check-box"></div>
+      <span class="roster-check-text">Recruit divisions or fleets</span>
+      <span class="roster-check-cost">3g / 5g</span>
+    </div>
+    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+      <div class="roster-check-box"></div>
+      <span class="roster-check-text">Deploy &amp; mobilize troops to regions</span>
+      <span class="roster-check-cost">1g/unit upkeep</span>
+    </div>
+    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+      <div class="roster-check-box"></div>
+      <span class="roster-check-text">Move fleets to sea zones</span>
+      <span class="roster-check-cost">1g/fleet upkeep</span>
+    </div>
+    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+      <div class="roster-check-box"></div>
+      <span class="roster-check-text">Negotiate alliances, support pledges, or trade agreements to boost income</span>
+      <span class="roster-check-cost">Free</span>
+    </div>
+    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+      <div class="roster-check-box"></div>
+      <span class="roster-check-text">Purchase upgrades (artillery, trenches, gas)</span>
+      <span class="roster-check-cost">3-6g</span>
+    </div>
+    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+      <div class="roster-check-box"></div>
+      <span class="roster-check-text">Submit orders to GM</span>
+      <span class="roster-check-cost">&mdash;</span>
+    </div>
+  </div>`;
 
   roster.innerHTML = html;
 }
