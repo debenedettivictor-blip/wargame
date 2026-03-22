@@ -682,6 +682,117 @@ body::before {
   }
 }
 
+/* ==================== TURN SUMMARY PANEL ==================== */
+.player-summary {
+  margin-top: 24px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+}
+
+.player-summary-header {
+  font-family: 'Playfair Display', serif;
+  font-size: 1em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 16px;
+  background: var(--ink);
+  color: var(--parchment);
+}
+
+.summary-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--parchment-dark);
+}
+
+.summary-section:last-child { border-bottom: none; }
+
+.summary-section-title {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-light);
+  margin-bottom: 8px;
+}
+
+.income-table {
+  width: 100%;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+}
+
+.income-table td { padding: 3px 0; }
+
+.income-table td:last-child {
+  text-align: right;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+}
+
+.income-table .income-divider td {
+  border-top: 1px solid var(--ink-light);
+  padding-top: 6px;
+}
+
+.income-table .income-net td { font-size: 1.1em; }
+
+.force-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 3px 0;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+}
+
+.force-row .force-label { font-weight: 700; }
+
+.force-row .force-delta {
+  font-size: 0.85em;
+  margin-left: 8px;
+}
+
+.force-row .force-delta.positive { color: var(--green-neutral); }
+.force-row .force-delta.negative { color: var(--red-empire); }
+
+.action-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.action-list li {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  padding: 4px 0;
+  border-bottom: 1px dotted var(--parchment-dark);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.action-list li:last-child { border-bottom: none; }
+
+.action-icon {
+  font-size: 0.85em;
+  flex-shrink: 0;
+}
+
+.action-icon.move { color: var(--blue-entente); }
+.action-icon.purchase { color: var(--green-neutral); }
+.action-icon.upgrade { color: var(--gold-accent); }
+.action-icon.battle { color: var(--red-empire); }
+.action-icon.income { color: var(--ink-light); }
+
+.no-actions {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: var(--ink-light);
+  font-size: 0.9em;
+}
+
 /* Responsive */
 @media (max-width: 700px) {
   .game-header h1 { font-size: 1.7em; letter-spacing: 1px; }
@@ -689,8 +800,8 @@ body::before {
   .game-header .tagline { font-size: 0.8em; }
   .game-header { padding: 24px 12px 20px; margin-bottom: 24px; }
   .container { padding: 10px; }
-  .nav-tabs { gap: 3px; margin-bottom: 20px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 0; }
-  .nav-tab { font-size: 10px; padding: 8px 10px; white-space: nowrap; flex-shrink: 0; letter-spacing: 1px; }
+  .nav-tabs { gap: 3px; margin-bottom: 20px; flex-wrap: wrap; padding-bottom: 0; }
+  .nav-tab { font-size: 10px; padding: 8px 10px; white-space: nowrap; letter-spacing: 1px; }
   .faction-card { padding: 14px; }
   .faction-name { font-size: 1.2em; }
   .faction-players { font-size: 0.8em; }
@@ -1281,6 +1392,12 @@ body::before {
 .negative { color: var(--red-empire); }
 
 /* ==================== MAP STYLES ==================== */
+.europe-map-container {
+  position: relative;
+  width: 100%;
+  margin: 20px 0;
+}
+
 .map-container {
   position: relative;
   width: 100%;
@@ -1653,6 +1770,7 @@ body::before {
   <button class="nav-tab" data-tab="reference">Quick Ref</button>
   <button class="nav-tab" data-tab="dashboard">Dashboard</button>
   <button class="nav-tab" data-tab="battle">Battle</button>
+  <button class="nav-tab" data-tab="map">Map</button>
   <button class="nav-tab" data-tab="gm">GM Guide</button>
 </div>
 
@@ -2592,6 +2710,23 @@ body::before {
 </div>
 </div>
 
+<div id="map" class="tab-content">
+<div class="section">
+<div class="section-title"><span class="icon">🗺</span> Map of Europe</div>
+<p>A strategic overview of the European theatre. Use the controls to pan, zoom, and explore the geography of the Great War.</p>
+<div class="europe-map-container">
+  <iframe
+    src="https://www.openstreetmap.org/export/embed.html?bbox=-12.0,34.0,45.0,72.0&layer=mapnik"
+    style="width:100%; height:600px; border:3px solid var(--ink); border-radius:4px;"
+    allowfullscreen>
+  </iframe>
+  <p style="margin-top:8px; font-size:0.85em; font-family:'IM Fell English',serif; color:var(--ink-light); text-align:center;">
+    <a href="https://www.openstreetmap.org/#map=4/50.0/15.0" target="_blank" style="color:var(--gold-accent);">View larger map on OpenStreetMap</a>
+  </p>
+</div>
+</div>
+</div>
+
 </div><!-- end container -->
 
 <script>
@@ -3150,6 +3285,7 @@ function defaultGameState() {
     },
     battleLog: [],
     turnLog: [],
+    actionLog: [],
     currentTurnNum: 1,
     setup: getDefaultSetup()
   };
@@ -3163,8 +3299,9 @@ function loadGameState() {
     const saved = localStorage.getItem('gunsOfAugust_gameState');
     if (saved) {
       const state = JSON.parse(saved);
-      // Migrate: ensure upgrades, turnLog, and setup exist
+      // Migrate: ensure upgrades, turnLog, actionLog, and setup exist
       if (!state.turnLog) state.turnLog = [];
+      if (!state.actionLog) state.actionLog = [];
       if (!state.setup) state.setup = getDefaultSetup();
       Object.keys(state.factions).forEach(fid => {
         if (!state.factions[fid].upgrades) state.factions[fid].upgrades = {};
@@ -3180,6 +3317,17 @@ function saveGameState() {
   const ind = document.getElementById('saveIndicator');
   ind.classList.add('visible');
   setTimeout(() => ind.classList.remove('visible'), 1500);
+}
+
+function logAction(fid, type, description) {
+  if (!gameState.actionLog) gameState.actionLog = [];
+  gameState.actionLog.push({
+    turn: gameState.currentTurnNum,
+    fid: fid,
+    type: type,
+    description: description,
+    timestamp: Date.now()
+  });
 }
 
 function resetGameState() {
@@ -3254,6 +3402,14 @@ function advanceTurn() {
     });
   });
 
+  // Log income for each faction before incrementing turn
+  summary.forEach(e => {
+    const fid = Object.keys(gameState.factions).find(k => FACTION_NAMES[k] === e.faction);
+    if (fid) {
+      logAction(fid, 'income', 'Turn ' + gameState.currentTurnNum + ' income: +' + e.income + 'g, upkeep: -' + e.maintenance + 'g, net: ' + (e.net >= 0 ? '+' : '') + e.net + 'g (' + e.oldGold + ' \u2192 ' + e.newGold + 'g)');
+    }
+  });
+
   gameState.currentTurnNum++;
   if (!gameState.turnLog) gameState.turnLog = [];
   gameState.turnLog.push({
@@ -3279,10 +3435,12 @@ function purchaseUnit(fid, type) {
     f.army++;
     const home = HOME_REGIONS[fid];
     if (home) f.troops[home] = (f.troops[home] || 0) + 1;
+    logAction(fid, 'purchase', 'Recruited 1 army division at ' + REGION_NAMES[home] + ' (-' + cost + 'g)');
   } else {
     f.navy++;
     const homeSea = HOME_SEAS[fid];
     if (homeSea) f.fleets[homeSea] = (f.fleets[homeSea] || 0) + 1;
+    logAction(fid, 'purchase', 'Recruited 1 fleet at ' + REGION_NAMES[homeSea] + ' (-' + cost + 'g)');
   }
 
   saveGameState();
@@ -3301,6 +3459,7 @@ function purchaseUpgrade(fid, upgradeId) {
 
   f.gold -= upg.cost;
   f.upgrades[upgradeId] = true;
+  logAction(fid, 'upgrade', 'Purchased ' + upg.name + ' (-' + upg.cost + 'g)');
 
   saveGameState();
   renderDashboard();
@@ -3411,6 +3570,128 @@ function toggleDashboardMode() {
   renderDashboard();
 }
 
+function renderPlayerTurnSummary(fid) {
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  const currentTurn = gameState.currentTurnNum;
+
+  // === INCOME STATEMENT ===
+  // Find most recent turnLog entry for this faction
+  let incomeHtml = '';
+  if (gameState.turnLog && gameState.turnLog.length > 0) {
+    const lastLog = gameState.turnLog[gameState.turnLog.length - 1];
+    const entry = lastLog.entries.find(e => e.faction === FACTION_NAMES[fid]);
+    if (entry) {
+      const netCls = entry.net >= 0 ? 'positive' : 'negative';
+      incomeHtml = `
+        <div class="summary-section">
+          <div class="summary-section-title">Income Statement — Turn ${lastLog.turn - 1}</div>
+          <table class="income-table">
+            <tr><td>Income</td><td class="positive">+${entry.income}g</td></tr>
+            <tr><td>Total upkeep</td><td class="negative">-${entry.maintenance}g</td></tr>
+            <tr class="income-divider income-net"><td>Net</td><td class="${netCls}">${entry.net >= 0 ? '+' : ''}${entry.net}g</td></tr>
+            <tr><td>Treasury</td><td>${entry.oldGold} \u2192 ${entry.newGold}g</td></tr>
+          </table>
+        </div>`;
+    }
+  }
+
+  // === FORCE REPORT ===
+  // Count recent changes from actionLog this turn
+  const thisActions = (gameState.actionLog || []).filter(a => a.fid === fid && a.turn === currentTurn);
+  const prevActions = (gameState.actionLog || []).filter(a => a.fid === fid && a.turn === currentTurn - 1);
+  const allRecent = thisActions.concat(prevActions);
+
+  let armyRecruited = 0, armyLost = 0, navyRecruited = 0;
+  allRecent.forEach(a => {
+    if (a.type === 'purchase' && a.description.includes('army')) armyRecruited++;
+    if (a.type === 'purchase' && a.description.includes('fleet')) navyRecruited++;
+    if (a.type === 'battle') {
+      const lossMatch = a.description.match(/Lost (\d+) div/);
+      if (lossMatch) armyLost += parseInt(lossMatch[1]);
+    }
+  });
+
+  const armyDeltaParts = [];
+  if (armyRecruited > 0) armyDeltaParts.push('+' + armyRecruited + ' recruited');
+  if (armyLost > 0) armyDeltaParts.push('-' + armyLost + ' lost');
+  const armyDelta = armyDeltaParts.length ? armyDeltaParts.join(', ') : 'no change';
+  const armyDeltaCls = armyLost > armyRecruited ? 'negative' : (armyRecruited > 0 ? 'positive' : '');
+
+  const navyDelta = navyRecruited > 0 ? '+' + navyRecruited + ' recruited' : 'no change';
+  const navyDeltaCls = navyRecruited > 0 ? 'positive' : '';
+
+  const upgradeList = f.upgrades ? Object.keys(f.upgrades).filter(k => f.upgrades[k]).map(k => UPGRADES[k] ? UPGRADES[k].name : k) : [];
+
+  let forceHtml = '';
+  if (!isDealer) {
+    forceHtml = `
+      <div class="summary-section">
+        <div class="summary-section-title">Force Report</div>
+        <div class="force-row">
+          <span><span class="force-label">Army:</span> ${f.army} divisions</span>
+          <span class="force-delta ${armyDeltaCls}">(${armyDelta})</span>
+        </div>
+        <div class="force-row">
+          <span><span class="force-label">Navy:</span> ${f.navy} fleets</span>
+          <span class="force-delta ${navyDeltaCls}">(${navyDelta})</span>
+        </div>
+        ${upgradeList.length ? '<div class="force-row"><span class="force-label">Upgrades:</span> <span>' + upgradeList.join(', ') + '</span></div>' : ''}
+      </div>`;
+  }
+
+  // === ACTION HISTORY ===
+  // Show actions for current turn + previous turn
+  const actionIcons = {
+    move: '\u2794',
+    purchase: '+',
+    upgrade: '\u2605',
+    battle: '\u2694',
+    income: '\u25CB'
+  };
+
+  const recentActions = (gameState.actionLog || [])
+    .filter(a => a.fid === fid && (a.turn === currentTurn || a.turn === currentTurn - 1))
+    .reverse();
+
+  let actionsHtml = '';
+  if (recentActions.length > 0) {
+    const items = recentActions.map(a => {
+      return `<li><span class="action-icon ${a.type}">${actionIcons[a.type] || '\u2022'}</span> <span>${a.description}</span></li>`;
+    }).join('');
+    actionsHtml = `
+      <div class="summary-section">
+        <div class="summary-section-title">Recent Actions</div>
+        <ul class="action-list">${items}</ul>
+      </div>`;
+  } else {
+    actionsHtml = `
+      <div class="summary-section">
+        <div class="summary-section-title">Recent Actions</div>
+        <p class="no-actions">No actions recorded yet. The calm before the storm...</p>
+      </div>`;
+  }
+
+  // Only show if there's content
+  if (!incomeHtml && !forceHtml && recentActions.length === 0) {
+    return `
+      <div class="player-summary">
+        <div class="player-summary-header">Turn Summary</div>
+        <div class="summary-section">
+          <p class="no-actions">No history yet. Begin your campaign...</p>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div class="player-summary">
+      <div class="player-summary-header">Turn Summary</div>
+      ${incomeHtml}
+      ${forceHtml}
+      ${actionsHtml}
+    </div>`;
+}
+
 function renderDashboard() {
   renderTurnBanner();
   const container = document.getElementById('dashboardContent');
@@ -3462,6 +3743,7 @@ function renderPlayerDashboard(container) {
       ${renderUpgradePanel(fid)}
       ${renderPowerInfo()}
     </div>
+    ${renderPlayerTurnSummary(fid)}
   `;
 }
 
@@ -3811,6 +4093,12 @@ function executeMove(fid, src, dest) {
     if (f.fleets[src] <= 0) delete f.fleets[src];
   }
 
+  // Log the move
+  const parts = [];
+  if (moveTroops > 0) parts.push(moveTroops + ' division' + (moveTroops > 1 ? 's' : ''));
+  if (moveFleets > 0) parts.push(moveFleets + ' fleet' + (moveFleets > 1 ? 's' : ''));
+  logAction(fid, 'move', 'Moved ' + parts.join(' and ') + ': ' + REGION_NAMES[src] + ' \u2192 ' + REGION_NAMES[dest]);
+
   saveGameState();
   clearMapSelection();
   renderDashboard();
@@ -4000,6 +4288,15 @@ function applyBattleResult() {
   if (defF.troops[defRegion]) {
     defF.troops[defRegion] = Math.max(0, defF.troops[defRegion] - defLosses);
     if (defF.troops[defRegion] <= 0) delete defF.troops[defRegion];
+  }
+
+  // Log battle for both factions
+  if (attackerWins) {
+    logAction(atkFid, 'battle', 'Victory at ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[defFid] + '! Lost ' + atkLosses + ' div, enemy lost ' + defLosses + ' div.');
+    logAction(defFid, 'battle', 'Defeat at ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[atkFid] + '. Lost ' + defLosses + ' div, enemy lost ' + atkLosses + ' div.');
+  } else {
+    logAction(defFid, 'battle', 'Held ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[atkFid] + '! Lost ' + defLosses + ' div, enemy lost ' + atkLosses + ' div.');
+    logAction(atkFid, 'battle', 'Repulsed at ' + REGION_NAMES[defRegion] + ' vs ' + FACTION_NAMES[defFid] + '. Lost ' + atkLosses + ' div, enemy lost ' + defLosses + ' div.');
   }
 
   saveGameState();
