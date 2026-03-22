@@ -847,6 +847,282 @@ body::before {
   .phase-text { font-size: 0.95em; }
 }
 
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  /* Hide all UI chrome */
+  .nav-tabs, .game-header, .print-btn, .print-packet-btn, .print-roles-btn,
+  .gm-note, .gm-badge, .mode-toggle, .btn-save, .btn-danger,
+  .save-indicator, .dashboard-controls, #turnTracker, #turnDetail,
+  .battle-setup, .battle-log, .map-container, #movementPanel,
+  .setup-container, .setup-presets, .preset-card, .faction-config-grid,
+  body::before { display: none !important; }
+
+  body {
+    background: white !important;
+    background-image: none !important;
+    color: #1a1a1a !important;
+    font-size: 11pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .container { max-width: 100%; padding: 0; margin: 0; }
+
+  /* --- Faction Packet Print Mode --- */
+  body.print-packets .tab-content { display: none !important; }
+  body.print-packets #factions { display: block !important; }
+  body.print-packets .section:first-child > .section-title,
+  body.print-packets .section:first-child > p { display: none !important; }
+
+  body.print-packets .faction-card {
+    page-break-before: always;
+    page-break-inside: avoid;
+    border: 3px solid #1a1a1a !important;
+    border-left-width: 8px !important;
+    padding: 20px 24px;
+    background: white !important;
+    margin: 0;
+    box-shadow: none;
+  }
+  body.print-packets .faction-card:first-child { page-break-before: avoid; }
+
+  body.print-packets .faction-card::before { display: none; }
+
+  body.print-packets .faction-name {
+    font-size: 22pt;
+    text-align: center;
+    border-bottom: 3px double #1a1a1a;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
+  body.print-packets .faction-players {
+    text-align: center;
+    font-size: 10pt;
+  }
+
+  body.print-packets .faction-flavor {
+    text-align: center;
+    font-size: 10pt;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  body.print-packets .stat-row {
+    justify-content: center;
+    gap: 24px;
+    padding: 8px 0;
+    border: 1px solid #ddd;
+    background: #f9f9f9 !important;
+    margin-bottom: 10px;
+  }
+
+  body.print-packets .stat-value { font-size: 14pt; }
+  body.print-packets .stat-label { font-size: 8pt; }
+
+  body.print-packets .objectives {
+    border: 1px solid #1a1a1a;
+    padding: 10px 14px;
+    margin: 8px 0;
+  }
+
+  body.print-packets .obj-title { font-size: 10pt; }
+  body.print-packets .obj-list { font-size: 10pt; }
+
+  body.print-packets .secret-obj {
+    border: 2px dashed #666;
+    background: #f5f5f0 !important;
+    padding: 10px 14px;
+    font-size: 10pt;
+  }
+
+  body.print-packets .highlight-box {
+    border: 2px solid #b8860b;
+    padding: 10px 14px;
+    font-size: 9.5pt;
+    background: #fffef5 !important;
+    page-break-inside: avoid;
+  }
+
+  body.print-packets .role-card {
+    border: 2px solid #444;
+    padding: 10px 14px;
+    margin-top: 8px;
+    background: white !important;
+    page-break-inside: avoid;
+  }
+  body.print-packets .role-card::after { display: none; }
+  body.print-packets .role-header { font-size: 12pt; }
+  body.print-packets .role-desc { font-size: 9.5pt; }
+  body.print-packets .role-secret { font-size: 9pt; padding: 8px 10px; }
+
+  body.print-packets .faction-grid { gap: 0; }
+
+  /* --- Role Cards Print Mode --- */
+  body.print-role-cards .tab-content { display: none !important; }
+  body.print-role-cards #printRoleCardsContainer { display: block !important; }
+
+  body.print-role-cards .print-role-page {
+    page-break-after: always;
+    padding: 16px;
+  }
+  body.print-role-cards .print-role-page:last-child { page-break-after: avoid; }
+
+  body.print-role-cards .prc-header {
+    text-align: center;
+    border-bottom: 3px double #1a1a1a;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  body.print-role-cards .prc-faction-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 12pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666;
+    margin-bottom: 2px;
+  }
+  body.print-role-cards .prc-role-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20pt;
+    font-weight: 900;
+  }
+  body.print-role-cards .prc-role-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 12pt;
+    color: #555;
+  }
+
+  body.print-role-cards .prc-section {
+    border: 1px solid #ccc;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+  body.print-role-cards .prc-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 10pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 4px;
+  }
+  body.print-role-cards .prc-section p,
+  body.print-role-cards .prc-section div {
+    font-family: 'Crimson Text', serif;
+    font-size: 10pt;
+    line-height: 1.5;
+  }
+
+  body.print-role-cards .prc-secret {
+    border: 2px dashed #b8860b;
+    background: #fffef5 !important;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  body.print-role-cards .prc-secret-title {
+    font-family: 'Source Serif 4', serif;
+    font-size: 9pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8b1a1a;
+    margin-bottom: 6px;
+  }
+  body.print-role-cards .prc-secret p {
+    font-family: 'Crimson Text', serif;
+    font-size: 9.5pt;
+    line-height: 1.5;
+  }
+
+  body.print-role-cards .prc-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 8px 0;
+    border: 1px solid #ddd;
+    background: #f9f9f9 !important;
+    margin-bottom: 10px;
+  }
+  body.print-role-cards .prc-stat-label {
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+  }
+  body.print-role-cards .prc-stat-value {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 12pt;
+  }
+
+  body.print-role-cards .prc-footer {
+    text-align: center;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 9pt;
+    color: #888;
+    margin-top: 16px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+  }
+
+  body.print-role-cards .prc-ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin-top: 6px;
+  }
+  body.print-role-cards .prc-ref-table th {
+    background: #eee !important;
+    font-family: 'Source Serif 4', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 7pt;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  body.print-role-cards .prc-ref-table td {
+    padding: 3px 6px;
+    border: 1px solid #ccc;
+    font-family: 'Crimson Text', serif;
+  }
+}
+
+/* On-screen print button variants */
+.print-packet-btn, .print-roles-btn {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 12px 28px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.print-packet-btn {
+  background: var(--ink);
+  color: var(--parchment);
+}
+.print-packet-btn:hover { background: var(--red-empire); }
+
+.print-roles-btn {
+  background: var(--gold-accent);
+  color: white;
+}
+.print-roles-btn:hover { background: var(--rust); }
+
+/* Hidden container for role card print */
+#printRoleCardsContainer { display: none; }
+
 .highlight-box {
   border: 2px solid var(--gold-accent);
   padding: 16px 20px;
@@ -1894,7 +2170,10 @@ body::before {
 <div class="section">
 <div class="section-title"><span class="icon">🦅</span> Faction Dossiers</div>
 <p>Each faction card below is designed to be printed and handed to the relevant team. Secret objectives should be kept hidden from other factions.</p>
-<button class="print-btn" onclick="window.print()" style="margin-bottom:24px;">⎙ Print All Faction Sheets</button>
+<div style="margin-bottom:24px;">
+  <button class="print-packet-btn" onclick="printFactionPackets()">⎙ Print Faction Packets</button>
+  <button class="print-roles-btn" onclick="printRoleCards()">⎙ Print Role Cards</button>
+</div>
 </div>
 
 <div class="faction-grid" id="factionGrid">
@@ -2721,6 +3000,9 @@ body::before {
 
 </div>
 </div>
+
+<!-- Hidden container for printable role cards -->
+<div id="printRoleCardsContainer"></div>
 
 </div><!-- end container -->
 
@@ -4609,12 +4891,7 @@ function renderFactionDossiers() {
   });
 
   // Update print button text
-  const gmFactions = Object.entries(config).filter(([_, f]) => f.controlled === 'gm').map(([fid]) => FACTION_NAMES[fid]);
-  const printBtn = document.querySelector('#factions .print-btn');
-  if (printBtn) {
-    const activeFactions = Object.entries(config).filter(([_, f]) => f.controlled !== 'gm').length;
-    printBtn.textContent = '\u2399 Print ' + activeFactions + ' Faction Sheets';
-  }
+  updatePrintButtons();
 }
 
 function renderOverviewFactions() {
@@ -4652,6 +4929,186 @@ function renderOverviewFactions() {
   }
 }
 
+// ==================== PRINT FUNCTIONS ====================
+
+function printFactionPackets() {
+  document.body.classList.add('print-packets');
+  window.print();
+  document.body.classList.remove('print-packets');
+}
+
+function printRoleCards() {
+  // Build role card pages from current active factions/roles
+  const config = gameState.setup ? gameState.setup.factionConfig : SETUP_PRESETS[19];
+  const container = document.getElementById('printRoleCardsContainer');
+  let html = '';
+
+  const allianceColors = {
+    central: '#8b1a1a', entente: '#1a3a6b', neutral: '#2d5016', corporate: '#b8860b'
+  };
+
+  Object.keys(FACTION_NAMES).forEach(fid => {
+    const fc = config[fid];
+    if (!fc || fc.controlled === 'disabled' || fc.controlled === 'gm') return;
+
+    const fr = FACTION_ROLES[fid];
+    const activeRoles = getActiveRoles(fid, fc.players);
+    const alliance = FACTION_ALLIANCE[fid];
+    const aColor = allianceColors[alliance] || '#333';
+
+    // Get faction stats from the faction card
+    const factionCard = document.querySelector('.faction-card[data-faction="' + fid + '"]');
+    if (!factionCard) return;
+
+    const stats = [];
+    factionCard.querySelectorAll('.stat').forEach(s => {
+      const label = s.querySelector('.stat-label')?.textContent || '';
+      const value = s.querySelector('.stat-value')?.textContent || '';
+      if (label && value) stats.push({ label: label, value: value });
+    });
+
+    // Get shared objectives
+    const objList = [];
+    factionCard.querySelectorAll('.objectives .obj-list div').forEach(d => {
+      objList.push(d.textContent);
+    });
+
+    // Get shared secret objectives
+    const secretObj = factionCard.querySelector('.secret-obj');
+    const sharedSecret = secretObj ? secretObj.innerHTML : '';
+
+    // Get special powers (highlight boxes) for arms dealers
+    const specialPowers = [];
+    factionCard.querySelectorAll('.highlight-box').forEach(box => {
+      specialPowers.push(box.innerHTML);
+    });
+
+    // Build a page for each active role
+    activeRoles.forEach(roleId => {
+      const roleData = fr.roles.find(r => r.id === roleId);
+      if (!roleData) return;
+
+      // Get role card content — check both static HTML and injected devious cards
+      let roleCard = factionCard.querySelector('.role-card[data-role="' + roleId + '"]');
+      if (!roleCard) {
+        // Check injected devious cards
+        roleCard = factionCard.querySelector('.role-card.injected-devious[data-role="' + roleId + '"]');
+      }
+      if (!roleCard) return;
+
+      const roleHeader = roleCard.querySelector('.role-header')?.innerHTML || roleData.name;
+      const roleDesc = roleCard.querySelector('.role-desc')?.innerHTML || '';
+      const roleSecret = roleCard.querySelector('.role-secret')?.innerHTML || '';
+
+      // Parse role name and subtitle from header
+      const headerText = roleCard.querySelector('.role-header')?.textContent || roleData.name;
+      const emEl = roleCard.querySelector('.role-header em');
+      const subtitle = emEl ? emEl.textContent : '';
+
+      html += '<div class="print-role-page">';
+
+      // Header
+      html += '<div class="prc-header" style="border-bottom-color: ' + aColor + ';">';
+      html += '<div class="prc-faction-name" style="color: ' + aColor + ';">' + FACTION_NAMES[fid] + '</div>';
+      html += '<div class="prc-role-name">' + roleData.name + '</div>';
+      if (subtitle) html += '<div class="prc-role-subtitle">' + subtitle + '</div>';
+      html += '</div>';
+
+      // Faction stats
+      if (stats.length) {
+        html += '<div class="prc-stats">';
+        stats.forEach(s => {
+          html += '<div style="text-align:center;"><div class="prc-stat-label">' + s.label + '</div><div class="prc-stat-value">' + s.value + '</div></div>';
+        });
+        html += '</div>';
+      }
+
+      // Your Role
+      html += '<div class="prc-section">';
+      html += '<div class="prc-section-title">Your Role</div>';
+      html += '<div>' + roleDesc + '</div>';
+      html += '</div>';
+
+      // Shared Faction Objectives
+      if (objList.length) {
+        html += '<div class="prc-section">';
+        html += '<div class="prc-section-title">Shared Faction Objectives</div>';
+        objList.forEach(obj => {
+          html += '<div style="padding:2px 0 2px 16px; position:relative;"><span style="position:absolute;left:0;color:' + aColor + ';">&#9656;</span>' + obj + '</div>';
+        });
+        html += '</div>';
+      }
+
+      // Shared Secret Objectives
+      if (sharedSecret) {
+        html += '<div class="prc-secret">';
+        html += '<div class="prc-secret-title">Shared Secret Objectives</div>';
+        html += '<div>' + sharedSecret + '</div>';
+        html += '</div>';
+      }
+
+      // Personal Secrets
+      if (roleSecret) {
+        html += '<div class="prc-secret" style="border-color: #8b1a1a;">';
+        html += '<div class="prc-secret-title">Personal Secrets &amp; Objectives</div>';
+        html += '<div>' + roleSecret + '</div>';
+        html += '</div>';
+      }
+
+      // Special powers for arms dealers
+      if (specialPowers.length) {
+        specialPowers.forEach(sp => {
+          html += '<div class="prc-section" style="border-color: #b8860b;">';
+          html += '<div>' + sp + '</div>';
+          html += '</div>';
+        });
+      }
+
+      // Quick reference table
+      html += '<div class="prc-section">';
+      html += '<div class="prc-section-title">Quick Reference</div>';
+      html += '<table class="prc-ref-table">';
+      html += '<tr><th>Action</th><th>Cost</th><th>Notes</th></tr>';
+      html += '<tr><td>Buy Army Division</td><td>3 Gold</td><td>Or 2 Gold via arms dealer</td></tr>';
+      html += '<tr><td>Buy Fleet</td><td>4 Gold</td><td>Or 3 Gold via arms dealer</td></tr>';
+      html += '<tr><td>Fortify Region</td><td>4 Gold</td><td>Or 3 Gold via Schneider; +2 defense</td></tr>';
+      html += '<tr><td>Espionage</td><td>3 Gold</td><td>GM rolls d6; 4+ succeeds</td></tr>';
+      html += '<tr><td>Break Alliance</td><td>-2 VP</td><td>Legal but costly</td></tr>';
+      html += '</table>';
+      html += '</div>';
+
+      // Footer
+      html += '<div class="prc-footer">';
+      html += 'THE GUNS OF AUGUST &mdash; ' + FACTION_NAMES[fid] + ' &mdash; ' + roleData.name;
+      html += '<br>Final Score = Faction VP + Personal VP. The individual with the highest total wins.';
+      html += '</div>';
+
+      html += '</div>'; // end print-role-page
+    });
+  });
+
+  container.innerHTML = html;
+  document.body.classList.add('print-role-cards');
+  window.print();
+  document.body.classList.remove('print-role-cards');
+}
+
+// Update print button text on faction changes
+function updatePrintButtons() {
+  const config = gameState.setup ? gameState.setup.factionConfig : SETUP_PRESETS[19];
+  const activeFactions = Object.entries(config).filter(([_, f]) => f.controlled !== 'disabled' && f.controlled !== 'gm').length;
+  const totalRoles = Object.entries(config).reduce((sum, [fid, fc]) => {
+    if (fc.controlled === 'disabled' || fc.controlled === 'gm') return sum;
+    return sum + (fc.players || 0);
+  }, 0);
+
+  const packetBtn = document.querySelector('.print-packet-btn');
+  if (packetBtn) packetBtn.textContent = '\u2399 Print ' + activeFactions + ' Faction Packets';
+
+  const roleBtn = document.querySelector('.print-roles-btn');
+  if (roleBtn) roleBtn.textContent = '\u2399 Print ' + totalRoles + ' Role Cards';
+}
+
 // ==================== INIT NEW FEATURES ====================
 renderDashboard();
 renderMap();
@@ -4660,6 +5117,7 @@ renderSetupGrid();
 renderFactionDossiers();
 renderOverviewFactions();
 updateSubtitle();
+updatePrintButtons();
 </script>
 
 </body>
