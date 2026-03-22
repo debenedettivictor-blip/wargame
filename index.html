@@ -1392,12 +1392,6 @@ body::before {
 .negative { color: var(--red-empire); }
 
 /* ==================== MAP STYLES ==================== */
-.europe-map-container {
-  position: relative;
-  width: 100%;
-  margin: 20px 0;
-}
-
 .map-container {
   position: relative;
   width: 100%;
@@ -1407,7 +1401,7 @@ body::before {
 .map-svg-wrapper {
   width: 100%;
   border: 3px solid var(--ink);
-  background: #b8cfe0;
+  background: #6b8e9e;
 }
 
 .map-svg-wrapper svg {
@@ -1417,46 +1411,47 @@ body::before {
 }
 
 .map-region {
-  stroke: var(--ink);
+  stroke: rgba(255,255,255,0.6);
   stroke-width: 1.5;
   cursor: pointer;
-  transition: fill 0.15s, stroke-width 0.15s;
+  transition: fill-opacity 0.2s, stroke-width 0.2s, stroke 0.2s;
+  fill-opacity: 0.08;
 }
 
-.map-region.land { fill: #d7c8aa; }
-.map-region.sea { fill: #a0c3e1; }
-.map-region.land:hover { fill: #e0d5b8; stroke-width: 2.5; }
-.map-region.sea:hover { fill: #8fb8d9; stroke-width: 2.5; }
-.map-region.selected { fill: #b8860b; stroke: var(--ink); stroke-width: 3; }
-.map-region.adjacent { fill: #7ab85a; stroke: var(--green-neutral); stroke-width: 2.5; }
-.map-region.sea.selected { fill: #c9a825; }
-.map-region.sea.adjacent { fill: #6aad4a; }
+.map-region.land { fill: #ffffff; }
+.map-region.sea { fill: #4488cc; fill-opacity: 0.12; }
+.map-region.land:hover { fill: #ffe066; fill-opacity: 0.35; stroke: #fff; stroke-width: 2.5; }
+.map-region.sea:hover { fill: #66aaff; fill-opacity: 0.3; stroke: #fff; stroke-width: 2.5; }
+.map-region.selected { fill: #b8860b; fill-opacity: 0.45; stroke: #fff; stroke-width: 3; }
+.map-region.adjacent { fill: #44cc44; fill-opacity: 0.35; stroke: #fff; stroke-width: 2.5; }
+.map-region.sea.selected { fill: #c9a825; fill-opacity: 0.4; }
+.map-region.sea.adjacent { fill: #44cc44; fill-opacity: 0.3; }
 
 .map-label {
   font-family: 'Source Serif 4', serif;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
-  fill: var(--ink);
+  fill: #fff;
   text-anchor: middle;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   pointer-events: none;
   paint-order: stroke;
-  stroke: rgba(255,255,255,0.7);
-  stroke-width: 2.5px;
+  stroke: rgba(0,0,0,0.7);
+  stroke-width: 3px;
 }
 
-.map-label.sea-label { fill: #1a3a6b; font-style: italic; }
+.map-label.sea-label { fill: #cce0ff; font-style: italic; font-size: 10px; }
 
 .map-troops {
   font-family: 'Playfair Display', serif;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
   text-anchor: middle;
   pointer-events: none;
   paint-order: stroke;
-  stroke: rgba(255,255,255,0.8);
-  stroke-width: 2px;
+  stroke: rgba(0,0,0,0.7);
+  stroke-width: 2.5px;
 }
 
 .movement-panel {
@@ -3834,119 +3829,100 @@ function applyGMEdits(fid) {
 
 // ==================== SVG MAP ====================
 
-// Geographically accurate map of Europe — viewBox 0 0 1000 700
-// Coordinates mapped to real geography: x≈(lon+12)*18, y≈(71-lat)*18
-// Interactive game regions + decorative background regions
+// 1910 Europe map image overlay — viewBox 0 0 1080 736
+// Coordinates mapped to the 1910 map image pixels
+// Interactive game regions overlaid on the real map image
 
 const MAP_REGIONS = {
   // === INTERACTIVE GAME REGIONS ===
   britain: {
-    points: '128,388 140,393 155,390 168,384 182,376 195,368 205,358 212,345 218,330 216,314 212,300 210,288 215,275 222,265 228,255 225,244 218,236 208,232 196,232 186,238 178,248 170,262 164,278 158,295 152,312 146,332 140,350 134,368 130,382',
-    cx: 182, cy: 312, sea: false
+    points: '195,200 205,188 218,175 230,168 238,172 248,185 255,198 262,212 268,230 272,248 268,262 258,275 248,285 240,295 228,298 220,292 212,280 205,268 200,252 195,238 192,222',
+    cx: 232, cy: 240, sea: false
   },
   belgium: {
-    points: '282,348 298,340 318,338 332,345 330,358 315,368 295,370 282,362',
-    cx: 308, cy: 355, sea: false
+    points: '370,268 385,260 400,262 410,270 408,282 395,288 378,285 370,278',
+    cx: 390, cy: 275, sea: false
   },
   paris: {
-    points: '250,400 268,395 282,402 282,418 268,425 250,420 245,412',
-    cx: 264, cy: 410, sea: false
+    points: '330,310 348,305 370,310 370,330 350,338 330,332 325,320',
+    cx: 348, cy: 320, sea: false
   },
   france: {
-    points: '142,422 152,410 165,398 178,388 192,378 205,370 220,368 240,370 258,368 275,362 282,348 282,362 295,370 315,368 330,358 340,368 348,385 282,402 268,395 250,400 245,412 250,420 268,425 282,418 282,402 308,415 348,385 355,408 352,432 345,458 335,480 320,500 302,515 282,525 260,530 238,528 218,520 200,508 185,492 172,475 160,455 150,438',
-    cx: 262, cy: 470, sea: false
+    points: '280,340 295,328 310,318 330,310 325,320 330,332 350,338 370,330 370,310 385,298 395,288 408,282 410,300 408,320 400,340 390,355 375,370 360,385 345,398 325,408 310,415 295,418 280,418 265,412 250,400 240,385 235,370 238,355 248,342 265,335',
+    cx: 325, cy: 368, sea: false
   },
   alsace_lorraine: {
-    points: '348,385 372,378 388,392 385,418 372,438 358,430 352,412 355,398',
-    cx: 368, cy: 408, sea: false
+    points: '408,282 420,278 435,285 438,302 430,318 418,322 408,315 405,298',
+    cx: 420, cy: 300, sea: false
   },
   germany: {
-    points: '318,338 342,328 368,320 392,315 418,318 442,325 458,335 465,352 465,372 458,392 445,408 428,415 410,412 392,405 375,398 372,378 348,385 340,368 330,358 332,345',
-    cx: 398, cy: 368, sea: false
+    points: '400,262 420,248 445,238 470,232 500,230 528,238 545,252 548,270 545,290 538,308 525,320 508,328 490,325 470,318 452,308 438,298 435,285 420,278 408,282 410,270',
+    cx: 475, cy: 278, sea: false
   },
   poland: {
-    points: '465,335 488,325 515,322 538,330 552,342 558,362 555,382 548,402 538,415 522,420 505,415 490,405 478,392 470,375 465,355',
-    cx: 515, cy: 370, sea: false
+    points: '548,238 570,228 595,222 618,228 635,242 642,260 640,280 635,300 625,315 610,325 595,322 578,315 565,302 555,285 548,268 545,252',
+    cx: 595, cy: 275, sea: false
   },
   russia: {
-    points: '562,148 608,100 655,68 705,48 758,40 815,48 872,72 918,115 948,172 965,238 968,308 955,375 932,432 900,475 862,502 818,515 772,518 728,510 688,495 655,472 628,445 608,415 592,382 580,348 572,312 568,275 565,238 562,198',
-    cx: 772, cy: 295, sea: false
+    points: '642,90 688,65 738,50 798,45 860,55 920,82 960,120 990,172 1005,235 1010,305 1000,370 982,428 955,475 920,505 878,520 835,528 792,525 748,515 710,498 680,475 658,448 642,415 632,380 628,345 628,310 632,272 635,242 638,200 640,150',
+    cx: 830, cy: 290, sea: false
   },
   austria: {
-    points: '372,378 392,405 410,412 428,415 445,408 458,392 478,392 490,405 505,415 522,420 538,430 548,452 542,478 528,500 510,512 488,518 465,515 442,508 422,498 405,485 392,468 382,448 372,432 365,415 368,398',
-    cx: 458, cy: 452, sea: false
+    points: '438,302 452,308 470,318 490,325 508,328 525,320 545,318 565,325 580,335 598,345 618,355 632,370 635,392 628,415 615,432 598,445 578,452 555,455 532,450 512,442 495,430 480,415 468,398 458,380 450,360 442,340 435,322 430,318',
+    cx: 538, cy: 385, sea: false
   },
   serbia: {
-    points: '510,512 528,505 548,512 552,532 538,545 522,542 510,530',
-    cx: 530, cy: 525, sea: false
+    points: '598,445 615,438 632,442 638,458 628,472 612,468 598,460',
+    cx: 618, cy: 455, sea: false
   },
   italy: {
-    points: '335,480 348,465 365,455 382,448 392,468 398,492 405,518 408,545 405,572 398,595 388,612 375,622 362,618 352,600 345,580 342,558 348,538 352,518 348,500 340,488 328,482 318,485 308,492 302,500',
-    cx: 370, cy: 540, sea: false
+    points: '345,398 360,385 375,370 390,355 400,340 408,360 415,385 420,408 425,432 422,458 418,482 412,502 402,518 390,530 378,525 368,510 360,492 358,472 362,452 365,432 362,415 355,405 345,400 335,405 325,412 315,418 310,415',
+    cx: 395, cy: 440, sea: false
   },
   balkans: {
-    points: '552,532 572,518 595,512 618,518 638,530 648,548 645,568 635,585 618,595 600,592 582,582 568,565 558,548',
-    cx: 602, cy: 555, sea: false
+    points: '638,458 655,445 675,438 698,442 715,455 722,472 718,490 708,505 692,512 675,508 658,498 648,482 640,468',
+    cx: 682, cy: 475, sea: false
   },
   ottoman: {
-    points: '662,512 692,498 722,490 758,488 795,492 832,502 865,518 892,540 902,565 895,588 878,605 855,615 828,618 798,615 768,608 740,598 715,585 695,568 678,548 665,528',
-    cx: 785, cy: 555, sea: false
+    points: '738,435 765,420 798,412 835,415 870,425 900,442 925,465 935,490 928,512 912,528 890,538 865,542 838,540 810,532 785,522 762,508 745,490 735,470 732,452',
+    cx: 838, cy: 475, sea: false
   },
   // === SEA ZONES ===
   dardanelles: {
-    points: '638,530 660,525 670,542 668,565 655,578 640,570 635,550',
-    cx: 652, cy: 550, sea: true
+    points: '715,455 735,448 742,465 740,488 728,498 715,490 712,472',
+    cx: 728, cy: 470, sea: true
   },
   north_sea: {
-    points: '180,230 218,210 258,195 298,188 335,192 365,202 385,218 392,242 395,272 392,302 385,325 368,338 348,345 328,345 318,338 298,340 282,348 275,342 268,335 258,325 248,318 238,308 228,298 218,288 212,275 208,262 202,248 195,238',
-    cx: 310, cy: 275, sea: true
+    points: '260,150 285,138 315,130 345,128 372,135 395,148 405,168 408,192 405,218 400,242 395,255 380,260 370,268 358,265 345,258 330,250 318,242 305,232 292,220 280,208 272,195 265,178 260,162',
+    cx: 338, cy: 195, sea: true
   },
   english_channel: {
-    points: '130,382 148,372 168,362 188,355 205,350 220,348 240,348 258,348 275,348 282,348 275,362 258,368 240,370 220,368 205,370 192,378 178,388 165,395 152,405 142,415 135,408',
-    cx: 210, cy: 375, sea: true
+    points: '200,300 218,292 238,288 258,285 278,282 298,280 318,282 335,290 330,305 318,310 300,312 282,310 265,305 250,302 235,305 222,312 210,318 202,312',
+    cx: 268, cy: 298, sea: true
   },
   baltic: {
-    points: '418,218 445,205 478,195 512,188 548,185 575,192 582,215 578,242 572,268 568,295 565,322 558,342 548,332 535,325 518,322 498,322 482,325 468,330 455,335 445,335 435,330 425,325 418,318 415,302 412,280 412,258 415,238',
-    cx: 505, cy: 268, sea: true
+    points: '500,152 525,138 555,128 585,125 612,132 625,150 628,175 628,202 625,228 620,248 615,262 605,270 595,265 585,258 572,250 558,242 545,238 530,235 518,238 508,242 500,248 495,240 490,228 488,212 488,195 492,175 495,160',
+    cx: 562, cy: 195, sea: true
   },
   mediterranean: {
-    points: '160,530 210,535 260,538 302,540 340,548 375,558 405,572 440,580 480,578 520,572 560,568 600,565 640,572 680,578 720,575 760,572 800,578 840,582 880,575 920,565 960,558 1000,555 1000,700 0,700 0,545 80,538 120,535',
-    cx: 500, cy: 645, sea: true
+    points: '235,430 280,438 325,445 365,452 405,462 440,470 480,475 520,472 560,468 600,470 640,478 680,485 720,488 760,485 800,488 840,498 880,508 920,512 960,505 1000,498 1080,490 1080,736 0,736 0,450 60,445 120,438 180,432',
+    cx: 540, cy: 570, sea: true
   }
 };
 
-// Decorative background regions (non-interactive, for geographic context)
-const DECO_REGIONS = {
-  ireland: '72,292 85,278 100,272 115,278 122,295 120,315 115,332 108,345 96,350 82,348 72,335 68,318 68,305',
-  scandinavia: '348,310 340,292 338,272 345,250 355,230 365,212 378,192 395,172 415,152 438,132 465,112 495,92 530,72 568,55 608,42 648,35 668,42 665,62 658,85 648,108 638,132 628,155 618,178 612,202 605,225 598,248 588,268 578,285 565,298 548,310 532,318 518,322 502,322 485,325 468,330 455,332 442,328 430,322 418,315 408,310 398,305 385,302 372,305 358,310',
-  denmark: '358,298 368,288 382,285 395,290 402,302 398,312 388,318 375,320 365,315 358,308',
-  spain: '112,520 132,508 152,498 170,492 185,492 200,498 215,508 228,518 238,528 260,530 282,525 302,530 318,535 335,540 348,542 352,548 348,562 338,578 325,592 310,605 292,615 270,622 248,628 225,632 202,635 178,638 155,638 132,635 112,628 95,618 82,605 72,588 65,572 62,555 65,538 72,525 85,518 98,518',
-  switzerland: '348,430 362,425 375,432 372,445 358,448 348,442',
-  netherlands: '265,332 278,325 292,328 298,340 290,350 275,348 265,342',
-  n_africa: '0,668 100,662 200,655 300,650 400,648 500,648 600,652 700,658 800,662 900,668 1000,672 1000,700 0,700'
-};
+// Decorative background regions — not needed with real map image
+const DECO_REGIONS = {};
 
 let mapSelectedRegion = null;
 
 function renderMap() {
   const container = document.getElementById('mapContainer');
-  let svg = `<div class="map-svg-wrapper"><svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">`;
+  let svg = `<div class="map-svg-wrapper"><svg viewBox="0 0 1080 736" xmlns="http://www.w3.org/2000/svg">`;
 
-  // Ocean background
-  svg += `<rect x="0" y="0" width="1000" height="700" fill="#8fb4d2"/>`;
+  // 1910 Europe map image as background
+  svg += `<image href="https://preview.redd.it/map-of-europe-1910-with-population-of-countries-listed-v0-wyqk6b5whp731.jpg?width=1080&crop=smart&auto=webp&s=5d254ba93d88a56bdd1f68bd79d4b4fc5c431bb9" x="0" y="0" width="1080" height="736" preserveAspectRatio="xMidYMid slice"/>`;
 
-  // Decorative non-interactive regions (geographic context)
-  Object.keys(DECO_REGIONS).forEach(k => {
-    const fill = k === 'n_africa' ? '#c8b88a' : '#c5b898';
-    svg += `<polygon points="${DECO_REGIONS[k]}" fill="${fill}" stroke="#8a7d65" stroke-width="0.8" opacity="0.65"/>`;
-  });
-
-  // Continent silhouette — fills gaps between game region polygons
-  svg += `<polygon points="282,348 298,340 318,338 342,328 368,320 392,315 418,318 442,325 458,335 465,335 488,325 515,322 538,330 552,342 558,362 565,238 562,198 562,148 608,100 655,68 705,48 758,40 815,48 872,72 918,115 948,172 965,238 968,308 955,375 932,432 900,475 862,502 818,515 772,518 728,510 688,495 655,472 638,530 648,548 648,578 635,585 618,595 600,592 582,582 568,565 552,532 538,545 522,542 510,530 510,512 488,518 465,515 442,508 422,498 405,485 392,468 398,492 405,518 408,545 405,572 398,595 388,612 375,622 362,618 352,600 345,580 342,558 348,538 352,518 348,500 340,488 328,482 318,485 308,492 302,500 282,525 260,530 238,528 218,520 200,508 185,492 172,475 160,455 150,438 142,422 148,405 165,390 192,375 205,370 220,368 240,370 258,368 275,362" fill="#d7c8aa" stroke="none"/>`;
-  svg += `<polygon points="662,512 692,498 722,490 758,488 795,492 832,502 865,518 892,540 902,565 895,588 878,605 855,615 828,618 798,615 768,608 740,598 715,585 695,568 678,548 665,528" fill="#d7c8aa" stroke="none"/>`;
-  svg += `<polygon points="128,388 140,393 155,390 168,384 182,376 195,368 205,358 212,345 218,330 216,314 212,300 210,288 215,275 222,265 228,255 225,244 218,236 208,232 196,232 186,238 178,248 170,262 164,278 158,295 152,312 146,332 140,350 134,368 130,382" fill="#d7c8aa" stroke="none"/>`;
-
-  // Draw interactive game region polygons
+  // Draw interactive game region polygons (semi-transparent overlays)
   ALL_REGIONS.forEach(r => {
     const reg = MAP_REGIONS[r];
     if (!reg) return;
@@ -3956,25 +3932,19 @@ function renderMap() {
     svg += `<polygon class="${cls}" points="${reg.points}" onclick="mapClickRegion('${r}')"/>`;
   });
 
-  // Decorative labels
-  svg += `<text class="map-label" x="95" y="315" opacity="0.5" font-size="7">Ireland</text>`;
-  svg += `<text class="map-label" x="500" y="180" opacity="0.5" font-size="7">Scandinavia</text>`;
-  svg += `<text class="map-label" x="210" y="580" opacity="0.5" font-size="7">Spain</text>`;
-  svg += `<text class="map-label" x="500" y="680" opacity="0.4" font-size="7">North Africa</text>`;
-
-  // Game region labels and troop counts
+  // English region labels (translated from German original)
   ALL_REGIONS.forEach(r => {
     const reg = MAP_REGIONS[r];
     if (!reg) return;
     const labelCls = reg.sea ? 'map-label sea-label' : 'map-label';
-    svg += `<text class="${labelCls}" x="${reg.cx}" y="${reg.cy - 5}">${REGION_NAMES[r]}</text>`;
+    svg += `<text class="${labelCls}" x="${reg.cx}" y="${reg.cy - 8}">${REGION_NAMES[r]}</text>`;
     let lineOffset = 0;
     if (!reg.sea) {
       Object.keys(gameState.factions).forEach(fid => {
         if (fid === 'krupp' || fid === 'schneider') return;
         const troops = gameState.factions[fid].troops[r] || 0;
         if (troops > 0) {
-          lineOffset += 12;
+          lineOffset += 14;
           svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${troops}⚔ ${fid.substring(0,3).toUpperCase()}</text>`;
         }
       });
@@ -3984,7 +3954,7 @@ function renderMap() {
         if (fid === 'krupp' || fid === 'schneider') return;
         const fleets = gameState.factions[fid].fleets[r] || 0;
         if (fleets > 0) {
-          lineOffset += 12;
+          lineOffset += 14;
           svg += `<text class="map-troops" x="${reg.cx}" y="${reg.cy + lineOffset}" fill="${FACTION_COLORS[fid]}">${fleets}⚓ ${fid.substring(0,3).toUpperCase()}</text>`;
         }
       });
