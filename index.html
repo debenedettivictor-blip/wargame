@@ -2919,11 +2919,44 @@ body::before {
 }
 .tab-section-title:first-child { margin-top: 0; }
 
+/* Decision Menu */
+.decision-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.decision-card { border: 2px solid var(--ink-light); background: var(--parchment); cursor: pointer; transition: all 0.2s; padding: 16px 18px; }
+.decision-card:hover { border-color: var(--ink); background: var(--cream); transform: translateY(-2px); }
+.decision-card.active { border-color: var(--gold-accent); border-left: 5px solid var(--gold-accent); background: var(--cream); }
+.decision-card-icon { font-size: 1.6em; margin-bottom: 6px; }
+.decision-card-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.95em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.decision-card-desc { font-family: 'Crimson Text', serif; font-size: 0.85em; color: var(--ink-light); line-height: 1.3; }
+.decision-card-cost { font-family: 'Source Serif 4', serif; font-size: 0.7em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gold-accent); margin-top: 6px; }
+.decision-panel { margin-top: 16px; border: 2px solid var(--ink); border-left: 5px solid var(--gold-accent); padding: 20px; background: var(--cream); }
+.decision-panel-title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--parchment-dark); }
+/* Confirmation Modal */
+.order-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,16,8,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+.order-modal { background: var(--cream); border: 3px solid var(--ink); max-width: 550px; width: 90%; max-height: 80vh; overflow-y: auto; }
+.order-modal-header { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.1em; text-transform: uppercase; letter-spacing: 2px; padding: 16px 20px; background: var(--ink); color: var(--parchment); text-align: center; }
+.order-modal-body { padding: 20px; }
+.order-modal-section { margin-bottom: 16px; }
+.order-modal-section-title { font-family: 'Source Serif 4', serif; font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-light); margin-bottom: 8px; }
+.order-modal-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; margin-bottom: 4px; border-left: 3px solid var(--ink-light); background: var(--parchment); font-family: 'Crimson Text', serif; font-size: 0.95em; }
+.order-modal-item.type-recruit { border-left-color: var(--green-neutral); }
+.order-modal-item.type-deploy { border-left-color: var(--blue-entente); }
+.order-modal-item.type-move { border-left-color: var(--gold-accent); }
+.order-modal-item.type-attack { border-left-color: var(--red-empire); }
+.order-modal-item.type-upgrade { border-left-color: var(--steel); }
+.order-modal-item.type-diplomacy { border-left-color: var(--blue-entente); }
+.order-modal-footer { display: flex; gap: 12px; padding: 16px 20px; border-top: 2px solid var(--ink-light); background: var(--parchment); }
+.order-modal-btn { flex: 1; padding: 14px; font-family: 'Playfair Display', serif; font-size: 0.9em; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; border: 2px solid var(--ink); cursor: pointer; transition: all 0.2s; }
+.order-modal-btn.cancel { background: var(--cream); color: var(--ink); }
+.order-modal-btn.cancel:hover { background: var(--parchment-dark); }
+.order-modal-btn.confirm { background: var(--gold-accent); color: white; }
+.order-modal-btn.confirm:hover { background: var(--ink); }
+
 @media (max-width: 900px) {
   .dashboard-layout { grid-template-columns: 1fr; }
   .force-roster { position: static; max-height: none; }
   .finance-ledger { grid-template-columns: 1fr; }
   .dash-tab { padding: 10px 14px; font-size: 0.7em; letter-spacing: 1px; }
+  .decision-menu { grid-template-columns: 1fr; }
 }
 @media (max-width: 700px) {
   .status-strip { flex-wrap: wrap; }
@@ -5073,46 +5106,46 @@ function recomputeAggregates(fid) {
 function defaultGameState() {
   const factions = {
     germany: {
-      gold: 25, income: 8, army: 10, navy: 6, vp: 0,
-      troops: { germany: 6, alsace_lorraine: 3, poland: 1 },
-      fleets: { north_sea: 4, baltic: 2 },
+      gold: 25, income: 15, army: 14, navy: 4, vp: 0,
+      troops: { germany: 8, alsace_lorraine: 4, poland: 2 },
+      fleets: { north_sea: 2, baltic: 2 },
       alliances: ['austria'], status: [], upgrades: {},
-      blockadedBy: [], blockadeTurns: 0, atWar: false
+      blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     france: {
-      gold: 18, income: 6, army: 8, navy: 4, vp: 0,
-      troops: { france: 5, paris: 3 },
+      gold: 20, income: 8, army: 10, navy: 4, vp: 0,
+      troops: { france: 7, paris: 3 },
       fleets: { mediterranean: 2, english_channel: 2 },
       alliances: ['britain','russia'], status: [], upgrades: {},
-      blockadedBy: [], blockadeTurns: 0, atWar: false
+      blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     britain: {
-      gold: 30, income: 9, army: 4, navy: 12, vp: 0,
-      troops: { britain: 4 },
-      fleets: { north_sea: 6, english_channel: 4, mediterranean: 2 },
+      gold: 30, income: 11, army: 6, navy: 14, vp: 0,
+      troops: { britain: 6 },
+      fleets: { north_sea: 7, english_channel: 4, mediterranean: 3 },
       alliances: ['france','russia'], status: [], upgrades: {},
-      blockadedBy: [], blockadeTurns: 0, atWar: false
+      blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     russia: {
-      gold: 16, income: 6, army: 12, navy: 3, vp: 0,
-      troops: { russia: 8, poland: 3, balkans: 1 },
+      gold: 18, income: 7, army: 14, navy: 3, vp: 0,
+      troops: { russia: 9, poland: 4, balkans: 1 },
       fleets: { baltic: 2, mediterranean: 1 },
       alliances: ['france','britain'], status: [], upgrades: {},
-      blockadedBy: [], blockadeTurns: 0, atWar: false
+      blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     austria: {
-      gold: 14, income: 5, army: 7, navy: 2, vp: 0,
-      troops: { austria: 5, balkans: 2 },
+      gold: 14, income: 5, army: 8, navy: 2, vp: 0,
+      troops: { austria: 6, balkans: 2 },
       fleets: { mediterranean: 2 },
       alliances: ['germany'], status: [], upgrades: {},
-      blockadedBy: [], blockadeTurns: 0, atWar: false
+      blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     ottoman: {
-      gold: 8, income: 4, army: 6, navy: 2, vp: 0,
+      gold: 10, income: 6, army: 6, navy: 2, vp: 0,
       troops: { ottoman: 4, dardanelles: 2 },
       fleets: { mediterranean: 2 },
       alliances: [], status: [], upgrades: {},
-      blockadedBy: [], blockadeTurns: 0, atWar: false
+      blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     krupp: {
       gold: 22, income: 3, army: 0, navy: 0, vp: 0,
@@ -5206,18 +5239,33 @@ function resetGameState() {
 // ==================== DASHBOARD ====================
 
 // Unit costs and upgrade definitions
-const UNIT_COSTS = { army: 3, fleet: 5 };
-const MAINTENANCE_COSTS = { army: 1, fleet: 1 };
+const UNIT_COSTS = { army: 2, fleet: 6 };
+const MAINTENANCE_COSTS = { army: 0.5, fleet: 0.75 };
 
 // ==================== ECONOMIC ENGINE ====================
-// Each faction's income = Industry + Trade + Bonuses - Mobilization Costs - Blockade Effects
-// Mobilizing/deploying troops costs extra — discourages early mobilization
-// Blockades cut trade income and (over time) hurt industry
+// Each faction's income = Industry + Trade + Bonuses - Mobilization Costs - Blockade Effects - War Penalties
+// Mobilizing troops costs per-division, with a discount for full mobilization (war readiness)
+// Blockades cut trade income and (over time) crush industry
+// War itself is expensive — factions are incentivized to maintain peace
 
 const MOBILIZATION_COSTS = {
-  reserve: 0,      // Troops at rest cost nothing extra
-  mobilized: 0.5,  // Mobilized but not deployed: +0.5g/unit (rounded)
-  deployed: 1      // Deployed troops: +1g/unit upkeep (same as MAINTENANCE)
+  reserve: 0,              // Troops at rest cost nothing extra
+  perDivision: 1,          // Cost per division to mobilize (partial mobilization)
+  fullMobilization: 0.5    // Cost per division if ALL divisions mobilized at once (50% discount)
+};
+
+// War is costly — these penalties apply to ANY faction at war
+const WAR_PENALTIES = {
+  tradeLoss: 0.5,          // Lose 50% of own trade income (trade routes disrupted)
+  warExhaustion: 1,        // Flat 1g/turn cost (civilian economy suffers)
+  unrestThreshold: 2,      // After this many turns of war, civilian unrest kicks in
+  unrestPenalty: 1          // Gold/turn penalty from civilian unrest (on top of exhaustion)
+};
+
+// Peace is profitable — factions NOT at war earn bonuses
+const PEACE_BONUSES = {
+  peaceDividend: 1,        // +1g/turn from neutral trade flourishing
+  endGameVP: 3             // +3 VP at game end for factions that never went to war
 };
 
 // Which sea zones affect which factions' trade routes
@@ -5231,22 +5279,24 @@ const TRADE_ROUTES = {
 };
 
 // Faction economic profiles: industry (domestic production), trade (maritime commerce)
+// Germany has the largest industrial base — but depends on Alsace-Lorraine and sea trade
 const FACTION_ECONOMY = {
-  germany:  { industry: 5, trade: 3, bonusDesc: '+2 if controlling Alsace-Lorraine' },
-  france:   { industry: 4, trade: 2, bonusDesc: '+2 if Lorraine recaptured' },
-  britain:  { industry: 3, trade: 6, bonusDesc: 'Heavily trade-dependent — vulnerable to blockade' },
-  russia:   { industry: 4, trade: 2, bonusDesc: '–2 if revolution ongoing' },
+  germany:  { industry: 8, trade: 3, bonusDesc: '+4 from Alsace-Lorraine (lost if contested by enemy troops)' },
+  france:   { industry: 5, trade: 3, bonusDesc: '+4 if Alsace-Lorraine recaptured' },
+  britain:  { industry: 4, trade: 7, bonusDesc: 'Trade empire — blockade is devastating to enemies' },
+  russia:   { industry: 5, trade: 2, bonusDesc: '–2 if revolution ongoing' },
   austria:  { industry: 4, trade: 1, bonusDesc: '–2 if internal rebellion' },
   ottoman:  { industry: 2, trade: 2, bonusDesc: '+2 from Straits tolls (if Dardanelles held)' },
   krupp:    { industry: 2, trade: 0, bonusDesc: '+ all sales revenue' },
   schneider:{ industry: 1, trade: 0, bonusDesc: '+ all sales revenue' }
 };
 
-// How blockades degrade over time: turn 1 = lose trade, turn 2+ = lose industry too
+// How blockades degrade over time — designed to be DEADLY
+// A sustained British blockade will strangle Germany's industrial economy
 const BLOCKADE_EFFECTS = {
-  1: { tradeLoss: 1.0, industryLoss: 0 },     // First turn: 100% trade cut, industry fine
-  2: { tradeLoss: 1.0, industryLoss: 0.25 },   // Turn 2: trade gone + 25% industry hit
-  3: { tradeLoss: 1.0, industryLoss: 0.50 },   // Turn 3+: trade gone + 50% industry hit
+  1: { tradeLoss: 1.0, industryLoss: 0 },     // Turn 1: 100% trade cut immediately
+  2: { tradeLoss: 1.0, industryLoss: 0.35 },   // Turn 2: trade gone + 35% industry hit (shortages begin)
+  3: { tradeLoss: 1.0, industryLoss: 0.60 },   // Turn 3+: trade gone + 60% industry crushed (starvation)
 };
 
 // Compute full income breakdown for a faction
@@ -5263,13 +5313,35 @@ function computeEconomy(fid) {
   let industryLoss = 0;
   let blockadeDetail = '';
   let mobilizationCost = 0;
+  let warPenalty = 0;
+  let warPenaltyLabel = '';
+  let peaceDividend = 0;
 
-  // --- Territorial bonuses ---
-  if (fid === 'germany' && f.troops && f.troops['alsace_lorraine'] > 0) {
-    bonus += 2; bonusLabel = 'Alsace-Lorraine controlled';
+  // --- Territorial bonuses (Alsace-Lorraine is CONTESTED) ---
+  // Germany gets +4g only if they hold Alsace AND no enemy troops are present
+  if (fid === 'germany') {
+    const germanTroops = (f.troops && f.troops['alsace_lorraine']) || 0;
+    // Check if any enemy faction has troops in Alsace-Lorraine
+    const enemyInAlsace = Object.keys(gameState.factions).some(otherId => {
+      if (otherId === 'germany' || otherId === 'krupp' || otherId === 'schneider') return false;
+      const other = gameState.factions[otherId];
+      return other.troops && other.troops['alsace_lorraine'] > 0;
+    });
+    if (germanTroops > 0 && !enemyInAlsace) {
+      bonus += 4; bonusLabel = 'Alsace-Lorraine industry (+4g)';
+    } else if (germanTroops > 0 && enemyInAlsace) {
+      bonus += 1; bonusLabel = 'Alsace-Lorraine contested (+1g)';
+    }
   }
-  if (fid === 'france' && f.troops && f.troops['alsace_lorraine'] > 0) {
-    bonus += 2; bonusLabel = 'Lorraine recaptured';
+  // France gets +4g if they have troops in Alsace-Lorraine and Germany doesn't
+  if (fid === 'france') {
+    const frenchTroops = (f.troops && f.troops['alsace_lorraine']) || 0;
+    const germanTroops = (gameState.factions.germany.troops && gameState.factions.germany.troops['alsace_lorraine']) || 0;
+    if (frenchTroops > 0 && germanTroops === 0) {
+      bonus += 4; bonusLabel = 'Lorraine reconquered! (+4g)';
+    } else if (frenchTroops > 0 && germanTroops > 0) {
+      bonus += 1; bonusLabel = 'Alsace-Lorraine contested (+1g)';
+    }
   }
   if (fid === 'ottoman' && f.troops && f.troops['dardanelles'] > 0) {
     bonus += 2; bonusLabel = 'Straits tolls';
@@ -5283,23 +5355,48 @@ function computeEconomy(fid) {
     bonus -= 2; bonusLabel = (bonusLabel ? bonusLabel + ', ' : '') + 'Rebellion!';
   }
 
+  // --- War penalties — war is EXPENSIVE ---
+  if (!isDealer && f.atWar) {
+    // Lose 50% trade income from wartime disruption
+    const warTradeLoss = Math.round(trade * WAR_PENALTIES.tradeLoss);
+    tradeLoss += warTradeLoss;
+    // War exhaustion: flat cost representing civilian economy strain
+    warPenalty += WAR_PENALTIES.warExhaustion;
+    warPenaltyLabel = 'War exhaustion (–' + WAR_PENALTIES.warExhaustion + 'g)';
+    // After sustained war, civilian unrest compounds the cost
+    const warTurns = f.warTurns || 0;
+    if (warTurns >= WAR_PENALTIES.unrestThreshold) {
+      warPenalty += WAR_PENALTIES.unrestPenalty;
+      warPenaltyLabel += ', Civilian unrest (–' + WAR_PENALTIES.unrestPenalty + 'g)';
+    }
+  }
+
+  // --- Peace dividend — peace is PROFITABLE ---
+  if (!isDealer && !f.atWar) {
+    peaceDividend = PEACE_BONUSES.peaceDividend;
+  }
+
   // --- Blockade effects ---
   if (!isDealer && f.blockadedBy && f.blockadedBy.length > 0) {
     const blockadeTurns = f.blockadeTurns || 1;
     const tier = blockadeTurns >= 3 ? BLOCKADE_EFFECTS[3] : BLOCKADE_EFFECTS[blockadeTurns];
-    tradeLoss = Math.round(trade * tier.tradeLoss);
+    tradeLoss = Math.round(trade * tier.tradeLoss); // full trade loss overrides partial war loss
     industryLoss = Math.round(industry * tier.industryLoss);
     blockadeDetail = 'Blockaded (turn ' + blockadeTurns + '): –' + (tradeLoss + industryLoss) + 'g';
   }
 
-  // --- Mobilization costs ---
-  // Peacetime troop deployments cost extra upkeep — incentivizes staying demobilized
+  // --- Mobilization costs (per division, with full-mobilization discount) ---
   if (!isDealer && f.units) {
-    const mobilizedCount = f.units.filter(u => u.state === 'mobilized').length;
-    const deployedCount = f.units.filter(u => u.state === 'deployed').length;
-    if (!f.atWar) {
-      mobilizationCost = Math.ceil(mobilizedCount * MOBILIZATION_COSTS.mobilized) +
-                          Math.ceil(deployedCount * 0.5); // peacetime surcharge
+    const armyUnits = f.units.filter(u => u.type === 'army' && u.state !== 'destroyed');
+    const totalArmy = armyUnits.length;
+    const mobilizedCount = armyUnits.filter(u => u.state === 'mobilized').length;
+    const deployedCount = armyUnits.filter(u => u.state === 'deployed').length;
+    const activeDivisions = mobilizedCount + deployedCount;
+    if (activeDivisions > 0 && !f.atWar) {
+      // Full mobilization discount: if ALL army units are mobilized/deployed
+      const isFullMobilization = activeDivisions >= totalArmy;
+      const costPerDiv = isFullMobilization ? MOBILIZATION_COSTS.fullMobilization : MOBILIZATION_COSTS.perDivision;
+      mobilizationCost = Math.ceil(activeDivisions * costPerDiv);
     }
   }
 
@@ -5312,17 +5409,18 @@ function computeEconomy(fid) {
     }
   }
 
-  const grossIncome = industry + trade + bonus + warDividend;
+  const grossIncome = industry + trade + bonus + warDividend + peaceDividend;
   const blockadePenalty = tradeLoss + industryLoss;
   const effectiveIncome = Math.max(0, grossIncome - blockadePenalty);
-  const baseUpkeep = f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet;
-  const totalUpkeep = baseUpkeep + mobilizationCost;
+  const baseUpkeep = Math.ceil(f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet);
+  const totalUpkeep = baseUpkeep + mobilizationCost + warPenalty;
   const net = effectiveIncome - totalUpkeep;
 
   return {
     industry, trade, bonus, bonusLabel,
     tradeLoss, industryLoss, blockadeDetail,
-    mobilizationCost, warDividend,
+    mobilizationCost, warDividend, warPenalty, warPenaltyLabel,
+    peaceDividend,
     grossIncome, blockadePenalty, effectiveIncome,
     baseUpkeep, totalUpkeep, net,
     isBlockaded: blockadePenalty > 0,
@@ -5400,6 +5498,11 @@ function liftBlockade(targetFid, seaZone) {
 function toggleWarStatus(fid) {
   const f = gameState.factions[fid];
   f.atWar = !f.atWar;
+  if (f.atWar) {
+    f.warTurns = 0; // Reset war turn counter when entering war
+  } else {
+    f.warTurns = 0; // Reset when peace returns
+  }
   logAction(fid, 'diplomacy', f.atWar ? FACTION_NAMES[fid] + ' is now AT WAR' : FACTION_NAMES[fid] + ' is now at PEACE');
   saveGameState();
   renderDashboard();
@@ -5541,6 +5644,72 @@ function removeOrder(fid, orderId) {
 }
 
 function submitOrders(fid) {
+  // Show confirmation modal instead of submitting immediately
+  const orders = getOrders(fid);
+  if (!orders || orders.actions.length === 0) {
+    alert('No orders to submit. Queue at least one action first.');
+    return;
+  }
+  showOrderConfirmation(fid);
+}
+
+function showOrderConfirmation(fid) {
+  const orders = getOrders(fid);
+  const actions = orders.actions;
+
+  // Group orders by type
+  const groups = {};
+  const groupLabels = {
+    recruit: 'Build Forces', deploy: 'Deploy Troops', move: 'Move Forces',
+    attack: 'Attack Orders', support: 'Support Pledges', upgrade: 'Upgrades',
+    diplomacy: 'Diplomacy'
+  };
+  actions.forEach(function(a) {
+    const type = a.type || 'other';
+    if (!groups[type]) groups[type] = [];
+    groups[type].push(a);
+  });
+
+  let sectionsHtml = '';
+  Object.keys(groups).forEach(function(type) {
+    sectionsHtml += '<div class="order-modal-section">';
+    sectionsHtml += '<div class="order-modal-section-title">' + (groupLabels[type] || type) + '</div>';
+    groups[type].forEach(function(a) {
+      sectionsHtml += '<div class="order-modal-item type-' + type + '"><span>' + (a.desc || a.type) + '</span></div>';
+    });
+    sectionsHtml += '</div>';
+  });
+
+  const modal = document.createElement('div');
+  modal.className = 'order-modal-overlay';
+  modal.id = 'orderConfirmModal';
+  modal.innerHTML = '<div class="order-modal">' +
+    '<div class="order-modal-header">Confirm Orders — Turn ' + gameState.currentTurnNum + '</div>' +
+    '<div class="order-modal-body">' +
+      '<p style="font-family:\'IM Fell English\',serif; font-style:italic; color:var(--ink-light); margin-bottom:16px; text-align:center;">' +
+        'Review your orders carefully. Once submitted, they cannot be changed.' +
+      '</p>' +
+      sectionsHtml +
+      '<div style="text-align:center; margin-top:12px; font-family:\'Playfair Display\',serif; font-weight:700;">' +
+        actions.length + ' order' + (actions.length !== 1 ? 's' : '') + ' for ' + FACTION_NAMES[fid] +
+      '</div>' +
+    '</div>' +
+    '<div class="order-modal-footer">' +
+      '<button class="order-modal-btn cancel" onclick="closeOrderModal()">Go Back</button>' +
+      '<button class="order-modal-btn confirm" onclick="confirmOrders(\'' + fid + '\')">Confirm &amp; Submit</button>' +
+    '</div>' +
+  '</div>';
+
+  document.body.appendChild(modal);
+}
+
+function closeOrderModal() {
+  const modal = document.getElementById('orderConfirmModal');
+  if (modal) modal.remove();
+}
+
+function confirmOrders(fid) {
+  closeOrderModal();
   if (!gameState.orders[fid]) return;
   gameState.orders[fid].submitted = true;
   logAction(fid, 'orders', 'Orders submitted for Turn ' + gameState.currentTurnNum + ' (' + gameState.orders[fid].actions.length + ' actions)');
@@ -5586,6 +5755,10 @@ function advanceTurn() {
     if (f.blockadedBy && f.blockadedBy.length > 0) {
       f.blockadeTurns = (f.blockadeTurns || 0) + 1;
     }
+    // Track war duration for escalating penalties
+    if (f.atWar) {
+      f.warTurns = (f.warTurns || 0) + 1;
+    }
   });
 
   Object.keys(factions).forEach(fid => {
@@ -5608,6 +5781,9 @@ function advanceTurn() {
       blockadeDetail: econ.blockadeDetail,
       mobilizationCost: econ.mobilizationCost,
       warDividend: econ.warDividend,
+      warPenalty: econ.warPenalty || 0,
+      warPenaltyLabel: econ.warPenaltyLabel || '',
+      peaceDividend: econ.peaceDividend || 0,
       maintenance: econ.totalUpkeep,
       baseUpkeep: econ.baseUpkeep,
       net: econ.net,
@@ -5623,10 +5799,12 @@ function advanceTurn() {
       let detail = 'Turn ' + gameState.currentTurnNum + ': Industry ' + e.industry + 'g + Trade ' + e.trade + 'g';
       if (e.bonus !== 0) detail += ' + Bonus ' + (e.bonus >= 0 ? '+' : '') + e.bonus + 'g';
       if (e.warDividend > 0) detail += ' + War Dividend +' + e.warDividend + 'g';
-      if (e.tradeLoss > 0) detail += ' | Blockade: –' + e.tradeLoss + 'g trade';
-      if (e.industryLoss > 0) detail += ', –' + e.industryLoss + 'g industry';
+      if (e.peaceDividend > 0) detail += ' + Peace Dividend +' + e.peaceDividend + 'g';
+      if (e.tradeLoss > 0) detail += ' | Trade loss: –' + e.tradeLoss + 'g';
+      if (e.industryLoss > 0) detail += ', Industry loss: –' + e.industryLoss + 'g';
       detail += ' | Upkeep –' + e.baseUpkeep + 'g';
       if (e.mobilizationCost > 0) detail += ' + Mobilization –' + e.mobilizationCost + 'g';
+      if (e.warPenalty > 0) detail += ' + War costs –' + e.warPenalty + 'g';
       detail += ' | Net: ' + (e.net >= 0 ? '+' : '') + e.net + 'g (' + e.oldGold + ' → ' + e.newGold + 'g)';
       logAction(fid, 'income', detail);
     }
@@ -6198,20 +6376,46 @@ function renderMilitaryTab(fid) {
   const isDealer = fid === 'krupp' || fid === 'schneider';
   if (isDealer) return '<div class="empty-state">Arms dealers do not command military forces.</div>';
 
-  const tabs = ['recruit','deploy','move','attack','support','upgrades','readiness'];
-  const tabLabels = { recruit:'Recruit', deploy:'Deploy', move:'Move', attack:'Attack', support:'Support', upgrades:'Upgrades', readiness:'Readiness' };
-  if (!tabs.includes(activeActionTab)) activeActionTab = tabs[0];
+  const f = gameState.factions[fid];
+  const decisions = [
+    { id: 'recruit', icon: '+', title: 'Build Forces', desc: 'Recruit new army divisions or naval fleets', cost: '3 Gold (army) / 5 Gold (fleet)' },
+    { id: 'deploy', icon: '\u2691', title: 'Deploy Troops', desc: 'Mobilize and position units to regions', cost: '1 Gold/unit upkeep' },
+    { id: 'move', icon: '\u2794', title: 'Move Forces', desc: 'Reposition troops and fleets to adjacent regions', cost: 'Free' },
+    { id: 'attack', icon: '\u2694', title: 'Attack', desc: 'Launch offensive operations against enemy regions', cost: 'Risk of losses' },
+    { id: 'upgrades', icon: '\u2605', title: 'Upgrades', desc: 'Purchase artillery, trenches, or gas weapons', cost: '3-6 Gold' },
+    { id: 'readiness', icon: '\u2616', title: 'Force Readiness', desc: 'Review all unit statuses and positions', cost: 'Intel only' }
+  ];
 
-  const subTabBtns = tabs.map(t => `<button class="action-tab ${activeActionTab === t ? 'active' : ''}" onclick="setActionTab('${t}')">${tabLabels[t]}</button>`).join('');
+  const validIds = decisions.map(d => d.id);
+  if (!validIds.includes(activeActionTab)) activeActionTab = '';
 
-  let content = '';
-  if (activeActionTab === 'readiness') {
-    content = renderReadinessTab(fid);
-  } else {
-    content = renderActionTabContent(fid);
+  let menuHtml = '<div class="decision-menu">';
+  decisions.forEach(d => {
+    menuHtml += `<div class="decision-card ${activeActionTab === d.id ? 'active' : ''}" onclick="setActionTab('${d.id}')">
+      <div class="decision-card-icon">${d.icon}</div>
+      <div class="decision-card-title">${d.title}</div>
+      <div class="decision-card-desc">${d.desc}</div>
+      <div class="decision-card-cost">${d.cost}</div>
+    </div>`;
+  });
+  menuHtml += '</div>';
+
+  let panelHtml = '';
+  if (activeActionTab && validIds.includes(activeActionTab)) {
+    const selected = decisions.find(d => d.id === activeActionTab);
+    let panelContent = '';
+    if (activeActionTab === 'readiness') {
+      panelContent = renderReadinessTab(fid);
+    } else {
+      panelContent = renderActionTabContent(fid);
+    }
+    panelHtml = `<div class="decision-panel">
+      <div class="decision-panel-title">${selected.icon} ${selected.title}</div>
+      ${panelContent}
+    </div>`;
   }
 
-  return `<div class="action-tabs">${subTabBtns}</div><div class="action-content">${content}</div>`;
+  return menuHtml + panelHtml;
 }
 
 function renderFinanceTab(fid) {
@@ -6699,7 +6903,8 @@ function renderPlayerDashboard(container) {
   if (isSubmitted) {
     submitHtml = '<button class="submit-orders-btn submitted">ORDERS SUBMITTED &mdash; Awaiting Resolution</button>';
   } else {
-    submitHtml = `<button class="submit-orders-btn" onclick="submitOrders('${fid}')">Submit Orders to GM</button>`;
+    const orderCount = orders.actions.length;
+    submitHtml = `<button class="submit-orders-btn" onclick="submitOrders('${fid}')">${orderCount > 0 ? 'Review &amp; Submit ' + orderCount + ' Order' + (orderCount !== 1 ? 's' : '') + ' to GM' : 'Submit Orders to GM'}</button>`;
   }
 
   container.innerHTML = `
