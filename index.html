@@ -7987,11 +7987,10 @@ function renderMilitaryTab(fid) {
   const f = gameState.factions[fid];
   const decisions = [
     { id: 'recruit', icon: '+', title: 'Build Forces', desc: 'Recruit new army divisions or naval fleets', cost: '2 Gold (army) / 6 Gold (fleet)' },
-    { id: 'deploy', icon: '\u2691', title: 'Deploy Troops', desc: 'Mobilize divisions for war (one-time cost per division)', cost: '1g/div (0.5g full mob)' },
     { id: 'move', icon: '\u2794', title: 'Move Forces', desc: 'Reposition troops and fleets to adjacent regions', cost: 'Free' },
     { id: 'attack', icon: '\u2694', title: 'Attack', desc: 'Launch offensive operations against enemy regions', cost: 'Risk of losses' },
     { id: 'upgrades', icon: '\u2605', title: 'Upgrades', desc: 'Purchase artillery, trenches, or gas weapons', cost: '3-6 Gold' },
-    { id: 'readiness', icon: '\u2616', title: 'Force Readiness', desc: 'Review all unit statuses and positions', cost: 'Intel only' }
+    { id: 'readiness', icon: '\u2616', title: 'Force Readiness', desc: 'Mobilize, deploy, and review all unit statuses', cost: '1g/mob' }
   ];
 
   const validIds = decisions.map(d => d.id);
@@ -8381,6 +8380,9 @@ function renderReadinessTab(fid) {
   const units = f.units || [];
   if (units.length === 0) return '<div class="empty-state">No units in the army. Recruit forces first.</div>';
 
+  const orders = getOrders(fid);
+  const isSubmitted = orders.submitted;
+
   let rows = '';
   units.forEach(function(u) {
     if (u.state === 'destroyed') return;
@@ -8388,16 +8390,33 @@ function renderReadinessTab(fid) {
     const stateLabel = stateClass.charAt(0).toUpperCase() + stateClass.slice(1);
     const location = u.state === 'deployed' && u.region ? (REGION_NAMES[u.region] || u.region) : '\u2014';
     const typeIcon = u.type === 'army' ? '\u2694' : '\u2693';
-    rows += `<tr>
-      <td>${typeIcon} ${getUnitName(u)}</td>
-      <td>${u.type === 'army' ? 'Division' : 'Fleet'}</td>
-      <td><span class="readiness-badge ${stateClass}">${stateLabel}</span></td>
-      <td>${location}</td>
-    </tr>`;
+    const safeName = getUnitName(u).replace(/'/g, "\\'");
+
+    // Build action cell based on unit state
+    let actionHtml = '';
+    if (u.state === 'reserve') {
+      actionHtml = '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em;" onclick="addOrder(\'' + fid + '\',{type:\'mobilize\',unitId:\'' + u.id + '\',desc:\'Mobilize ' + safeName + '\'})" ' + (isSubmitted ? 'disabled' : '') + '><span>Mobilize</span><span class="action-cost">1g</span></button>';
+    } else if (u.state === 'mobilized') {
+      const regionOptions = (u.type === 'army' ? LAND_REGIONS : SEA_REGIONS).map(function(r) { return '<option value="' + r + '">' + REGION_NAMES[r] + '</option>'; }).join('');
+      actionHtml = '<div style="display:flex; align-items:center; gap:6px;">' +
+        '<select id="rdeploy_' + u.id + '" style="padding:4px; border:1px solid var(--ink-light); font-family:\'Crimson Text\',serif; font-size:0.85em;">' + regionOptions + '</select>' +
+        '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em;" onclick="addOrder(\'' + fid + '\',{type:\'deploy\',unitId:\'' + u.id + '\',region:document.getElementById(\'rdeploy_' + u.id + '\').value,desc:\'Deploy ' + safeName + ' to \'+REGION_NAMES[document.getElementById(\'rdeploy_' + u.id + '\').value]})" ' + (isSubmitted ? 'disabled' : '') + '><span>Deploy</span></button>' +
+        '</div>';
+    } else {
+      actionHtml = '<span style="color:var(--ink-light); font-size:0.85em;">\u2714 In position</span>';
+    }
+
+    rows += '<tr>' +
+      '<td>' + typeIcon + ' ' + getUnitName(u) + '</td>' +
+      '<td>' + (u.type === 'army' ? 'Division' : 'Fleet') + '</td>' +
+      '<td><span class="readiness-badge ' + stateClass + '">' + stateLabel + '</span></td>' +
+      '<td>' + location + '</td>' +
+      '<td>' + actionHtml + '</td>' +
+    '</tr>';
   });
 
   return `<table class="readiness-table">
-    <tr><th>Unit</th><th>Type</th><th>Status</th><th>Location</th></tr>
+    <tr><th>Unit</th><th>Type</th><th>Status</th><th>Location</th><th>Action</th></tr>
     ${rows}
   </table>`;
 }
@@ -8422,53 +8441,6 @@ function renderActionTabContent(fid) {
         <span class="action-cost">${UNIT_COSTS.fleet} Gold</span>
       </button>
     `;
-  }
-
-  if (activeActionTab === 'deploy') {
-    if (isDealer) return '<div class="empty-state">Arms dealers have no units to deploy.</div>';
-    const units = f.units || [];
-    const reserveUnits = units.filter(u => u.state === 'reserve');
-    const mobilizedUnits = units.filter(u => u.state === 'mobilized');
-
-    if (reserveUnits.length === 0 && mobilizedUnits.length === 0) {
-      return '<div class="empty-state">All forces are deployed. Recruit new units to see them here as they progress through mobilization.</div>';
-    }
-
-    let html = '';
-
-    // Step 1: Reserve units need to be mobilized first
-    if (reserveUnits.length > 0) {
-      html += '<div style="margin-bottom:16px;"><div style="font-family:\'Playfair Display\',serif; font-size:0.85em; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; color:var(--ink-light);">Step 1: Mobilize Reserve Units</div>';
-      html += '<p style="font-size:0.9em; color:var(--ink-light); margin-bottom:10px;">These units are in reserve. Queue mobilization to make them ready for deployment next turn.</p>';
-      reserveUnits.forEach(u => {
-        const icon = u.type === 'army' ? '\u2694' : '\u2693';
-        const typeLabel = u.type === 'army' ? 'Division' : 'Fleet';
-        html += '<div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border:1px solid var(--ink-light); margin-bottom:4px; background:var(--parchment);">';
-        html += '<span style="font-weight:700;">' + icon + ' ' + getUnitName(u) + '</span>';
-        html += '<button class="action-btn" style="width:auto; margin:0; padding:6px 14px;" onclick="addOrder(\'' + fid + '\',{type:\'mobilize\',unitId:\'' + u.id + '\',desc:\'Mobilize ' + getUnitName(u).replace(/'/g, "\\'") + '\'})\" ' + (isSubmitted ? 'disabled' : '') + '><span>Mobilize</span><span class="action-cost">1g</span></button>';
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    // Step 2: Mobilized units can be deployed to a region
-    if (mobilizedUnits.length > 0) {
-      html += '<div><div style="font-family:\'Playfair Display\',serif; font-size:0.85em; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; color:var(--ink-light);">Step 2: Deploy Mobilized Units to Regions</div>';
-      html += '<p style="font-size:0.9em; color:var(--ink-light); margin-bottom:10px;">Assign mobilized units to a specific region on the map.</p>';
-      mobilizedUnits.forEach(u => {
-        const icon = u.type === 'army' ? '\u2694' : '\u2693';
-        const typeLabel = u.type === 'army' ? 'Division' : 'Fleet';
-        const regionOptions = (u.type === 'army' ? LAND_REGIONS : SEA_REGIONS).map(r => '<option value="' + r + '">' + REGION_NAMES[r] + '</option>').join('');
-        html += '<div style="display:flex; align-items:center; gap:10px; margin-bottom:6px; padding:8px 12px; border:1px solid var(--ink-light); background:var(--parchment);">';
-        html += '<span style="font-weight:700; min-width:140px;">' + icon + ' ' + getUnitName(u) + '</span>';
-        html += '<select id="deploy_' + u.id + '" style="flex:1; padding:6px; border:1px solid var(--ink-light); font-family:\'Crimson Text\',serif;">' + regionOptions + '</select>';
-        html += '<button class="action-btn" style="width:auto; margin:0; padding:6px 14px;" onclick="addOrder(\'' + fid + '\',{type:\'deploy\',unitId:\'' + u.id + '\',region:document.getElementById(\'deploy_' + u.id + '\').value,desc:\'Deploy ' + getUnitName(u).replace(/\'/g, "\\'") + ' to \'+REGION_NAMES[document.getElementById(\'deploy_' + u.id + '\').value]})" ' + (isSubmitted ? 'disabled' : '') + '><span>Deploy</span></button>';
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
-    return html;
   }
 
   if (activeActionTab === 'move') {
