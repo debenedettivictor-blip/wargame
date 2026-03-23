@@ -3344,6 +3344,127 @@ body::before {
   white-space: nowrap;
 }
 
+/* VP Rankings & History Tables */
+.roster-rankings {
+  padding: 10px 14px;
+  border-top: 2px solid var(--ink);
+  background: var(--parchment);
+}
+.roster-rankings-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.75em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.rankings-table, .vp-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.85em;
+}
+.rankings-table th, .vp-history-table th {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-light);
+  text-align: left;
+  padding: 3px 4px;
+  border-bottom: 2px solid var(--ink);
+}
+.rankings-table td, .vp-history-table td {
+  padding: 3px 4px;
+  border-bottom: 1px dotted var(--parchment-dark);
+}
+.rankings-table .rank-num {
+  font-weight: 700;
+  color: var(--ink-light);
+  width: 20px;
+}
+.rankings-table .rank-faction {
+  font-weight: 600;
+}
+.rankings-table .rank-vp, .vp-history-table td.vp-cell {
+  text-align: right;
+  font-weight: 700;
+  font-family: 'Source Serif 4', serif;
+}
+.vp-history-table th.vp-turn-col {
+  text-align: center;
+  min-width: 28px;
+}
+.vp-history-table td.vp-cell {
+  text-align: center;
+}
+.vp-change-pos { color: var(--green-neutral); font-size: 0.8em; }
+.vp-change-neg { color: var(--red-empire); font-size: 0.8em; }
+
+/* Checklist Action Popup */
+.checklist-popup-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.checklist-popup {
+  background: var(--cream);
+  border: 3px solid var(--ink);
+  padding: 20px 24px;
+  max-width: 420px;
+  width: 90%;
+  font-family: 'Crimson Text', serif;
+  position: relative;
+}
+.checklist-popup-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 8px;
+}
+.checklist-popup-desc {
+  font-size: 0.95em;
+  color: var(--ink-light);
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+.checklist-popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.checklist-popup-btn {
+  padding: 8px 14px;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid var(--ink);
+  background: var(--parchment);
+  text-align: left;
+  transition: background 0.15s;
+}
+.checklist-popup-btn:hover { background: var(--parchment-dark); }
+.checklist-popup-btn.primary { background: var(--ink); color: var(--parchment); }
+.checklist-popup-btn.primary:hover { opacity: 0.85; }
+.checklist-popup-close {
+  position: absolute;
+  top: 8px; right: 12px;
+  background: none; border: none;
+  font-size: 1.3em; cursor: pointer;
+  color: var(--ink-light);
+}
+
 /* Top-Level Dashboard Tabs */
 .dash-tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 3px solid var(--ink); }
 .dash-tab {
@@ -6485,6 +6606,7 @@ function defaultGameState() {
     messages: {},
     storylineChoices: {},
     turnPhase: 'orders',
+    vpHistory: {},
     resolutionLog: [],
     tradeAgreements: [
       { parties: ['germany','austria'], value: 1, label: 'Central Powers Cooperation' },
@@ -7407,6 +7529,13 @@ function advanceTurn() {
   // Clear orders for new turn
   gameState.orders = {};
 
+  // Record VP snapshot at end of this turn
+  if (!gameState.vpHistory) gameState.vpHistory = {};
+  Object.keys(factions).forEach(fid => {
+    if (!gameState.vpHistory[fid]) gameState.vpHistory[fid] = [];
+    gameState.vpHistory[fid].push({ turn: gameState.currentTurnNum, vp: factions[fid].vp || 0 });
+  });
+
   const prevTurnNum = gameState.currentTurnNum;
   gameState.currentTurnNum++;
   gameState.turnPhase = 'orders';
@@ -8220,35 +8349,81 @@ function renderForceRoster() {
     </div>`;
   });
 
-  // Turn Action Checklist
+  // VP Rankings Table
+  const playableFactions = Object.keys(FACTION_NAMES).filter(f => f !== 'krupp' && f !== 'schneider');
+  const ranked = playableFactions.map(fid => ({ fid, name: FACTION_NAMES[fid], vp: gameState.factions[fid].vp || 0 }))
+    .sort((a, b) => b.vp - a.vp);
+
+  html += `<div class="roster-rankings">
+    <div class="roster-rankings-title">Rankings</div>
+    <table class="rankings-table">
+      <tr><th>#</th><th>Faction</th><th style="text-align:right">VP</th></tr>
+      ${ranked.map((r, i) => `<tr>
+        <td class="rank-num">${i + 1}</td>
+        <td class="rank-faction" style="color:${FACTION_COLORS[r.fid]};">${r.name}</td>
+        <td class="rank-vp">${r.vp}</td>
+      </tr>`).join('')}
+    </table>
+  </div>`;
+
+  // VP History by Turn
+  const vpH = gameState.vpHistory || {};
+  const maxTurn = Math.max(0, ...playableFactions.flatMap(fid => (vpH[fid] || []).map(e => e.turn)));
+  if (maxTurn > 0) {
+    const turnNums = [];
+    for (let t = 1; t <= maxTurn; t++) turnNums.push(t);
+    html += `<div class="roster-rankings" style="border-top:1px solid var(--ink-light);">
+      <div class="roster-rankings-title">VP by Turn</div>
+      <table class="vp-history-table">
+        <tr><th>Faction</th>${turnNums.map(t => `<th class="vp-turn-col">T${t}</th>`).join('')}<th style="text-align:center">Now</th></tr>
+        ${ranked.map(r => {
+          const hist = vpH[r.fid] || [];
+          return `<tr>
+            <td style="color:${FACTION_COLORS[r.fid]}; font-weight:600; font-size:0.85em;">${r.name.split(' ')[0]}</td>
+            ${turnNums.map(t => {
+              const entry = hist.find(e => e.turn === t);
+              const prev = t > 1 ? (hist.find(e => e.turn === t - 1) || { vp: 0 }) : { vp: 0 };
+              const vp = entry ? entry.vp : '';
+              const delta = entry && t > 1 ? entry.vp - prev.vp : 0;
+              const deltaHtml = delta > 0 ? `<span class="vp-change-pos">+${delta}</span>` : delta < 0 ? `<span class="vp-change-neg">${delta}</span>` : '';
+              return `<td class="vp-cell">${vp}${deltaHtml ? '<br>' + deltaHtml : ''}</td>`;
+            }).join('')}
+            <td class="vp-cell" style="font-weight:700;">${r.vp}</td>
+          </tr>`;
+        }).join('')}
+      </table>
+    </div>`;
+  }
+
+  // Turn Action Checklist — clicking opens a popup to queue the order
   html += `<div class="roster-checklist">
     <div class="roster-checklist-title">Turn Checklist</div>
-    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+    <div class="roster-check-item" onclick="showChecklistPopup('recruit')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Recruit divisions or fleets</span>
       <span class="roster-check-cost">2 / 6 Gold</span>
     </div>
-    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+    <div class="roster-check-item" onclick="showChecklistPopup('deploy')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Deploy &amp; mobilize troops to regions</span>
       <span class="roster-check-cost">1g/div (0.5g full mob)</span>
     </div>
-    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+    <div class="roster-check-item" onclick="showChecklistPopup('move')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Move fleets to sea zones</span>
       <span class="roster-check-cost">Free</span>
     </div>
-    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+    <div class="roster-check-item" onclick="showChecklistPopup('diplomacy')">
       <div class="roster-check-box"></div>
-      <span class="roster-check-text">Negotiate alliances, support pledges, or trade agreements to boost income</span>
+      <span class="roster-check-text">Negotiate alliances, support pledges, or trade agreements</span>
       <span class="roster-check-cost">Free</span>
     </div>
-    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+    <div class="roster-check-item" onclick="showChecklistPopup('upgrade')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Purchase upgrades (artillery, trenches, gas)</span>
       <span class="roster-check-cost">3-6 Gold</span>
     </div>
-    <div class="roster-check-item" onclick="this.querySelector('.roster-check-box').classList.toggle('checked')">
+    <div class="roster-check-item" onclick="showChecklistPopup('submit')">
       <div class="roster-check-box"></div>
       <span class="roster-check-text">Submit orders to GM</span>
       <span class="roster-check-cost">&mdash;</span>
@@ -8256,6 +8431,86 @@ function renderForceRoster() {
   </div>`;
 
   roster.innerHTML = html;
+}
+
+function showChecklistPopup(actionType) {
+  const fid = document.getElementById('factionSelect').value;
+  const f = gameState.factions[fid];
+  const orders = getOrders(fid);
+
+  const configs = {
+    recruit: {
+      title: 'Recruit Forces',
+      desc: `Build new divisions (2g each) or fleets (6g each). Treasury: ${f.gold}g.`,
+      actions: [
+        { label: 'Recruit 1 Division (2g)', handler: () => { addOrder(fid, { type:'recruit', unitType:'army', desc:'Recruit 1 division (2g)' }); closeChecklistPopup(); }},
+        { label: 'Recruit 1 Fleet (6g)', handler: () => { addOrder(fid, { type:'recruit', unitType:'fleet', desc:'Recruit 1 fleet (6g)' }); closeChecklistPopup(); }},
+        { label: 'Go to Military Tab', handler: () => { setDashTab('military'); closeChecklistPopup(); }, primary: true }
+      ]
+    },
+    deploy: {
+      title: 'Deploy & Mobilize',
+      desc: 'Deploy mobilized troops to a region (1g/div) or fully mobilize reserves (0.5g).',
+      actions: [
+        { label: 'Go to Military Tab', handler: () => { setDashTab('military'); closeChecklistPopup(); }, primary: true }
+      ]
+    },
+    move: {
+      title: 'Move Forces',
+      desc: 'Move armies or fleets to adjacent regions. Moves are free.',
+      actions: [
+        { label: 'Go to Military Tab', handler: () => { setDashTab('military'); closeChecklistPopup(); }, primary: true }
+      ]
+    },
+    diplomacy: {
+      title: 'Diplomacy & Trade',
+      desc: 'Negotiate alliances, support pledges, or trade agreements to boost income.',
+      actions: [
+        { label: 'Go to Diplomacy Tab', handler: () => { setDashTab('diplomacy'); closeChecklistPopup(); }, primary: true },
+        { label: 'Go to Trade Tab', handler: () => { setDashTab('trade'); closeChecklistPopup(); }}
+      ]
+    },
+    upgrade: {
+      title: 'Purchase Upgrades',
+      desc: 'Buy artillery (3g), trenches (4g), or gas weapons (6g) for your forces.',
+      actions: [
+        { label: 'Go to Military Tab', handler: () => { setDashTab('military'); closeChecklistPopup(); }, primary: true }
+      ]
+    },
+    submit: {
+      title: 'Submit Orders',
+      desc: `You have ${orders.actions.length} pending order${orders.actions.length !== 1 ? 's' : ''}. Submit them to the GM for resolution.`,
+      actions: orders.actions.length > 0
+        ? [{ label: `Review & Submit ${orders.actions.length} Order${orders.actions.length !== 1 ? 's' : ''}`, handler: () => { submitOrders(fid); closeChecklistPopup(); }, primary: true }]
+        : [{ label: 'No orders queued yet', handler: () => closeChecklistPopup() }]
+    }
+  };
+
+  const cfg = configs[actionType];
+  if (!cfg) return;
+
+  // Store action handlers for the buttons
+  window._checklistPopupHandlers = cfg.actions.map(a => a.handler);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'checklist-popup-overlay';
+  overlay.id = 'checklistPopupOverlay';
+  overlay.onclick = (e) => { if (e.target === overlay) closeChecklistPopup(); };
+  overlay.innerHTML = `<div class="checklist-popup">
+    <button class="checklist-popup-close" onclick="closeChecklistPopup()">&times;</button>
+    <div class="checklist-popup-title">${cfg.title}</div>
+    <div class="checklist-popup-desc">${cfg.desc}</div>
+    <div class="checklist-popup-actions">
+      ${cfg.actions.map((a, i) => `<button class="checklist-popup-btn${a.primary ? ' primary' : ''}" onclick="window._checklistPopupHandlers[${i}]()">${a.label}</button>`).join('')}
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function closeChecklistPopup() {
+  const el = document.getElementById('checklistPopupOverlay');
+  if (el) el.remove();
+  window._checklistPopupHandlers = null;
 }
 
 function setDashTab(tab) {
@@ -10462,7 +10717,7 @@ const LEGEND_ENTRIES = [
   ['Austria-Hungary', '#D4A76A'],
   ['Ottoman Empire', '#C46B4E'],
   ['France', '#7B9B8B'],
-  ['United Kingdom', '#D4785A'],
+  ['United Kingdom', '#C0392B'],
   ['Spain', '#C8B44E'],
   ['Italy', '#6B8B5E'],
   ['Sweden-Norway', '#8B9BB5'],
@@ -10495,6 +10750,58 @@ function toggleMapLegend() {
   if (legend) legend.classList.toggle('collapsed');
 }
 
+const GEO_TO_FACTION = {
+  'United Kingdom of Great Britain and Ireland': 'britain',
+  'Germany': 'germany',
+  'France': 'france',
+  'Russian Empire': 'russia',
+  'Austria Hungary': 'austria',
+  'Ottoman Empire': 'ottoman'
+};
+
+function getFactionMilitarySummary(factionId) {
+  if (!gameState || !gameState.factions || !gameState.factions[factionId]) return '';
+  const f = gameState.factions[factionId];
+  const RNAMES = typeof REGION_NAMES !== 'undefined' ? REGION_NAMES : {};
+
+  let html = '<hr class="panel-divider">';
+  html += '<div class="panel-detail" style="font-weight:700;margin-bottom:8px;">Current Force Disposition</div>';
+
+  // Army summary
+  const totalArmy = f.units ? f.units.filter(u => u.type === 'army' && u.state !== 'destroyed').length : (f.army || 0);
+  const totalNavy = f.units ? f.units.filter(u => u.type === 'fleet' && u.state !== 'destroyed').length : (f.navy || 0);
+
+  html += `<div class="panel-detail"><strong>Total Strength:</strong> ${totalArmy} army div. &bull; ${totalNavy} fleets</div>`;
+  html += `<div class="panel-detail"><strong>Treasury:</strong> ${f.gold} Gold &bull; Income: +${f.income}/turn</div>`;
+
+  // Troops by region
+  if (f.troops && Object.keys(f.troops).length > 0) {
+    html += '<div class="panel-detail" style="margin-top:8px;"><strong>Army Deployments:</strong></div>';
+    Object.entries(f.troops).forEach(([region, count]) => {
+      const rName = RNAMES[region] || region;
+      html += `<div class="panel-detail" style="padding-left:12px;">\u2694 ${rName}: ${count} division${count !== 1 ? 's' : ''}</div>`;
+    });
+  }
+
+  // Fleets by region
+  if (f.fleets && Object.keys(f.fleets).length > 0) {
+    html += '<div class="panel-detail" style="margin-top:8px;"><strong>Naval Deployments:</strong></div>';
+    Object.entries(f.fleets).forEach(([region, count]) => {
+      const rName = RNAMES[region] || region;
+      html += `<div class="panel-detail" style="padding-left:12px;">\u2693 ${rName}: ${count} fleet${count !== 1 ? 's' : ''}</div>`;
+    });
+  }
+
+  // War status
+  if (f.atWar) {
+    html += '<div class="panel-detail" style="margin-top:8px;color:#8b1a1a;"><strong>\u26A0 AT WAR</strong> (Turn ${f.warTurns || "?"})</div>';
+  } else {
+    html += '<div class="panel-detail" style="margin-top:8px;color:#2d5016;">\u2618 At Peace</div>';
+  }
+
+  return html;
+}
+
 function showCountryInfo(name) {
   const panel = document.getElementById('countryInfoPanel');
   const content = document.getElementById('countryInfoContent');
@@ -10503,13 +10810,16 @@ function showCountryInfo(name) {
   const data = COUNTRY_DATA[name];
   const displayName = COUNTRY_DISPLAY_NAMES[name] || name;
   const color = getCountryColor(name);
+  const factionId = GEO_TO_FACTION[name];
+  const militaryHtml = factionId ? getFactionMilitarySummary(factionId) : '';
 
   if (!data) {
     content.innerHTML = `
       <div class="panel-title">${displayName}</div>
       <div class="panel-subtitle"><span class="panel-color-swatch" style="background:${color}"></span>${name}</div>
       <hr class="panel-divider">
-      <div class="panel-summary">Detailed information not available for this territory.</div>`;
+      <div class="panel-summary">Detailed information not available for this territory.</div>
+      ${militaryHtml}`;
   } else {
     content.innerHTML = `
       <div class="panel-title">${data.formalName}</div>
@@ -10520,7 +10830,8 @@ function showCountryInfo(name) {
       <div class="panel-detail"><strong>Government:</strong> ${data.government}</div>
       <div class="panel-detail"><strong>Population:</strong> ${data.population}</div>
       <hr class="panel-divider">
-      <div class="panel-summary">${data.summary}</div>`;
+      <div class="panel-summary">${data.summary}</div>
+      ${militaryHtml}`;
   }
   panel.classList.add('open');
 }
