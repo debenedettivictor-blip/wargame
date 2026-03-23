@@ -3528,6 +3528,15 @@ body::before {
   font-weight: 900;
   font-size: 2em;
 }
+.dash-header-stat .stat-sub {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 600;
+  display: block;
+  margin-top: -2px;
+}
+.dash-header-stat .stat-sub.positive { color: var(--green-accent, #2d5016); }
+.dash-header-stat .stat-sub.negative { color: #8b1a1a; }
 .dash-header-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
 .dash-badge {
   font-family: 'Source Serif 4', serif;
@@ -3798,6 +3807,119 @@ body::before {
 <p>The year is 1910. The great empires of Europe stand at the height of their power — and at the brink of catastrophe. Ancient rivalries fester, colonial ambitions collide, and arms manufacturers grow fat on the paranoia of nations. Each faction pursues its own vision for Europe's future. Some seek peace; most do not. <strong>War is not inevitable — but it is very, very likely.</strong></p>
 
 <p style="margin-top:16px;">Players represent the leaders, generals, diplomats, and industrialists who will decide the fate of millions. The game is played over <strong>6 turns</strong>, each representing roughly one year (1910–1915). Alliances will form, betrayals will occur, and the Game Master will ensure that history — or something like it — unfolds.</p>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon">🏆</span> How to Win</div>
+
+<div class="highlight-box" style="border-color: var(--gold-accent); border-width: 3px; background: linear-gradient(135deg, #faf7e6 0%, #f0e8c8 100%);">
+  <strong style="font-size:1.15em; display:block; margin-bottom:8px; color: var(--red-empire);">THE WINNER IS THE INDIVIDUAL PLAYER WITH THE MOST VICTORY POINTS (VP).</strong>
+  Not the best faction. Not the winning side. <strong>YOU</strong>, personally. Your teammate is also your rival.
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+  <div style="background: var(--cream); border: 1px solid var(--ink); padding: 14px; border-radius: 2px;">
+    <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em;">Faction VP (Shared)</strong>
+    <p style="margin-top:6px;">Earned by achieving your faction's public objectives — controlling territory, maintaining alliances, winning wars. These VP are <strong>split equally</strong> among all faction members.</p>
+  </div>
+  <div style="background: var(--cream); border: 1px solid var(--ink); padding: 14px; border-radius: 2px;">
+    <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em;">Personal VP (Secret)</strong>
+    <p style="margin-top:6px;">Each player has a named historical role with <strong>hidden personal objectives</strong> — often in direct tension with their teammates. Only you earn these VP. This is where betrayals are born.</p>
+  </div>
+</div>
+
+<p style="margin-top:16px;"><strong>Example:</strong> You're Germany's Chancellor. Your faction wants to keep Alsace-Lorraine and build the strongest army. But YOUR secret card says you earn +4 VP if you maneuver the Kaiser into a constitutional crisis. Do you serve the empire — or yourself?</p>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon">📋</span> What Players Actually Do Each Turn</div>
+
+<p>Every turn follows four phases. Here is <strong>exactly</strong> what happens:</p>
+
+<div style="margin-top:16px;">
+  <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
+    <div style="background:var(--ink); color:var(--parchment); min-width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:900; font-size:1.1em; border-radius:2px;">1</div>
+    <div>
+      <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px;">NEWS (3 min)</strong><br>
+      The GM reads a dramatic headline aloud — an assassination, a colonial crisis, a secret treaty leaked. These events have <strong>real game effects</strong>: shifting borders, forcing alliances, granting or removing gold. Players react.
+    </div>
+  </div>
+
+  <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
+    <div style="background:var(--ink); color:var(--parchment); min-width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:900; font-size:1.1em; border-radius:2px;">2</div>
+    <div>
+      <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px;">DIPLOMACY (8–10 min)</strong><br>
+      The heart of the game. Players talk, argue, threaten, and negotiate. Form alliances. Broker trade deals. Send written dispatches between boats. Buy weapons from arms dealers. Whisper promises you may not keep. <em>Everything said is non-binding unless written down and shown to the GM.</em>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
+    <div style="background:var(--ink); color:var(--parchment); min-width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:900; font-size:1.1em; border-radius:2px;">3</div>
+    <div>
+      <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px;">ORDERS (3 min)</strong><br>
+      All factions <strong>simultaneously</strong> write secret orders on paper. This is where decisions become real:
+      <ul style="margin-top:6px; margin-left:18px;">
+        <li><strong>Spend Gold</strong> — Buy army divisions (2g), fleets (6g), or modernize your economy (3-5g)</li>
+        <li><strong>Move Forces</strong> — Deploy armies and fleets to map regions</li>
+        <li><strong>Declare War</strong> — Announce hostilities against another faction</li>
+        <li><strong>Mobilize</strong> — Activate your reserves for combat (costs 1g per division)</li>
+        <li><strong>Sign Treaties</strong> — Formalize alliances or trade deals</li>
+        <li><strong>Break Treaties</strong> — Betray an ally (costs -2 VP but perfectly legal)</li>
+        <li><strong>Special Actions</strong> — Arms dealers can fund coups, plant fake crises, run weapon auctions</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;">
+    <div style="background:var(--red-empire); color:var(--parchment); min-width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:900; font-size:1.1em; border-radius:2px;">4</div>
+    <div>
+      <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px;">RESOLUTION (5 min)</strong><br>
+      The GM reads all orders aloud. Purchases are processed. Armies move on the map. If forces collide — <strong>battle</strong>. Each side counts divisions + modifiers, both roll a d6, and the GM resolves casualties. Income is distributed. VP is tallied. The consequences of your decisions hit the table.
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon">⚖</span> The Core Tension: War vs. Peace</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+  <div style="background: #e8f0e8; border: 2px solid var(--green-neutral); padding: 14px; border-radius: 2px;">
+    <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; color: var(--green-neutral);">Incentives for Peace</strong>
+    <ul style="margin-top:8px; margin-left:16px; font-size:0.95em;">
+      <li>Austria-Hungary earns <strong>+3 VP/turn</strong> at peace</li>
+      <li>Russia and Ottomans earn <strong>+2 VP/turn</strong></li>
+      <li>Germany and Britain earn <strong>+1 VP/turn</strong></li>
+      <li>Trade agreements generate mutual income</li>
+      <li>No casualties, no war costs</li>
+    </ul>
+  </div>
+  <div style="background: #f0e8e8; border: 2px solid var(--red-empire); padding: 14px; border-radius: 2px;">
+    <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; color: var(--red-empire);">Incentives for War</strong>
+    <ul style="margin-top:8px; margin-left:16px; font-size:0.95em;">
+      <li>France earns <strong>0 VP/turn at peace</strong> — needs war to win</li>
+      <li>Arms dealers get <strong>+2 gold/turn War Dividend</strong></li>
+      <li>Territory conquest earns massive faction VP</li>
+      <li>Many personal secret objectives require war</li>
+      <li>Russia's hidden revolutionary <em>wants</em> collapse</li>
+    </ul>
+  </div>
+</div>
+
+<p style="margin-top:14px;">This asymmetry is the engine of the game. Some players <em>need</em> peace to win. Others <em>need</em> war. Arms dealers need war and have tools to manufacture it. The question is never <em>whether</em> tension rises — it's whether anyone can stop it.</p>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon">⚡</span> How Battles Are Resolved</div>
+<p>When armies clash in the same region during Resolution:</p>
+<ol style="margin-top:10px; margin-left:20px;">
+  <li><strong>Count divisions</strong> on each side (allies combine forces)</li>
+  <li><strong>Add modifiers</strong> — defender in fortified region gets +2; Russia fights at half strength in Turn 1 of war</li>
+  <li><strong>Both sides roll 1d6</strong>, add divisions + modifiers</li>
+  <li><strong>Compare totals</strong> — higher total wins; ties go to defender</li>
+  <li><strong>Calculate losses</strong> — bigger victory margin = more enemy casualties, fewer of your own</li>
+</ol>
+<p style="margin-top:10px;">Outcomes range from <strong>Crushing Victory</strong> (enemy routed, 60% losses) to <strong>Stalemate</strong> (both sides bleed, nobody retreats). Naval combat works the same way with fleets.</p>
 </div>
 
 <div class="section">
@@ -6537,42 +6659,42 @@ function recomputeAggregates(fid) {
 function defaultGameState() {
   const factions = {
     germany: {
-      gold: 25, income: 15, army: 14, navy: 4, vp: 0,
+      gold: 25, income: 15, army: 14, navy: 4, vp: 0, stability: 8,
       troops: { germany: 8, alsace_lorraine: 4, poland: 2 },
       fleets: { north_sea: 2, baltic: 2 },
       alliances: ['austria'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     france: {
-      gold: 20, income: 8, army: 12, navy: 4, vp: 0,
+      gold: 20, income: 8, army: 12, navy: 4, vp: 0, stability: 7,
       troops: { france: 9, paris: 3 },
       fleets: { mediterranean: 2, english_channel: 2 },
       alliances: ['britain','russia'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     britain: {
-      gold: 30, income: 11, army: 8, navy: 14, vp: 0,
+      gold: 30, income: 11, army: 8, navy: 14, vp: 0, stability: 9,
       troops: { britain: 8 },
       fleets: { north_sea: 7, english_channel: 4, mediterranean: 3 },
       alliances: ['france','russia'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     russia: {
-      gold: 18, income: 7, army: 14, navy: 3, vp: 0,
+      gold: 18, income: 7, army: 14, navy: 3, vp: 0, stability: 5,
       troops: { russia: 9, poland: 4, balkans: 1 },
       fleets: { baltic: 2, mediterranean: 1 },
       alliances: ['france','britain'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     austria: {
-      gold: 14, income: 5, army: 8, navy: 2, vp: 0,
+      gold: 14, income: 5, army: 8, navy: 2, vp: 0, stability: 4,
       troops: { austria: 6, balkans: 2 },
       fleets: { mediterranean: 2 },
       alliances: ['germany'], status: [], upgrades: {}, modernization: 0,
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     ottoman: {
-      gold: 10, income: 6, army: 6, navy: 2, vp: 0,
+      gold: 10, income: 6, army: 6, navy: 2, vp: 0, stability: 4,
       troops: { ottoman: 4, dardanelles: 2 },
       fleets: { mediterranean: 2 },
       alliances: [], status: [], upgrades: {}, modernization: 0,
@@ -6663,6 +6785,10 @@ function loadGameState() {
         if (state.factions[fid].atWar === undefined) state.factions[fid].atWar = false;
         if (state.factions[fid].warTurns === undefined) state.factions[fid].warTurns = 0;
         if (state.factions[fid].modernization === undefined) state.factions[fid].modernization = 0;
+        if (state.factions[fid].stability === undefined) {
+          const defaultStab = { germany: 8, france: 7, britain: 9, russia: 5, austria: 4, ottoman: 4 };
+          state.factions[fid].stability = defaultStab[fid] || 7;
+        }
         // Migrate: backfill unit names
         if (state.factions[fid].units) {
           const names = UNIT_NAMES[fid] || { army: [], fleet: [] };
@@ -6929,12 +7055,18 @@ function computeEconomy(fid) {
   const blockadePenalty = tradeLoss + industryLoss;
   const effectiveIncome = Math.max(0, grossIncome - blockadePenalty);
   const baseUpkeep = Math.ceil(f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet);
-  const totalUpkeep = baseUpkeep + mobilizationCost + warPenalty;
+  // Stability-based unrest costs
+  let stabilityCost = 0;
+  if (!isDealer) {
+    const stabThreshold = getStabilityThreshold(f.stability || 0);
+    stabilityCost = stabThreshold.unrestCost;
+  }
+  const totalUpkeep = baseUpkeep + mobilizationCost + warPenalty + stabilityCost;
   const net = effectiveIncome - totalUpkeep;
 
   return {
     industry, trade, bonus, bonusLabel,
-    tradeLoss, industryLoss, blockadeDetail,
+    tradeLoss, industryLoss, blockadeDetail, stabilityCost,
     mobilizationCost, warDividend, warPenalty, warPenaltyLabel,
     peaceDividend, peaceVP, peaceLabel,
     tradeAgreementIncome, dualMonarchyBonus,
@@ -6943,6 +7075,98 @@ function computeEconomy(fid) {
     baseUpkeep, totalUpkeep, net,
     isBlockaded: blockadePenalty > 0,
     atWar: !!f.atWar
+  };
+}
+
+// ==================== STABILITY ENGINE ====================
+
+const STABILITY_THRESHOLDS = {
+  STABLE:   { min: 8, label: 'Stable',   color: '#2d5016', unrestCost: 0 },
+  STRAINED: { min: 5, label: 'Strained', color: '#b8860b', unrestCost: 1 },
+  UNSTABLE: { min: 3, label: 'Unstable', color: '#cc6600', unrestCost: 2 },
+  CRISIS:   { min: 1, label: 'Crisis',   color: '#8b1a1a', unrestCost: 3 },
+  COLLAPSE: { min: 0, label: 'Collapse', color: '#4a0000', unrestCost: 5 }
+};
+
+function getStabilityThreshold(stability) {
+  if (stability >= 8) return STABILITY_THRESHOLDS.STABLE;
+  if (stability >= 5) return STABILITY_THRESHOLDS.STRAINED;
+  if (stability >= 3) return STABILITY_THRESHOLDS.UNSTABLE;
+  if (stability >= 1) return STABILITY_THRESHOLDS.CRISIS;
+  return STABILITY_THRESHOLDS.COLLAPSE;
+}
+
+function computeStability(fid) {
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  if (isDealer) return { current: 10, delta: 0, modifiers: [], threshold: STABILITY_THRESHOLDS.STABLE };
+
+  const modifiers = [];
+  let delta = 0;
+
+  // --- Positive modifiers ---
+  if (!f.atWar) {
+    delta += 1; modifiers.push({ label: 'At peace', value: +1, type: 'positive' });
+  }
+  if (f.gold > 15) {
+    delta += 1; modifiers.push({ label: 'Prosperous treasury (>' + 15 + 'g)', value: +1, type: 'positive' });
+  }
+  const agreements = gameState.tradeAgreements ? gameState.tradeAgreements.filter(function(a) { return a.parties.includes(fid); }) : [];
+  if (agreements.length >= 2) {
+    delta += 1; modifiers.push({ label: 'Trade partnerships (' + agreements.length + ' agreements)', value: +1, type: 'positive' });
+  }
+  if (f.modernization && f.modernization > 0) {
+    const modBonus = Math.floor(f.modernization * 0.5);
+    if (modBonus > 0) {
+      delta += modBonus; modifiers.push({ label: 'Modernization investment', value: +modBonus, type: 'positive' });
+    }
+  }
+
+  // --- Negative modifiers ---
+  if (f.atWar) {
+    delta -= 1; modifiers.push({ label: 'At war', value: -1, type: 'negative' });
+    if ((f.warTurns || 0) >= 2) {
+      delta -= 1; modifiers.push({ label: 'Prolonged war (' + f.warTurns + ' turns)', value: -1, type: 'negative' });
+    }
+  }
+  if (f.gold < 5 && f.gold > 0) {
+    delta -= 1; modifiers.push({ label: 'Low treasury (<5g)', value: -1, type: 'negative' });
+  }
+  if (f.gold <= 0) {
+    delta -= 2; modifiers.push({ label: 'Bankrupt!', value: -2, type: 'negative' });
+  }
+  if (f.blockadedBy && f.blockadedBy.length > 0) {
+    delta -= 1; modifiers.push({ label: 'Under blockade', value: -1, type: 'negative' });
+  }
+  if (f.status && f.status.includes('revolution')) {
+    delta -= 2; modifiers.push({ label: 'Revolution!', value: -2, type: 'negative' });
+  }
+  if (f.status && f.status.includes('rebellion')) {
+    delta -= 2; modifiers.push({ label: 'Rebellion!', value: -2, type: 'negative' });
+  }
+
+  // --- Faction-specific modifiers ---
+  if (fid === 'austria' && f.atWar) {
+    delta -= 2; modifiers.push({ label: 'Nationality crisis (multi-ethnic empire at war)', value: -2, type: 'negative' });
+  }
+  if (fid === 'russia' && f.atWar) {
+    delta -= 1; modifiers.push({ label: 'Revolutionary pressure', value: -1, type: 'negative' });
+  }
+  if (fid === 'ottoman' && f.atWar) {
+    delta -= 1; modifiers.push({ label: 'Fragile state at war', value: -1, type: 'negative' });
+  }
+
+  const current = f.stability || 0;
+  const projected = Math.max(0, Math.min(10, current + delta));
+  const threshold = getStabilityThreshold(current);
+
+  return {
+    current: current,
+    delta: delta,
+    projected: projected,
+    modifiers: modifiers,
+    threshold: threshold,
+    unrestCost: threshold.unrestCost
   };
 }
 
@@ -7447,6 +7671,21 @@ function advanceTurn() {
     // Track war duration for escalating penalties
     if (f.atWar) {
       f.warTurns = (f.warTurns || 0) + 1;
+    }
+    // Apply stability changes
+    if (fid !== 'krupp' && fid !== 'schneider') {
+      const stab = computeStability(fid);
+      const oldStab = f.stability || 0;
+      f.stability = Math.max(0, Math.min(10, oldStab + stab.delta));
+      if (stab.delta !== 0) {
+        logAction(fid, 'stability', 'Stability: ' + oldStab + ' \u2192 ' + f.stability + ' (' + (stab.delta >= 0 ? '+' : '') + stab.delta + ')');
+      }
+      // Collapse check
+      if (f.stability <= 0 && oldStab > 0) {
+        f.vp = (f.vp || 0) - 5;
+        if (!f.status.includes('rebellion')) f.status.push('rebellion');
+        logAction(fid, 'stability', 'GOVERNMENT COLLAPSE! -5 VP, rebellion triggered.');
+      }
     }
   });
 
@@ -8605,6 +8844,9 @@ function renderFinanceTab(fid) {
   if (econ.mobilizationCost > 0) {
     expenseRows += `<div class="ledger-row"><span class="ledger-label">Mobilization Cost (per division)</span><span class="ledger-value negative">-${econ.mobilizationCost}</span></div>`;
   }
+  if (econ.stabilityCost > 0) {
+    expenseRows += `<div class="ledger-row"><span class="ledger-label">Unrest (low stability)</span><span class="ledger-value negative">-${econ.stabilityCost}</span></div>`;
+  }
   if (econ.warPenalty > 0) {
     expenseRows += `<div class="ledger-row"><span class="ledger-label">${econ.warPenaltyLabel || 'War Costs'}</span><span class="ledger-value negative">-${econ.warPenalty}</span></div>`;
   }
@@ -8837,6 +9079,143 @@ function renderDiplomacyTab(fid) {
     html += `<div class="ledger-row"><span>${FACTION_NAMES[otherId]}</span><span class="ledger-value" style="font-size:0.85em; color:var(--ink-light);">${other.atWar ? '\u2694 War' : '\u262E Peace'}${allyList ? ' \u2014 Allied: ' + allyList : ''}</span></div>`;
   });
   html += '</div>';
+
+  return html;
+}
+
+function renderVPTab(fid) {
+  const f = gameState.factions[fid];
+  const econ = computeEconomy(fid);
+  const turnsRemaining = Math.max(0, 6 - gameState.currentTurnNum);
+  const peaceVPRate = econ.peaceVP || 0;
+  const projectedPeaceVP = peaceVPRate * turnsRemaining;
+  const endGameBonus = !f.atWar ? PEACE_BONUSES.endGameVP : 0;
+  const projectedTotal = (f.vp || 0) + projectedPeaceVP + endGameBonus;
+
+  let html = '<div class="tab-section-title" style="margin-top:0;">Victory Points Summary</div>';
+
+  // Current VP
+  html += `<div style="text-align:center; padding:20px; background:var(--cream); border:2px solid var(--ink); border-radius:6px; margin-bottom:16px;">
+    <div style="font-family:'Source Serif 4',serif; font-size:0.75em; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-light);">Current Victory Points</div>
+    <div style="font-family:'Playfair Display',serif; font-size:3em; font-weight:900;">${f.vp || 0}</div>
+    <div style="font-family:'Crimson Text',serif; font-size:1.1em; color:var(--ink-light);">
+      ${peaceVPRate > 0 ? '<span class="positive">+' + peaceVPRate + ' VP/turn from peace</span>' : '<span style="color:#8b1a1a;">No peace VP (at war or no peace bonus)</span>'}
+    </div>
+  </div>`;
+
+  // VP Breakdown
+  html += '<div class="tab-section-title">VP Breakdown</div>';
+  html += `<div class="ledger-row"><span class="ledger-label">Current VP</span><span class="ledger-value">${f.vp || 0}</span></div>`;
+  if (peaceVPRate > 0) {
+    html += `<div class="ledger-row"><span class="ledger-label">Peace VP rate (${econ.peaceLabel || 'peace'})</span><span class="ledger-value positive">+${peaceVPRate}/turn</span></div>`;
+  }
+
+  // Projection
+  html += '<div class="tab-section-title">End-Game Projection</div>';
+  html += `<div class="ledger-row"><span class="ledger-label">Turns remaining</span><span class="ledger-value">${turnsRemaining}</span></div>`;
+  if (peaceVPRate > 0) {
+    html += `<div class="ledger-row"><span class="ledger-label">Projected peace VP (${peaceVPRate} x ${turnsRemaining} turns)</span><span class="ledger-value positive">+${projectedPeaceVP}</span></div>`;
+  }
+  if (endGameBonus > 0) {
+    html += `<div class="ledger-row"><span class="ledger-label">End-game peace bonus (never at war)</span><span class="ledger-value positive">+${endGameBonus}</span></div>`;
+  } else if (f.atWar) {
+    html += `<div class="ledger-row"><span class="ledger-label">End-game peace bonus</span><span class="ledger-value negative">Lost (at war)</span></div>`;
+  }
+  html += `<div class="ledger-row" style="font-weight:700; border-top:2px solid var(--ink); padding-top:8px; margin-top:8px;">
+    <span class="ledger-label">Projected Total (before faction/personal objectives)</span>
+    <span class="ledger-value" style="font-size:1.3em;">${projectedTotal}</span>
+  </div>`;
+
+  // Warning
+  if (f.atWar) {
+    html += `<div style="margin-top:16px; padding:12px; background:#ffeaea; border:2px solid #8b1a1a; border-radius:6px; font-family:'Crimson Text',serif;">
+      <strong style="color:#8b1a1a;">At War</strong> — Peace VP has stopped. Every turn of war costs you ${peaceVPRate > 0 ? peaceVPRate + ' VP' : 'potential VP'}. Consider negotiating peace.
+    </div>`;
+  }
+
+  // Peace VP comparison
+  html += '<div class="tab-section-title">Peace VP Comparison (all factions)</div>';
+  const factionOrder = ['austria','russia','ottoman','germany','britain','france'];
+  factionOrder.forEach(function(otherId) {
+    const otherF = gameState.factions[otherId];
+    const otherEcon = computeEconomy(otherId);
+    const otherRate = otherEcon.peaceVP || 0;
+    const isCurrent = otherId === fid;
+    html += `<div class="ledger-row" style="${isCurrent ? 'font-weight:700; background:var(--cream);' : ''}">
+      <span class="ledger-label">${FACTION_NAMES[otherId]}${isCurrent ? ' (you)' : ''}</span>
+      <span class="ledger-value ${otherRate > 0 ? 'positive' : ''}">${otherRate > 0 ? '+' + otherRate + '/turn' : '0'}</span>
+    </div>`;
+  });
+
+  return html;
+}
+
+function renderStabilityTab(fid) {
+  const f = gameState.factions[fid];
+  const stab = computeStability(fid);
+  const econ = computeEconomy(fid);
+
+  let html = '<div class="tab-section-title" style="margin-top:0;">National Stability</div>';
+
+  // Stability bar
+  const barPct = (stab.current / 10) * 100;
+  html += `<div style="text-align:center; padding:20px; background:var(--cream); border:2px solid var(--ink); border-radius:6px; margin-bottom:16px;">
+    <div style="font-family:'Source Serif 4',serif; font-size:0.75em; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-light);">Stability Rating</div>
+    <div style="font-family:'Playfair Display',serif; font-size:3em; font-weight:900; color:${stab.threshold.color};">${stab.current}/10</div>
+    <div style="width:100%; height:12px; background:#ddd; border-radius:6px; margin:8px 0; overflow:hidden;">
+      <div style="width:${barPct}%; height:100%; background:${stab.threshold.color}; border-radius:6px; transition:width 0.3s;"></div>
+    </div>
+    <div style="font-family:'Crimson Text',serif; font-size:1.1em; font-weight:700; color:${stab.threshold.color};">${stab.threshold.label}</div>
+    <div style="font-family:'Crimson Text',serif; font-size:0.9em; color:var(--ink-light);">
+      Trend: <span class="${stabCls = stab.delta >= 0 ? 'positive' : ''}" style="${stab.delta < 0 ? 'color:#8b1a1a;' : ''}">${stab.delta >= 0 ? '+' : ''}${stab.delta}/turn</span>
+      &rarr; Next turn: ${stab.projected}/10
+    </div>
+  </div>`;
+
+  // Modifiers breakdown
+  html += '<div class="tab-section-title">Stability Modifiers</div>';
+  if (stab.modifiers.length > 0) {
+    stab.modifiers.forEach(function(mod) {
+      const isPos = mod.type === 'positive';
+      html += `<div class="ledger-row">
+        <span class="ledger-label">${mod.label}</span>
+        <span class="ledger-value ${isPos ? 'positive' : 'negative'}">${mod.value >= 0 ? '+' : ''}${mod.value}</span>
+      </div>`;
+    });
+    html += `<div class="ledger-row" style="font-weight:700; border-top:2px solid var(--ink); padding-top:8px; margin-top:8px;">
+      <span class="ledger-label">Net Stability Change</span>
+      <span class="ledger-value ${stab.delta >= 0 ? 'positive' : 'negative'}">${stab.delta >= 0 ? '+' : ''}${stab.delta}/turn</span>
+    </div>`;
+  } else {
+    html += '<div class="empty-state">No active modifiers.</div>';
+  }
+
+  // Unrest cost
+  if (stab.unrestCost > 0) {
+    html += `<div style="margin-top:12px; padding:12px; background:#fff3e0; border:2px solid ${stab.threshold.color}; border-radius:6px; font-family:'Crimson Text',serif;">
+      <strong style="color:${stab.threshold.color};">Unrest Cost: -${stab.unrestCost}g/turn</strong> — Low stability is draining your treasury. Invest in modernization, negotiate trade agreements, or seek peace to stabilize.
+    </div>`;
+  }
+
+  // Threshold reference
+  html += '<div class="tab-section-title">Stability Thresholds</div>';
+  html += '<table class="ref-table" style="font-size:0.9em;">';
+  html += '<tr><th>Level</th><th>Range</th><th>Status</th><th>Effect</th></tr>';
+  html += '<tr' + (stab.current >= 8 ? ' style="background:var(--cream); font-weight:700;"' : '') + '><td style="color:#2d5016;">Stable</td><td>8-10</td><td>No penalties</td><td>Nation thrives</td></tr>';
+  html += '<tr' + (stab.current >= 5 && stab.current < 8 ? ' style="background:var(--cream); font-weight:700;"' : '') + '><td style="color:#b8860b;">Strained</td><td>5-7</td><td>-1g/turn unrest</td><td>Growing discontent</td></tr>';
+  html += '<tr' + (stab.current >= 3 && stab.current < 5 ? ' style="background:var(--cream); font-weight:700;"' : '') + '><td style="color:#cc6600;">Unstable</td><td>3-4</td><td>-2g/turn unrest</td><td>Risk of rebellion (GM rolls)</td></tr>';
+  html += '<tr' + (stab.current >= 1 && stab.current < 3 ? ' style="background:var(--cream); font-weight:700;"' : '') + '><td style="color:#8b1a1a;">Crisis</td><td>1-2</td><td>-3g/turn + desertion</td><td>Rebellion automatic</td></tr>';
+  html += '<tr' + (stab.current === 0 ? ' style="background:var(--cream); font-weight:700;"' : '') + '><td style="color:#4a0000;">Collapse</td><td>0</td><td>-5 VP + exit war</td><td>Government toppled</td></tr>';
+  html += '</table>';
+
+  // Stabilize action
+  html += '<div class="tab-section-title">Stabilize</div>';
+  const orders = getOrders(fid);
+  const isSubmitted = orders.submitted;
+  html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Invest in Stability (3 Gold, +1 stability)'})" ${isSubmitted || f.gold < 3 ? 'disabled' : ''}>
+    <span>Invest in Domestic Stability &mdash; Appease unrest, fund reforms</span>
+    <span class="action-cost">3 Gold (+1 stability)</span>
+  </button>`;
 
   return html;
 }
@@ -9121,9 +9500,13 @@ function renderPlayerDashboard(container) {
   const orders = getOrders(fid);
   const isSubmitted = orders.submitted;
   const econ = computeEconomy(fid);
+  const stab = computeStability(fid);
   const netCls = econ.net >= 0 ? 'positive' : 'negative';
+  const vpChange = econ.peaceVP || 0;
+  const vpCls = vpChange > 0 ? 'positive' : (vpChange < 0 ? 'negative' : '');
+  const stabCls = stab.delta >= 0 ? 'positive' : 'negative';
 
-  // Compact Header
+  // Compact Header — 3 core stats: Gold, VP, Stability
   let badges = '';
   if (f.atWar) badges += '<span class="dash-badge war">\u2694 At War</span>';
   else badges += '<span class="dash-badge peace">\u262E Peace</span>';
@@ -9134,9 +9517,21 @@ function renderPlayerDashboard(container) {
       <h3 style="margin:0; font-family:'Playfair Display',serif; font-size:1.3em;">${FACTION_NAMES[fid]}</h3>
       <div class="faction-type"><span class="alliance-badge ${allianceCls}">${allianceCls}</span></div>
     </div>
-    <div class="dash-header-stat"><span class="stat-label">Treasury</span><span class="stat-value">${f.gold}</span></div>
-    <div class="dash-header-stat"><span class="stat-label">Net / Turn</span><span class="stat-value ${netCls}">${econ.net >= 0 ? '+' : ''}${econ.net}</span></div>
-    <div class="dash-header-stat"><span class="stat-label">Victory</span><span class="stat-value">${f.vp}</span></div>
+    <div class="dash-header-stat" onclick="setDashTab('finance')" style="cursor:pointer;">
+      <span class="stat-label">Gold</span>
+      <span class="stat-value">${f.gold}</span>
+      <span class="stat-sub ${netCls}">${econ.net >= 0 ? '+' : ''}${econ.net}/turn</span>
+    </div>
+    <div class="dash-header-stat" onclick="setDashTab('vp')" style="cursor:pointer;">
+      <span class="stat-label">Victory</span>
+      <span class="stat-value">${f.vp || 0}</span>
+      <span class="stat-sub ${vpCls}">${vpChange > 0 ? '+' + vpChange : vpChange}/turn</span>
+    </div>
+    <div class="dash-header-stat" onclick="setDashTab('stability')" style="cursor:pointer;">
+      <span class="stat-label">Stability</span>
+      <span class="stat-value" style="color:${stab.threshold.color};">${stab.current}/10</span>
+      <span class="stat-sub" style="color:${stab.threshold.color};">${stab.threshold.label}</span>
+    </div>
     <div class="dash-header-badges">${badges}</div>
   </div>`;
 
@@ -9162,8 +9557,8 @@ function renderPlayerDashboard(container) {
   // Top-level tab definitions
   const dashTabs = isDealer
     ? ['finance','trade','diplomacy','special','messages']
-    : ['military','finance','trade','diplomacy','special','messages'];
-  const dashTabLabels = { military:'Military', finance:'Finance', trade:'Trade', diplomacy:'Diplomacy', special:'Special', messages:'Messages' };
+    : ['military','finance','trade','diplomacy','vp','stability','special','messages'];
+  const dashTabLabels = { military:'Military', finance:'Finance', trade:'Trade', diplomacy:'Diplomacy', vp:'VP', stability:'Stability', special:'Special', messages:'Messages' };
   if (!dashTabs.includes(activeDashTab)) activeDashTab = dashTabs[0];
 
   // Unread message count for badge
@@ -9180,6 +9575,8 @@ function renderPlayerDashboard(container) {
   else if (activeDashTab === 'finance') tabContent = renderFinanceTab(fid);
   else if (activeDashTab === 'trade') tabContent = renderTradeTab(fid);
   else if (activeDashTab === 'diplomacy') tabContent = renderDiplomacyTab(fid);
+  else if (activeDashTab === 'vp') tabContent = renderVPTab(fid);
+  else if (activeDashTab === 'stability') tabContent = renderStabilityTab(fid);
   else if (activeDashTab === 'special') tabContent = renderSpecialTab(fid);
   else if (activeDashTab === 'messages') tabContent = renderMessagesTab(fid);
 
