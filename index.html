@@ -999,6 +999,289 @@ body::before {
   margin-bottom: 6px;
 }
 
+/* === Messaging System (Faction to GM) === */
+.messages-panel {
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  margin-bottom: 20px;
+}
+.messages-header {
+  background: linear-gradient(135deg, #3a3226, #2a2419);
+  color: var(--gold-accent);
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--gold-accent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.messages-header .msg-badge {
+  background: var(--red-empire);
+  color: #fff;
+  font-size: 0.7em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-family: 'Source Serif 4', serif;
+  letter-spacing: 0;
+}
+.messages-thread {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.msg-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.92em;
+  line-height: 1.4;
+  position: relative;
+  animation: dispatchFadeIn 0.3s ease;
+}
+.msg-bubble.from-faction {
+  align-self: flex-end;
+  background: rgba(26,58,107,0.1);
+  border: 1px solid rgba(26,58,107,0.25);
+  border-left: 3px solid #1a3a6b;
+}
+.msg-bubble.from-gm {
+  align-self: flex-start;
+  background: rgba(139,26,26,0.06);
+  border: 1px solid rgba(139,26,26,0.2);
+  border-left: 3px solid var(--red-empire);
+}
+.msg-sender {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+.msg-bubble.from-faction .msg-sender { color: #1a3a6b; }
+.msg-bubble.from-gm .msg-sender { color: var(--red-empire); }
+.msg-time {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.65em;
+  color: var(--ink-light);
+  margin-top: 4px;
+  text-align: right;
+}
+.msg-compose {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--ink-light);
+  background: var(--parchment);
+}
+.msg-compose input {
+  flex: 1;
+  padding: 8px 12px;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+  border: 1px solid var(--ink-light);
+  background: var(--cream);
+}
+.msg-compose button {
+  padding: 8px 16px;
+  font-family: 'Source Serif 4', serif;
+  font-weight: 700;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--ink);
+  color: var(--cream);
+  border: none;
+  cursor: pointer;
+}
+.msg-compose button:hover { background: #2a2419; }
+.msg-empty {
+  text-align: center;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: var(--ink-light);
+  padding: 20px;
+}
+.gm-msg-inbox {
+  display: flex;
+  gap: 12px;
+}
+.gm-msg-factions {
+  flex: 0 0 180px;
+  border: 1px solid var(--ink-light);
+  background: var(--parchment);
+  max-height: 400px;
+  overflow-y: auto;
+}
+.gm-msg-faction-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.82em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.gm-msg-faction-item:hover { background: var(--cream); }
+.gm-msg-faction-item.active { background: var(--cream); border-left: 3px solid var(--red-empire); font-weight: 700; }
+.gm-msg-faction-item .unread-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--red-empire); display: inline-block;
+}
+.gm-msg-thread-panel {
+  flex: 1;
+  border: 1px solid var(--ink-light);
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+}
+.gm-msg-thread-header {
+  padding: 8px 14px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.85em;
+  background: var(--parchment);
+  border-bottom: 1px solid var(--ink-light);
+}
+
+/* === Turn Recap === */
+.turn-recap-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: recapFadeIn 0.5s ease;
+}
+@keyframes recapFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.turn-recap {
+  background: linear-gradient(135deg, #fdf6e3, #f0e6c8);
+  border: 3px solid var(--ink);
+  max-width: 700px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.turn-recap-masthead {
+  background: linear-gradient(135deg, #2a2419, #3a3226);
+  color: var(--gold-accent);
+  text-align: center;
+  padding: 24px 20px 16px;
+  border-bottom: 3px double var(--gold-accent);
+}
+.turn-recap-masthead .paper-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8em;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.turn-recap-masthead .paper-date {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.85em;
+  color: rgba(184,134,11,0.7);
+}
+.turn-recap-headline {
+  text-align: center;
+  padding: 20px 24px 10px;
+  border-bottom: 2px solid var(--ink);
+}
+.turn-recap-headline h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink);
+  margin: 0 0 6px;
+  line-height: 1.2;
+}
+.turn-recap-headline .sub-headline {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 1em;
+  color: var(--rust);
+}
+.turn-recap-body {
+  padding: 16px 24px;
+  columns: 2;
+  column-gap: 24px;
+  column-rule: 1px solid var(--ink-light);
+}
+@media (max-width: 600px) {
+  .turn-recap-body { columns: 1; }
+}
+.recap-article {
+  break-inside: avoid;
+  margin-bottom: 16px;
+}
+.recap-article-header {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 0.95em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink-light);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+.recap-article-body {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.88em;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+.recap-article-body .recap-highlight {
+  font-weight: 700;
+  color: var(--ink);
+}
+.recap-battle-result {
+  background: rgba(139,26,26,0.06);
+  border-left: 3px solid var(--red-empire);
+  padding: 8px 10px;
+  margin: 6px 0;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--red-empire);
+}
+.turn-recap-footer {
+  text-align: center;
+  padding: 16px 24px;
+  border-top: 2px solid var(--ink);
+}
+.turn-recap-footer button {
+  padding: 12px 32px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: var(--ink);
+  color: var(--gold-accent);
+  border: 2px solid var(--gold-accent);
+  cursor: pointer;
+}
+.turn-recap-footer button:hover { background: #2a2419; }
+
 /* === Turn Storyline Cards === */
 .storyline-grid {
   display: grid;
@@ -6199,6 +6482,7 @@ function defaultGameState() {
     orders: {},
     battles: [],
     customNews: [],
+    messages: {},
     storylineChoices: {},
     turnPhase: 'orders',
     resolutionLog: [],
@@ -7123,6 +7407,7 @@ function advanceTurn() {
   // Clear orders for new turn
   gameState.orders = {};
 
+  const prevTurnNum = gameState.currentTurnNum;
   gameState.currentTurnNum++;
   gameState.turnPhase = 'orders';
   gameState.resolutionLog = [];
@@ -7138,6 +7423,9 @@ function advanceTurn() {
   renderDashboard();
   renderMap();
   renderGMControl();
+
+  // Show dramatic turn recap
+  showTurnRecap(prevTurnNum);
 }
 
 // ==================== TURN RESOLUTION ENGINE ====================
@@ -8618,12 +8906,18 @@ function renderPlayerDashboard(container) {
 
   // Top-level tab definitions
   const dashTabs = isDealer
-    ? ['finance','trade','diplomacy','special']
-    : ['military','finance','trade','diplomacy','special'];
-  const dashTabLabels = { military:'Military', finance:'Finance', trade:'Trade', diplomacy:'Diplomacy', special:'Special' };
+    ? ['finance','trade','diplomacy','special','messages']
+    : ['military','finance','trade','diplomacy','special','messages'];
+  const dashTabLabels = { military:'Military', finance:'Finance', trade:'Trade', diplomacy:'Diplomacy', special:'Special', messages:'Messages' };
   if (!dashTabs.includes(activeDashTab)) activeDashTab = dashTabs[0];
 
-  const tabBtns = dashTabs.map(t => `<button class="dash-tab ${activeDashTab === t ? 'active' : ''}" onclick="setDashTab('${t}')">${dashTabLabels[t]}</button>`).join('');
+  // Unread message count for badge
+  const msgCount = getUnreadCount(fid, 'faction');
+  const tabBtns = dashTabs.map(t => {
+    let label = dashTabLabels[t];
+    if (t === 'messages' && msgCount > 0) label += ` (${msgCount})`;
+    return `<button class="dash-tab ${activeDashTab === t ? 'active' : ''}" onclick="setDashTab('${t}')">${label}</button>`;
+  }).join('');
 
   // Tab content
   let tabContent = '';
@@ -8632,6 +8926,7 @@ function renderPlayerDashboard(container) {
   else if (activeDashTab === 'trade') tabContent = renderTradeTab(fid);
   else if (activeDashTab === 'diplomacy') tabContent = renderDiplomacyTab(fid);
   else if (activeDashTab === 'special') tabContent = renderSpecialTab(fid);
+  else if (activeDashTab === 'messages') tabContent = renderMessagesTab(fid);
 
   // Pending orders (always visible)
   let ordersHtml = '';
@@ -8685,6 +8980,347 @@ function renderPlayerTurnSummaryContent(fid) {
   if (recentActions.length === 0) return '<p class="no-actions">No history yet. Begin your campaign...</p>';
   const actionIcons = { move: '\u2794', purchase: '+', upgrade: '\u2605', battle: '\u2694', income: '\u25CB', orders: '\u2691', blockade: '\u2693', diplomacy: '\u2690' };
   return recentActions.map(a => `<div class="summary-entry"><span class="action-icon ${a.type}">${actionIcons[a.type] || '\u2022'}</span> ${a.description}</div>`).join('');
+}
+
+// ==================== MESSAGING SYSTEM (Faction ↔ GM) ====================
+
+let gmSelectedMsgFaction = null;
+
+function getMessages(fid) {
+  if (!gameState.messages) gameState.messages = {};
+  if (!gameState.messages[fid]) gameState.messages[fid] = [];
+  return gameState.messages[fid];
+}
+
+function getUnreadCount(fid, viewer) {
+  const msgs = getMessages(fid);
+  return msgs.filter(m => !m.read && m.from !== viewer).length;
+}
+
+function sendMessage(fid, from, text) {
+  if (!text || !text.trim()) return;
+  const msgs = getMessages(fid);
+  msgs.push({
+    from: from, // 'faction' or 'gm'
+    text: text.trim(),
+    turn: gameState.currentTurnNum,
+    timestamp: Date.now(),
+    read: false
+  });
+  saveGameState();
+}
+
+function markMessagesRead(fid, viewer) {
+  const msgs = getMessages(fid);
+  msgs.forEach(m => {
+    if (m.from !== viewer) m.read = true;
+  });
+  saveGameState();
+}
+
+function renderMessagesTab(fid) {
+  const msgs = getMessages(fid);
+  markMessagesRead(fid, 'faction');
+
+  let threadHtml = '';
+  if (msgs.length === 0) {
+    threadHtml = '<div class="msg-empty">No dispatches yet. Send a sealed message to the Game Master.</div>';
+  } else {
+    threadHtml = msgs.map(m => {
+      const cls = m.from === 'faction' ? 'from-faction' : 'from-gm';
+      const sender = m.from === 'faction' ? FACTION_NAMES[fid] : 'Game Master';
+      const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      return `<div class="msg-bubble ${cls}">
+        <div class="msg-sender">${sender}</div>
+        <div>${m.text}</div>
+        <div class="msg-time">Turn ${m.turn} &mdash; ${time}</div>
+      </div>`;
+    }).join('');
+  }
+
+  return `
+    <div class="messages-panel">
+      <div class="messages-header">
+        <span>Sealed Dispatches to Game Master</span>
+      </div>
+      <div class="messages-thread" id="msgThread">${threadHtml}</div>
+      <div class="msg-compose">
+        <input type="text" id="msgInput" placeholder="Write a sealed dispatch to the GM..." onkeydown="if(event.key==='Enter')sendFactionMessage('${fid}')">
+        <button onclick="sendFactionMessage('${fid}')">Send</button>
+      </div>
+    </div>
+    <div style="font-family:'IM Fell English',serif; font-style:italic; font-size:0.82em; color:var(--ink-light); text-align:center; margin-top:8px;">
+      Messages are private between your faction and the Game Master only. Other players cannot see these dispatches.
+    </div>`;
+}
+
+function sendFactionMessage(fid) {
+  const input = document.getElementById('msgInput');
+  if (!input || !input.value.trim()) return;
+  sendMessage(fid, 'faction', input.value);
+  renderDashboard();
+  setTimeout(() => {
+    const thread = document.getElementById('msgThread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  }, 50);
+}
+
+function renderGMMessagesSection() {
+  const allFactions = getPlayableFactions();
+  if (!gmSelectedMsgFaction) gmSelectedMsgFaction = allFactions[0];
+
+  const factionListHtml = allFactions.map(fid => {
+    const unread = getUnreadCount(fid, 'gm');
+    const isActive = fid === gmSelectedMsgFaction;
+    return `<div class="gm-msg-faction-item ${isActive ? 'active' : ''}" onclick="gmSelectMsgFaction('${fid}')">
+      <span>${FACTION_NAMES[fid]}</span>
+      ${unread > 0 ? '<span class="unread-dot"></span>' : ''}
+    </div>`;
+  }).join('');
+
+  const msgs = getMessages(gmSelectedMsgFaction);
+  markMessagesRead(gmSelectedMsgFaction, 'gm');
+
+  let threadHtml = '';
+  if (msgs.length === 0) {
+    threadHtml = '<div class="msg-empty">No messages with this faction yet.</div>';
+  } else {
+    threadHtml = msgs.map(m => {
+      const cls = m.from === 'gm' ? 'from-gm' : 'from-faction';
+      const sender = m.from === 'gm' ? 'Game Master' : FACTION_NAMES[gmSelectedMsgFaction];
+      const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      return `<div class="msg-bubble ${cls}">
+        <div class="msg-sender">${sender}</div>
+        <div>${m.text}</div>
+        <div class="msg-time">Turn ${m.turn} &mdash; ${time}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const totalUnread = allFactions.reduce((s, fid) => s + getUnreadCount(fid, 'gm'), 0);
+
+  return `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Faction Messages${totalUnread > 0 ? ' (' + totalUnread + ' unread)' : ''}</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">
+      <div class="gm-msg-inbox">
+        <div class="gm-msg-factions">${factionListHtml}</div>
+        <div class="gm-msg-thread-panel">
+          <div class="gm-msg-thread-header">${FACTION_NAMES[gmSelectedMsgFaction]}</div>
+          <div class="messages-thread" id="gmMsgThread" style="flex:1;">${threadHtml}</div>
+          <div class="msg-compose">
+            <input type="text" id="gmMsgInput" placeholder="Reply to ${FACTION_NAMES[gmSelectedMsgFaction]}..." onkeydown="if(event.key==='Enter')sendGMMessage()">
+            <button onclick="sendGMMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function gmSelectMsgFaction(fid) {
+  gmSelectedMsgFaction = fid;
+  renderGMControl();
+  setTimeout(() => {
+    const thread = document.getElementById('gmMsgThread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  }, 50);
+}
+
+function sendGMMessage() {
+  const input = document.getElementById('gmMsgInput');
+  if (!input || !input.value.trim() || !gmSelectedMsgFaction) return;
+  sendMessage(gmSelectedMsgFaction, 'gm', input.value);
+  renderGMControl();
+  setTimeout(() => {
+    const thread = document.getElementById('gmMsgThread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  }, 50);
+}
+
+// ==================== TURN RECAP SYSTEM ====================
+
+function generateTurnRecap(prevTurnNum) {
+  const prevTurnIdx = Math.min(prevTurnNum - 1, turns.length - 1);
+  const prevTurn = turns[prevTurnIdx];
+  const nextTurnIdx = Math.min(prevTurnNum, turns.length - 1);
+  const nextTurn = turns[nextTurnIdx];
+
+  // Gather data from the previous turn
+  const turnBattles = (gameState.battles || []).filter(b => b.turn === prevTurnNum && b.status === 'resolved');
+  const turnActions = (gameState.actionLog || []).filter(a => a.turn === prevTurnNum);
+  const customNews = (gameState.customNews || []).filter(n => n.turnNum === prevTurnNum);
+
+  // Find deployments, movements, blockades, diplomacy
+  const deployments = turnActions.filter(a => a.type === 'move' || a.type === 'purchase' || a.description.includes('deploy') || a.description.includes('Deploy'));
+  const blockades = turnActions.filter(a => a.type === 'blockade');
+  const diplomacyActions = turnActions.filter(a => a.type === 'diplomacy');
+  const warDeclarations = diplomacyActions.filter(a => a.description.includes('AT WAR'));
+  const peaceActions = diplomacyActions.filter(a => a.description.includes('PEACE'));
+
+  // Determine headline
+  let headline = '';
+  let subHeadline = '';
+
+  if (turnBattles.length > 0) {
+    const biggestBattle = turnBattles.reduce((best, b) => {
+      const totalForce = (b.attackerCoalition || []).reduce((s,c) => s + c.divisions, 0) +
+                         (b.defenderCoalition || []).reduce((s,c) => s + c.divisions, 0);
+      return totalForce > best.force ? { battle: b, force: totalForce } : best;
+    }, { battle: turnBattles[0], force: 0 });
+    const b = biggestBattle.battle;
+    const region = REGION_NAMES[b.targetRegion] || b.targetRegion;
+    const attackers = (b.attackerCoalition || []).map(c => FACTION_NAMES[c.fid]).join(' & ');
+    const result = b.result ? b.result.tier : 'Unknown';
+    headline = `THUNDER OVER ${region.toUpperCase()}!`;
+    subHeadline = `${attackers} launch assault \u2014 Result: ${result}`;
+  } else if (warDeclarations.length > 0) {
+    headline = 'WAR DECLARED!';
+    subHeadline = 'The drums of war echo across the continent';
+  } else if (blockades.length > 0) {
+    headline = 'NAVAL FORCES ON THE MOVE';
+    subHeadline = 'Fleets deploy to enforce blockades across vital sea lanes';
+  } else {
+    headline = `${prevTurn.title.toUpperCase()} \u2014 A TURN IN REVIEW`;
+    subHeadline = prevTurn.desc;
+  }
+
+  // Build articles
+  let articles = [];
+
+  // Battle reports
+  turnBattles.forEach(b => {
+    const region = REGION_NAMES[b.targetRegion] || b.targetRegion;
+    const attackers = (b.attackerCoalition || []).map(c => `${FACTION_NAMES[c.fid]} (${c.divisions} div)`).join(', ');
+    const defenders = (b.defenderCoalition || []).map(c => `${FACTION_NAMES[c.fid]} (${c.divisions} div)`).join(', ');
+    const r = b.result || {};
+    articles.push({
+      header: `\u2694 Battle of ${region}`,
+      body: `<span class="recap-highlight">${attackers}</span> stormed the defenses of <span class="recap-highlight">${defenders}</span> at ${region}.`,
+      result: r.tier ? `${r.tier} \u2014 Attacker: ${r.atkTotal} vs Defender: ${r.defTotal} (Margin: ${r.margin >= 0 ? '+' : ''}${r.margin}). Attacker lost ${r.atkLosses} div, Defender lost ${r.defLosses} div.` : null
+    });
+  });
+
+  // War declarations
+  warDeclarations.forEach(a => {
+    articles.push({
+      header: '\u2694 Declaration of War',
+      body: `<span class="recap-highlight">${FACTION_NAMES[a.fid]}</span> has declared a state of war! Mobilization orders have been issued and reservists are streaming to their assembly points.`
+    });
+  });
+
+  // Blockades
+  if (blockades.length > 0) {
+    const blockadeDescs = blockades.map(a => a.description).join('. ');
+    articles.push({
+      header: '\u2693 Naval Operations',
+      body: `The great fleets are on the move. ${blockadeDescs}. Merchant vessels scatter as warships take up station.`
+    });
+  }
+
+  // Troop deployments & movements
+  const moveActions = turnActions.filter(a => a.description && (a.description.includes('deployed') || a.description.includes('Deployed') || a.description.includes('moved') || a.description.includes('mobilized')));
+  if (moveActions.length > 0) {
+    const factionMoves = {};
+    moveActions.forEach(a => {
+      if (!factionMoves[a.fid]) factionMoves[a.fid] = [];
+      factionMoves[a.fid].push(a.description);
+    });
+    let moveBody = '';
+    Object.keys(factionMoves).forEach(fid => {
+      moveBody += `<span class="recap-highlight">${FACTION_NAMES[fid]}</span>: ${factionMoves[fid].length} unit movement${factionMoves[fid].length > 1 ? 's' : ''} ordered. `;
+    });
+    articles.push({
+      header: '\u2794 Troop Movements',
+      body: `Across the continent, armies are on the march. ${moveBody}`
+    });
+  }
+
+  // Purchases / Recruiting
+  const purchases = turnActions.filter(a => a.type === 'purchase');
+  if (purchases.length > 0) {
+    const factionPurchases = {};
+    purchases.forEach(a => {
+      if (!factionPurchases[a.fid]) factionPurchases[a.fid] = 0;
+      factionPurchases[a.fid]++;
+    });
+    let purchBody = Object.keys(factionPurchases).map(fid =>
+      `<span class="recap-highlight">${FACTION_NAMES[fid]}</span> commissioned ${factionPurchases[fid]} new unit${factionPurchases[fid] > 1 ? 's' : ''}`
+    ).join('. ') + '.';
+    articles.push({
+      header: '\u2605 Arms Build-Up',
+      body: `The arms race intensifies. ${purchBody} Factories work day and night to equip the forces of Europe.`
+    });
+  }
+
+  // Economic summary
+  const lastTurnLog = (gameState.turnLog || []).find(t => t.turn === prevTurnNum + 1);
+  if (lastTurnLog && lastTurnLog.entries) {
+    const richest = lastTurnLog.entries.reduce((best, e) => e.newGold > best.newGold ? e : best, lastTurnLog.entries[0]);
+    const poorest = lastTurnLog.entries.reduce((worst, e) => e.newGold < worst.newGold ? e : worst, lastTurnLog.entries[0]);
+    articles.push({
+      header: '\u25CB Treasury Report',
+      body: `<span class="recap-highlight">${richest.faction}</span> leads the exchequers with ${richest.newGold}g in the treasury. Meanwhile, <span class="recap-highlight">${poorest.faction}</span> scrapes by with just ${poorest.newGold}g. The cost of empire weighs heavy.`
+    });
+  }
+
+  // Custom news items
+  customNews.forEach(n => {
+    articles.push({
+      header: `\u2709 ${n.headline}`,
+      body: n.body || ''
+    });
+  });
+
+  // If no articles, add a quiet turn article
+  if (articles.length === 0) {
+    articles.push({
+      header: 'An Uneasy Calm',
+      body: 'The great powers watch and wait. Diplomats whisper in gilded chambers while generals study their maps. The peace holds \u2014 but for how long?'
+    });
+  }
+
+  return { headline, subHeadline, articles, prevTurn, nextTurn };
+}
+
+function showTurnRecap(prevTurnNum) {
+  const recap = generateTurnRecap(prevTurnNum);
+  const articlesHtml = recap.articles.map(a => `
+    <div class="recap-article">
+      <div class="recap-article-header">${a.header}</div>
+      <div class="recap-article-body">${a.body}</div>
+      ${a.result ? `<div class="recap-battle-result">${a.result}</div>` : ''}
+    </div>
+  `).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'turn-recap-overlay';
+  overlay.id = 'turnRecapOverlay';
+  overlay.innerHTML = `
+    <div class="turn-recap">
+      <div class="turn-recap-masthead">
+        <div class="paper-name">The Continental Telegraph</div>
+        <div class="paper-date">${recap.prevTurn.year} \u2014 End of ${recap.prevTurn.title}</div>
+      </div>
+      <div class="turn-recap-headline">
+        <h2>${recap.headline}</h2>
+        <div class="sub-headline">${recap.subHeadline}</div>
+      </div>
+      <div class="turn-recap-body">
+        ${articlesHtml}
+      </div>
+      <div class="turn-recap-footer">
+        <button onclick="dismissTurnRecap()">Proceed to Turn ${recap.nextTurn.num} \u2014 ${recap.nextTurn.title} \u2192</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function dismissTurnRecap() {
+  const overlay = document.getElementById('turnRecapOverlay');
+  if (overlay) overlay.remove();
 }
 
 // ==================== GM CONTROL ====================
@@ -9307,7 +9943,8 @@ function renderGMControl() {
     </div>
   </div>`;
 
-  container.innerHTML = turnSection + storylineHtml + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + battleSection + economySection + factionSection + overviewSection + logSection;
+  const messagesSection = renderGMMessagesSection();
+  container.innerHTML = turnSection + storylineHtml + messagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + battleSection + economySection + factionSection + overviewSection + logSection;
 
   // Render turn tracker into GM console
   renderGMTurnTracker();
@@ -9513,7 +10150,7 @@ const COUNTRY_COLORS = {
   'Austria Hungary': '#D4A76A',
   'Ottoman Empire': '#C46B4E',
   'France': '#7B9B8B',
-  'United Kingdom of Great Britain and Ireland': '#D4785A',
+  'United Kingdom of Great Britain and Ireland': '#C0392B',
   'Spain': '#C8B44E',
   'Italy': '#6B8B5E',
   'Sweden\u2013Norway': '#8B9BB5',
