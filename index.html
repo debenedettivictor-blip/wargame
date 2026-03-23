@@ -4931,6 +4931,7 @@ body::before {
       <label><input type="checkbox" id="modFortified"> Fortified (+2 defense)</label>
       <label><input type="checkbox" id="modTrench"> Trench Warfare (+1 defense)</label>
       <label><input type="checkbox" id="modRussiaMob"> Russia 1st-turn mobilization (half forces)</label>
+      <label><input type="checkbox" id="modUndeployed"> Defender mobilized but not deployed (-2 defense)</label>
     </div>
   </div>
 </div>
@@ -5005,9 +5006,9 @@ const turns = [
     desc: 'The Balkans erupt in local conflict. Austria eyes Serbia with hunger. Russia pledges protection. The fuse is lit.',
     phases: [
       { n: '1', text: 'NEWS: Read Turn 3 event (Balkan Wars). Collect income. Austria must decide how to respond.' },
-      { n: '2', text: 'DIPLOMACY: Critical turn. War may be imminent. Last chance for peaceful solutions. Arms dealers should be doing brisk business.' },
-      { n: '3', text: 'ORDERS: War declarations possible. All orders submitted simultaneously.' },
-      { n: '4', text: 'RESOLUTION: If war is declared, resolve the first battles. If not, increase pressure next turn.' }
+      { n: '2', text: 'DIPLOMACY: Critical turn. Mobilization accelerates. Last chance for peaceful solutions. Arms dealers should be doing brisk business.' },
+      { n: '3', text: 'ORDERS: ⚠️ War declarations NOT yet possible — nations are still mobilizing and deploying. Final preparations before the storm.' },
+      { n: '4', text: 'RESOLUTION: Resolve orders. Tension mounts. If Turn 3 ends without war, read a BONUS crisis event to increase pressure.' }
     ]
   },
   {
@@ -5016,7 +5017,7 @@ const turns = [
     phases: [
       { n: '1', text: 'NEWS: THE ASSASSINATION. If war hasn\'t started, it almost certainly will now. Austria must respond to the assassination of Franz Ferdinand.' },
       { n: '2', text: 'DIPLOMACY: Frantic negotiations. Last-ditch peace efforts. Or gleeful war planning. Arms dealers in overdrive.' },
-      { n: '3', text: 'ORDERS: War declarations very likely. Russia begins mobilization (half forces this turn if just entering war).' },
+      { n: '3', text: 'ORDERS: ⚔️ War declarations NOW ALLOWED. Russia begins mobilization (slow mobilizer — needs extra turn). The crisis point has arrived.' },
       { n: '4', text: 'RESOLUTION: The guns of August speak. Resolve all combat. Announce casualties dramatically.' }
     ]
   },
@@ -5159,7 +5160,8 @@ newsEvents.forEach((ev, i) => {
 const LAND_REGIONS = [
   'france','paris','alsace_lorraine','belgium','britain',
   'germany','austria','serbia','russia','poland',
-  'ottoman','dardanelles','italy','balkans'
+  'ottoman','dardanelles','italy','balkans',
+  'bulgaria','romania','greece','montenegro'
 ];
 
 const SEA_REGIONS = ['north_sea','english_channel','mediterranean','baltic'];
@@ -5171,6 +5173,7 @@ const REGION_NAMES = {
   britain:'Britain', germany:'Germany', austria:'Austria', serbia:'Serbia',
   russia:'Russia', poland:'Poland', ottoman:'Ottoman Empire', dardanelles:'Dardanelles',
   italy:'Italy', balkans:'Balkans',
+  bulgaria:'Bulgaria', romania:'Romania', greece:'Greece', montenegro:'Montenegro',
   north_sea:'North Sea', english_channel:'English Channel', mediterranean:'Mediterranean', baltic:'Baltic Sea'
 };
 
@@ -5181,17 +5184,21 @@ const ADJACENCY = {
   belgium: ['france','paris','alsace_lorraine','germany','english_channel','north_sea'],
   britain: ['english_channel','north_sea'],
   germany: ['alsace_lorraine','belgium','poland','austria','north_sea','baltic'],
-  austria: ['germany','serbia','italy','poland','balkans'],
-  serbia: ['austria','balkans','ottoman'],
-  russia: ['poland','baltic','ottoman','balkans'],
+  austria: ['germany','serbia','italy','poland','balkans','romania'],
+  serbia: ['austria','balkans','ottoman','montenegro','bulgaria'],
+  russia: ['poland','baltic','ottoman','balkans','romania'],
   poland: ['germany','austria','russia','baltic'],
-  ottoman: ['serbia','dardanelles','balkans','russia','mediterranean'],
+  ottoman: ['serbia','dardanelles','balkans','russia','mediterranean','bulgaria'],
   dardanelles: ['ottoman','mediterranean'],
-  italy: ['france','austria','mediterranean'],
-  balkans: ['serbia','austria','russia','ottoman'],
+  italy: ['france','austria','mediterranean','greece'],
+  balkans: ['serbia','austria','russia','ottoman','bulgaria','romania','greece','montenegro'],
+  bulgaria: ['balkans','serbia','romania','ottoman','greece','mediterranean'],
+  romania: ['austria','russia','balkans','bulgaria'],
+  greece: ['balkans','bulgaria','mediterranean','italy'],
+  montenegro: ['serbia','balkans'],
   north_sea: ['britain','belgium','germany','english_channel','baltic'],
   english_channel: ['britain','france','belgium','north_sea','mediterranean'],
-  mediterranean: ['france','italy','ottoman','dardanelles','english_channel'],
+  mediterranean: ['france','italy','ottoman','dardanelles','english_channel','greece','bulgaria'],
   baltic: ['russia','poland','germany','north_sea']
 };
 
@@ -6656,6 +6663,16 @@ function recomputeAggregates(fid) {
   });
 }
 
+// Minor nations — contestable territories with VP and economic value
+// These are GM-controlled and can be influenced, allied, or conquered by great powers
+const MINOR_NATIONS = {
+  bulgaria:   { name: 'Bulgaria',    divisions: 2, vpValue: 2, goldBonus: 0, fleetBonus: 0, desc: 'Balkan power with territorial ambitions. Can be influenced by Austria or Russia.' },
+  romania:    { name: 'Romania',     divisions: 3, vpValue: 2, goldBonus: 1, fleetBonus: 0, desc: 'Oil-rich kingdom. Grants +1 Gold/turn to controlling power.' },
+  greece:     { name: 'Greece',      divisions: 2, vpValue: 1, goldBonus: 0, fleetBonus: 1, desc: 'Naval access to Mediterranean. Grants +1 fleet to allied power.' },
+  belgium:    { name: 'Belgium',     divisions: 2, vpValue: 2, goldBonus: 2, fleetBonus: 0, desc: 'Neutral trading hub. +2 Gold/turn. Invasion triggers British auto-entry!', triggersBritain: true },
+  montenegro: { name: 'Montenegro',  divisions: 1, vpValue: 1, goldBonus: 0, fleetBonus: 0, desc: 'Tiny Balkan ally of Serbia. Aligned with Serbian interests.', alignedWith: 'serbia' }
+};
+
 function defaultGameState() {
   const factions = {
     germany: {
@@ -6704,21 +6721,35 @@ function defaultGameState() {
       gold: 22, income: 3, army: 0, navy: 0, vp: 0,
       troops: {}, fleets: {},
       alliances: [], status: [], sales: 0, contracts: [], upgrades: {},
-      blockadedBy: [], blockadeTurns: 0, atWar: false
+      blockadedBy: [], blockadeTurns: 0, atWar: false,
+      loans: [], escalationVP: 0, crisisHistory: [], unitsSold: 0
     },
     schneider: {
       gold: 16, income: 2, army: 0, navy: 0, vp: 0,
       troops: {}, fleets: {},
       alliances: [], status: [], sales: 0, contracts: [], upgrades: {},
-      blockadedBy: [], blockadeTurns: 0, atWar: false
+      blockadedBy: [], blockadeTurns: 0, atWar: false,
+      loans: [], escalationVP: 0, crisisHistory: [], unitsSold: 0
     }
   };
   // Generate units arrays from troops/fleets
   Object.keys(factions).forEach(fid => {
     factions[fid].units = generateUnitsFromTroops(fid, factions[fid].troops, factions[fid].fleets);
   });
+  // Initialize minor nations state
+  const minorNations = {};
+  Object.keys(MINOR_NATIONS).forEach(id => {
+    minorNations[id] = {
+      controller: null,          // faction ID that controls/allies this minor nation, or null
+      status: 'neutral',         // 'neutral', 'allied', 'conquered', 'destroyed'
+      divisions: MINOR_NATIONS[id].divisions,
+      influencePoints: {}        // { factionId: points } — tracks diplomatic influence
+    };
+  });
+
   return {
     factions: factions,
+    minorNations: minorNations,
     battleLog: [],
     turnLog: [],
     actionLog: [],
@@ -6803,9 +6834,30 @@ function loadGameState() {
                 fleetIdx++;
               }
             }
+            // Migrate: add mobilizedTurn for mobilization speed tracking
+            if (u.mobilizedTurn === undefined) u.mobilizedTurn = 0;
           });
         }
+        // Migrate: arms dealer fields
+        if (fid === 'krupp' || fid === 'schneider') {
+          if (!state.factions[fid].loans) state.factions[fid].loans = [];
+          if (state.factions[fid].escalationVP === undefined) state.factions[fid].escalationVP = 0;
+          if (!state.factions[fid].crisisHistory) state.factions[fid].crisisHistory = [];
+          if (state.factions[fid].unitsSold === undefined) state.factions[fid].unitsSold = 0;
+        }
       });
+      // Migrate: add minor nations if missing
+      if (!state.minorNations) {
+        state.minorNations = {};
+        Object.keys(MINOR_NATIONS).forEach(id => {
+          state.minorNations[id] = {
+            controller: null,
+            status: 'neutral',
+            divisions: MINOR_NATIONS[id].divisions,
+            influencePoints: {}
+          };
+        });
+      }
       return state;
     }
   } catch(e) {}
@@ -6854,6 +6906,30 @@ const MOBILIZATION_COSTS = {
   reserve: 0,              // Troops at rest cost nothing extra
   perDivision: 1,          // Cost per division to mobilize (partial mobilization)
   fullMobilization: 0.5    // Cost per division if ALL divisions mobilized at once (50% discount)
+};
+
+// Variable mobilization speed by faction
+// mobilizeTurns: how many turns a unit spends in 'mobilized' state before it can deploy
+// deployTurns: how many turns after deployment before unit is combat-ready (full value)
+// Total pipeline: reserve(1 turn) → mobilized(mobilizeTurns) → deployed(deployTurns) → ready
+const MOBILIZATION_SPEED = {
+  germany: { mobilizeTurns: 1, deployTurns: 1, label: 'Prussian efficiency — fastest mobilization' },
+  france:  { mobilizeTurns: 1, deployTurns: 1, label: 'Plan XVII — rapid mobilization' },
+  britain: { mobilizeTurns: 1, deployTurns: 2, label: 'Volunteer army — standard deployment' },
+  austria: { mobilizeTurns: 1, deployTurns: 2, label: 'Dual monarchy logistics — standard deployment' },
+  ottoman: { mobilizeTurns: 1, deployTurns: 2, label: 'Ottoman reform — standard deployment' },
+  russia:  { mobilizeTurns: 2, deployTurns: 1, label: 'The Steamroller is slow to start — slow mobilization' }
+};
+
+// Combat readiness modifiers based on unit state
+// reserve: worthless (cannot fight at all)
+// mobilized: can defend at penalty, cannot attack
+// deployed but not ready: reduced effectiveness
+// ready (deployed + enough turns): full combat value
+const READINESS_MODIFIERS = {
+  reserve: { canAttack: false, canDefend: false, defenseModifier: 0, label: 'Reserve — cannot fight' },
+  mobilized: { canAttack: false, canDefend: true, defenseModifier: -2, label: 'Mobilized — poor defense only' },
+  deployed: { canAttack: true, canDefend: true, defenseModifier: 0, label: 'Deployed — full combat value' }
 };
 
 // War is costly — these penalties apply to ANY faction at war
@@ -7023,6 +7099,20 @@ function computeEconomy(fid) {
     });
   }
 
+  // --- Minor nation bonuses (from controlled/allied minor nations) ---
+  let minorNationBonus = 0;
+  let minorNationLabel = '';
+  if (!isDealer && gameState.minorNations) {
+    Object.keys(gameState.minorNations).forEach(mnId => {
+      const mn = gameState.minorNations[mnId];
+      const mnDef = MINOR_NATIONS[mnId];
+      if (mn.controller === fid && mnDef && mnDef.goldBonus > 0) {
+        minorNationBonus += mnDef.goldBonus;
+        minorNationLabel += (minorNationLabel ? ', ' : '') + mnDef.name + ' (+' + mnDef.goldBonus + 'g)';
+      }
+    });
+  }
+
   // --- Austria Dual Monarchy Stability bonus ---
   let dualMonarchyBonus = 0;
   if (fid === 'austria' && !f.atWar && !(f.status && f.status.includes('rebellion'))) {
@@ -7041,17 +7131,17 @@ function computeEconomy(fid) {
     desertionRisk = Math.min(2, 1 + Math.floor((f.warTurns || 0) / 2));
   }
 
-  // --- War dividend for arms dealers ---
+  // --- War dividend for arms dealers (increased: +3g/turn) ---
   let warDividend = 0;
   if (isDealer) {
     const atWarFactions = Object.keys(gameState.factions).filter(fk => gameState.factions[fk].atWar);
     if (atWarFactions.length >= 2) {
-      warDividend = 2;
+      warDividend = 3;
     }
   }
 
   const grossIncome = industry + trade + bonus + warDividend + peaceDividend
-                    + tradeAgreementIncome + dualMonarchyBonus + modernizationIncome;
+                    + tradeAgreementIncome + dualMonarchyBonus + modernizationIncome + minorNationBonus;
   const blockadePenalty = tradeLoss + industryLoss;
   const effectiveIncome = Math.max(0, grossIncome - blockadePenalty);
   const baseUpkeep = Math.ceil(f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet);
@@ -7060,6 +7150,8 @@ function computeEconomy(fid) {
   if (!isDealer) {
     const stabThreshold = getStabilityThreshold(f.stability || 0);
     stabilityCost = stabThreshold.unrestCost;
+    // Russia Reform Discount: halved stability costs (modernization efforts)
+    if (fid === 'russia') stabilityCost = Math.max(0, Math.floor(stabilityCost / 2));
   }
   const totalUpkeep = baseUpkeep + mobilizationCost + warPenalty + stabilityCost;
   const net = effectiveIncome - totalUpkeep;
@@ -7071,6 +7163,7 @@ function computeEconomy(fid) {
     peaceDividend, peaceVP, peaceLabel,
     tradeAgreementIncome, dualMonarchyBonus,
     modernizationIncome, desertionRisk,
+    minorNationBonus, minorNationLabel,
     grossIncome, blockadePenalty, effectiveIncome,
     baseUpkeep, totalUpkeep, net,
     isBlockaded: blockadePenalty > 0,
@@ -7310,12 +7403,168 @@ function liftBlockade(targetFid, seaZone) {
   saveGameState();
 }
 
+// ==================== ARMS DEALER ACTIONS ====================
+
+// Offer a loan from arms dealer to a nation
+function offerLoan(dealerFid, borrowerFid, principal) {
+  const dealer = gameState.factions[dealerFid];
+  if (!dealer || !borrowerFid || !principal || principal < 3) {
+    alert('Invalid loan: minimum 3 Gold principal.');
+    return;
+  }
+  if (dealer.gold < principal) {
+    alert('Insufficient funds! You only have ' + dealer.gold + ' Gold.');
+    return;
+  }
+  if (dealerFid === borrowerFid) {
+    alert('Cannot loan to yourself!');
+    return;
+  }
+
+  const interest = Math.ceil(principal * 0.4); // 40% interest
+  const repaymentTurns = 2;
+  const borrower = gameState.factions[borrowerFid];
+
+  // Transfer principal to borrower
+  dealer.gold -= principal;
+  borrower.gold += principal;
+
+  // Record loan
+  if (!dealer.loans) dealer.loans = [];
+  dealer.loans.push({
+    borrower: borrowerFid,
+    principal: principal,
+    interest: interest,
+    originalTurns: repaymentTurns,
+    turnsRemaining: repaymentTurns,
+    turn: gameState.currentTurnNum
+  });
+
+  logAction(dealerFid, 'deal', 'Loan offered to ' + FACTION_NAMES[borrowerFid] + ': ' + principal + 'g principal, ' + interest + 'g interest, repay over ' + repaymentTurns + ' turns');
+  logAction(borrowerFid, 'deal', 'Received loan from ' + FACTION_NAMES[dealerFid] + ': +' + principal + 'g (must repay ' + (principal + interest) + 'g over ' + repaymentTurns + ' turns)');
+
+  saveGameState();
+  renderDashboard();
+  if (typeof renderGMControl === 'function') renderGMControl();
+}
+
+// Manufacture a crisis (arms dealer action)
+function manufactureCrisis(dealerFid, crisisType, targetFid) {
+  const dealer = gameState.factions[dealerFid];
+  const crisisCosts = { border_incident: 2, leaked_treaty: 3, assassination_attempt: 4 };
+  const cost = crisisCosts[crisisType];
+
+  if (!cost) { alert('Invalid crisis type.'); return; }
+  if (dealer.gold < cost) { alert('Insufficient funds! Need ' + cost + ' Gold.'); return; }
+
+  dealer.gold -= cost;
+  if (!dealer.crisisHistory) dealer.crisisHistory = [];
+
+  const crisisLabels = {
+    border_incident: 'Border Incident',
+    leaked_treaty: 'Leaked Treaty',
+    assassination_attempt: 'Assassination Attempt'
+  };
+  const crisisDescs = {
+    border_incident: 'A border incident has been manufactured against ' + FACTION_NAMES[targetFid] + '. They must respond diplomatically or lose 1 VP!',
+    leaked_treaty: 'A secret treaty has been "leaked"! ' + FACTION_NAMES[targetFid] + '\'s diplomatic arrangements are exposed. Diplomatic fallout ensues.',
+    assassination_attempt: 'An assassination attempt targets a leader in ' + (MINOR_NATIONS[targetFid] ? MINOR_NATIONS[targetFid].name : FACTION_NAMES[targetFid]) + '! This creates a casus belli for nearby powers.'
+  };
+
+  dealer.crisisHistory.push({
+    type: crisisType,
+    target: targetFid,
+    turn: gameState.currentTurnNum,
+    cost: cost
+  });
+
+  logAction(dealerFid, 'crisis', crisisLabels[crisisType] + ' manufactured for ' + cost + 'g — ' + crisisDescs[crisisType]);
+
+  // GM notification
+  if (!gameState.resolutionLog) gameState.resolutionLog = [];
+  gameState.resolutionLog.push({
+    icon: '⚠',
+    text: 'CRISIS: ' + FACTION_NAMES[dealerFid] + ' manufactured a ' + crisisLabels[crisisType] + ' targeting ' + (FACTION_NAMES[targetFid] || targetFid) + '. GM must adjudicate the response.',
+    manual: true
+  });
+
+  saveGameState();
+  renderDashboard();
+  if (typeof renderGMControl === 'function') renderGMControl();
+}
+
+// Add escalation VP to an arms dealer (called by GM)
+function addEscalationVP(dealerFid, amount, reason) {
+  const dealer = gameState.factions[dealerFid];
+  if (!dealer) return;
+  dealer.escalationVP = (dealer.escalationVP || 0) + amount;
+  dealer.vp = (dealer.vp || 0) + amount;
+  logAction(dealerFid, 'escalation', 'Escalation VP: +' + amount + ' (' + reason + ')');
+  saveGameState();
+  renderDashboard();
+  if (typeof renderGMControl === 'function') renderGMControl();
+}
+
+// Record a unit sale for arms race VP tracking
+function recordUnitSale(dealerFid, buyerFid, unitType) {
+  const dealer = gameState.factions[dealerFid];
+  if (!dealer) return;
+  dealer.unitsSold = (dealer.unitsSold || 0) + 1;
+  dealer.sales = (dealer.sales || 0) + (unitType === 'army' ? 2 : 6);
+  // Check arms race VP threshold: +1 VP per 3 units sold
+  if (dealer.unitsSold % 3 === 0) {
+    dealer.vp = (dealer.vp || 0) + 1;
+    logAction(dealerFid, 'sales', 'Arms Race Bonus! +1 VP (' + dealer.unitsSold + ' units sold total)');
+  }
+  logAction(dealerFid, 'sales', 'Sold 1 ' + unitType + ' to ' + FACTION_NAMES[buyerFid] + ' (total: ' + dealer.unitsSold + ' units)');
+  saveGameState();
+}
+
+// Set controller of a minor nation
+function setMinorNationController(mnId, controllerFid) {
+  if (!gameState.minorNations) gameState.minorNations = {};
+  if (!gameState.minorNations[mnId]) {
+    const mnDef = MINOR_NATIONS[mnId];
+    gameState.minorNations[mnId] = { controller: null, status: 'neutral', divisions: mnDef ? mnDef.divisions : 0, influencePoints: {} };
+  }
+  const mn = gameState.minorNations[mnId];
+  const oldController = mn.controller;
+  mn.controller = controllerFid || null;
+  mn.status = controllerFid ? 'allied' : 'neutral';
+
+  const mnDef = MINOR_NATIONS[mnId];
+  const mnName = mnDef ? mnDef.name : mnId;
+
+  if (controllerFid) {
+    logAction(controllerFid, 'diplomacy', mnName + ' is now allied with ' + FACTION_NAMES[controllerFid]);
+  }
+  if (oldController && oldController !== controllerFid) {
+    logAction(oldController, 'diplomacy', mnName + ' is no longer allied with ' + FACTION_NAMES[oldController]);
+  }
+  saveGameState();
+}
+
 // Toggle war status for a faction
 function toggleWarStatus(fid) {
   const f = gameState.factions[fid];
+  // War cannot be declared before Turn 4 — nations need time to mobilize and deploy
+  if (gameState.currentTurnNum < 4 && !f.atWar) {
+    alert('War cannot be declared before Turn 4 (1913-14). Nations need time to mobilize and deploy (1 turn mobilize → 1 turn deploy → ready to fight).');
+    return;
+  }
   f.atWar = !f.atWar;
   if (f.atWar) {
     f.warTurns = 0; // Reset war turn counter when entering war
+    // Prompt GM: did an arms dealer influence this war declaration?
+    setTimeout(function() {
+      const dealerInfluence = confirm('Did an arms dealer influence ' + FACTION_NAMES[fid] + '\'s war declaration?\n\nClick OK to award escalation VP, Cancel to skip.');
+      if (dealerInfluence) {
+        const dealer = prompt('Which dealer? Enter "krupp" or "schneider":');
+        if (dealer === 'krupp' || dealer === 'schneider') {
+          addEscalationVP(dealer, 2, 'Influenced ' + FACTION_NAMES[fid] + ' war declaration');
+        }
+      }
+    }, 100);
   } else {
     f.warTurns = 0; // Reset when peace returns
   }
@@ -7371,7 +7620,7 @@ const FACTION_SPECIALS = {
     abilities: [
       { name: 'Mobilization Delay', desc: 'Only half forces available on Turn 1 of any war. The steamroller is slow to start.', type: 'penalty' },
       { name: 'The Steamroller', desc: '14 divisions — tied for largest army. If Germany fights France, your eastern front forces can overwhelm them.', type: 'military' },
-      { name: 'Revolution Risk', desc: 'Must pay 4 Gold for stability or face revolution — lose half army, -3 VP, exit the war.', type: 'penalty', check: function(f) { return f.status && f.status.includes('revolution'); } }
+      { name: 'Revolution Risk', desc: 'Must pay 2 Gold for stability (reform discount) or face revolution — lose half army, -3 VP, exit the war.', type: 'penalty', check: function(f) { return f.status && f.status.includes('revolution'); } }
     ]
   },
   austria: {
@@ -7701,6 +7950,67 @@ function advanceTurn() {
       f.vp = (f.vp || 0) + econ.peaceVP;
       logAction(fid, 'peace', 'Peace VP: +' + econ.peaceVP + ' (' + econ.peaceLabel + ')');
     }
+    // Award VP from controlled minor nations
+    if (gameState.minorNations) {
+      Object.keys(gameState.minorNations).forEach(mnId => {
+        const mn = gameState.minorNations[mnId];
+        const mnDef = MINOR_NATIONS[mnId];
+        if (mn.controller === fid && mnDef && mnDef.vpValue > 0) {
+          f.vp = (f.vp || 0) + mnDef.vpValue;
+          logAction(fid, 'territory', 'Minor nation VP: +' + mnDef.vpValue + ' from ' + mnDef.name);
+        }
+      });
+    }
+
+    // Process arms dealer loans (repayment)
+    const isDealerFaction = fid === 'krupp' || fid === 'schneider';
+    if (isDealerFaction && f.loans && f.loans.length > 0) {
+      const activeLoans = [];
+      f.loans.forEach(loan => {
+        if (loan.turnsRemaining > 0) {
+          const borrower = factions[loan.borrower];
+          const repaymentPerTurn = Math.ceil((loan.principal + loan.interest) / (loan.originalTurns || 2));
+          if (borrower && borrower.gold >= repaymentPerTurn) {
+            borrower.gold -= repaymentPerTurn;
+            f.gold += repaymentPerTurn;
+            loan.turnsRemaining--;
+            logAction(fid, 'income', 'Loan repayment: ' + FACTION_NAMES[loan.borrower] + ' pays ' + repaymentPerTurn + 'g (' + loan.turnsRemaining + ' turns left)');
+            logAction(loan.borrower, 'expense', 'Loan repayment to ' + FACTION_NAMES[fid] + ': -' + repaymentPerTurn + 'g');
+          } else if (borrower) {
+            // Default! Borrower can't pay
+            logAction(fid, 'warning', 'LOAN DEFAULT: ' + FACTION_NAMES[loan.borrower] + ' cannot pay ' + repaymentPerTurn + 'g this turn!');
+            logAction(loan.borrower, 'warning', 'Loan default! Cannot repay ' + FACTION_NAMES[fid]);
+            loan.turnsRemaining--; // Still ticks down
+          }
+          if (loan.turnsRemaining > 0) activeLoans.push(loan);
+          else {
+            logAction(fid, 'income', 'Loan to ' + FACTION_NAMES[loan.borrower] + ' fully repaid!');
+          }
+        }
+      });
+      f.loans = activeLoans;
+    }
+
+    // Arms dealer: Arms Race VP (+1 VP per 3 units sold)
+    if (isDealerFaction && f.unitsSold) {
+      const armsRaceVP = Math.floor(f.unitsSold / 3);
+      const prevArmsRaceVP = Math.floor((f.unitsSold) / 3); // cumulative, checked each turn
+      // VP awarded at game end, tracked here
+    }
+
+    // Arms dealer: No-war penalty check (increased to -8 VP at game end)
+    if (isDealerFaction && gameState.currentTurnNum >= 6) {
+      const anyWar = Object.keys(factions).some(fk => factions[fk].atWar);
+      if (!anyWar) {
+        f.vp = (f.vp || 0) - 8;
+        logAction(fid, 'penalty', 'No war occurred! Peace penalty: -8 VP. The merchants of death starve.');
+      }
+    }
+
+    // Arms dealer: Escalation VP (accumulated from war influence actions)
+    if (isDealerFaction && f.escalationVP > 0) {
+      // escalationVP is added directly when events happen, already in f.vp via addEscalationVP
+    }
 
     summary.push({
       faction: FACTION_NAMES[fid],
@@ -7742,6 +8052,7 @@ function advanceTurn() {
       if (e.tradeAgreementIncome > 0) detail += ' + Trade Agreements +' + e.tradeAgreementIncome + 'g';
       if (e.dualMonarchyBonus > 0) detail += ' + Stability +' + e.dualMonarchyBonus + 'g';
       if (e.modernizationIncome > 0) detail += ' + Modernization +' + e.modernizationIncome + 'g';
+      if (e.minorNationBonus > 0) detail += ' + Minor Nations +' + e.minorNationBonus + 'g (' + e.minorNationLabel + ')';
       if (e.tradeLoss > 0) detail += ' | Trade loss: –' + e.tradeLoss + 'g';
       if (e.industryLoss > 0) detail += ', Industry loss: –' + e.industryLoss + 'g';
       detail += ' | Upkeep –' + e.baseUpkeep + 'g';
@@ -7752,14 +8063,22 @@ function advanceTurn() {
     }
   });
 
-  // Lifecycle transitions: reserve → mobilized (auto after 1 turn in reserve)
+  // Lifecycle transitions: reserve → mobilized → deployed (faction-variable speed)
   Object.keys(factions).forEach(fid => {
     const f = factions[fid];
     if (!f.units) return;
+    const speed = MOBILIZATION_SPEED[fid];
     f.units.forEach(u => {
+      // Reserve → Mobilized (after 1 turn in reserve)
       if (u.state === 'reserve' && u.createdTurn < gameState.currentTurnNum) {
         u.state = 'mobilized';
-        logAction(fid, 'lifecycle', `${getUnitName(u)} mobilized from reserve — ready for deployment`);
+        u.mobilizedTurn = gameState.currentTurnNum;
+        if (speed) {
+          const readyIn = speed.mobilizeTurns;
+          logAction(fid, 'lifecycle', `${getUnitName(u)} mobilized from reserve — deployable in ${readyIn} turn(s)`);
+        } else {
+          logAction(fid, 'lifecycle', `${getUnitName(u)} mobilized from reserve — ready for deployment`);
+        }
       }
     });
     recomputeAggregates(fid);
@@ -8775,6 +9094,14 @@ function renderMilitaryTab(fid) {
     { id: 'readiness', icon: '\u2616', title: 'Force Readiness', desc: 'Mobilize, deploy, and review all unit statuses', cost: '1g/mob' }
   ];
 
+  // Add arms dealer-specific tabs
+  if (isDealer) {
+    decisions.push(
+      { id: 'loans', icon: '$', title: 'Offer Loans', desc: 'Extend credit to nations at 40% interest', cost: 'Variable' },
+      { id: 'crisis', icon: '!', title: 'Manufacture Crisis', desc: 'Border incidents, leaked treaties, assassination attempts', cost: '2-4 Gold' }
+    );
+  }
+
   const validIds = decisions.map(d => d.id);
   if (!validIds.includes(activeActionTab)) activeActionTab = '';
 
@@ -9294,6 +9621,70 @@ function renderSpecialTab(fid) {
     </div>`;
   }
 
+  // --- Arms Dealer: Loans & Crisis Manufacturing ---
+  const isDealerSpecial = fid === 'krupp' || fid === 'schneider';
+  if (isDealerSpecial) {
+    const orders = getOrders(fid);
+    const isSubmitted = orders.submitted;
+    const nationFids = Object.keys(FACTION_NAMES).filter(k => k !== 'krupp' && k !== 'schneider');
+    const borrowerOpts = nationFids.map(k => `<option value="${k}">${FACTION_NAMES[k]} (${gameState.factions[k].gold}g)</option>`).join('');
+
+    // Loan section
+    html += '<div class="tab-section-title">Offer Loans</div>';
+    html += `<div style="font-size:0.85em; margin-bottom:8px; color:var(--ink-light);">
+      Offer credit at 40% interest. Borrower gets cash now, you get repaid over 2 turns.<br>
+      <strong>Escalation VP:</strong> ${f.escalationVP || 0} | <strong>Units Sold:</strong> ${f.unitsSold || 0} (next Arms Race VP at ${((Math.floor((f.unitsSold||0)/3)+1)*3)})
+    </div>`;
+    html += `<div style="display:flex; gap:8px; align-items:end; flex-wrap:wrap; margin-bottom:8px;">
+      <div><label style="font-size:0.8em;">Borrower</label><select id="loanBorrower2" style="display:block; width:100%;">${borrowerOpts}</select></div>
+      <div><label style="font-size:0.8em;">Principal (Gold)</label><input type="number" id="loanPrincipal2" min="3" max="${f.gold}" value="5" style="display:block; width:80px; padding:4px;"></div>
+      <div><button class="action-btn" style="width:auto; margin:0; padding:6px 14px; font-size:0.85em;" onclick="offerLoan('${fid}', document.getElementById('loanBorrower2').value, parseInt(document.getElementById('loanPrincipal2').value))" ${isSubmitted ? 'disabled' : ''}>Offer Loan</button></div>
+    </div>`;
+
+    // Outstanding loans
+    if (f.loans && f.loans.length > 0) {
+      f.loans.forEach(loan => {
+        const totalDue = loan.principal + loan.interest;
+        const perTurn = Math.ceil(totalDue / (loan.originalTurns || 2));
+        html += `<div style="padding:6px 10px; margin:3px 0; background:var(--cream); border:1px solid var(--ink-faint); border-radius:4px; font-size:0.8em;">
+          <strong>${FACTION_NAMES[loan.borrower]}</strong>: ${loan.principal}g + ${loan.interest}g interest | ${perTurn}g/turn | ${loan.turnsRemaining} turn(s) left
+        </div>`;
+      });
+    }
+
+    // Crisis Manufacturing section
+    const allTargets = nationFids.concat(Object.keys(MINOR_NATIONS));
+    const targetOpts = allTargets.map(k => `<option value="${k}">${FACTION_NAMES[k] || (MINOR_NATIONS[k] ? MINOR_NATIONS[k].name + ' (minor)' : k)}</option>`).join('');
+
+    html += '<div class="tab-section-title" style="margin-top:16px;">Manufacture Crisis</div>';
+    html += `<div style="font-size:0.85em; margin-bottom:8px; color:var(--ink-light);">
+      Create incidents to push nations toward war. GM adjudicates the outcome.
+    </div>`;
+    html += `<div style="margin-bottom:8px;">
+      <label style="font-size:0.8em;">Target</label>
+      <select id="crisisTarget2" style="display:block; width:100%; max-width:250px;">${targetOpts}</select>
+    </div>`;
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget2').value)" ${f.gold >= 2 && !isSubmitted ? '' : 'disabled'}>
+      <span>Border Incident — force diplomatic response or -1 VP</span><span class="action-cost">2g</span>
+    </button>`;
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget2').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
+      <span>Leaked Treaty — expose alliances, cause fallout</span><span class="action-cost">3g</span>
+    </button>`;
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget2').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
+      <span>Assassination Attempt — create casus belli</span><span class="action-cost">4g</span>
+    </button>`;
+
+    // Crisis history
+    if (f.crisisHistory && f.crisisHistory.length > 0) {
+      const crisisLabels = { border_incident: 'Border Incident', leaked_treaty: 'Leaked Treaty', assassination_attempt: 'Assassination Attempt' };
+      html += '<div style="margin-top:8px; font-size:0.8em; color:var(--ink-light);"><strong>Crisis Log:</strong></div>';
+      f.crisisHistory.forEach(c => {
+        const targetName = FACTION_NAMES[c.target] || (MINOR_NATIONS[c.target] ? MINOR_NATIONS[c.target].name : c.target);
+        html += `<div style="font-size:0.75em; color:var(--ink-light);">Turn ${c.turn}: ${crisisLabels[c.type]} vs ${targetName} (${c.cost}g)</div>`;
+      });
+    }
+  }
+
   return html;
 }
 
@@ -9319,11 +9710,23 @@ function renderReadinessTab(fid) {
     if (u.state === 'reserve') {
       actionHtml = '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em;" onclick="addOrder(\'' + fid + '\',{type:\'mobilize\',unitId:\'' + u.id + '\',desc:\'Mobilize ' + safeName + '\'})" ' + (isSubmitted ? 'disabled' : '') + '><span>Mobilize</span><span class="action-cost">1g</span></button>';
     } else if (u.state === 'mobilized') {
-      const regionOptions = (u.type === 'army' ? LAND_REGIONS : SEA_REGIONS).map(function(r) { return '<option value="' + r + '">' + REGION_NAMES[r] + '</option>'; }).join('');
-      actionHtml = '<div style="display:flex; align-items:center; gap:6px;">' +
-        '<select id="rdeploy_' + u.id + '" style="padding:4px; border:1px solid var(--ink-light); font-family:\'Crimson Text\',serif; font-size:0.85em;">' + regionOptions + '</select>' +
-        '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em;" onclick="addOrder(\'' + fid + '\',{type:\'deploy\',unitId:\'' + u.id + '\',region:document.getElementById(\'rdeploy_' + u.id + '\').value,desc:\'Deploy ' + safeName + ' to \'+REGION_NAMES[document.getElementById(\'rdeploy_' + u.id + '\').value]})" ' + (isSubmitted ? 'disabled' : '') + '><span>Deploy</span></button>' +
-        '</div>';
+      // Check if enough mobilization turns have passed for this faction
+      const speed = MOBILIZATION_SPEED[fid];
+      const mobilizedTurn = u.mobilizedTurn || 0;
+      const turnsInMobilized = gameState.currentTurnNum - mobilizedTurn;
+      const requiredTurns = speed ? speed.mobilizeTurns : 1;
+      const canDeploy = turnsInMobilized >= requiredTurns;
+
+      if (canDeploy) {
+        const regionOptions = (u.type === 'army' ? LAND_REGIONS : SEA_REGIONS).map(function(r) { return '<option value="' + r + '">' + REGION_NAMES[r] + '</option>'; }).join('');
+        actionHtml = '<div style="display:flex; align-items:center; gap:6px;">' +
+          '<select id="rdeploy_' + u.id + '" style="padding:4px; border:1px solid var(--ink-light); font-family:\'Crimson Text\',serif; font-size:0.85em;">' + regionOptions + '</select>' +
+          '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em;" onclick="addOrder(\'' + fid + '\',{type:\'deploy\',unitId:\'' + u.id + '\',region:document.getElementById(\'rdeploy_' + u.id + '\').value,desc:\'Deploy ' + safeName + ' to \'+REGION_NAMES[document.getElementById(\'rdeploy_' + u.id + '\').value]})" ' + (isSubmitted ? 'disabled' : '') + '><span>Deploy</span></button>' +
+          '</div>';
+      } else {
+        const turnsLeft = requiredTurns - turnsInMobilized;
+        actionHtml = '<span style="color:#b8860b; font-size:0.85em;">⏳ Mobilizing (' + turnsLeft + ' turn' + (turnsLeft > 1 ? 's' : '') + ' remaining)</span>';
+      }
     } else {
       actionHtml = '<span style="color:var(--ink-light); font-size:0.85em;">\u2714 In position</span>';
     }
@@ -9443,6 +9846,93 @@ function renderActionTabContent(fid) {
       }
     });
     return html;
+  }
+
+  // --- ARMS DEALER: LOANS ---
+  if (activeActionTab === 'loans') {
+    if (!isDealer) return '<div class="empty-state">Only arms dealers can offer loans.</div>';
+    const nationFids = Object.keys(FACTION_NAMES).filter(k => k !== 'krupp' && k !== 'schneider');
+    const borrowerOpts = nationFids.map(k => `<option value="${k}">${FACTION_NAMES[k]} (${gameState.factions[k].gold}g)</option>`).join('');
+
+    let loansListHtml = '';
+    if (f.loans && f.loans.length > 0) {
+      loansListHtml = '<div style="margin-top:16px;"><strong>Outstanding Loans:</strong></div>';
+      f.loans.forEach((loan, i) => {
+        const totalDue = loan.principal + loan.interest;
+        const perTurn = Math.ceil(totalDue / (loan.originalTurns || 2));
+        loansListHtml += `<div style="padding:8px 12px; margin:4px 0; background:var(--cream); border:1px solid var(--ink-faint); border-radius:4px; font-size:0.85em;">
+          <strong>${FACTION_NAMES[loan.borrower]}</strong>: ${loan.principal}g principal + ${loan.interest}g interest = ${totalDue}g total | ${perTurn}g/turn | ${loan.turnsRemaining} turn(s) remaining
+        </div>`;
+      });
+    }
+
+    let totalInterestEarned = 0;
+    if (f.loans) f.loans.forEach(l => totalInterestEarned += l.interest);
+
+    return `
+      <div style="font-size:0.9em; margin-bottom:12px; color:var(--ink-light);">
+        Offer loans to nations at 40% interest. They get cash now, you get paid back over 2 turns.<br>
+        <strong>VP Bonus:</strong> +1 VP per 4 Gold of interest collected.<br>
+        <strong>Escalation VP:</strong> ${f.escalationVP || 0} earned | <strong>Units Sold:</strong> ${f.unitsSold || 0} (next Arms Race VP at ${((Math.floor((f.unitsSold||0)/3)+1)*3)})
+      </div>
+      <div class="move-selector" style="margin-bottom:12px;">
+        <div><label>Borrower</label><select id="loanBorrower">${borrowerOpts}</select></div>
+        <div><label>Principal (Gold)</label><input type="number" id="loanPrincipal" min="3" max="${f.gold}" value="5"></div>
+        <div style="padding-top:18px; font-size:0.85em; color:var(--ink-light);">
+          Interest: <strong id="loanInterestDisplay">2g</strong> (40%)
+        </div>
+      </div>
+      <button class="action-btn" style="max-width:250px;" onclick="offerLoan('${fid}', document.getElementById('loanBorrower').value, parseInt(document.getElementById('loanPrincipal').value))" ${isSubmitted ? 'disabled' : ''}>
+        <span>Offer Loan</span>
+        <span class="action-cost">Transfer Gold</span>
+      </button>
+      ${loansListHtml}
+    `;
+  }
+
+  // --- ARMS DEALER: CRISIS MANUFACTURING ---
+  if (activeActionTab === 'crisis') {
+    if (!isDealer) return '<div class="empty-state">Only arms dealers can manufacture crises.</div>';
+    const allTargets = Object.keys(FACTION_NAMES).filter(k => k !== fid);
+    const minorTargets = Object.keys(MINOR_NATIONS);
+    const targetOpts = allTargets.map(k => `<option value="${k}">${FACTION_NAMES[k]}</option>`).join('') +
+      minorTargets.map(k => `<option value="${k}">${MINOR_NATIONS[k].name} (minor)</option>`).join('');
+
+    let historyHtml = '';
+    if (f.crisisHistory && f.crisisHistory.length > 0) {
+      const crisisLabels = { border_incident: 'Border Incident', leaked_treaty: 'Leaked Treaty', assassination_attempt: 'Assassination Attempt' };
+      historyHtml = '<div style="margin-top:16px;"><strong>Crisis History:</strong></div>';
+      f.crisisHistory.forEach(c => {
+        const targetName = FACTION_NAMES[c.target] || (MINOR_NATIONS[c.target] ? MINOR_NATIONS[c.target].name : c.target);
+        historyHtml += `<div style="padding:4px 12px; margin:2px 0; font-size:0.8em; color:var(--ink-light);">
+          Turn ${c.turn}: ${crisisLabels[c.type] || c.type} vs ${targetName} (${c.cost}g)
+        </div>`;
+      });
+    }
+
+    return `
+      <div style="font-size:0.9em; margin-bottom:12px; color:var(--ink-light);">
+        Manufacture crises to push nations toward war. Each crisis forces a diplomatic response.<br>
+        The GM adjudicates the outcome during resolution.
+      </div>
+      <div style="margin-bottom:8px;">
+        <label style="font-size:0.85em;">Target</label>
+        <select id="crisisTarget" style="display:block; width:100%; max-width:300px; margin-bottom:8px;">${targetOpts}</select>
+      </div>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget').value)" ${f.gold >= 2 && !isSubmitted ? '' : 'disabled'}>
+        <span>Border Incident — force diplomatic response or -1 VP</span>
+        <span class="action-cost">2 Gold</span>
+      </button>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
+        <span>Leaked Treaty — expose alliances, cause diplomatic fallout</span>
+        <span class="action-cost">3 Gold</span>
+      </button>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
+        <span>Assassination Attempt — create casus belli for nearby powers</span>
+        <span class="action-cost">4 Gold</span>
+      </button>
+      ${historyHtml}
+    `;
   }
 
   return '';
@@ -10595,8 +11085,48 @@ function renderGMControl() {
     </div>
   </div>`;
 
+  // Minor Nations section
+  const factionSelectOptions = nationFids.map(fid => `<option value="${fid}">${FACTION_NAMES[fid]}</option>`).join('');
+  let minorNationsHtml = '';
+  if (gameState.minorNations) {
+    minorNationsHtml = Object.keys(MINOR_NATIONS).map(mnId => {
+      const mn = gameState.minorNations[mnId] || { controller: null, status: 'neutral', divisions: MINOR_NATIONS[mnId].divisions };
+      const mnDef = MINOR_NATIONS[mnId];
+      const controllerName = mn.controller ? FACTION_NAMES[mn.controller] : 'Neutral';
+      const statusColor = mn.controller ? 'var(--blue-entente)' : 'var(--ink-light)';
+      const vpBadge = mnDef.vpValue > 0 ? `<span style="background:#2d5016; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.7em; margin-left:4px;">+${mnDef.vpValue} VP/turn</span>` : '';
+      const goldBadge = mnDef.goldBonus > 0 ? `<span style="background:#b8860b; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.7em; margin-left:4px;">+${mnDef.goldBonus}g/turn</span>` : '';
+      const fleetBadge = mnDef.fleetBonus > 0 ? `<span style="background:#1a3a5c; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.7em; margin-left:4px;">+${mnDef.fleetBonus} fleet</span>` : '';
+      const britainWarning = mnDef.triggersBritain ? `<span style="background:#8b1a1a; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.7em; margin-left:4px;">⚠ Invasion triggers Britain!</span>` : '';
+      return `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; margin:4px 0; background:var(--cream); border:1px solid var(--ink-faint); border-radius:6px;">
+        <div>
+          <strong>${mnDef.name}</strong> ${vpBadge}${goldBadge}${fleetBadge}${britainWarning}
+          <div style="font-size:0.8em; color:var(--ink-light);">${mn.divisions} division(s) | ${mnDef.desc}</div>
+          <div style="font-size:0.8em; color:${statusColor};">Status: <strong>${controllerName}</strong></div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <select id="mnCtrl_${mnId}" style="padding:4px; font-size:0.8em;">
+            <option value="">Neutral</option>
+            ${factionSelectOptions}
+          </select>
+          <button class="print-btn" style="font-size:0.7em; padding:4px 10px;" onclick="setMinorNationController('${mnId}', document.getElementById('mnCtrl_${mnId}').value); renderGMControl(); renderDashboard();">Set</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  let minorNationsSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Minor Nations &amp; Territories</span><span>▼</span>
+    </div>
+    <div class="gm-section-body">
+      <p style="font-size:0.85em; color:var(--ink-light); margin-bottom:8px;">Assign control of minor nations to great powers. Controllers gain VP and gold bonuses each turn.</p>
+      ${minorNationsHtml}
+    </div>
+  </div>`;
+
   const messagesSection = renderGMMessagesSection();
-  container.innerHTML = turnSection + storylineHtml + messagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + battleSection + economySection + factionSection + overviewSection + logSection;
+  container.innerHTML = turnSection + storylineHtml + messagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
 
   // Render turn tracker into GM console
   renderGMTurnTracker();
@@ -11569,6 +12099,7 @@ function rollBattle() {
   if (document.getElementById('modFortified').checked) defMod += 2;
   if (document.getElementById('modTrench').checked) defMod += 1;
   if (document.getElementById('modRussiaMob').checked) defDiv = Math.ceil(defDiv / 2);
+  if (document.getElementById('modUndeployed').checked) defMod -= 2; // Mobilized but not deployed penalty
 
   // Show dice
   const diceDisplay = document.getElementById('diceDisplay');
