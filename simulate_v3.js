@@ -29,6 +29,8 @@ function newGame() {
     schlieffen: null, // null, 'success', 'fail'
     blockadeOn: false,
     franceFranceTroops: 0, // BEF in France
+    befSize: 0, // size of BEF commitment
+    franceLobbySpent: 0, // gold France spent lobbying Britain
     log: [],
   };
 }
@@ -223,47 +225,59 @@ function simulateTurn(g) {
     const brit = g.factions.britain;
 
     if (ger.army >= 16 && ger.deployed) {
-      // --- STEP 1: Britain decides whether to deploy BEF to France ---
-      // If Britain mobilized early (hawkish cabinet, deployed=true), BEF goes to France as deterrent
-      const befDeployed = brit.deployed; // true if Britain mob'd T2
+      // --- STEP 1: France lobbies Britain for BEF ---
+      // France spends gold pre-war (T1-3) convincing Britain to deploy BEF
+      // Modeled as: France's diplomatic investment + Britain's readiness
+      const franceLobbyGold = Math.min(4, Math.max(0, fra.gold)); // France invests up to 4g in diplomacy
+      fra.gold -= franceLobbyGold;
+      g.franceLobbySpent = franceLobbyGold;
+
+      // BEF deployment chance: base 30% + 10% per gold France spent lobbying + 20% if Britain mob'd early
+      const britishReady = brit.deployed;
+      const befChance = clamp(0.3 + (franceLobbyGold * 0.10) + (britishReady ? 0.20 : 0), 0, 0.95);
+      const befDeployed = Math.random() < befChance;
+
       if (befDeployed) {
-        const befSize = Math.min(4, brit.army);
+        // Full BEF deployment — Britain commits big (10 divs if they have them, representing full expeditionary force)
+        const befSize = Math.min(10, brit.army);
         g.franceFranceTroops = befSize;
-        log.push(`**BEF DEPLOYED to France!** ${befSize} British divisions cross the Channel as deterrent.`);
+        g.befSize = befSize;
+        log.push(`**France lobbied Britain (${franceLobbyGold}g spent). BEF DEPLOYED: ${befSize} divisions cross the Channel!** (chance was ${Math.round(befChance*100)}%)`);
       } else {
-        log.push(`BEF not deployed — Britain hasn't mobilized. France stands alone.`);
+        g.befSize = 0;
+        log.push(`France lobbied Britain (${franceLobbyGold}g spent) but BEF NOT deployed (chance was ${Math.round(befChance*100)}%). France stands alone.`);
       }
 
       // --- STEP 2: Germany decides Schlieffen based on BEF presence ---
       if (befDeployed) {
-        // BEF is in France — Schlieffen too risky, Germany cancels and defends
+        // Massive BEF in France — Schlieffen is suicide, Germany cancels
         g.schlieffen = 'cancelled';
         ger.schlieffenDone = false;
-        log.push(`**SCHLIEFFEN PLAN CANCELLED!** BEF in France makes Belgium gamble too risky — Germany digs in on defense.`);
-        // No Belgium invasion → Britain has no casus belli for full war
-        // BEF came as deterrent but Parliament won't vote for offensive war
+        log.push(`**SCHLIEFFEN PLAN CANCELLED!** ${g.befSize}-division BEF makes Belgium gamble impossible — Germany digs in.`);
+        // No Belgium invasion → no casus belli
         if (Math.random() < 0.2) {
           brit.atWar = true; brit.warTurns = 0;
-          log.push(`Britain declares war anyway (hawks: "we're already committed!")`);
+          log.push(`Britain declares war anyway (hawks: "we're already committed with ${g.befSize} divisions!")`);
         } else {
-          // BEF withdraws — it was a deterrent, not a commitment
           g.franceFranceTroops = 0;
-          log.push(`**Britain stays NEUTRAL.** BEF deterrent worked — no Belgium invasion, BEF withdraws. Parliament won't vote for war.`);
+          log.push(`**Britain stays NEUTRAL.** BEF deterrent worked — no Belgium invasion, BEF withdraws. Parliament won't authorize offensive war.`);
         }
         log.push(`**WAR: Central Powers vs France/Russia. Germany on full defense.**`);
       } else {
-        // No BEF — Germany executes Schlieffen! Gamble for Paris!
+        // No BEF — Germany executes Schlieffen through Belgium!
         log.push(`**WAR DECLARED! Germany executes SCHLIEFFEN PLAN through Belgium!**`);
         // Belgium invasion → Britain outraged, joins ~90%
         if (Math.random() < 0.9) {
           brit.atWar = true; brit.warTurns = 0;
-          log.push(`**Britain joins! "Belgian neutrality is sacred!" — BEF will arrive later.**`);
+          log.push(`**Britain joins! "Belgian neutrality is sacred!" — full BEF will deploy to France.**`);
+          // Britain deploys full BEF to France for combat next turn (10 divs)
+          g.befSize = Math.min(10, brit.army);
         } else {
           log.push(`Britain stays neutral despite Belgium (isolationists prevail — rare)`);
         }
 
         const germanWest = Math.min(ger.army, Math.round(ger.army * 0.75));
-        // No BEF in France yet — they'll arrive later as reinforcements
+        // No BEF in France yet — Schlieffen races to Paris before they arrive
         let modifier = 0;
         if (germanWest >= 18) modifier += 1;
         if (germanWest > fra.army) modifier += 1;
@@ -290,7 +304,6 @@ function simulateTurn(g) {
       }
     } else {
       log.push(`Germany cannot execute Schlieffen Plan (army: ${ger.army}, deployed: ${ger.deployed})`);
-      // No Schlieffen = no Belgium = Britain likely stays out
       if (Math.random() < 0.2) {
         brit.atWar = true; brit.warTurns = 0;
         log.push(`Britain joins anyway (hawks override)`);
@@ -322,12 +335,20 @@ function simulateTurn(g) {
 
     // Skip first-turn combat if Schlieffen resolved this turn
     if (t > 4 || g.schlieffen === 'fail') {
-      // --- Western Front: Germany vs France ---
+      // Russia pressing Eastern Front forces Germany to split forces
+      const russianPressure = (rus.atWar && rus.deployed && rus.army >= 18);
+
+      // --- Western Front: Germany vs France (+BEF) ---
       if (ger.army > 2 && fra.army > 0 && !fra.rebellion) {
-        const gerWest = Math.round(ger.army * 0.6);
+        const gerWestPct = russianPressure ? 0.50 : 0.60;
+        const gerWest = Math.round(ger.army * gerWestPct);
+        if (russianPressure) log.push(`Russian Steamroller pressure! Germany forced to reinforce east — only ${Math.round(gerWestPct*100)}% committed west.`);
+
         const fraForce = fra.army + (fra.deployed ? 2 : 0); // fortress bonus
-        const befBonus = (brit.atWar && brit.deployed && !brit.befSent && brit.army >= 4) ? 4 : 0;
-        if (befBonus > 0) { brit.befSent = true; brit.army -= 4; }
+        // BEF: full expeditionary force (up to 10 divs) arrives after Schlieffen turn
+        const befAvailable = (brit.atWar && brit.deployed && !brit.befSent && g.befSize > 0) ? g.befSize : 0;
+        const befBonus = Math.min(befAvailable, brit.army);
+        if (befBonus > 0) { brit.befSent = true; brit.army -= befBonus; log.push(`**BEF arrives on Western Front!** ${befBonus} British divisions reinforce France.`); }
         const fraTotal = fraForce + befBonus;
 
         // Germany defense: +5 Alsace fortifications (Metz/Strasbourg) + +3 general German defensive quality (superior training, interior lines)
@@ -360,9 +381,11 @@ function simulateTurn(g) {
       }
 
       // --- Eastern Front: Germany East vs Russia ---
+      // Russia commits 70% of army to Eastern Front (aggressive — they WANT this fight)
       if (ger.army > 2 && rus.army > 2 && rus.atWar) {
-        const gerEast = Math.round(ger.army * 0.3);
-        const rusForce = Math.round(rus.army * 0.6);
+        const gerEastPct = russianPressure ? 0.40 : 0.30; // Germany forced to match Russian pressure
+        const gerEast = Math.round(ger.army * gerEastPct);
+        const rusForce = Math.round(rus.army * 0.70); // Russia commits 70% — wants Eastern Front dominance
         const rusMod = rus.deployed ? 0 : -2;
 
         // German eastern defense: +2 (East Prussian fortifications, Tannenberg-style interior lines)
@@ -552,6 +575,10 @@ function scoreGame(g) {
   let fraSecret = 0;
   // France bonus: +3 if Russia is still fighting (kept ally alive)
   if (f.russia.atWar && !f.russia.revolution) fraSecret += 3;
+  // France bonus: +5 if Britain joined the war (successful diplomacy — "l'Entente Cordiale holds!")
+  if (f.britain.atWar) fraSecret += 5;
+  // France bonus: +3 if BEF was sent to France (convinced Britain to commit troops)
+  if (f.britain.befSent) fraSecret += 3;
   scores.france = f.france.vp + fraSecret;
 
   // Britain: Continental Balance +7, Kaiser Overthrown +7, Splendid Isolation +3, France Must Not Fall -7
@@ -603,15 +630,14 @@ function scoreGame(g) {
 }
 
 // --- Run simulations ---
-console.log('# The Guns of August — V3.2 Balance: 10-Game Simulation\n');
-console.log('## V3.2 Changes');
-console.log('- **Germany**: Alsace fortification defense +3 (harder for France to take)');
-console.log('- **Germany/Austria**: Can foment Russian revolution (spend gold to destabilize)');
-console.log('- **Russia PUBLIC**: +10 VP if Tsar stays in power (no revolution at game end)');
-console.log('- **Russia Secret**: +4 VP protect Balkans, +2 VP Eastern Front wins, +3 VP allied gold ≥8');
-console.log('- **France/Britain**: Send gold to Russia during war (keep Eastern Front alive) — +3 VP each if Russia survives');
-console.log('- **Krupp**: +5 VP if Germany wins, wartime arms sales to Germany/Austria, +1 VP per 4 CP arms');
-console.log('- **Austria**: +3 secret VP if Russia revolution (helped cause it)');
+console.log('# The Guns of August — V3.4 Balance: 10-Game Simulation\n');
+console.log('## V3.4 Changes');
+console.log('- **Germany**: Alsace +5 defense, Prussian doctrine +3, East Prussia +2. Only attacks via Schlieffen.');
+console.log('- **France**: Lobbies Britain for BEF (spends gold). +5 VP if Britain joins, +3 VP if BEF sent, +3 VP if Russia survives.');
+console.log('- **BEF**: Now up to 10 divisions (full expeditionary force), not 4.');
+console.log('- **Russia**: Commits 70% to Eastern Front. Steamroller (18+ divs) forces Germany to split 50/50 instead of 60/40.');
+console.log('- **France peace VP**: 0 (must fight for everything)');
+console.log('- **Diplomatic chain**: France lobbies Britain → BEF deployed → deters Schlieffen → Germany must convince Britain to stay out');
 console.log('');
 
 const allScores = [];
