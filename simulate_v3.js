@@ -206,15 +206,6 @@ function simulateTurn(g) {
     ['germany','austria'].forEach(fid => { g.factions[fid].atWar = true; g.factions[fid].warTurns = 0; });
     ['france','russia'].forEach(fid => { g.factions[fid].atWar = true; g.factions[fid].warTurns = 0; });
 
-    // Britain joins ~70% of the time (Belgium invasion)
-    const britainJoins = Math.random() < 0.7;
-    if (britainJoins) {
-      g.factions.britain.atWar = true; g.factions.britain.warTurns = 0;
-      log.push(`**WAR DECLARED! Central Powers vs Entente. Britain joins (Belgium invaded)!**`);
-    } else {
-      log.push(`**WAR DECLARED! Central Powers vs Entente. Britain stays neutral (no Belgium invasion).**`);
-    }
-
     // Ottoman joins Central Powers ~50% of time
     if (Math.random() < 0.5) {
       g.factions.ottoman.atWar = true; g.factions.ottoman.warTurns = 0;
@@ -225,34 +216,62 @@ function simulateTurn(g) {
     g.factions.austria.stab = clamp(g.factions.austria.stab + 2, 0, 10);
     log.push(`Austria war rally: stability +2 → ${g.factions.austria.stab}`);
 
-    // --- Schlieffen Plan attempt ---
-    // Germany needs 16+ divs, Britain must not have BEF in France
+    // --- Schlieffen Plan decision ---
+    // Germany must CHOOSE: execute Schlieffen (invade Belgium → Britain joins) or defend (no Belgium → Britain likely stays out)
     const ger = g.factions.germany;
     const fra = g.factions.france;
     const brit = g.factions.britain;
 
     if (ger.army >= 16 && ger.deployed) {
-      const befInFrance = brit.atWar && brit.deployed ? Math.min(4, brit.army) : 0;
-      g.franceFranceTroops = befInFrance;
-
-      // V3.1: Germany CANCELS Schlieffen if BEF is deployed — too risky with -2 modifier
-      if (befInFrance > 0) {
-        g.schlieffen = 'cancelled';
-        log.push(`**SCHLIEFFEN PLAN CANCELLED!** BEF deployed in France (${befInFrance} divs). Germany shifts to conventional western defense — no Belgium invasion, preserves forces.`);
-        // Germany gets a defensive bonus instead: digs in on Alsace, keeps full army
-        ger.schlieffenDone = false; // didn't attempt it
+      // --- STEP 1: Britain decides whether to deploy BEF to France ---
+      // If Britain mobilized early (hawkish cabinet, deployed=true), BEF goes to France as deterrent
+      const befDeployed = brit.deployed; // true if Britain mob'd T2
+      if (befDeployed) {
+        const befSize = Math.min(4, brit.army);
+        g.franceFranceTroops = befSize;
+        log.push(`**BEF DEPLOYED to France!** ${befSize} British divisions cross the Channel as deterrent.`);
       } else {
-        const germanWest = Math.min(ger.army, Math.round(ger.army * 0.75));
+        log.push(`BEF not deployed — Britain hasn't mobilized. France stands alone.`);
+      }
 
+      // --- STEP 2: Germany decides Schlieffen based on BEF presence ---
+      if (befDeployed) {
+        // BEF is in France — Schlieffen too risky, Germany cancels and defends
+        g.schlieffen = 'cancelled';
+        ger.schlieffenDone = false;
+        log.push(`**SCHLIEFFEN PLAN CANCELLED!** BEF in France makes Belgium gamble too risky — Germany digs in on defense.`);
+        // No Belgium invasion → Britain has no casus belli for full war
+        // BEF came as deterrent but Parliament won't vote for offensive war
+        if (Math.random() < 0.2) {
+          brit.atWar = true; brit.warTurns = 0;
+          log.push(`Britain declares war anyway (hawks: "we're already committed!")`);
+        } else {
+          // BEF withdraws — it was a deterrent, not a commitment
+          g.franceFranceTroops = 0;
+          log.push(`**Britain stays NEUTRAL.** BEF deterrent worked — no Belgium invasion, BEF withdraws. Parliament won't vote for war.`);
+        }
+        log.push(`**WAR: Central Powers vs France/Russia. Germany on full defense.**`);
+      } else {
+        // No BEF — Germany executes Schlieffen! Gamble for Paris!
+        log.push(`**WAR DECLARED! Germany executes SCHLIEFFEN PLAN through Belgium!**`);
+        // Belgium invasion → Britain outraged, joins ~90%
+        if (Math.random() < 0.9) {
+          brit.atWar = true; brit.warTurns = 0;
+          log.push(`**Britain joins! "Belgian neutrality is sacred!" — BEF will arrive later.**`);
+        } else {
+          log.push(`Britain stays neutral despite Belgium (isolationists prevail — rare)`);
+        }
+
+        const germanWest = Math.min(ger.army, Math.round(ger.army * 0.75));
+        // No BEF in France yet — they'll arrive later as reinforcements
         let modifier = 0;
         if (germanWest >= 18) modifier += 1;
         if (germanWest > fra.army) modifier += 1;
         if (germanWest < fra.army) modifier -= 1;
-        // No BEF check needed — we already filtered that out
 
         const roll = d6();
         const total = roll + modifier;
-        g.factions.germany.schlieffenDone = true;
+        ger.schlieffenDone = true;
 
         if (total >= 4) {
           g.schlieffen = 'success';
@@ -271,9 +290,16 @@ function simulateTurn(g) {
       }
     } else {
       log.push(`Germany cannot execute Schlieffen Plan (army: ${ger.army}, deployed: ${ger.deployed})`);
+      // No Schlieffen = no Belgium = Britain likely stays out
+      if (Math.random() < 0.2) {
+        brit.atWar = true; brit.warTurns = 0;
+        log.push(`Britain joins anyway (hawks override)`);
+      } else {
+        log.push(`Britain stays neutral — no Belgian invasion`);
+      }
     }
 
-    // Britain blockades Germany
+    // Britain blockades Germany IF at war
     if (g.factions.britain.atWar) {
       g.blockadeOn = true;
       log.push(`Britain blockades Germany`);
@@ -304,12 +330,13 @@ function simulateTurn(g) {
         if (befBonus > 0) { brit.befSent = true; brit.army -= 4; }
         const fraTotal = fraForce + befBonus;
 
-        // Germany gets +3 defense bonus for Alsace fortifications (Metz/Strasbourg)
-        const alsaceDefense = ger.alsace ? 3 : 0;
-        const gerRoll = gerWest + alsaceDefense + d6();
+        // Germany defense: +5 Alsace fortifications (Metz/Strasbourg) + +3 general German defensive quality (superior training, interior lines)
+        const alsaceDefense = ger.alsace ? 5 : 0;
+        const germanDefense = 3; // Prussian defensive doctrine, interior rail lines
+        const gerRoll = gerWest + alsaceDefense + germanDefense + d6();
         const fraRoll = fraTotal + d6();
         const margin = gerRoll - fraRoll;
-        if (alsaceDefense > 0) log.push(`Germany Alsace fortification defense bonus: +${alsaceDefense}`);
+        log.push(`Germany defense bonuses: Alsace +${alsaceDefense}, Prussian doctrine +${germanDefense}`);
 
         let gerLoss, fraLoss, result;
         if (margin >= 6) { result = 'Crushing German Victory'; gerLoss = pct(gerWest, 0.1); fraLoss = pct(fraTotal, 0.6); }
@@ -338,9 +365,12 @@ function simulateTurn(g) {
         const rusForce = Math.round(rus.army * 0.6);
         const rusMod = rus.deployed ? 0 : -2;
 
-        const gerRoll = gerEast + d6();
+        // German eastern defense: +2 (East Prussian fortifications, Tannenberg-style interior lines)
+        const gerEastDefense = 2;
+        const gerRoll = gerEast + gerEastDefense + d6();
         const rusRoll = rusForce + rusMod + d6();
         const margin = gerRoll - rusRoll;
+        log.push(`Germany eastern defense bonus: +${gerEastDefense}`);
 
         let gerLoss, rusLoss, result;
         if (margin >= 6) { result = 'Crushing German Victory'; gerLoss = pct(gerEast, 0.1); rusLoss = pct(rusForce, 0.6); }
