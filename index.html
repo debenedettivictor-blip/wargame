@@ -11894,13 +11894,6 @@ function renderMap() {
       style: defaultStyle,
       onEachFeature: (feature, layer) => {
         const name = feature.properties.NAME;
-        const isUK = name === 'United Kingdom of Great Britain and Ireland';
-
-        if (!isUK) {
-          layer.options.interactive = false;
-          theatreMapLayers.push(layer);
-          return;
-        }
 
         layer.on('mouseover', function(e) {
           if (selectedLayer !== this) {
