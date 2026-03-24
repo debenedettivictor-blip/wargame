@@ -4044,14 +4044,15 @@ body::before {
   <div class="objectives">
     <div class="obj-title">Shared Faction Objectives (known to all)</div>
     <div class="obj-list">
-      <div>Retain control of Alsace-Lorraine at game end (+3 VP to all German players)</div>
-      <div>Maintain the strongest army on the continent (+2 VP to all)</div>
+      <div>Retain control of Alsace-Lorraine at game end (+8 VP to all German players)</div>
+      <div>Maintain the strongest army on the continent (+4 VP to all)</div>
+      <div>Capture Paris (+5 VP to all — France collapses)</div>
       <div>Secure alliance with Austria-Hungary or Ottoman Empire (+1 VP each, to all)</div>
     </div>
   </div>
   <div class="secret-obj" style="margin-bottom:8px;">
     <strong>🔒 Shared Secret Objectives (only Germany sees)</strong><br>
-    ◈ The Schlieffen Plan: If war begins, conquer France within 2 turns (+5 VP to all, –3 VP to all if it fails)
+    ◈ <strong>The Schlieffen Plan (+5 VP, –3 VP if failed):</strong> Invade France through Belgium within 2 turns of war. <strong>Requirements for success:</strong> Germany must commit 10+ divisions to the western front, must have Artillery upgrade, and Britain must NOT have troops deployed in France. If Britain has BEF deployed, the plan has very low chance of success. GM rolls d6: base 4+ succeeds, +1 if 12+ divisions committed, +1 if France has fewer divisions, –2 if British troops in France, –1 if France has trenches. Success = capture Paris, +5 VP. Failure = –3 VP, heavy losses.
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
     <div class="role-card" data-role="kaiser">
@@ -7576,6 +7577,91 @@ function recordUnitSale(dealerFid, buyerFid, unitType) {
   saveGameState();
 }
 
+// ==================== SCHLIEFFEN PLAN RESOLUTION ====================
+// GM triggers this when Germany declares execution of the Schlieffen Plan
+function resolveSchlieffenPlan() {
+  const germany = gameState.factions.germany;
+  const france = gameState.factions.france;
+  const britain = gameState.factions.britain;
+  if (!germany || !france) { alert('Germany or France not found!'); return; }
+  if (!germany.atWar) { alert('Germany must be at war to execute the Schlieffen Plan!'); return; }
+  if (germany.schlieffenResolved) { alert('The Schlieffen Plan has already been resolved this game.'); return; }
+
+  // Calculate modifiers
+  const germanWestDivs = (germany.troops['france'] || 0) + (germany.troops['paris'] || 0) + (germany.troops['alsace_lorraine'] || 0);
+  const hasArtillery = germany.upgrades && germany.upgrades.artillery;
+  const befInFrance = britain ? ((britain.troops['france'] || 0) + (britain.troops['paris'] || 0)) : 0;
+  const frenchDivs = (france.troops['france'] || 0) + (france.troops['paris'] || 0);
+  const frenchTrenches = france.upgrades && france.upgrades.trenches;
+
+  let modifier = 0;
+  let modDetails = [];
+
+  // Base requirement: need 10+ divisions committed
+  if (germanWestDivs < 10) {
+    alert('Schlieffen Plan requires at least 10 divisions on the western front!\nCurrently committed: ' + germanWestDivs + ' divisions (france + paris + alsace_lorraine regions).');
+    return;
+  }
+
+  // Modifiers
+  if (germanWestDivs >= 12) { modifier += 1; modDetails.push('+1 (12+ divisions committed: ' + germanWestDivs + ')'); }
+  if (germanWestDivs < frenchDivs) { modifier -= 1; modDetails.push('-1 (outnumbered by French: ' + germanWestDivs + ' vs ' + frenchDivs + ')'); }
+  if (germanWestDivs > frenchDivs) { modifier += 1; modDetails.push('+1 (outnumber French: ' + germanWestDivs + ' vs ' + frenchDivs + ')'); }
+  if (hasArtillery) { modifier += 1; modDetails.push('+1 (Artillery upgrade)'); }
+  if (befInFrance > 0) { modifier -= 2; modDetails.push('-2 (British BEF deployed in France: ' + befInFrance + ' divisions!)'); }
+  if (frenchTrenches) { modifier -= 1; modDetails.push('-1 (French Trench Networks)'); }
+
+  // Roll d6
+  const roll = Math.floor(Math.random() * 6) + 1;
+  const total = roll + modifier;
+  const success = total >= 4;
+
+  germany.schlieffenResolved = true;
+
+  let resultText = '';
+  if (success) {
+    // SUCCESS — Germany captures Paris
+    germany.vp = (germany.vp || 0) + 5;
+    germany.parisCaptured = true;
+    // Move troops to Paris
+    if (!germany.troops['paris']) germany.troops['paris'] = 0;
+    germany.troops['paris'] += Math.min(4, germanWestDivs);
+    // France collapses
+    if (!france.status.includes('rebellion')) france.status.push('rebellion');
+    france.vp = (france.vp || 0) - 6;
+    france.stability = Math.max(0, (france.stability || 0) - 3);
+
+    resultText = 'SCHLIEFFEN PLAN SUCCEEDS! Roll: ' + roll + ' + modifiers (' + modifier + ') = ' + total + ' (needed 4+). Germany storms through Belgium and captures Paris! +5 VP to Germany. France collapses (-6 VP, rebellion, -3 stability).';
+    logAction('germany', 'objective', 'THE SCHLIEFFEN PLAN SUCCEEDS! +5 VP — Paris has fallen!');
+    logAction('france', 'penalty', 'SCHLIEFFEN PLAN — Paris overrun! -6 VP, rebellion triggered, -3 stability.');
+  } else {
+    // FAILURE — costly for Germany
+    germany.vp = (germany.vp || 0) - 3;
+    // Heavy losses — lose 2 divisions
+    const lossRegion = germany.troops['france'] > 0 ? 'france' : 'alsace_lorraine';
+    germany.troops[lossRegion] = Math.max(0, (germany.troops[lossRegion] || 0) - 2);
+    germany.army = Math.max(0, (germany.army || 0) - 2);
+
+    resultText = 'SCHLIEFFEN PLAN FAILS! Roll: ' + roll + ' + modifiers (' + modifier + ') = ' + total + ' (needed 4+). The German advance stalls. -3 VP and 2 divisions lost. The war becomes a grinding stalemate.';
+    logAction('germany', 'penalty', 'THE SCHLIEFFEN PLAN FAILS! -3 VP, 2 divisions lost. The advance stalls at the Marne.');
+    logAction('france', 'objective', 'THE MARNE! France holds the line! The Schlieffen Plan has failed!');
+  }
+
+  // Log full details for GM
+  if (!gameState.resolutionLog) gameState.resolutionLog = [];
+  gameState.resolutionLog.push({
+    icon: '⚔',
+    text: resultText + '\n\nModifiers: ' + (modDetails.length > 0 ? modDetails.join(', ') : 'none'),
+    manual: false
+  });
+
+  saveGameState();
+  renderDashboard();
+  if (typeof renderGMControl === 'function') renderGMControl();
+
+  alert(resultText);
+}
+
 // Set controller of a minor nation
 function setMinorNationController(mnId, controllerFid) {
   if (!gameState.minorNations) gameState.minorNations = {};
@@ -7648,7 +7734,10 @@ const FACTION_SPECIALS = {
   germany: {
     title: 'Imperial German Command',
     abilities: [
-      { name: 'Schlieffen Plan', desc: 'Invade France through Belgium within 2 turns of war. Success: +5 VP. Failure: -3 VP.', type: 'strategic' },
+      { name: 'Schlieffen Plan', desc: 'Invade France through Belgium within 2 turns of war. Requires 10+ divisions on western front and Artillery upgrade. If Britain has troops in France, plan is nearly impossible (–2 penalty). GM rolls d6: base 4+, +1 for 12+ divisions, +1 if outnumbering France, –2 if BEF deployed, –1 if French trenches. Success: capture Paris, +5 VP. Failure: –3 VP, heavy losses.', type: 'strategic' },
+      { name: 'Fortress Alsace', desc: 'Retain Alsace-Lorraine at game end: +8 VP. This is Germany\'s most valuable objective — defend it at all costs.', type: 'strategic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
+      { name: 'Capture Paris', desc: '+5 VP if Germany captures Paris. France collapses. The war is won in the west.', type: 'strategic' },
+      { name: 'Continental Supremacy', desc: '+4 VP for maintaining the strongest army on the continent at game end.', type: 'strategic' },
       { name: 'Industrial Powerhouse', desc: 'Highest industry (8g). +4 Gold/turn from Alsace-Lorraine — but income drops if enemy troops contest the region.', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
       { name: 'Naval Vulnerability', desc: 'Only 4 starting fleets vs Britain\'s 14. Must invest heavily in fleet (6g each) to break a British blockade — or face economic strangulation.', type: 'penalty' },
       { name: 'Two-Front Dilemma', desc: '14 divisions are the largest army — but splitting between France and Russia means losing on both fronts. Neutralize one enemy first.', type: 'strategic' }
@@ -8035,6 +8124,23 @@ function advanceTurn() {
     }
 
     // === SECONDARY OBJECTIVES ===
+
+    // GERMANY: Capture Paris — +5 VP one-time if German troops occupy Paris with no French defenders
+    if (fid === 'germany') {
+      const germanInParis = (f.troops && f.troops['paris']) || 0;
+      const frenchInParis = (factions.france && factions.france.troops && factions.france.troops['paris']) || 0;
+      if (germanInParis > 0 && frenchInParis === 0 && !f.parisCaptured) {
+        f.parisCaptured = true;
+        f.vp = (f.vp || 0) + 5;
+        logAction(fid, 'objective', 'PARIS HAS FALLEN! +5 VP — Germany captures the French capital! France collapses.');
+        // Also trigger France collapse
+        if (factions.france && !factions.france.status.includes('rebellion')) {
+          factions.france.status.push('rebellion');
+          factions.france.vp = (factions.france.vp || 0) - 6;
+          logAction('france', 'penalty', 'PARIS LOST! -6 VP — The capital has fallen. Government in disarray.');
+        }
+      }
+    }
 
     // FRANCE: Alsace Revanche — ONE-TIME massive VP bonus when France captures Alsace-Lorraine
     // 5 VP public (visible to all) + 7 VP secret (only GM knows, added silently)
@@ -11102,6 +11208,43 @@ function renderGMControl() {
     </div>
   `;
 
+  // Schlieffen Plan status
+  const schlieffenResolved = gameState.factions.germany && gameState.factions.germany.schlieffenResolved;
+  const germanyAtWar = gameState.factions.germany && gameState.factions.germany.atWar;
+  const germanWestDivs = gameState.factions.germany ? ((gameState.factions.germany.troops['france'] || 0) + (gameState.factions.germany.troops['paris'] || 0) + (gameState.factions.germany.troops['alsace_lorraine'] || 0)) : 0;
+  const befDeployed = gameState.factions.britain ? ((gameState.factions.britain.troops['france'] || 0) + (gameState.factions.britain.troops['paris'] || 0)) : 0;
+  const hasArtillery = gameState.factions.germany && gameState.factions.germany.upgrades && gameState.factions.germany.upgrades.artillery;
+  const frenchTrenches = gameState.factions.france && gameState.factions.france.upgrades && gameState.factions.france.upgrades.trenches;
+  const frenchDivs = gameState.factions.france ? ((gameState.factions.france.troops['france'] || 0) + (gameState.factions.france.troops['paris'] || 0)) : 0;
+
+  let schlieffenStatusHtml = '';
+  if (schlieffenResolved) {
+    schlieffenStatusHtml = '<div class="empty-state">The Schlieffen Plan has already been resolved.</div>';
+  } else if (!germanyAtWar) {
+    schlieffenStatusHtml = '<div class="empty-state">Germany is not at war. The Schlieffen Plan cannot be executed yet.</div>';
+  } else {
+    let readiness = '<div style="margin:8px 0; font-size:0.9em;">';
+    readiness += '<div style="margin-bottom:4px;"><strong>Western Front Divisions:</strong> ' + germanWestDivs + '/10 required ' + (germanWestDivs >= 10 ? '\u2705' : '\u274C') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>Artillery Upgrade:</strong> ' + (hasArtillery ? '\u2705 +1 bonus' : '\u274C No bonus') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>BEF in France:</strong> ' + (befDeployed > 0 ? '\u26A0 ' + befDeployed + ' British divisions! <strong>-2 penalty!</strong>' : '\u2705 None — plan viable') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>French Trenches:</strong> ' + (frenchTrenches ? '\u26A0 -1 penalty' : '\u2705 None') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>German vs French:</strong> ' + germanWestDivs + ' vs ' + frenchDivs + ' ' + (germanWestDivs > frenchDivs ? '(\u2705 +1 outnumber)' : (germanWestDivs < frenchDivs ? '(\u26A0 -1 outnumbered)' : '(even)')) + '</div>';
+    readiness += '</div>';
+
+    schlieffenStatusHtml = readiness + '<button class="roll-btn" onclick="resolveSchlieffenPlan()" ' + (germanWestDivs >= 10 ? '' : 'disabled') + ' style="width:100%; margin-top:8px;">\u2694 Execute the Schlieffen Plan \u2694</button>';
+  }
+
+  let specialOpsSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Special Operations</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">
+      <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.9em; margin-bottom:8px;">The Schlieffen Plan</h4>
+      <p style="font-size:0.85em; margin-bottom:8px; font-style:italic;">Germany's secret war plan to knock out France through Belgium in 2 turns. Roll d6: base 4+ succeeds. Modifiers: +1 for 12+ divisions, +1 if outnumbering France, +1 for Artillery, -2 if British BEF deployed in France, -1 if French trenches.</p>
+      ${schlieffenStatusHtml}
+    </div>
+  </div>`;
+
   let battleSection = `<div class="gm-section">
     <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
       <span>Battle Resolution</span><span>\u25BC</span>
@@ -11308,7 +11451,7 @@ function renderGMControl() {
   </div>`;
 
   const messagesSection = renderGMMessagesSection();
-  container.innerHTML = turnSection + storylineHtml + messagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
+  container.innerHTML = turnSection + storylineHtml + messagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + specialOpsSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
 
   // Render turn tracker into GM console
   renderGMTurnTracker();
