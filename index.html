@@ -11843,6 +11843,24 @@ function renderMap() {
     const europeBounds = { minLat: 25, maxLat: 72, minLng: -15, maxLng: 60 };
     const europeNames = new Set(Object.keys(COUNTRY_COLORS));
 
+    // Clip multi-region empires (like UK with global colonies) to European polygons only
+    function clipToEurope(feature) {
+      const geom = feature.geometry;
+      if (geom.type !== 'MultiPolygon') return feature;
+      const dominated = ['United Kingdom of Great Britain and Ireland'];
+      if (!dominated.includes(feature.properties.NAME)) return feature;
+      const kept = geom.coordinates.filter(poly => {
+        // Check if any point of the outer ring falls in Europe
+        const ring = poly[0];
+        return ring.some(coord => coord[1] >= 45 && coord[1] <= 65 && coord[0] >= -12 && coord[0] <= 5);
+      });
+      if (kept.length === 0) return feature;
+      const clipped = JSON.parse(JSON.stringify(feature));
+      clipped.geometry.coordinates = kept;
+      return clipped;
+    }
+    worldData.features = worldData.features.map(clipToEurope);
+
     let selectedLayer = null;
 
     const defaultStyle = (feature) => ({
@@ -11868,7 +11886,7 @@ function renderMap() {
           const bounds = L.geoJSON(feature).getBounds();
           const center = bounds.getCenter();
           // For Russia/Persia/Ottoman show even if centroid is outside strict bounds
-          if (['Russian Empire', 'Ottoman Empire', 'Persia'].includes(name)) return true;
+          if (['Russian Empire', 'Ottoman Empire', 'Persia', 'United Kingdom of Great Britain and Ireland'].includes(name)) return true;
           return center.lat >= europeBounds.minLat - 5 && center.lat <= europeBounds.maxLat + 5 &&
                  center.lng >= europeBounds.minLng - 10 && center.lng <= europeBounds.maxLng + 10;
         } catch(e) { return true; }
