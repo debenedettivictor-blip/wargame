@@ -11332,7 +11332,7 @@ const COUNTRY_COLORS = {
   'Austria Hungary': '#D4A76A',
   'Ottoman Empire': '#C46B4E',
   'France': '#7B9B8B',
-  'United Kingdom of Great Britain and Ireland': '#C0392B',
+  'United Kingdom of Great Britain and Ireland': '#E53935',
   'Spain': '#C8B44E',
   'Italy': '#6B8B5E',
   'Sweden\u2013Norway': '#8B9BB5',
@@ -11644,7 +11644,7 @@ const LEGEND_ENTRIES = [
   ['Austria-Hungary', '#D4A76A'],
   ['Ottoman Empire', '#C46B4E'],
   ['France', '#7B9B8B'],
-  ['United Kingdom', '#C0392B'],
+  ['United Kingdom', '#E53935'],
   ['Spain', '#C8B44E'],
   ['Italy', '#6B8B5E'],
   ['Sweden-Norway', '#8B9BB5'],
@@ -11876,6 +11876,13 @@ function renderMap() {
       style: defaultStyle,
       onEachFeature: (feature, layer) => {
         const name = feature.properties.NAME;
+        const isUK = name === 'United Kingdom of Great Britain and Ireland';
+
+        if (!isUK) {
+          layer.options.interactive = false;
+          theatreMapLayers.push(layer);
+          return;
+        }
 
         layer.on('mouseover', function(e) {
           if (selectedLayer !== this) {
