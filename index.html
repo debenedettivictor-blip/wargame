@@ -4572,13 +4572,13 @@ body::before {
 <div class="highlight-box" style="border-color: #2d5016;">
   <strong>Peace Victory Points — The Reward for Diplomacy:</strong><br>
   Each turn at peace, factions earn VP based on how much they benefit from stability:<br><br>
-  ◆ <strong>Austria-Hungary: +3 VP/turn</strong> — "Imperial Harmony." War risks national disintegration.<br>
+  ◆ <strong>Austria-Hungary: +2 VP/turn</strong> — "Imperial Harmony." War risks national disintegration.<br>
   ◆ <strong>Russia: +2 VP/turn</strong> — "Reform & Stability." Needs peace to modernize and avoid revolution.<br>
-  ◆ <strong>Ottoman Empire: +2 VP/turn</strong> — "Ottoman Revival." Needs peace for reforms.<br>
+  ◆ <strong>Britain: +2 VP/turn</strong> — "Pax Britannica." Trade thrives in peacetime (+2g/turn bonus too). Plus blockade VP and secret objectives.<br>
   ◆ <strong>Germany: +1 VP/turn</strong> — "Industrial Prosperity." Benefits from peace but strong enough for war.<br>
-  ◆ <strong>Britain: +1 VP/turn</strong> — "Pax Britannica." Trade thrives in peacetime (+2g/turn bonus too).<br>
-  ◆ <strong>France: 0 VP/turn</strong> — "Revanchism Simmers." France gains <em>nothing</em> from peace. They want Alsace-Lorraine back.<br><br>
-  <em>Over 6 turns: Austria earns +18 VP from peace vs France's 0. This creates radically different incentives.</em>
+  ◆ <strong>France: +1 VP/turn</strong> — "Diplomatic Prestige." Plus Entente Leader VP and massive Alsace-Lorraine capture bonus.<br>
+  ◆ <strong>Ottoman Empire: +1 VP/turn</strong> — "Ottoman Revival." Declining empire — neutrality alone won't win.<br><br>
+  <em>All great powers can now compete for VP. France and Britain have secondary objectives that reward bold action, while Austria and Russia profit from peace. Arms dealers must spark war or face -8 VP.</em>
 </div>
 
 <div class="highlight-box" style="border-color: #8b1a1a;">
@@ -4717,12 +4717,12 @@ body::before {
 <p><strong>Peace VP Per Turn (while at peace)</strong></p>
 <table class="ref-table">
   <tr><th>Faction</th><th>VP/Turn</th><th>Gold/Turn</th><th>Rationale</th></tr>
-  <tr><td>Austria-Hungary</td><td><strong>+3 VP</strong></td><td>+1g</td><td>Imperial harmony — war destroys the empire</td></tr>
+  <tr><td>Austria-Hungary</td><td><strong>+2 VP</strong></td><td>+1g</td><td>Imperial harmony — war destroys the empire</td></tr>
   <tr><td>Russia</td><td><strong>+2 VP</strong></td><td>+1g</td><td>Reform &amp; stability — needs time to modernize</td></tr>
-  <tr><td>Ottoman Empire</td><td><strong>+2 VP</strong></td><td>+1g</td><td>Ottoman revival — needs peace for reforms</td></tr>
+  <tr><td>Britain</td><td><strong>+2 VP</strong></td><td>+2g</td><td>Pax Britannica — plus blockade VP &amp; secret objectives</td></tr>
   <tr><td>Germany</td><td>+1 VP</td><td>+1g</td><td>Industrial prosperity — but can afford war</td></tr>
-  <tr><td>Britain</td><td>+1 VP</td><td>+2g</td><td>Pax Britannica — trade empire thrives in peace</td></tr>
-  <tr><td>France</td><td><strong>0 VP</strong></td><td>0g</td><td>Revanchism — peace gains France nothing</td></tr>
+  <tr><td>France</td><td>+1 VP</td><td>+1g</td><td>Diplomatic prestige — plus Alsace capture bonus &amp; Entente VP</td></tr>
+  <tr><td>Ottoman Empire</td><td>+1 VP</td><td>+1g</td><td>Ottoman revival — neutrality alone won't win</td></tr>
 </table>
 
 <p><strong>Arms Dealer Price List</strong></p>
@@ -9267,7 +9267,7 @@ function renderMilitaryTab(fid) {
   if (isDealer) {
     decisions.push(
       { id: 'loans', icon: '$', title: 'Offer Loans', desc: 'Extend credit to nations at 40% interest', cost: 'Variable' },
-      { id: 'crisis', icon: '!', title: 'Manufacture Crisis', desc: 'Border incidents, leaked treaties, assassination attempts', cost: '2-4 Gold' }
+      { id: 'crisis', icon: '!', title: 'Manufacture Crisis', desc: 'Border incidents, leaked treaties, assassination attempts', cost: '3-5 Gold' }
     );
   }
 
@@ -9833,14 +9833,14 @@ function renderSpecialTab(fid) {
       <label style="font-size:0.8em;">Target</label>
       <select id="crisisTarget2" style="display:block; width:100%; max-width:250px;">${targetOpts}</select>
     </div>`;
-    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget2').value)" ${f.gold >= 2 && !isSubmitted ? '' : 'disabled'}>
-      <span>Border Incident — force diplomatic response or -1 VP</span><span class="action-cost">2g</span>
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget2').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
+      <span>Border Incident — force diplomatic response or -1 VP</span><span class="action-cost">3g</span>
     </button>`;
-    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget2').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
-      <span>Leaked Treaty — expose alliances, cause fallout</span><span class="action-cost">3g</span>
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget2').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
+      <span>Leaked Treaty — expose alliances, cause fallout</span><span class="action-cost">4g</span>
     </button>`;
-    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget2').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
-      <span>Assassination Attempt — create casus belli</span><span class="action-cost">4g</span>
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget2').value)" ${f.gold >= 5 && !isSubmitted ? '' : 'disabled'}>
+      <span>Assassination Attempt — create casus belli</span><span class="action-cost">5g</span>
     </button>`;
 
     // Crisis history
@@ -10088,17 +10088,17 @@ function renderActionTabContent(fid) {
         <label style="font-size:0.85em;">Target</label>
         <select id="crisisTarget" style="display:block; width:100%; max-width:300px; margin-bottom:8px;">${targetOpts}</select>
       </div>
-      <button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget').value)" ${f.gold >= 2 && !isSubmitted ? '' : 'disabled'}>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
         <span>Border Incident — force diplomatic response or -1 VP</span>
-        <span class="action-cost">2 Gold</span>
-      </button>
-      <button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
-        <span>Leaked Treaty — expose alliances, cause diplomatic fallout</span>
         <span class="action-cost">3 Gold</span>
       </button>
-      <button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
-        <span>Assassination Attempt — create casus belli for nearby powers</span>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
+        <span>Leaked Treaty — expose alliances, cause diplomatic fallout</span>
         <span class="action-cost">4 Gold</span>
+      </button>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget').value)" ${f.gold >= 5 && !isSubmitted ? '' : 'disabled'}>
+        <span>Assassination Attempt — create casus belli for nearby powers</span>
+        <span class="action-cost">5 Gold</span>
       </button>
       ${historyHtml}
     `;
