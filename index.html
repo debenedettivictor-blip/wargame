@@ -7657,8 +7657,11 @@ const FACTION_SPECIALS = {
       { name: 'Naval Supremacy', desc: '14 fleets dominate the seas. Blockading Germany cuts their trade immediately and crushes their industry over time.', type: 'strategic' },
       { name: 'Blockade VP', desc: '+1 VP/turn for each nation Britain is actively blockading. Command the seas to strangle enemy economies and earn VP!', type: 'strategic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).some(function(fid) { var t = gameState.factions[fid]; return t.blockadedBy && t.blockadedBy.some(function(b) { return b.fid === 'britain'; }); }); } },
       { name: 'Colonial Trade Network', desc: 'Highest trade income (7g) but expensive navy. War disrupts your own trade too — peace keeps the money flowing.', type: 'economic' },
-      { name: 'BEF Deployed', desc: '+1 VP/turn while British troops are stationed in France or Paris. The Expeditionary Force supports the Entente front line.', type: 'military', check: function(f) { return f.troops && ((f.troops['france'] || 0) + (f.troops['paris'] || 0)) > 0; } },
-      { name: 'Expeditionary Force', desc: '8 army divisions can reinforce France via the Channel — but losing them is costly to replace (2g each).', type: 'military' },
+      { name: 'Continental Balance', desc: 'Britain benefits enormously when France and Germany go to war — continental rivals weaken each other while the Empire grows stronger. But if France collapses, it\'s a disaster.', type: 'strategic' },
+      { name: 'France Must Not Fall', desc: 'If France collapses into rebellion, Britain loses -7 VP. The balance of power is shattered. Keep France alive — but not too strong.', type: 'penalty', check: function(f) { return typeof gameState !== 'undefined' && gameState.factions.france && gameState.factions.france.status && gameState.factions.france.status.includes('rebellion'); } },
+      { name: 'Regime Change', desc: 'If Germany\'s government collapses (rebellion), Britain earns a major strategic victory. Blockade Germany and fund coups to break the Kaiser.', type: 'strategic' },
+      { name: 'Splendid Isolation', desc: '+3 VP at end of game if Britain never deploys troops to France. Let the continent fight — the Royal Navy is enough.', type: 'strategic', check: function(f) { return !f.troopsDeployedToFrance; } },
+      { name: 'Expeditionary Force', desc: '8 army divisions can reinforce France via the Channel — but deploying them forfeits Splendid Isolation bonus.', type: 'military' },
       { name: 'BEF Rapid Deployment', desc: 'Deploy 4 divisions to France instantly for 2 Gold. Can only be used once per game — the professional army crosses the Channel.', type: 'military', check: function(f) { return !(f.upgrades && f.upgrades.bef_deployed); } }
     ]
   },
@@ -8066,12 +8069,55 @@ function advanceTurn() {
       }
     }
 
-    // BRITAIN: BEF Deployed VP — +1 VP/turn if British troops are stationed in France (expeditionary force)
+    // BRITAIN: Continental Balance — SECRET +7 VP (one-time) when France and Germany are BOTH at war
+    // Britain profits from continental rivals weakening each other — but France must survive
+    if (fid === 'britain' && !f.continentalBalanceAwarded) {
+      const franceAtWar = factions.france && factions.france.atWar;
+      const germanyAtWar = factions.germany && factions.germany.atWar;
+      if (franceAtWar && germanyAtWar) {
+        f.continentalBalanceAwarded = true;
+        f.vp = (f.vp || 0) + 7;
+        if (!gameState.resolutionLog) gameState.resolutionLog = [];
+        gameState.resolutionLog.push({
+          icon: '🇬🇧',
+          text: 'SECRET OBJECTIVE COMPLETE: Britain earns +7 hidden VP — Continental Balance. France and Germany are at war, weakening both rivals. Britain profits from the chaos.',
+          manual: false
+        });
+      }
+    }
+
+    // BRITAIN: France Collapse Penalty — if France gets rebellion/collapse, Britain takes a massive hit
     if (fid === 'britain') {
-      const befInFrance = (f.troops && (f.troops['france'] || 0) + (f.troops['paris'] || 0)) || 0;
+      const franceCollapsed = factions.france && factions.france.status && factions.france.status.includes('rebellion');
+      if (franceCollapsed && !f.franceCollapsePenalty) {
+        f.franceCollapsePenalty = true;
+        f.vp = (f.vp || 0) - 7;
+        logAction(fid, 'penalty', 'FRANCE HAS FALLEN! -7 VP — Britain\'s continental strategy collapses. The balance of power is destroyed.');
+      }
+    }
+
+    // BRITAIN: Kaiser Overthrown — SECRET +7 VP (one-time) if Germany gets rebellion/collapse
+    // Requires destabilizing Germany (blockade + fund a coup = the British way)
+    if (fid === 'britain' && !f.kaiserOverthrown) {
+      const germanyCollapsed = factions.germany && factions.germany.status && factions.germany.status.includes('rebellion');
+      if (germanyCollapsed) {
+        f.kaiserOverthrown = true;
+        f.vp = (f.vp || 0) + 7;
+        if (!gameState.resolutionLog) gameState.resolutionLog = [];
+        gameState.resolutionLog.push({
+          icon: '🇬🇧',
+          text: 'SECRET OBJECTIVE COMPLETE: Britain earns +7 hidden VP — The Kaiser is Overthrown! Germany\'s government has collapsed. The Royal Navy\'s blockade and British covert action have broken the German Empire.',
+          manual: false
+        });
+      }
+    }
+
+    // BRITAIN: Splendid Isolation — +3 VP at end of game if Britain NEVER deployed troops to France
+    // Tracked per-turn: if troops are ever in France, mark it
+    if (fid === 'britain') {
+      const befInFrance = (f.troops && ((f.troops['france'] || 0) + (f.troops['paris'] || 0))) || 0;
       if (befInFrance > 0) {
-        f.vp = (f.vp || 0) + 1;
-        logAction(fid, 'objective', 'BEF Deployed: +1 VP (British Expeditionary Force supporting France with ' + befInFrance + ' divisions)');
+        f.troopsDeployedToFrance = true;
       }
     }
 
@@ -8123,6 +8169,15 @@ function advanceTurn() {
     // Arms dealer: Escalation VP (accumulated from war influence actions)
     if (isDealerFaction && f.escalationVP > 0) {
       // escalationVP is added directly when events happen, already in f.vp via addEscalationVP
+    }
+
+    // BRITAIN: Splendid Isolation — +3 VP at end of game if Britain never sent troops to France
+    if (fid === 'britain' && gameState.currentTurnNum >= 6 && !f.splendidIsolationAwarded) {
+      if (!f.troopsDeployedToFrance) {
+        f.splendidIsolationAwarded = true;
+        f.vp = (f.vp || 0) + 3;
+        logAction(fid, 'objective', 'Splendid Isolation: +3 VP — Britain kept its army home and let the continent bleed. The Empire endures.');
+      }
     }
 
     summary.push({
