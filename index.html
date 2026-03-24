@@ -6704,7 +6704,7 @@ function defaultGameState() {
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     austria: {
-      gold: 14, income: 5, army: 8, navy: 2, vp: 0, stability: 4,
+      gold: 14, income: 5, army: 8, navy: 2, vp: 0, stability: 3,
       troops: { austria: 6, balkans: 2 },
       fleets: { mediterranean: 2 },
       alliances: ['germany'], status: [], upgrades: {}, modernization: 0,
@@ -6817,7 +6817,7 @@ function loadGameState() {
         if (state.factions[fid].warTurns === undefined) state.factions[fid].warTurns = 0;
         if (state.factions[fid].modernization === undefined) state.factions[fid].modernization = 0;
         if (state.factions[fid].stability === undefined) {
-          const defaultStab = { germany: 8, france: 7, britain: 9, russia: 5, austria: 4, ottoman: 4 };
+          const defaultStab = { germany: 8, france: 7, britain: 9, russia: 5, austria: 3, ottoman: 4 };
           state.factions[fid].stability = defaultStab[fid] || 7;
         }
         // Migrate: backfill unit names
@@ -6950,7 +6950,7 @@ const PEACE_BONUSES = {
     france:   { gold: 0, vp: 0, label: 'Revanchism simmers' },        // France gains NOTHING from peace — they want Alsace back
     britain:  { gold: 2, vp: 1, label: 'Pax Britannica' },            // Britain profits most from stable trade
     russia:   { gold: 1, vp: 2, label: 'Reform & stability' },        // Russia desperately needs peace to modernize and avoid revolution
-    austria:  { gold: 1, vp: 3, label: 'Imperial harmony' },          // Austria benefits ENORMOUSLY — war tears them apart
+    austria:  { gold: 1, vp: 2, label: 'Imperial harmony' },          // Austria benefits from peace but less dominantly
     ottoman:  { gold: 1, vp: 2, label: 'Ottoman revival' }            // Ottoman needs peace to reform
   }
 };
@@ -7119,6 +7119,22 @@ function computeEconomy(fid) {
     dualMonarchyBonus = 2;
   }
 
+  // --- Central Powers Coordination Bonus ---
+  // Germany gets +2g/turn when Austria is also at war (joint war effort)
+  // Austria gets +1g/turn when Germany is also at war (German support)
+  let allianceWarBonus = 0;
+  let allianceWarLabel = '';
+  if (!isDealer && f.atWar) {
+    if (fid === 'germany' && gameState.factions.austria && gameState.factions.austria.atWar) {
+      allianceWarBonus = 2;
+      allianceWarLabel = 'Central Powers coordination (+2g)';
+    }
+    if (fid === 'austria' && gameState.factions.germany && gameState.factions.germany.atWar) {
+      allianceWarBonus = 1;
+      allianceWarLabel = 'German alliance support (+1g)';
+    }
+  }
+
   // --- Modernization income ---
   let modernizationIncome = 0;
   if (!isDealer && f.modernization && f.modernization > 0) {
@@ -7126,9 +7142,10 @@ function computeEconomy(fid) {
   }
 
   // --- Austria desertion risk (for GM reference) ---
+  // Flat -1 division/turn (reduced from escalating 1-2/turn)
   let desertionRisk = 0;
   if (fid === 'austria' && f.atWar) {
-    desertionRisk = Math.min(2, 1 + Math.floor((f.warTurns || 0) / 2));
+    desertionRisk = 1;
   }
 
   // --- War dividend for arms dealers (increased: +3g/turn) ---
@@ -7141,7 +7158,7 @@ function computeEconomy(fid) {
   }
 
   const grossIncome = industry + trade + bonus + warDividend + peaceDividend
-                    + tradeAgreementIncome + dualMonarchyBonus + modernizationIncome + minorNationBonus;
+                    + tradeAgreementIncome + dualMonarchyBonus + modernizationIncome + minorNationBonus + allianceWarBonus;
   const blockadePenalty = tradeLoss + industryLoss;
   const effectiveIncome = Math.max(0, grossIncome - blockadePenalty);
   const baseUpkeep = Math.ceil(f.army * MAINTENANCE_COSTS.army + f.navy * MAINTENANCE_COSTS.fleet);
@@ -7164,6 +7181,7 @@ function computeEconomy(fid) {
     tradeAgreementIncome, dualMonarchyBonus,
     modernizationIncome, desertionRisk,
     minorNationBonus, minorNationLabel,
+    allianceWarBonus, allianceWarLabel,
     grossIncome, blockadePenalty, effectiveIncome,
     baseUpkeep, totalUpkeep, net,
     isBlockaded: blockadePenalty > 0,
@@ -7215,11 +7233,19 @@ function computeStability(fid) {
     }
   }
 
-  // --- Negative modifiers ---
+  // --- War effects on stability (rally-round-the-flag, then war weariness) ---
   if (f.atWar) {
-    delta -= 1; modifiers.push({ label: 'At war', value: -1, type: 'negative' });
-    if ((f.warTurns || 0) >= 2) {
-      delta -= 1; modifiers.push({ label: 'Prolonged war (' + f.warTurns + ' turns)', value: -1, type: 'negative' });
+    const warTurns = f.warTurns || 0;
+    if (warTurns <= 1) {
+      // Rally effect! Early war BOOSTS stability as the nation unites
+      delta += 2; modifiers.push({ label: 'War rally! Nation unites against the enemy', value: +2, type: 'positive' });
+    } else if (warTurns === 2) {
+      // Rally fading — neutral effect
+      modifiers.push({ label: 'War effort holding steady', value: 0, type: 'neutral' });
+    } else {
+      // War weariness kicks in hard after 2 turns
+      const weariness = Math.min(3, warTurns - 1);
+      delta -= weariness; modifiers.push({ label: 'War weariness (' + warTurns + ' turns of war)', value: -weariness, type: 'negative' });
     }
   }
   if (f.gold < 5 && f.gold > 0) {
@@ -7240,7 +7266,7 @@ function computeStability(fid) {
 
   // --- Faction-specific modifiers ---
   if (fid === 'austria' && f.atWar) {
-    delta -= 2; modifiers.push({ label: 'Nationality crisis (multi-ethnic empire at war)', value: -2, type: 'negative' });
+    delta -= 1; modifiers.push({ label: 'Nationality tensions (multi-ethnic empire at war)', value: -1, type: 'negative' });
   }
   if (fid === 'russia' && f.atWar) {
     delta -= 1; modifiers.push({ label: 'Revolutionary pressure', value: -1, type: 'negative' });
@@ -7480,11 +7506,28 @@ function manufactureCrisis(dealerFid, crisisType, targetFid) {
 
   logAction(dealerFid, 'crisis', crisisLabels[crisisType] + ' manufactured for ' + cost + 'g — ' + crisisDescs[crisisType]);
 
+  // Crises directly destabilize the target faction!
+  // Border Incident: -1 stability, Leaked Treaty: -1 stability, Assassination: -2 stability
+  const stabilityDamage = { border_incident: 1, leaked_treaty: 1, assassination_attempt: 2 };
+  const stabDmg = stabilityDamage[crisisType] || 0;
+  const targetFaction = gameState.factions[targetFid];
+  if (targetFaction && targetFaction.stability !== undefined && stabDmg > 0) {
+    const oldStab = targetFaction.stability;
+    targetFaction.stability = Math.max(0, targetFaction.stability - stabDmg);
+    logAction(targetFid, 'stability', crisisLabels[crisisType] + ' crisis! Stability: ' + oldStab + ' → ' + targetFaction.stability + ' (−' + stabDmg + ')');
+    if (targetFaction.stability <= 0 && oldStab > 0) {
+      targetFaction.vp = (targetFaction.vp || 0) - 5;
+      if (!targetFaction.status) targetFaction.status = [];
+      if (!targetFaction.status.includes('rebellion')) targetFaction.status.push('rebellion');
+      logAction(targetFid, 'stability', 'GOVERNMENT COLLAPSE from crisis! -5 VP, rebellion triggered.');
+    }
+  }
+
   // GM notification
   if (!gameState.resolutionLog) gameState.resolutionLog = [];
   gameState.resolutionLog.push({
     icon: '⚠',
-    text: 'CRISIS: ' + FACTION_NAMES[dealerFid] + ' manufactured a ' + crisisLabels[crisisType] + ' targeting ' + (FACTION_NAMES[targetFid] || targetFid) + '. GM must adjudicate the response.',
+    text: 'CRISIS: ' + FACTION_NAMES[dealerFid] + ' manufactured a ' + crisisLabels[crisisType] + ' targeting ' + (FACTION_NAMES[targetFid] || targetFid) + ' (−' + stabDmg + ' stability). GM must adjudicate the response.',
     manual: true
   });
 
@@ -7627,9 +7670,10 @@ const FACTION_SPECIALS = {
     title: 'Dual Monarchy Command',
     abilities: [
       { name: 'Dual Monarchy Stability', desc: '+2g/turn while at peace AND no rebellion. Austria profits enormously from maintaining the status quo.', type: 'economic', check: function(f) { return !f.atWar && !(f.status && f.status.includes('rebellion')); } },
-      { name: 'Nationality Crisis', desc: 'While at war: risk losing 1-2 army divisions per turn to desertion as ethnic minorities refuse to fight. Rebellion chance increases each turn.', type: 'penalty', check: function(f) { return f.atWar; } },
+      { name: 'War Rally', desc: 'Early war BOOSTS stability (+2 for first 2 turns) as the nation rallies. But war weariness kicks in hard after Turn 2.', type: 'strategic' },
+      { name: 'Nationality Tensions', desc: 'While at war: lose 1 army division per turn to desertion. Manageable if war is short.', type: 'penalty', check: function(f) { return f.atWar; } },
       { name: 'Internal Rebellion', desc: 'Rebellion costs -2 Gold/turn and may cause unit desertion.', type: 'penalty', check: function(f) { return f.status && f.status.includes('rebellion'); } },
-      { name: 'German Alliance', desc: '8 divisions support Germany. Together you field 22 army — but Germany may pressure you into a war that tears your empire apart.', type: 'strategic' }
+      { name: 'German Alliance', desc: '8 divisions support Germany — together you field 22+ army. Germany gets +2g/turn and +1 VP/turn when you fight alongside them. You get +1g/turn German support.', type: 'strategic' }
     ]
   },
   ottoman: {
@@ -7962,6 +8006,12 @@ function advanceTurn() {
       });
     }
 
+    // Central Powers coordination VP — Germany earns VP for getting Austria into war
+    if (fid === 'germany' && f.atWar && gameState.factions.austria && gameState.factions.austria.atWar) {
+      f.vp = (f.vp || 0) + 1;
+      logAction(fid, 'alliance', 'Central Powers coordination VP: +1 (Austria fighting alongside Germany)');
+    }
+
     // Process arms dealer loans (repayment)
     const isDealerFaction = fid === 'krupp' || fid === 'schneider';
     if (isDealerFaction && f.loans && f.loans.length > 0) {
@@ -8053,6 +8103,7 @@ function advanceTurn() {
       if (e.dualMonarchyBonus > 0) detail += ' + Stability +' + e.dualMonarchyBonus + 'g';
       if (e.modernizationIncome > 0) detail += ' + Modernization +' + e.modernizationIncome + 'g';
       if (e.minorNationBonus > 0) detail += ' + Minor Nations +' + e.minorNationBonus + 'g (' + e.minorNationLabel + ')';
+      if (e.allianceWarBonus > 0) detail += ' + ' + e.allianceWarLabel;
       if (e.tradeLoss > 0) detail += ' | Trade loss: –' + e.tradeLoss + 'g';
       if (e.industryLoss > 0) detail += ', Industry loss: –' + e.industryLoss + 'g';
       detail += ' | Upkeep –' + e.baseUpkeep + 'g';
