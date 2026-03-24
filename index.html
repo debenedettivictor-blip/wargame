@@ -3776,6 +3776,185 @@ body::before {
   .dash-tab { font-size: 0.65em; padding: 8px 10px; }
   .dash-header { flex-wrap: wrap; gap: 16px; }
 }
+/* ==================== CHARACTER DASHBOARD ==================== */
+.char-dash-container { max-width: 900px; margin: 0 auto; }
+
+.char-select-bar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding: 16px 0; border-bottom: 2px solid var(--ink-light); margin-bottom: 20px;
+}
+.char-select-bar label {
+  font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.95em;
+  text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;
+}
+.char-select-bar select {
+  padding: 8px 12px; font-family: 'Crimson Text', serif; font-size: 1em;
+  border: 2px solid var(--ink); border-radius: 4px; background: var(--cream);
+}
+
+.char-header-card {
+  display: flex; gap: 20px; align-items: center; padding: 20px;
+  background: var(--cream); border: 2px solid var(--ink); border-radius: 8px;
+  margin-bottom: 20px; position: relative; overflow: hidden;
+}
+.char-header-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
+}
+.char-header-info { flex: 1; }
+.char-header-info h2 {
+  margin: 0; font-family: 'Playfair Display', serif; font-size: 1.5em;
+}
+.char-header-info .char-subtitle {
+  font-family: 'IM Fell English', serif; font-style: italic;
+  color: var(--ink-light); font-size: 1em; margin-top: 2px;
+}
+.char-header-info .char-faction-badge {
+  display: inline-block; margin-top: 6px; padding: 3px 10px;
+  font-family: 'Source Serif 4', serif; font-size: 0.75em;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  border: 1px solid var(--ink-light); border-radius: 3px;
+}
+.char-stats-row {
+  display: flex; gap: 16px;
+}
+.char-stat-box {
+  text-align: center; padding: 10px 16px; background: var(--parchment);
+  border: 1px solid var(--ink-light); border-radius: 4px; min-width: 70px;
+}
+.char-stat-box .stat-label {
+  font-family: 'Source Serif 4', serif; font-size: 0.65em;
+  text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light);
+}
+.char-stat-box .stat-value {
+  font-family: 'Playfair Display', serif; font-size: 1.6em; font-weight: 900;
+}
+
+/* Objectives Panel */
+.char-obj-panel {
+  background: var(--parchment); border: 2px solid var(--ink);
+  border-radius: 8px; margin-bottom: 20px; overflow: hidden;
+}
+.char-obj-header {
+  padding: 12px 16px; font-family: 'Playfair Display', serif; font-weight: 700;
+  font-size: 0.95em; text-transform: uppercase; letter-spacing: 1px;
+  border-bottom: 2px solid var(--ink); display: flex; justify-content: space-between;
+  align-items: center; cursor: pointer;
+}
+.char-obj-header .obj-type-badge {
+  font-size: 0.7em; padding: 2px 8px; border-radius: 3px;
+  font-family: 'Source Serif 4', serif; letter-spacing: 0.5px;
+}
+.obj-type-badge.public { background: #e8f0e8; color: #2a5a2a; border: 1px solid #2a5a2a; }
+.obj-type-badge.shared-secret { background: #f0e8e8; color: #8b1a1a; border: 1px solid #8b1a1a; }
+.obj-type-badge.personal { background: #e8e0f0; color: #4a2a6a; border: 1px solid #4a2a6a; }
+.char-obj-list { padding: 0; }
+.char-obj-item {
+  display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px;
+  border-bottom: 1px solid var(--ink-light); cursor: pointer;
+  transition: background 0.15s;
+}
+.char-obj-item:hover { background: var(--cream); }
+.char-obj-item:last-child { border-bottom: none; }
+.char-obj-check {
+  width: 22px; height: 22px; min-width: 22px; border: 2px solid var(--ink);
+  border-radius: 4px; margin-top: 2px; display: flex; align-items: center;
+  justify-content: center; background: var(--cream); transition: all 0.2s;
+  font-size: 14px; color: transparent;
+}
+.char-obj-check.completed {
+  background: #2a5a2a; border-color: #2a5a2a; color: white;
+}
+.char-obj-check.failed {
+  background: #8b1a1a; border-color: #8b1a1a; color: white;
+}
+.char-obj-text { flex: 1; }
+.char-obj-title {
+  font-family: 'Crimson Text', serif; font-size: 1em; font-weight: 700;
+}
+.char-obj-desc {
+  font-family: 'Crimson Text', serif; font-size: 0.9em; color: var(--ink-light);
+  margin-top: 2px;
+}
+.char-obj-vp {
+  font-family: 'Playfair Display', serif; font-weight: 700;
+  font-size: 0.9em; min-width: 50px; text-align: right; margin-top: 2px;
+}
+.char-obj-vp.positive { color: #2a5a2a; }
+.char-obj-vp.negative { color: #8b1a1a; }
+
+/* Message Board */
+.char-msg-board {
+  background: var(--parchment); border: 2px solid var(--ink);
+  border-radius: 8px; overflow: hidden;
+}
+.char-msg-tabs {
+  display: flex; border-bottom: 2px solid var(--ink);
+}
+.char-msg-tab {
+  flex: 1; padding: 10px; text-align: center; cursor: pointer;
+  font-family: 'Playfair Display', serif; font-size: 0.8em;
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+  background: var(--parchment-dark); border-right: 1px solid var(--ink-light);
+  transition: all 0.2s; position: relative;
+}
+.char-msg-tab:last-child { border-right: none; }
+.char-msg-tab.active { background: var(--cream); color: var(--ink); }
+.char-msg-tab .msg-badge {
+  position: absolute; top: 4px; right: 8px; background: #8b1a1a;
+  color: white; font-size: 0.65em; padding: 1px 5px; border-radius: 8px;
+  font-family: 'Source Serif 4', serif;
+}
+.char-msg-thread {
+  max-height: 350px; overflow-y: auto; padding: 16px;
+  background: linear-gradient(to bottom, var(--cream), var(--parchment));
+}
+.char-msg-empty {
+  text-align: center; padding: 40px 20px;
+  font-family: 'IM Fell English', serif; font-style: italic;
+  color: var(--ink-light); font-size: 1.1em;
+}
+.char-msg-bubble {
+  max-width: 80%; padding: 10px 14px; border-radius: 8px;
+  margin-bottom: 10px; position: relative;
+  font-family: 'Crimson Text', serif; font-size: 0.95em;
+}
+.char-msg-bubble.from-self {
+  margin-left: auto; background: #d4e8d4; border: 1px solid #2a5a2a;
+}
+.char-msg-bubble.from-gm {
+  margin-right: auto; background: #f5e6d0; border: 1px solid #b8860b;
+}
+.char-msg-bubble.from-player {
+  margin-right: auto; background: #dde4f0; border: 1px solid #3a5a8a;
+}
+.char-msg-sender {
+  font-family: 'Source Serif 4', serif; font-size: 0.7em;
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+  margin-bottom: 4px;
+}
+.char-msg-time {
+  font-size: 0.7em; color: var(--ink-light); text-align: right; margin-top: 4px;
+}
+.char-msg-compose {
+  display: flex; gap: 8px; padding: 12px 16px;
+  border-top: 2px solid var(--ink); background: var(--cream);
+}
+.char-msg-compose select {
+  padding: 6px 8px; font-family: 'Crimson Text', serif; font-size: 0.9em;
+  border: 1px solid var(--ink); border-radius: 4px; background: var(--parchment);
+}
+.char-msg-compose input {
+  flex: 1; padding: 8px 12px; font-family: 'Crimson Text', serif;
+  font-size: 0.95em; border: 1px solid var(--ink); border-radius: 4px;
+}
+.char-msg-compose button {
+  padding: 8px 16px; font-family: 'Playfair Display', serif;
+  font-weight: 700; text-transform: uppercase; font-size: 0.75em;
+  letter-spacing: 1px; cursor: pointer; background: var(--ink);
+  color: var(--parchment); border: none; border-radius: 4px;
+  transition: background 0.2s;
+}
+.char-msg-compose button:hover { background: #1a0a00; }
 </style>
 </head>
 <body>
@@ -3795,6 +3974,7 @@ body::before {
   <button class="nav-tab" data-tab="rules">Rules</button>
   <button class="nav-tab" data-tab="reference">Quick Ref</button>
   <button class="nav-tab" data-tab="dashboard">Dashboard</button>
+  <button class="nav-tab" data-tab="character">Character</button>
   <button class="nav-tab" data-tab="gmcontrol">GM Control</button>
   <button class="nav-tab" data-tab="gm">GM Guide</button>
 </div>
@@ -4873,6 +5053,56 @@ body::before {
 </div>
 </div>
 
+<!-- ==================== CHARACTER DASHBOARD ==================== -->
+<div id="character" class="tab-content">
+<div class="section">
+<div class="section-title"><span class="icon">&#9812;</span> Character Dashboard</div>
+
+<div class="char-dash-container">
+  <div class="char-select-bar">
+    <label for="charSelect">Your Character:</label>
+    <select id="charSelect" onchange="renderCharacterDashboard()">
+      <optgroup label="German Empire">
+        <option value="kaiser">Kaiser Wilhelm II</option>
+        <option value="chancellor">The Chancellor</option>
+        <option value="chief_staff">Chief of General Staff</option>
+      </optgroup>
+      <optgroup label="French Republic">
+        <option value="president">The President</option>
+        <option value="general">The Commanding General</option>
+      </optgroup>
+      <optgroup label="British Empire">
+        <option value="pm">The Prime Minister</option>
+        <option value="admiralty">First Lord of the Admiralty</option>
+        <option value="foreign_sec">Foreign Secretary</option>
+      </optgroup>
+      <optgroup label="Russian Empire">
+        <option value="tsar">Tsar Nicholas II</option>
+        <option value="war_minister">War Minister</option>
+        <option value="duma">Duma Representative</option>
+      </optgroup>
+      <optgroup label="Austria-Hungary">
+        <option value="emperor">Emperor Franz Josef</option>
+        <option value="conrad">Conrad von Hotzendorf</option>
+      </optgroup>
+      <optgroup label="Ottoman Empire">
+        <option value="sultan">The Sultan</option>
+        <option value="young_turk">Young Turk Leader</option>
+      </optgroup>
+      <optgroup label="Arms Dealers">
+        <option value="krupp_dir">Krupp Director</option>
+        <option value="vickers_dir">Vickers Director</option>
+        <option value="merchant">Schneider — Merchant of Death</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div id="charDashContent"></div>
+</div>
+
+</div>
+</div>
+
 <!-- ==================== GM CONTROL ==================== -->
 <div id="gmcontrol" class="tab-content">
 <div class="section">
@@ -4990,6 +5220,7 @@ document.getElementById('navTabs').addEventListener('click', function(e) {
   btn.classList.add('active');
   if (tabId === 'gmcontrol') renderGMControl();
   if (tabId === 'dashboard') { renderDashboard(); setTimeout(renderMap, 150); }
+  if (tabId === 'character') renderCharacterDashboard();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
@@ -10493,6 +10724,497 @@ function sendFactionMessage(fid) {
     const thread = document.getElementById('msgThread');
     if (thread) thread.scrollTop = thread.scrollHeight;
   }, 50);
+}
+
+// ==================== CHARACTER DASHBOARD ====================
+
+const CHAR_DATA = {
+  kaiser: { name: 'Kaiser Wilhelm II', subtitle: 'The Impulsive Monarch', faction: 'germany', icon: '\u265A',
+    publicObj: [
+      { id:'ger_alsace', title:'Hold Alsace-Lorraine', desc:'Retain control at game end', vp:'+8' },
+      { id:'ger_army', title:'Strongest Army', desc:'Maintain the strongest army on the continent', vp:'+4' },
+      { id:'ger_paris', title:'Capture Paris', desc:'France collapses', vp:'+5' },
+      { id:'ger_alliance', title:'Alliance', desc:'Secure alliance with Austria-Hungary or Ottoman Empire', vp:'+1 each' }
+    ],
+    sharedSecret: [
+      { id:'ger_schlieffen', title:'The Schlieffen Plan', desc:'Invade France through Belgium within 2 turns of war. 16+ divisions, through Belgium, d6 roll. Success = Paris falls.', vp:'+5/\u22123' }
+    ],
+    personalSecret: [
+      { id:'kai_navy', title:'Navy Obsession', desc:'Build fleet to 10+ ships. Must spend 2+ Gold/turn on navy.', vp:'+4' },
+      { id:'kai_george', title:'Cousin George', desc:'End at peace with or allied to Britain. At war with Britain: penalty.', vp:'+3/\u22122' },
+      { id:'kai_weakness', title:'Fear of Weakness', desc:'If Chancellor overrules you, lose VP.', vp:'\u22122' }
+    ]
+  },
+  chancellor: { name: 'The Chancellor', subtitle: 'The Pragmatist', faction: 'germany', icon: '\u265C',
+    publicObj: [
+      { id:'ger_alsace', title:'Hold Alsace-Lorraine', desc:'Retain control at game end', vp:'+8' },
+      { id:'ger_army', title:'Strongest Army', desc:'Maintain the strongest army on the continent', vp:'+4' },
+      { id:'ger_paris', title:'Capture Paris', desc:'France collapses', vp:'+5' },
+      { id:'ger_alliance', title:'Alliance', desc:'Secure alliance with Austria-Hungary or Ottoman Empire', vp:'+1 each' }
+    ],
+    sharedSecret: [
+      { id:'ger_schlieffen', title:'The Schlieffen Plan', desc:'Invade France through Belgium. Success = Paris, +5 VP. Failure = \u22123 VP.', vp:'+5/\u22123' }
+    ],
+    personalSecret: [
+      { id:'chan_topple', title:'Topple the Kaiser', desc:'Engineer a Constitutional Crisis \u2014 get Chief of Staff to side with you. +4 first, +2 second.', vp:'+4/+2' },
+      { id:'chan_diplo', title:'Diplomatic Mastermind', desc:'Negotiate a treaty with any Entente power lasting 2+ turns.', vp:'+3' },
+      { id:'chan_delay', title:'Delay the War', desc:'Germany enters Turn 4 without being at war.', vp:'+2' }
+    ]
+  },
+  chief_staff: { name: 'Chief of General Staff', subtitle: 'The War Planner', faction: 'germany', icon: '\u2694',
+    publicObj: [
+      { id:'ger_alsace', title:'Hold Alsace-Lorraine', desc:'Retain control at game end', vp:'+8' },
+      { id:'ger_army', title:'Strongest Army', desc:'Maintain the strongest army on the continent', vp:'+4' },
+      { id:'ger_paris', title:'Capture Paris', desc:'France collapses', vp:'+5' }
+    ],
+    sharedSecret: [
+      { id:'ger_schlieffen', title:'The Schlieffen Plan', desc:'Invade France through Belgium. Success = Paris, +5 VP. Failure = \u22123 VP.', vp:'+5/\u22123' }
+    ],
+    personalSecret: [
+      { id:'cos_legacy', title:'My Legacy', desc:'Schlieffen Plan executed: +3 VP regardless. +3 more if it succeeds. You WANT war.', vp:'+3/+6' },
+      { id:'cos_milit', title:'Militarism', desc:'Germany must have 12+ army divisions by Turn 4.', vp:'+2' },
+      { id:'cos_king', title:'The Kingmaker', desc:'Side with Chancellor to overrule Kaiser (+2) or stay loyal (+1).', vp:'+1/+2' }
+    ]
+  },
+  president: { name: 'The President', subtitle: 'The Cautious Republican', faction: 'france', icon: '\u265A',
+    publicObj: [
+      { id:'fra_alsace', title:'Recapture Alsace-Lorraine', desc:'French troops present, no German troops', vp:'+5' },
+      { id:'fra_alliance', title:'Triple Entente', desc:'Maintain alliance with both Britain AND Russia', vp:'+2' },
+      { id:'fra_leader', title:'Entente Leader', desc:'+1 VP/turn while maintaining 2+ alliances', vp:'+1/turn' },
+      { id:'fra_paris', title:'Defend Paris', desc:'Do not lose Paris', vp:'\u22126 if lost' }
+    ],
+    sharedSecret: [
+      { id:'fra_revanche', title:'La Revanche', desc:'Hidden +7 VP when Alsace-Lorraine fully liberated. Total capture: 12 VP.', vp:'+7' },
+      { id:'fra_bef', title:'Convince Britain', desc:'Get Britain to commit ground troops to Continental war.', vp:'+3' }
+    ],
+    personalSecret: [
+      { id:'pres_banker', title:'The Banker', desc:'Loan Russia at least 5 Gold over the game.', vp:'+3' },
+      { id:'pres_fort', title:'Fortress France', desc:'Build fortifications on the German border (4 Gold).', vp:'+2' },
+      { id:'pres_control', title:'Control the General', desc:'Keep the General on a leash and still win. If he launches attack you opposed: \u22122.', vp:'+2/\u22122' }
+    ]
+  },
+  general: { name: 'The Commanding General', subtitle: "L'Attaque \u00e0 Outrance", faction: 'france', icon: '\u2694',
+    publicObj: [
+      { id:'fra_alsace', title:'Recapture Alsace-Lorraine', desc:'French troops present, no German troops', vp:'+5' },
+      { id:'fra_alliance', title:'Triple Entente', desc:'Maintain alliance with both Britain AND Russia', vp:'+2' },
+      { id:'fra_paris', title:'Defend Paris', desc:'Do not lose Paris', vp:'\u22126 if lost' }
+    ],
+    sharedSecret: [
+      { id:'fra_revanche', title:'La Revanche', desc:'Hidden +7 VP when Alsace-Lorraine fully liberated.', vp:'+7' },
+      { id:'fra_bef', title:'Convince Britain', desc:'Get Britain to commit ground troops.', vp:'+3' }
+    ],
+    personalSecret: [
+      { id:'gen_plan17', title:'Plan XVII', desc:'Launch offensive into Lorraine in FIRST turn of war. +3 for audacity, +3 more if you hold it.', vp:'+3/+6' },
+      { id:'gen_offense', title:'Offense Over Defense', desc:'If France builds fortifications, \u22121 VP per fort. You despise defense.', vp:'\u22121/fort' },
+      { id:'gen_coup', title:'Military Coup', desc:'If losing badly (4+ divs lost), seize control from President. Costs \u22123 VP.', vp:'\u22123' }
+    ]
+  },
+  pm: { name: 'The Prime Minister', subtitle: 'The Reluctant Leader', faction: 'britain', icon: '\u265A',
+    publicObj: [
+      { id:'brit_peace', title:'Peace Dividend', desc:'+1 VP/turn while not at war', vp:'+1/turn' },
+      { id:'brit_naval', title:'Naval Supremacy', desc:'Maintain largest navy in Europe', vp:'+3' }
+    ],
+    sharedSecret: [
+      { id:'brit_kaiser', title:'Kaiser Overthrown', desc:'Germany collapses or Kaiser deposed.', vp:'+7' },
+      { id:'brit_isolation', title:'Splendid Isolation', desc:'Never send BEF to the continent.', vp:'+3' },
+      { id:'brit_france', title:'France Must Not Fall', desc:'If France collapses, catastrophic penalty.', vp:'\u22127' }
+    ],
+    personalSecret: [
+      { id:'pm_nowar', title:'Keep the Peace', desc:'Britain does not enter war. Parliament supports you.', vp:'+4' },
+      { id:'pm_empire', title:'Imperial Unity', desc:'Maintain colonial stability throughout the game.', vp:'+3' }
+    ]
+  },
+  admiralty: { name: 'First Lord of the Admiralty', subtitle: 'Master of the Seas', faction: 'britain', icon: '\u2693',
+    publicObj: [
+      { id:'brit_peace', title:'Peace Dividend', desc:'+1 VP/turn while not at war', vp:'+1/turn' },
+      { id:'brit_naval', title:'Naval Supremacy', desc:'Maintain largest navy in Europe', vp:'+3' }
+    ],
+    sharedSecret: [
+      { id:'brit_kaiser', title:'Kaiser Overthrown', desc:'Germany collapses.', vp:'+7' },
+      { id:'brit_france', title:'France Must Not Fall', desc:'If France collapses, penalty.', vp:'\u22127' }
+    ],
+    personalSecret: [
+      { id:'adm_dread', title:'Dreadnought Race', desc:'Build 2+ more capital ships than Germany.', vp:'+4' },
+      { id:'adm_blockade', title:'The Blockade', desc:'If war comes, establish naval blockade of Germany.', vp:'+3' }
+    ]
+  },
+  foreign_sec: { name: 'Foreign Secretary', subtitle: 'The Grey Eminence', faction: 'britain', icon: '\u2690',
+    publicObj: [
+      { id:'brit_peace', title:'Peace Dividend', desc:'+1 VP/turn while not at war', vp:'+1/turn' },
+      { id:'brit_naval', title:'Naval Supremacy', desc:'Maintain largest navy in Europe', vp:'+3' }
+    ],
+    sharedSecret: [
+      { id:'brit_kaiser', title:'Kaiser Overthrown', desc:'Germany collapses.', vp:'+7' },
+      { id:'brit_isolation', title:'Splendid Isolation', desc:'Never send BEF to the continent.', vp:'+3' }
+    ],
+    personalSecret: [
+      { id:'fs_entente', title:'The Entente Cordiale', desc:'Maintain alliance with France throughout the game.', vp:'+3' },
+      { id:'fs_balance', title:'Balance of Power', desc:'No single power dominates Europe at game end.', vp:'+4' }
+    ]
+  },
+  tsar: { name: 'Tsar Nicholas II', subtitle: 'The Last Emperor', faction: 'russia', icon: '\u265A',
+    publicObj: [
+      { id:'rus_tsar', title:'Tsar Survives', desc:'No revolution at game end. PUBLIC: everyone knows.', vp:'+10' },
+      { id:'rus_balkans', title:'Protect the Balkans', desc:'Serbia not conquered by Austria.', vp:'+4' }
+    ],
+    sharedSecret: [
+      { id:'rus_eastern', title:'Eastern Front Dominance', desc:'Win 2+ Eastern Front battles.', vp:'+2' },
+      { id:'rus_gold', title:'Allied Gold', desc:'Receive 8+ gold from allies.', vp:'+3' }
+    ],
+    personalSecret: [
+      { id:'tsar_dynasty', title:'Dynasty', desc:'Maintain stability above 5 at game end. The Romanovs endure.', vp:'+4' },
+      { id:'tsar_cousin', title:'Cousin Nicky', desc:'Personal letter to Kaiser prevents war. If successful, +5 VP.', vp:'+5' }
+    ]
+  },
+  war_minister: { name: 'War Minister', subtitle: 'The Steamroller', faction: 'russia', icon: '\u2694',
+    publicObj: [
+      { id:'rus_tsar', title:'Tsar Survives', desc:'No revolution at game end.', vp:'+10' },
+      { id:'rus_balkans', title:'Protect the Balkans', desc:'Serbia not conquered by Austria.', vp:'+4' }
+    ],
+    sharedSecret: [
+      { id:'rus_eastern', title:'Eastern Front Dominance', desc:'Win 2+ Eastern Front battles.', vp:'+2' },
+      { id:'rus_gold', title:'Allied Gold', desc:'Receive 8+ gold from allies.', vp:'+3' }
+    ],
+    personalSecret: [
+      { id:'wm_steam', title:'The Steamroller', desc:'Deploy 18+ divisions to Eastern Front. Crush Germany in the east.', vp:'+3' },
+      { id:'wm_mobil', title:'Full Mobilization', desc:'Complete mobilization before Turn 4.', vp:'+2' }
+    ]
+  },
+  duma: { name: 'Duma Representative', subtitle: 'Voice of the People', faction: 'russia', icon: '\u2691',
+    publicObj: [
+      { id:'rus_tsar', title:'Tsar Survives', desc:'No revolution at game end.', vp:'+10' },
+      { id:'rus_balkans', title:'Protect the Balkans', desc:'Serbia not conquered.', vp:'+4' }
+    ],
+    sharedSecret: [
+      { id:'rus_eastern', title:'Eastern Front Dominance', desc:'Win 2+ Eastern Front battles.', vp:'+2' }
+    ],
+    personalSecret: [
+      { id:'duma_reform', title:'Reform or Revolution', desc:'Push for constitutional reforms. If Tsar agrees: +4 VP. If revolution triggers: +6 VP (you led it).', vp:'+4/+6' },
+      { id:'duma_peace', title:'Peace Faction', desc:'Prevent Russia from entering war, or negotiate early peace.', vp:'+3' }
+    ]
+  },
+  emperor: { name: 'Emperor Franz Josef', subtitle: 'The Ancient Monarch', faction: 'austria', icon: '\u265A',
+    publicObj: [
+      { id:'aus_stab', title:'Imperial Stability', desc:'Keep stability above 3 at game end.', vp:'+3' },
+      { id:'aus_balkans', title:'Balkan Dominance', desc:'Control Serbia and Balkan regions.', vp:'+4' }
+    ],
+    sharedSecret: [
+      { id:'aus_rev', title:'Russian Revolution', desc:'Help cause revolution in Russia.', vp:'+3' }
+    ],
+    personalSecret: [
+      { id:'emp_dynasty', title:'Habsburg Dynasty', desc:'Austria-Hungary does not collapse. The empire endures.', vp:'+5' },
+      { id:'emp_german', title:'German Alliance', desc:'Maintain alliance with Germany throughout the game.', vp:'+2' }
+    ]
+  },
+  conrad: { name: 'Conrad von H\u00f6tzendorf', subtitle: 'The Warmonger', faction: 'austria', icon: '\u2694',
+    publicObj: [
+      { id:'aus_stab', title:'Imperial Stability', desc:'Keep stability above 3.', vp:'+3' },
+      { id:'aus_balkans', title:'Balkan Dominance', desc:'Control Serbia.', vp:'+4' }
+    ],
+    sharedSecret: [
+      { id:'aus_rev', title:'Russian Revolution', desc:'Help cause revolution in Russia.', vp:'+3' }
+    ],
+    personalSecret: [
+      { id:'con_serbia', title:'Crush Serbia', desc:'Invade and conquer Serbia. You have wanted this for years.', vp:'+4' },
+      { id:'con_war', title:'War Hawk', desc:'Austria declares war before Turn 4. You believe in preemptive action.', vp:'+2' }
+    ]
+  },
+  sultan: { name: 'The Sultan', subtitle: 'Shadow of God on Earth', faction: 'ottoman', icon: '\u265A',
+    publicObj: [
+      { id:'ott_survive', title:'Ottoman Survival', desc:'Ottoman Empire does not collapse.', vp:'+4' },
+      { id:'ott_balkans', title:'Balkan Recovery', desc:'Reclaim lost Balkan territories.', vp:'+3' }
+    ],
+    sharedSecret: [],
+    personalSecret: [
+      { id:'sul_neutral', title:'Armed Neutrality', desc:'Stay out of war while profiting from arms sales to both sides.', vp:'+4' },
+      { id:'sul_caliph', title:'The Caliphate', desc:'Assert Ottoman religious authority. Declare jihad if at war.', vp:'+3' }
+    ]
+  },
+  young_turk: { name: 'Young Turk Leader', subtitle: 'The Modernizer', faction: 'ottoman', icon: '\u2605',
+    publicObj: [
+      { id:'ott_survive', title:'Ottoman Survival', desc:'Ottoman Empire does not collapse.', vp:'+4' },
+      { id:'ott_balkans', title:'Balkan Recovery', desc:'Reclaim lost territories.', vp:'+3' }
+    ],
+    sharedSecret: [],
+    personalSecret: [
+      { id:'yt_modern', title:'Modernize the Army', desc:'Purchase 4+ divisions and artillery upgrade.', vp:'+3' },
+      { id:'yt_german', title:'German Alliance', desc:'Secure military alliance with Germany. German officers train your army.', vp:'+3' },
+      { id:'yt_coup', title:'Seize Power', desc:'If Sultan opposes modernization, take control. Costs \u22122 stability but you decide.', vp:'+2' }
+    ]
+  },
+  krupp_dir: { name: 'Krupp Director', subtitle: 'Steel Baron', faction: 'krupp', icon: '\u2692',
+    publicObj: [
+      { id:'kru_sales', title:'Arms Sales', desc:'+1 VP per 4 divisions/fleets sold to Central Powers.', vp:'+1/4 sold' },
+      { id:'kru_gerwin', title:'German Victory', desc:'If Germany wins the game.', vp:'+5' }
+    ],
+    sharedSecret: [],
+    personalSecret: [
+      { id:'kd_monopoly', title:'Monopoly', desc:'Sell arms to 3+ different nations in a single turn.', vp:'+3' },
+      { id:'kd_sabotage', title:'Sabotage Schneider', desc:'Steal a Schneider exclusive contract.', vp:'+2' }
+    ]
+  },
+  vickers_dir: { name: 'Vickers Director', subtitle: 'The British Connection', faction: 'krupp', icon: '\u2692',
+    publicObj: [
+      { id:'kru_sales', title:'Arms Sales', desc:'+1 VP per 4 divisions/fleets sold.', vp:'+1/4 sold' },
+      { id:'kru_gerwin', title:'German Victory', desc:'If Germany wins the game.', vp:'+5' }
+    ],
+    sharedSecret: [],
+    personalSecret: [
+      { id:'vd_entente', title:'Entente Sales', desc:'Sell arms to both sides of the conflict simultaneously.', vp:'+4' },
+      { id:'vd_brit', title:'British Interests', desc:'Ensure Britain maintains naval supremacy. Your ships defend the empire.', vp:'+2' }
+    ]
+  },
+  merchant: { name: 'Merchant of Death', subtitle: 'Schneider-\u0160koda', faction: 'schneider', icon: '\u2620',
+    publicObj: [
+      { id:'sch_sales', title:'Arms Sales', desc:'Sell to everyone. Each sale earns gold and VP.', vp:'variable' }
+    ],
+    sharedSecret: [],
+    personalSecret: [
+      { id:'mer_architect', title:'War Architect', desc:'Directly contribute to war breaking out (fund coup, plant crisis, etc).', vp:'+6' },
+      { id:'mer_puppet', title:'Puppet Master', desc:'Exclusive contracts with nations on BOTH sides of a conflict.', vp:'+4' },
+      { id:'mer_bankroll', title:'Bankroll the Revolution', desc:'Secretly fund Russian revolutionary. If revolution triggers and you contributed.', vp:'+4' },
+      { id:'mer_destroy', title:'Destroy Krupp-Vickers', desc:'Get a Krupp director nationalized or cut off. +3 VP per director.', vp:'+3 each' },
+      { id:'mer_ultimate', title:'The Ultimate Win', desc:'End with most total VP of ANY player. The true winner.', vp:'ULTIMATE' }
+    ]
+  }
+};
+
+let activeCharMsgTab = 'gm'; // 'gm' or 'players'
+
+function getCharObjectiveState(charId) {
+  if (!gameState.charObjectives) gameState.charObjectives = {};
+  if (!gameState.charObjectives[charId]) gameState.charObjectives[charId] = {};
+  return gameState.charObjectives[charId];
+}
+
+function toggleCharObjective(charId, objId) {
+  const state = getCharObjectiveState(charId);
+  // Cycle: none -> completed -> failed -> none
+  if (!state[objId]) state[objId] = 'completed';
+  else if (state[objId] === 'completed') state[objId] = 'failed';
+  else delete state[objId];
+  saveGameState();
+  renderCharacterDashboard();
+}
+
+function getCharMessages(charId) {
+  if (!gameState.charMessages) gameState.charMessages = {};
+  if (!gameState.charMessages[charId]) gameState.charMessages[charId] = [];
+  return gameState.charMessages[charId];
+}
+
+function getCharUnreadCount(charId, channel) {
+  const msgs = getCharMessages(charId);
+  return msgs.filter(m => !m.read && m.channel === channel && m.fromId !== charId).length;
+}
+
+function sendCharMessage(charId) {
+  const input = document.getElementById('charMsgInput');
+  const recipientSelect = document.getElementById('charMsgRecipient');
+  if (!input || !input.value.trim()) return;
+
+  const text = input.value.trim();
+  const msgs = getCharMessages(charId);
+  const char = CHAR_DATA[charId];
+
+  if (activeCharMsgTab === 'gm') {
+    msgs.push({
+      fromId: charId, fromName: char.name, toName: 'Game Master',
+      channel: 'gm', text: text, turn: gameState.currentTurnNum,
+      timestamp: Date.now(), read: false
+    });
+  } else {
+    const recipientId = recipientSelect ? recipientSelect.value : '';
+    const recipientChar = CHAR_DATA[recipientId];
+    if (!recipientChar) return;
+    // Add to sender's thread
+    msgs.push({
+      fromId: charId, fromName: char.name,
+      toId: recipientId, toName: recipientChar.name,
+      channel: 'player', text: text, turn: gameState.currentTurnNum,
+      timestamp: Date.now(), read: false
+    });
+    // Add to recipient's thread
+    const recipientMsgs = getCharMessages(recipientId);
+    recipientMsgs.push({
+      fromId: charId, fromName: char.name,
+      toId: recipientId, toName: recipientChar.name,
+      channel: 'player', text: text, turn: gameState.currentTurnNum,
+      timestamp: Date.now(), read: false
+    });
+  }
+
+  saveGameState();
+  renderCharacterDashboard();
+  setTimeout(() => {
+    const thread = document.getElementById('charMsgThread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  }, 50);
+}
+
+function sendGMToChar(charId) {
+  const input = document.getElementById('charGMReplyInput');
+  if (!input || !input.value.trim()) return;
+  const msgs = getCharMessages(charId);
+  msgs.push({
+    fromId: '_gm', fromName: 'Game Master', toName: CHAR_DATA[charId].name,
+    channel: 'gm', text: input.value.trim(), turn: gameState.currentTurnNum,
+    timestamp: Date.now(), read: false
+  });
+  saveGameState();
+  renderCharacterDashboard();
+}
+
+function renderCharacterDashboard() {
+  const container = document.getElementById('charDashContent');
+  if (!container) return;
+  const charId = document.getElementById('charSelect').value;
+  const char = CHAR_DATA[charId];
+  if (!char) { container.innerHTML = '<p>Select a character above.</p>'; return; }
+
+  const f = gameState.factions[char.faction];
+  const objState = getCharObjectiveState(charId);
+
+  // Header card
+  const fColor = FACTION_COLORS[char.faction] || '#3A2A1A';
+  let headerHtml = `<div class="char-header-card" style="border-left: 8px solid ${fColor};">
+    <div class="char-header-info">
+      <h2>${char.icon} ${char.name}</h2>
+      <div class="char-subtitle">${char.subtitle}</div>
+      <div class="char-faction-badge" style="border-color:${fColor}; color:${fColor};">${FACTION_NAMES[char.faction]}</div>
+    </div>
+    <div class="char-stats-row">
+      <div class="char-stat-box">
+        <div class="stat-label">Gold</div>
+        <div class="stat-value">${f.gold}</div>
+      </div>
+      <div class="char-stat-box">
+        <div class="stat-label">VP</div>
+        <div class="stat-value">${f.vp || 0}</div>
+      </div>
+      <div class="char-stat-box">
+        <div class="stat-label">Stability</div>
+        <div class="stat-value">${f.stability}/10</div>
+      </div>
+      <div class="char-stat-box">
+        <div class="stat-label">Army</div>
+        <div class="stat-value">${f.army || 0}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Objectives panels
+  function renderObjPanel(title, badgeClass, objectives) {
+    if (!objectives || objectives.length === 0) return '';
+    const items = objectives.map(obj => {
+      const st = objState[obj.id] || '';
+      const checkCls = st === 'completed' ? 'completed' : st === 'failed' ? 'failed' : '';
+      const checkIcon = st === 'completed' ? '\u2713' : st === 'failed' ? '\u2717' : '';
+      const vpCls = obj.vp.startsWith('+') ? 'positive' : obj.vp.startsWith('\u2212') ? 'negative' : '';
+      return `<div class="char-obj-item" onclick="toggleCharObjective('${charId}','${obj.id}')">
+        <div class="char-obj-check ${checkCls}">${checkIcon}</div>
+        <div class="char-obj-text">
+          <div class="char-obj-title">${obj.title}</div>
+          <div class="char-obj-desc">${obj.desc}</div>
+        </div>
+        <div class="char-obj-vp ${vpCls}">${obj.vp}</div>
+      </div>`;
+    }).join('');
+    return `<div class="char-obj-panel">
+      <div class="char-obj-header">
+        <span>${title}</span>
+        <span class="obj-type-badge ${badgeClass}">${badgeClass === 'public' ? 'Known to All' : badgeClass === 'shared-secret' ? 'Faction Only' : 'Eyes Only'}</span>
+      </div>
+      <div class="char-obj-list">${items}</div>
+    </div>`;
+  }
+
+  let objHtml = renderObjPanel('Public Objectives', 'public', char.publicObj);
+  objHtml += renderObjPanel('Shared Secret Objectives', 'shared-secret', char.sharedSecret);
+  objHtml += renderObjPanel('Personal Secret Objectives', 'personal', char.personalSecret);
+
+  // Message board
+  const gmUnread = getCharUnreadCount(charId, 'gm');
+  const playerUnread = getCharUnreadCount(charId, 'player');
+  const msgs = getCharMessages(charId);
+
+  const gmTabActive = activeCharMsgTab === 'gm' ? 'active' : '';
+  const playerTabActive = activeCharMsgTab === 'players' ? 'active' : '';
+
+  let threadHtml = '';
+  if (activeCharMsgTab === 'gm') {
+    // Mark GM messages as read
+    msgs.filter(m => m.channel === 'gm' && m.fromId !== charId).forEach(m => m.read = true);
+    const gmMsgs = msgs.filter(m => m.channel === 'gm');
+    if (gmMsgs.length === 0) {
+      threadHtml = '<div class="char-msg-empty">No dispatches from the Game Master yet. Send a sealed message below.</div>';
+    } else {
+      threadHtml = gmMsgs.map(m => {
+        const cls = m.fromId === charId ? 'from-self' : 'from-gm';
+        const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        return `<div class="char-msg-bubble ${cls}">
+          <div class="char-msg-sender">${m.fromName}</div>
+          <div>${m.text}</div>
+          <div class="char-msg-time">Turn ${m.turn} \u2014 ${time}</div>
+        </div>`;
+      }).join('');
+    }
+  } else {
+    // Player messages
+    msgs.filter(m => m.channel === 'player' && m.fromId !== charId).forEach(m => m.read = true);
+    const playerMsgs = msgs.filter(m => m.channel === 'player');
+    if (playerMsgs.length === 0) {
+      threadHtml = '<div class="char-msg-empty">No dispatches from other players yet. Send a sealed note to another character below.</div>';
+    } else {
+      threadHtml = playerMsgs.map(m => {
+        const cls = m.fromId === charId ? 'from-self' : 'from-player';
+        const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        const otherName = m.fromId === charId ? ('\u2192 ' + m.toName) : m.fromName;
+        return `<div class="char-msg-bubble ${cls}">
+          <div class="char-msg-sender">${otherName}</div>
+          <div>${m.text}</div>
+          <div class="char-msg-time">Turn ${m.turn} \u2014 ${time}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Compose area
+  let composeHtml = '';
+  if (activeCharMsgTab === 'gm') {
+    composeHtml = `<div class="char-msg-compose">
+      <input type="text" id="charMsgInput" placeholder="Write a sealed dispatch to the GM..." onkeydown="if(event.key==='Enter')sendCharMessage('${charId}')">
+      <button onclick="sendCharMessage('${charId}')">Send</button>
+    </div>`;
+  } else {
+    // Build recipient list (all chars except self)
+    const recipientOptions = Object.keys(CHAR_DATA)
+      .filter(cid => cid !== charId)
+      .map(cid => `<option value="${cid}">${CHAR_DATA[cid].name} (${FACTION_NAMES[CHAR_DATA[cid].faction]})</option>`)
+      .join('');
+    composeHtml = `<div class="char-msg-compose">
+      <select id="charMsgRecipient">${recipientOptions}</select>
+      <input type="text" id="charMsgInput" placeholder="Write a secret note..." onkeydown="if(event.key==='Enter')sendCharMessage('${charId}')">
+      <button onclick="sendCharMessage('${charId}')">Send</button>
+    </div>`;
+  }
+
+  let msgHtml = `<div class="char-msg-board">
+    <div class="char-msg-tabs">
+      <div class="char-msg-tab ${gmTabActive}" onclick="activeCharMsgTab='gm';renderCharacterDashboard();">
+        GM Dispatches
+        ${gmUnread > 0 ? '<span class="msg-badge">' + gmUnread + '</span>' : ''}
+      </div>
+      <div class="char-msg-tab ${playerTabActive}" onclick="activeCharMsgTab='players';renderCharacterDashboard();">
+        Player Messages
+        ${playerUnread > 0 ? '<span class="msg-badge">' + playerUnread + '</span>' : ''}
+      </div>
+    </div>
+    <div class="char-msg-thread" id="charMsgThread">${threadHtml}</div>
+    ${composeHtml}
+  </div>`;
+
+  container.innerHTML = headerHtml + objHtml + msgHtml;
 }
 
 function renderGMMessagesSection() {
