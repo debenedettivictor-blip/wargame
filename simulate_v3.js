@@ -39,7 +39,7 @@ function newGame() {
 const ECON = {
   germany:  { ind: 8, trade: 3, alsaceBonus: 4, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
   france:   { ind: 5, trade: 3, peaceGold: 1, peaceVP: 0, maint: f => f.army*0.5 + f.navy*0.75 },
-  britain:  { ind: 4, trade: 7, peaceGold: 2, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
+  britain:  { ind: 4, trade: 7, peaceGold: 2, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
   russia:   { ind: 5, trade: 2, peaceGold: 1, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
   austria:  { ind: 4, trade: 1, peaceGold: 1, peaceVP: 3, maint: f => f.army*0.5 + f.navy*0.75 },
   ottoman:  { ind: 2, trade: 2, straitsBonus: 2, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
@@ -581,9 +581,8 @@ function scoreGame(g) {
   if (f.britain.befSent) fraSecret += 3;
   scores.france = f.france.vp + fraSecret;
 
-  // Britain: Continental Balance +7, Kaiser Overthrown +7, Splendid Isolation +3, France Must Not Fall -7
+  // Britain: Kaiser Overthrown +7, Splendid Isolation +3, France Must Not Fall -7
   let britSecret = 0;
-  if (f.germany.atWar && f.france.atWar) britSecret += 7; // Continental Balance
   if (f.germany.collapsed) britSecret += 7; // Kaiser Overthrown
   if (!f.britain.befSent) britSecret += 3; // Splendid Isolation
   if (f.france.rebellion) britSecret -= 7; // France Must Not Fall
