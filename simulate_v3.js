@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// V3 Balance Simulator — 10 games, turn-by-turn output
-// Models: economics, peace VP, war costs, mobilization, combat, Schlieffen Plan, secret objectives
+// V3.1 Balance Simulator — 10 games, turn-by-turn output
+// Changes from V3: Russia cheap divs (1.5g via Krupp loans), Germany cancels Schlieffen if BEF deployed, Austria peace VP +3
 
 const NUM_GAMES = 10;
 
@@ -36,7 +36,7 @@ const ECON = {
   france:   { ind: 5, trade: 3, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
   britain:  { ind: 4, trade: 7, peaceGold: 2, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
   russia:   { ind: 5, trade: 2, peaceGold: 1, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
-  austria:  { ind: 4, trade: 1, peaceGold: 1, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
+  austria:  { ind: 4, trade: 1, peaceGold: 1, peaceVP: 3, maint: f => f.army*0.5 + f.navy*0.75 },
   ottoman:  { ind: 2, trade: 2, straitsBonus: 2, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
   krupp:    { ind: 2, trade: 0 },
   schneider:{ ind: 1, trade: 0 },
@@ -113,22 +113,43 @@ function simulateTurn(g) {
     g.factions.france.gold -= schnCost; g.factions.france.army += schnSale;
     log.push(`Schneider sells ${schnSale} army to France (${schnCost}g)`);
 
-    // Russia buys 1 div from Schneider on T2-3
+    // Russia buys cheap divisions — 1.5g/div discount (Russian conscripts are cheap)
+    // Russia takes Krupp loans to fund buildup, creating dealer income + Russian mass
+    if (t === 1) {
+      // T1: Russia buys 2 cheap divs from Krupp (3g total at 1.5g/div), Krupp loans 2g
+      g.factions.krupp.gold += 3; g.factions.krupp.sales += 2;
+      g.factions.russia.gold -= 3; g.factions.russia.army += 2;
+      log.push(`Krupp sells 2 cheap army to Russia (3g at 1.5g/div)`);
+    }
     if (t >= 2) {
-      g.factions.schneider.gold += 2; g.factions.schneider.sales += 1;
+      // T2-3: Russia buys 2 divs from Schneider (3g at 1.5g/div) + 1 from Krupp loan
+      g.factions.schneider.gold += 3; g.factions.schneider.sales += 2;
+      g.factions.russia.gold -= 3; g.factions.russia.army += 2;
+      log.push(`Schneider sells 2 cheap army to Russia (3g at 1.5g/div)`);
+      // Krupp extends loan: Russia gets 1 more div, owes Krupp later
+      g.factions.krupp.gold += 2; g.factions.krupp.sales += 1;
       g.factions.russia.gold -= 2; g.factions.russia.army += 1;
-      log.push(`Schneider sells 1 army to Russia (2g)`);
+      log.push(`Krupp loans Russia 1 army (2g) — debt fuels the Steamroller`);
     }
   }
 
   // --- Phase: Mobilization ---
   if (t === 2) {
+    // Britain mobilizes T2 (50% chance — hawkish cabinet) to enable BEF by T4
     ['germany','france','russia'].forEach(fid => { g.factions[fid].mobTurn = t; });
-    log.push(`Germany, France, Russia begin mobilization`);
+    const britEarlyMob = Math.random() < 0.5;
+    if (britEarlyMob) {
+      g.factions.britain.mobTurn = t;
+      log.push(`Germany, France, Russia, Britain begin mobilization (Britain: hawkish cabinet mobilizes early!)`);
+    } else {
+      log.push(`Germany, France, Russia begin mobilization`);
+    }
   }
   if (t === 3) {
-    ['britain','austria','ottoman'].forEach(fid => { g.factions[fid].mobTurn = t; });
-    log.push(`Britain, Austria, Ottoman begin mobilization`);
+    const toMob = ['austria','ottoman'];
+    if (g.factions.britain.mobTurn === 0) toMob.push('britain');
+    toMob.forEach(fid => { g.factions[fid].mobTurn = t; });
+    log.push(`${toMob.map(f => f.charAt(0).toUpperCase()+f.slice(1)).join(', ')} begin mobilization`);
   }
 
   // Deployment check: Germany/France ready 2 turns after mob. Others 3 turns.
@@ -208,33 +229,42 @@ function simulateTurn(g) {
     const brit = g.factions.britain;
 
     if (ger.army >= 16 && ger.deployed) {
-      const germanWest = Math.min(ger.army, Math.round(ger.army * 0.75)); // commit 75% west
       const befInFrance = brit.atWar && brit.deployed ? Math.min(4, brit.army) : 0;
       g.franceFranceTroops = befInFrance;
 
-      let modifier = 0;
-      if (germanWest >= 18) modifier += 1;
-      if (germanWest > fra.army) modifier += 1;
-      if (germanWest < fra.army) modifier -= 1;
-      if (befInFrance > 0) modifier -= 2;
-
-      const roll = d6();
-      const total = roll + modifier;
-      g.factions.germany.schlieffenDone = true;
-
-      if (total >= 4) {
-        g.schlieffen = 'success';
-        ger.vp += 5; // Paris captured
-        ger.parisCaptured = true;
-        fra.vp -= 6;
-        fra.stab = clamp(fra.stab - 3, 0, 10);
-        fra.rebellion = true;
-        log.push(`**SCHLIEFFEN PLAN SUCCEEDS!** Roll ${roll} + mod ${modifier} = ${total} ≥ 4. Paris falls! Germany +5 VP, France -6 VP, rebellion.`);
+      // V3.1: Germany CANCELS Schlieffen if BEF is deployed — too risky with -2 modifier
+      if (befInFrance > 0) {
+        g.schlieffen = 'cancelled';
+        log.push(`**SCHLIEFFEN PLAN CANCELLED!** BEF deployed in France (${befInFrance} divs). Germany shifts to conventional western defense — no Belgium invasion, preserves forces.`);
+        // Germany gets a defensive bonus instead: digs in on Alsace, keeps full army
+        ger.schlieffenDone = false; // didn't attempt it
       } else {
-        g.schlieffen = 'fail';
-        ger.vp -= 3;
-        ger.army -= 2;
-        log.push(`**SCHLIEFFEN PLAN FAILS!** Roll ${roll} + mod ${modifier} = ${total} < 4. Germany -3 VP, loses 2 divisions.`);
+        const germanWest = Math.min(ger.army, Math.round(ger.army * 0.75));
+
+        let modifier = 0;
+        if (germanWest >= 18) modifier += 1;
+        if (germanWest > fra.army) modifier += 1;
+        if (germanWest < fra.army) modifier -= 1;
+        // No BEF check needed — we already filtered that out
+
+        const roll = d6();
+        const total = roll + modifier;
+        g.factions.germany.schlieffenDone = true;
+
+        if (total >= 4) {
+          g.schlieffen = 'success';
+          ger.vp += 5;
+          ger.parisCaptured = true;
+          fra.vp -= 6;
+          fra.stab = clamp(fra.stab - 3, 0, 10);
+          fra.rebellion = true;
+          log.push(`**SCHLIEFFEN PLAN SUCCEEDS!** Roll ${roll} + mod ${modifier} = ${total} ≥ 4. Paris falls! Germany +5 VP, France -6 VP, rebellion.`);
+        } else {
+          g.schlieffen = 'fail';
+          ger.vp -= 3;
+          ger.army -= 2;
+          log.push(`**SCHLIEFFEN PLAN FAILS!** Roll ${roll} + mod ${modifier} = ${total} < 4. Germany -3 VP, loses 2 divisions.`);
+        }
       }
     } else {
       log.push(`Germany cannot execute Schlieffen Plan (army: ${ger.army}, deployed: ${ger.deployed})`);
@@ -452,11 +482,11 @@ function scoreGame(g) {
 }
 
 // --- Run simulations ---
-console.log('# The Guns of August — V3 Balance: 10-Game Simulation\n');
-console.log('## V3 Key Changes');
-console.log('- France: Alsace-Lorraine = 12 VP total (5 public + 7 secret La Revanche)');
-console.log('- Britain: Continental Balance +7, Kaiser Overthrown +7, Splendid Isolation +3, France Must Not Fall -7');
-console.log('- Germany: Alsace retention +8, strongest army +4, Schlieffen Plan (16+ divs, BEF blocks)');
+console.log('# The Guns of August — V3.1 Balance: 10-Game Simulation\n');
+console.log('## V3.1 Changes (from V3)');
+console.log('- **Russia**: Cheap divisions (1.5g/div) — incentivizes Krupp loans, builds the Steamroller');
+console.log('- **Germany**: Cancels Schlieffen Plan if BEF deployed — shifts to conventional defense, preserves army');
+console.log('- **Austria**: Peace VP increased to +3/turn (was +2) — thrives on peace');
 console.log('');
 
 const allScores = [];
