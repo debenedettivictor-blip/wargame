@@ -4044,14 +4044,15 @@ body::before {
   <div class="objectives">
     <div class="obj-title">Shared Faction Objectives (known to all)</div>
     <div class="obj-list">
-      <div>Retain control of Alsace-Lorraine at game end (+3 VP to all German players)</div>
-      <div>Maintain the strongest army on the continent (+2 VP to all)</div>
+      <div>Retain control of Alsace-Lorraine at game end (+8 VP to all German players)</div>
+      <div>Maintain the strongest army on the continent (+4 VP to all)</div>
+      <div>Capture Paris (+5 VP to all — France collapses)</div>
       <div>Secure alliance with Austria-Hungary or Ottoman Empire (+1 VP each, to all)</div>
     </div>
   </div>
   <div class="secret-obj" style="margin-bottom:8px;">
     <strong>🔒 Shared Secret Objectives (only Germany sees)</strong><br>
-    ◈ The Schlieffen Plan: If war begins, conquer France within 2 turns (+5 VP to all, –3 VP to all if it fails)
+    ◈ <strong>The Schlieffen Plan (+5 VP, –3 VP if failed):</strong> Invade France through Belgium within 2 turns of war. <strong>Requirements for success:</strong> Germany must commit 16+ divisions to the western front, must have Artillery upgrade, and Britain must NOT have troops deployed in France. If Britain has BEF deployed, the plan has very low chance of success. GM rolls d6: base 4+ succeeds, +1 if 18+ divisions committed, +1 if France has fewer divisions, –2 if British troops in France, –1 if France has trenches. Success = capture Paris, +5 VP. Failure = –3 VP, heavy losses.
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
     <div class="role-card" data-role="kaiser">
@@ -4097,18 +4098,21 @@ body::before {
     <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">8 Gold</div></div>
     <div class="stat"><div class="stat-label">Army</div><div class="stat-value">12 Divisions</div></div>
     <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">4 Fleets</div></div>
-    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">0/turn</div></div>
+    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+1/turn</div></div>
   </div>
   <div class="objectives">
     <div class="obj-title">Shared Faction Objectives (known to all)</div>
     <div class="obj-list">
-      <div>Recapture Alsace-Lorraine from Germany (+5 VP to both)</div>
+      <div>Recapture Alsace-Lorraine from Germany (+5 VP to both — publicly announced)</div>
       <div>Maintain alliance with both Britain AND Russia (+2 VP to both)</div>
+      <div>Entente Leader: +1 VP/turn while maintaining 2+ alliances</div>
+      <div>+1 VP/turn while contesting Alsace-Lorraine (French troops present)</div>
       <div>Do not lose Paris (–6 VP to both if Paris falls)</div>
     </div>
   </div>
   <div class="secret-obj" style="margin-bottom:8px;">
     <strong>🔒 Shared Secret Objectives</strong><br>
+    ◈ <strong>La Revanche (+7 hidden VP):</strong> When Alsace-Lorraine is fully liberated (French troops present, no German troops), France earns +7 HIDDEN VP on top of the +5 public bonus. Total capture reward: 12 VP. The sacred provinces are priceless.<br>
     ◈ Convince Britain to commit ground troops to a Continental war (+3 VP to both)
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
@@ -4145,7 +4149,7 @@ body::before {
     <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">11 Gold</div></div>
     <div class="stat"><div class="stat-label">Army</div><div class="stat-value">8 Divisions</div></div>
     <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">14 Fleets</div></div>
-    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+1/turn</div></div>
+    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+2/turn</div></div>
   </div>
   <div class="objectives">
     <div class="obj-title">Shared Faction Objectives (known to all)</div>
@@ -4153,7 +4157,16 @@ body::before {
       <div>Maintain naval supremacy — more fleets than any other nation (+3 VP to all)</div>
       <div>Prevent any single power from dominating the Continent (+3 VP to all)</div>
       <div>Protect Belgium's neutrality (+2 VP — or –2 VP if Belgium falls and Britain does nothing)</div>
+      <div>Naval Blockade: +1 VP/turn for each nation Britain is actively blockading</div>
+      <div>France Must Not Fall: –7 VP if France collapses into rebellion. Keep France alive!</div>
+      <div>Splendid Isolation: +3 VP at end of game if Britain never deploys troops to France</div>
     </div>
+  </div>
+  <div class="secret-obj" style="margin-bottom:8px;">
+    <strong>🔒 Shared Secret Objectives (only Britain sees)</strong><br>
+    ◈ <strong>Continental Balance (+7 hidden VP):</strong> When France and Germany are BOTH at war with each other, Britain earns +7 hidden VP. The continent bleeds; the Empire profits. Encourage war — but don't get dragged in too deep.<br>
+    ◈ <strong>The Kaiser Must Fall (+7 hidden VP):</strong> If Germany's government collapses into rebellion, Britain earns +7 hidden VP. The play: blockade Germany to crush their economy, then fund a coup to push the Kaiser over the edge. Classic British statecraft.<br>
+    ◈ <strong>Not Committing Troops (+3 VP):</strong> If Britain never sends troops to France, +3 VP at game end (Splendid Isolation). Let others do the dying. But if France falls without your help, it's –7 VP. Thread the needle.
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
     <div class="role-card" data-role="pm">
@@ -4199,7 +4212,8 @@ body::before {
     <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">5 Gold</div></div>
     <div class="stat"><div class="stat-label">Army</div><div class="stat-value">8 Divisions</div></div>
     <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">2 Fleets</div></div>
-    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+3/turn</div></div>
+    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+2/turn</div></div>
+    <div class="stat"><div class="stat-label">Stability</div><div class="stat-value">5 (Strained)</div></div>
   </div>
   <div class="objectives">
     <div class="obj-title">Shared Faction Objectives (known to all)</div>
@@ -4314,7 +4328,7 @@ body::before {
     <div class="stat"><div class="stat-label">Income/Turn</div><div class="stat-value">6 Gold</div></div>
     <div class="stat"><div class="stat-label">Army</div><div class="stat-value">6 Divisions</div></div>
     <div class="stat"><div class="stat-label">Navy</div><div class="stat-value">2 Fleets</div></div>
-    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+2/turn</div></div>
+    <div class="stat"><div class="stat-label">Peace VP</div><div class="stat-value">+1/turn</div></div>
   </div>
   <div class="objectives">
     <div class="obj-title">Shared Faction Objectives (known to all)</div>
@@ -4572,13 +4586,13 @@ body::before {
 <div class="highlight-box" style="border-color: #2d5016;">
   <strong>Peace Victory Points — The Reward for Diplomacy:</strong><br>
   Each turn at peace, factions earn VP based on how much they benefit from stability:<br><br>
-  ◆ <strong>Austria-Hungary: +3 VP/turn</strong> — "Imperial Harmony." War risks national disintegration.<br>
+  ◆ <strong>Austria-Hungary: +2 VP/turn</strong> — "Imperial Harmony." War risks national disintegration.<br>
   ◆ <strong>Russia: +2 VP/turn</strong> — "Reform & Stability." Needs peace to modernize and avoid revolution.<br>
-  ◆ <strong>Ottoman Empire: +2 VP/turn</strong> — "Ottoman Revival." Needs peace for reforms.<br>
+  ◆ <strong>Britain: +2 VP/turn</strong> — "Pax Britannica." Trade thrives in peacetime (+2g/turn bonus too). Plus blockade VP and secret objectives.<br>
   ◆ <strong>Germany: +1 VP/turn</strong> — "Industrial Prosperity." Benefits from peace but strong enough for war.<br>
-  ◆ <strong>Britain: +1 VP/turn</strong> — "Pax Britannica." Trade thrives in peacetime (+2g/turn bonus too).<br>
-  ◆ <strong>France: 0 VP/turn</strong> — "Revanchism Simmers." France gains <em>nothing</em> from peace. They want Alsace-Lorraine back.<br><br>
-  <em>Over 6 turns: Austria earns +18 VP from peace vs France's 0. This creates radically different incentives.</em>
+  ◆ <strong>France: +1 VP/turn</strong> — "Diplomatic Prestige." Plus Entente Leader VP and massive Alsace-Lorraine capture bonus.<br>
+  ◆ <strong>Ottoman Empire: +1 VP/turn</strong> — "Ottoman Revival." Declining empire — neutrality alone won't win.<br><br>
+  <em>All great powers can now compete for VP. France and Britain have secondary objectives that reward bold action, while Austria and Russia profit from peace. Arms dealers must spark war or face -8 VP.</em>
 </div>
 
 <div class="highlight-box" style="border-color: #8b1a1a;">
@@ -4676,8 +4690,8 @@ body::before {
 <table class="ref-table">
   <tr><th>Faction</th><th>Industry</th><th>Trade</th><th>Agreements</th><th>Peace VP</th><th>Special</th></tr>
   <tr><td>Germany</td><td>8</td><td>3</td><td>+3</td><td>+1/turn</td><td>+4 from Alsace-Lorraine (contested if enemy present)</td></tr>
-  <tr><td>Britain</td><td>4</td><td>7</td><td>+2</td><td>+1/turn</td><td>+2g peace dividend. 14 fleets = blockade power.</td></tr>
-  <tr><td>France</td><td>5</td><td>3</td><td>+2</td><td>0</td><td>+4 if Alsace recaptured. No peace VP — wants war!</td></tr>
+  <tr><td>Britain</td><td>4</td><td>7</td><td>+2</td><td>+2/turn</td><td>+2g peace dividend. 14 fleets = blockade VP. BEF VP.</td></tr>
+  <tr><td>France</td><td>5</td><td>3</td><td>+2</td><td>+1/turn</td><td>+4g if Alsace recaptured. +5 VP capture bonus! Entente Leader VP.</td></tr>
   <tr><td>Russia</td><td>5</td><td>2</td><td>+2</td><td>+2/turn</td><td>–2 if revolution. Needs peace to reform.</td></tr>
   <tr><td>Austria-Hungary</td><td>4</td><td>1</td><td>+1</td><td>+3/turn</td><td>+2g stability bonus at peace. War = desertion risk.</td></tr>
   <tr><td>Ottoman Empire</td><td>2</td><td>2</td><td>+2</td><td>+2/turn</td><td>+2 from Straits tolls (if Dardanelles held).</td></tr>
@@ -4717,12 +4731,12 @@ body::before {
 <p><strong>Peace VP Per Turn (while at peace)</strong></p>
 <table class="ref-table">
   <tr><th>Faction</th><th>VP/Turn</th><th>Gold/Turn</th><th>Rationale</th></tr>
-  <tr><td>Austria-Hungary</td><td><strong>+3 VP</strong></td><td>+1g</td><td>Imperial harmony — war destroys the empire</td></tr>
+  <tr><td>Austria-Hungary</td><td><strong>+2 VP</strong></td><td>+1g</td><td>Imperial harmony — war destroys the empire</td></tr>
   <tr><td>Russia</td><td><strong>+2 VP</strong></td><td>+1g</td><td>Reform &amp; stability — needs time to modernize</td></tr>
-  <tr><td>Ottoman Empire</td><td><strong>+2 VP</strong></td><td>+1g</td><td>Ottoman revival — needs peace for reforms</td></tr>
+  <tr><td>Britain</td><td><strong>+2 VP</strong></td><td>+2g</td><td>Pax Britannica — plus blockade VP &amp; secret objectives</td></tr>
   <tr><td>Germany</td><td>+1 VP</td><td>+1g</td><td>Industrial prosperity — but can afford war</td></tr>
-  <tr><td>Britain</td><td>+1 VP</td><td>+2g</td><td>Pax Britannica — trade empire thrives in peace</td></tr>
-  <tr><td>France</td><td><strong>0 VP</strong></td><td>0g</td><td>Revanchism — peace gains France nothing</td></tr>
+  <tr><td>France</td><td>+1 VP</td><td>+1g</td><td>Diplomatic prestige — plus Alsace capture bonus &amp; Entente VP</td></tr>
+  <tr><td>Ottoman Empire</td><td>+1 VP</td><td>+1g</td><td>Ottoman revival — neutrality alone won't win</td></tr>
 </table>
 
 <p><strong>Arms Dealer Price List</strong></p>
@@ -6704,7 +6718,7 @@ function defaultGameState() {
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     austria: {
-      gold: 14, income: 5, army: 8, navy: 2, vp: 0, stability: 3,
+      gold: 14, income: 5, army: 8, navy: 2, vp: 0, stability: 5,
       troops: { austria: 6, balkans: 2 },
       fleets: { mediterranean: 2 },
       alliances: ['germany'], status: [], upgrades: {}, modernization: 0,
@@ -6817,7 +6831,7 @@ function loadGameState() {
         if (state.factions[fid].warTurns === undefined) state.factions[fid].warTurns = 0;
         if (state.factions[fid].modernization === undefined) state.factions[fid].modernization = 0;
         if (state.factions[fid].stability === undefined) {
-          const defaultStab = { germany: 8, france: 7, britain: 9, russia: 5, austria: 3, ottoman: 4 };
+          const defaultStab = { germany: 8, france: 7, britain: 9, russia: 5, austria: 5, ottoman: 4 };
           state.factions[fid].stability = defaultStab[fid] || 7;
         }
         // Migrate: backfill unit names
@@ -6943,15 +6957,15 @@ const WAR_PENALTIES = {
 // Peace is profitable — factions NOT at war earn VP and gold each turn
 // Each faction values peace differently based on their strategic situation
 const PEACE_BONUSES = {
-  endGameVP: 3,            // +3 VP at game end for factions that never went to war
+  endGameVP: 2,            // +2 VP at game end for factions that never went to war (reduced from 3)
   // Per-turn rewards while at peace: { gold: g/turn, vp: VP/turn }
   perFaction: {
     germany:  { gold: 1, vp: 1, label: 'Industrial prosperity' },
-    france:   { gold: 0, vp: 0, label: 'Revanchism simmers' },        // France gains NOTHING from peace — they want Alsace back
-    britain:  { gold: 2, vp: 1, label: 'Pax Britannica' },            // Britain profits most from stable trade
+    france:   { gold: 1, vp: 1, label: 'Diplomatic prestige' },       // France now earns modest peace VP — Republic thrives
+    britain:  { gold: 2, vp: 2, label: 'Pax Britannica' },            // Britain profits most from stable trade — increased VP
     russia:   { gold: 1, vp: 2, label: 'Reform & stability' },        // Russia desperately needs peace to modernize and avoid revolution
-    austria:  { gold: 1, vp: 2, label: 'Imperial harmony' },          // Austria benefits from peace but less dominantly
-    ottoman:  { gold: 1, vp: 2, label: 'Ottoman revival' }            // Ottoman needs peace to reform
+    austria:  { gold: 1, vp: 2, label: 'Imperial harmony' },          // Austria benefits from peace
+    ottoman:  { gold: 1, vp: 1, label: 'Ottoman revival' }            // Ottoman peace VP reduced (was 2) — less rewarding to sit out
   }
 };
 
@@ -7148,12 +7162,12 @@ function computeEconomy(fid) {
     desertionRisk = 1;
   }
 
-  // --- War dividend for arms dealers (increased: +3g/turn) ---
+  // --- War dividend for arms dealers (reduced: +2g/turn, was +3g) ---
   let warDividend = 0;
   if (isDealer) {
     const atWarFactions = Object.keys(gameState.factions).filter(fk => gameState.factions[fk].atWar);
     if (atWarFactions.length >= 2) {
-      warDividend = 3;
+      warDividend = 2;
     }
   }
 
@@ -7477,7 +7491,7 @@ function offerLoan(dealerFid, borrowerFid, principal) {
 // Manufacture a crisis (arms dealer action)
 function manufactureCrisis(dealerFid, crisisType, targetFid) {
   const dealer = gameState.factions[dealerFid];
-  const crisisCosts = { border_incident: 2, leaked_treaty: 3, assassination_attempt: 4 };
+  const crisisCosts = { border_incident: 3, leaked_treaty: 4, assassination_attempt: 5 };
   const cost = crisisCosts[crisisType];
 
   if (!cost) { alert('Invalid crisis type.'); return; }
@@ -7507,8 +7521,8 @@ function manufactureCrisis(dealerFid, crisisType, targetFid) {
   logAction(dealerFid, 'crisis', crisisLabels[crisisType] + ' manufactured for ' + cost + 'g — ' + crisisDescs[crisisType]);
 
   // Crises directly destabilize the target faction!
-  // Border Incident: -1 stability, Leaked Treaty: -1 stability, Assassination: -2 stability
-  const stabilityDamage = { border_incident: 1, leaked_treaty: 1, assassination_attempt: 2 };
+  // Border Incident: -1 stability, Leaked Treaty: -1 stability, Assassination: -1 stability (reduced from -2)
+  const stabilityDamage = { border_incident: 1, leaked_treaty: 1, assassination_attempt: 1 };
   const stabDmg = stabilityDamage[crisisType] || 0;
   const targetFaction = gameState.factions[targetFid];
   if (targetFaction && targetFaction.stability !== undefined && stabDmg > 0) {
@@ -7561,6 +7575,91 @@ function recordUnitSale(dealerFid, buyerFid, unitType) {
   }
   logAction(dealerFid, 'sales', 'Sold 1 ' + unitType + ' to ' + FACTION_NAMES[buyerFid] + ' (total: ' + dealer.unitsSold + ' units)');
   saveGameState();
+}
+
+// ==================== SCHLIEFFEN PLAN RESOLUTION ====================
+// GM triggers this when Germany declares execution of the Schlieffen Plan
+function resolveSchlieffenPlan() {
+  const germany = gameState.factions.germany;
+  const france = gameState.factions.france;
+  const britain = gameState.factions.britain;
+  if (!germany || !france) { alert('Germany or France not found!'); return; }
+  if (!germany.atWar) { alert('Germany must be at war to execute the Schlieffen Plan!'); return; }
+  if (germany.schlieffenResolved) { alert('The Schlieffen Plan has already been resolved this game.'); return; }
+
+  // Calculate modifiers
+  const germanWestDivs = (germany.troops['france'] || 0) + (germany.troops['paris'] || 0) + (germany.troops['alsace_lorraine'] || 0);
+  const hasArtillery = germany.upgrades && germany.upgrades.artillery;
+  const befInFrance = britain ? ((britain.troops['france'] || 0) + (britain.troops['paris'] || 0)) : 0;
+  const frenchDivs = (france.troops['france'] || 0) + (france.troops['paris'] || 0);
+  const frenchTrenches = france.upgrades && france.upgrades.trenches;
+
+  let modifier = 0;
+  let modDetails = [];
+
+  // Base requirement: need 16+ divisions committed
+  if (germanWestDivs < 16) {
+    alert('Schlieffen Plan requires at least 16 divisions on the western front!\nCurrently committed: ' + germanWestDivs + ' divisions (france + paris + alsace_lorraine regions).');
+    return;
+  }
+
+  // Modifiers
+  if (germanWestDivs >= 18) { modifier += 1; modDetails.push('+1 (18+ divisions committed: ' + germanWestDivs + ')'); }
+  if (germanWestDivs < frenchDivs) { modifier -= 1; modDetails.push('-1 (outnumbered by French: ' + germanWestDivs + ' vs ' + frenchDivs + ')'); }
+  if (germanWestDivs > frenchDivs) { modifier += 1; modDetails.push('+1 (outnumber French: ' + germanWestDivs + ' vs ' + frenchDivs + ')'); }
+  if (hasArtillery) { modifier += 1; modDetails.push('+1 (Artillery upgrade)'); }
+  if (befInFrance > 0) { modifier -= 2; modDetails.push('-2 (British BEF deployed in France: ' + befInFrance + ' divisions!)'); }
+  if (frenchTrenches) { modifier -= 1; modDetails.push('-1 (French Trench Networks)'); }
+
+  // Roll d6
+  const roll = Math.floor(Math.random() * 6) + 1;
+  const total = roll + modifier;
+  const success = total >= 4;
+
+  germany.schlieffenResolved = true;
+
+  let resultText = '';
+  if (success) {
+    // SUCCESS — Germany captures Paris
+    germany.vp = (germany.vp || 0) + 5;
+    germany.parisCaptured = true;
+    // Move troops to Paris
+    if (!germany.troops['paris']) germany.troops['paris'] = 0;
+    germany.troops['paris'] += Math.min(4, germanWestDivs);
+    // France collapses
+    if (!france.status.includes('rebellion')) france.status.push('rebellion');
+    france.vp = (france.vp || 0) - 6;
+    france.stability = Math.max(0, (france.stability || 0) - 3);
+
+    resultText = 'SCHLIEFFEN PLAN SUCCEEDS! Roll: ' + roll + ' + modifiers (' + modifier + ') = ' + total + ' (needed 4+). Germany storms through Belgium and captures Paris! +5 VP to Germany. France collapses (-6 VP, rebellion, -3 stability).';
+    logAction('germany', 'objective', 'THE SCHLIEFFEN PLAN SUCCEEDS! +5 VP — Paris has fallen!');
+    logAction('france', 'penalty', 'SCHLIEFFEN PLAN — Paris overrun! -6 VP, rebellion triggered, -3 stability.');
+  } else {
+    // FAILURE — costly for Germany
+    germany.vp = (germany.vp || 0) - 3;
+    // Heavy losses — lose 2 divisions
+    const lossRegion = germany.troops['france'] > 0 ? 'france' : 'alsace_lorraine';
+    germany.troops[lossRegion] = Math.max(0, (germany.troops[lossRegion] || 0) - 2);
+    germany.army = Math.max(0, (germany.army || 0) - 2);
+
+    resultText = 'SCHLIEFFEN PLAN FAILS! Roll: ' + roll + ' + modifiers (' + modifier + ') = ' + total + ' (needed 4+). The German advance stalls. -3 VP and 2 divisions lost. The war becomes a grinding stalemate.';
+    logAction('germany', 'penalty', 'THE SCHLIEFFEN PLAN FAILS! -3 VP, 2 divisions lost. The advance stalls at the Marne.');
+    logAction('france', 'objective', 'THE MARNE! France holds the line! The Schlieffen Plan has failed!');
+  }
+
+  // Log full details for GM
+  if (!gameState.resolutionLog) gameState.resolutionLog = [];
+  gameState.resolutionLog.push({
+    icon: '⚔',
+    text: resultText + '\n\nModifiers: ' + (modDetails.length > 0 ? modDetails.join(', ') : 'none'),
+    manual: false
+  });
+
+  saveGameState();
+  renderDashboard();
+  if (typeof renderGMControl === 'function') renderGMControl();
+
+  alert(resultText);
 }
 
 // Set controller of a minor nation
@@ -7635,7 +7734,10 @@ const FACTION_SPECIALS = {
   germany: {
     title: 'Imperial German Command',
     abilities: [
-      { name: 'Schlieffen Plan', desc: 'Invade France through Belgium within 2 turns of war. Success: +5 VP. Failure: -3 VP.', type: 'strategic' },
+      { name: 'Schlieffen Plan', desc: 'Invade France through Belgium within 2 turns of war. Requires 16+ divisions on western front and Artillery upgrade. If Britain has troops in France, plan is nearly impossible (–2 penalty). GM rolls d6: base 4+, +1 for 18+ divisions, +1 if outnumbering France, –2 if BEF deployed, –1 if French trenches. Success: capture Paris, +5 VP. Failure: –3 VP, heavy losses.', type: 'strategic' },
+      { name: 'Fortress Alsace', desc: 'Retain Alsace-Lorraine at game end: +8 VP. This is Germany\'s most valuable objective — defend it at all costs.', type: 'strategic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
+      { name: 'Capture Paris', desc: '+5 VP if Germany captures Paris. France collapses. The war is won in the west.', type: 'strategic' },
+      { name: 'Continental Supremacy', desc: '+4 VP for maintaining the strongest army on the continent at game end.', type: 'strategic' },
       { name: 'Industrial Powerhouse', desc: 'Highest industry (8g). +4 Gold/turn from Alsace-Lorraine — but income drops if enemy troops contest the region.', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
       { name: 'Naval Vulnerability', desc: 'Only 4 starting fleets vs Britain\'s 14. Must invest heavily in fleet (6g each) to break a British blockade — or face economic strangulation.', type: 'penalty' },
       { name: 'Two-Front Dilemma', desc: '14 divisions are the largest army — but splitting between France and Russia means losing on both fronts. Neutralize one enemy first.', type: 'strategic' }
@@ -7645,7 +7747,9 @@ const FACTION_SPECIALS = {
     title: 'French Republic Command',
     abilities: [
       { name: 'Lorraine Reconquest', desc: '+4 Gold/turn if you retake Alsace-Lorraine. Moving troops there also denies Germany their +4g bonus — a 8g swing!', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
+      { name: 'Alsace Revanche', desc: '+5 VP one-time bonus when you liberate Alsace-Lorraine (no German troops present). +1 VP/turn while contesting. The sacred mission of the Republic!', type: 'strategic', check: function(f) { return f.alsaceCaptured || (f.troops && f.troops['alsace_lorraine'] > 0); } },
       { name: 'Fortress Paris', desc: 'Paris is always considered fortified (+2 defense) at no cost.', type: 'military' },
+      { name: 'Entente Leader', desc: '+1 VP/turn while maintaining 2+ alliances. France leads the diplomatic coalition against the Central Powers.', type: 'strategic', check: function(f) { return f.alliances && f.alliances.length >= 2; } },
       { name: 'Entente Coordination', desc: 'Combined with Britain (20 army + 18 fleet), you outmatch Germany on land and sea. Coordinate to overwhelm.', type: 'strategic' }
     ]
   },
@@ -7653,8 +7757,13 @@ const FACTION_SPECIALS = {
     title: 'British Imperial Command',
     abilities: [
       { name: 'Naval Supremacy', desc: '14 fleets dominate the seas. Blockading Germany cuts their trade immediately and crushes their industry over time.', type: 'strategic' },
+      { name: 'Blockade VP', desc: '+1 VP/turn for each nation Britain is actively blockading. Command the seas to strangle enemy economies and earn VP!', type: 'strategic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).some(function(fid) { var t = gameState.factions[fid]; return t.blockadedBy && t.blockadedBy.some(function(b) { return b.fid === 'britain'; }); }); } },
       { name: 'Colonial Trade Network', desc: 'Highest trade income (7g) but expensive navy. War disrupts your own trade too — peace keeps the money flowing.', type: 'economic' },
-      { name: 'Expeditionary Force', desc: '8 army divisions can reinforce France via the Channel — but losing them is costly to replace (2g each).', type: 'military' },
+      { name: 'Continental Balance', desc: 'Britain benefits enormously when France and Germany go to war — continental rivals weaken each other while the Empire grows stronger. But if France collapses, it\'s a disaster.', type: 'strategic' },
+      { name: 'France Must Not Fall', desc: 'If France collapses into rebellion, Britain loses -7 VP. The balance of power is shattered. Keep France alive — but not too strong.', type: 'penalty', check: function(f) { return typeof gameState !== 'undefined' && gameState.factions.france && gameState.factions.france.status && gameState.factions.france.status.includes('rebellion'); } },
+      { name: 'Regime Change', desc: 'If Germany\'s government collapses (rebellion), Britain earns a major strategic victory. Blockade Germany and fund coups to break the Kaiser.', type: 'strategic' },
+      { name: 'Splendid Isolation', desc: '+3 VP at end of game if Britain never deploys troops to France. Let the continent fight — the Royal Navy is enough.', type: 'strategic', check: function(f) { return !f.troopsDeployedToFrance; } },
+      { name: 'Expeditionary Force', desc: '8 army divisions can reinforce France via the Channel — but deploying them forfeits Splendid Isolation bonus.', type: 'military' },
       { name: 'BEF Rapid Deployment', desc: 'Deploy 4 divisions to France instantly for 2 Gold. Can only be used once per game — the professional army crosses the Channel.', type: 'military', check: function(f) { return !(f.upgrades && f.upgrades.bef_deployed); } }
     ]
   },
@@ -7670,6 +7779,7 @@ const FACTION_SPECIALS = {
     title: 'Dual Monarchy Command',
     abilities: [
       { name: 'Dual Monarchy Stability', desc: '+2g/turn while at peace AND no rebellion. Austria profits enormously from maintaining the status quo.', type: 'economic', check: function(f) { return !f.atWar && !(f.status && f.status.includes('rebellion')); } },
+      { name: 'Strained Empire', desc: 'Starts at stability 5 (Strained). More resilient than before but still vulnerable to crises and prolonged war.', type: 'strategic' },
       { name: 'War Rally', desc: 'Early war BOOSTS stability (+2 for first 2 turns) as the nation rallies. But war weariness kicks in hard after Turn 2.', type: 'strategic' },
       { name: 'Nationality Tensions', desc: 'While at war: lose 1 army division per turn to desertion. Manageable if war is short.', type: 'penalty', check: function(f) { return f.atWar; } },
       { name: 'Internal Rebellion', desc: 'Rebellion costs -2 Gold/turn and may cause unit desertion.', type: 'penalty', check: function(f) { return f.status && f.status.includes('rebellion'); } },
@@ -7680,7 +7790,8 @@ const FACTION_SPECIALS = {
     title: 'Ottoman Imperial Command',
     abilities: [
       { name: 'Straits Control', desc: '+2 Gold/turn from Dardanelles tolls while holding the region.', type: 'economic', check: function(f) { return f.troops && f.troops['dardanelles'] > 0; } },
-      { name: 'Gallipoli Defense', desc: 'Defenders in Dardanelles get +2 to defense rolls. The straits are a fortress.', type: 'military' }
+      { name: 'Gallipoli Defense', desc: 'Defenders in Dardanelles get +2 to defense rolls. The straits are a fortress.', type: 'military' },
+      { name: 'Sick Man of Europe', desc: 'Reduced peace VP (+1/turn). The Ottoman Empire is in decline — neutrality alone will not win the game. Must take territory or join a coalition.', type: 'penalty' }
     ]
   },
   krupp: {
@@ -7690,7 +7801,7 @@ const FACTION_SPECIALS = {
       { name: 'Fund a Coup', desc: 'Pay 3 Gold to secretly bribe a junior player to betray their faction leader.', type: 'dealer' },
       { name: 'Plant a Crisis', desc: 'Pay 3 Gold to write a fake news headline. GM reads it next turn as if real.', type: 'dealer' },
       { name: 'Fear Campaign', desc: 'Free (Vickers Director only): spread a rumor about enemy troop buildup to drive sales.', type: 'dealer' },
-      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war. No war = -5 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
+      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war (reduced from +3). No war = -8 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
     ]
   },
   schneider: {
@@ -7700,7 +7811,7 @@ const FACTION_SPECIALS = {
       { name: 'Exclusive Contracts', desc: 'Pay 2 Gold to lock a nation into buying only from you for 3 turns.', type: 'dealer' },
       { name: 'Industrial Espionage', desc: 'Pay 2 Gold to learn rival consortium\'s total sales, treasury, and latest client.', type: 'dealer' },
       { name: 'Regime Change', desc: 'Fund a Coup costs only 2 Gold instead of 3 Gold.', type: 'dealer' },
-      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war. No war = -5 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
+      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war (reduced from +3). No war = -8 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
     ]
   }
 };
@@ -8012,6 +8123,123 @@ function advanceTurn() {
       logAction(fid, 'alliance', 'Central Powers coordination VP: +1 (Austria fighting alongside Germany)');
     }
 
+    // === SECONDARY OBJECTIVES ===
+
+    // GERMANY: Capture Paris — +5 VP one-time if German troops occupy Paris with no French defenders
+    if (fid === 'germany') {
+      const germanInParis = (f.troops && f.troops['paris']) || 0;
+      const frenchInParis = (factions.france && factions.france.troops && factions.france.troops['paris']) || 0;
+      if (germanInParis > 0 && frenchInParis === 0 && !f.parisCaptured) {
+        f.parisCaptured = true;
+        f.vp = (f.vp || 0) + 5;
+        logAction(fid, 'objective', 'PARIS HAS FALLEN! +5 VP — Germany captures the French capital! France collapses.');
+        // Also trigger France collapse
+        if (factions.france && !factions.france.status.includes('rebellion')) {
+          factions.france.status.push('rebellion');
+          factions.france.vp = (factions.france.vp || 0) - 6;
+          logAction('france', 'penalty', 'PARIS LOST! -6 VP — The capital has fallen. Government in disarray.');
+        }
+      }
+    }
+
+    // FRANCE: Alsace Revanche — ONE-TIME massive VP bonus when France captures Alsace-Lorraine
+    // 5 VP public (visible to all) + 7 VP secret (only GM knows, added silently)
+    if (fid === 'france') {
+      const frenchInAlsace = (f.troops && f.troops['alsace_lorraine']) || 0;
+      const germanInAlsace = (factions.germany && factions.germany.troops && factions.germany.troops['alsace_lorraine']) || 0;
+      if (frenchInAlsace > 0 && germanInAlsace === 0 && !f.alsaceCaptured) {
+        // One-time capture bonus!
+        f.alsaceCaptured = true;
+        f.vp = (f.vp || 0) + 5;
+        logAction(fid, 'objective', 'ALSACE-LORRAINE LIBERATED! +5 VP — The sacred provinces are restored to France! Vive la France!');
+        // Secret bonus — 7 VP added silently (only GM sees this in resolution log)
+        f.vp = (f.vp || 0) + 7;
+        if (!gameState.resolutionLog) gameState.resolutionLog = [];
+        gameState.resolutionLog.push({
+          icon: '🇫🇷',
+          text: 'SECRET OBJECTIVE COMPLETE: France earns +7 hidden VP for Alsace-Lorraine liberation (total capture bonus: 12 VP). Only the GM knows about this bonus.',
+          manual: false
+        });
+      } else if (frenchInAlsace > 0 && germanInAlsace > 0) {
+        f.vp = (f.vp || 0) + 1;
+        logAction(fid, 'objective', 'Alsace Contested! +1 VP (French troops contesting Alsace-Lorraine)');
+      }
+    }
+
+    // FRANCE: Entente Leader — +1 VP/turn if France has 2+ allies (alliance network)
+    if (fid === 'france' && f.alliances && f.alliances.length >= 2) {
+      f.vp = (f.vp || 0) + 1;
+      logAction(fid, 'objective', 'Entente Leader: +1 VP (diplomatic alliance network of ' + f.alliances.length + ' allies)');
+    }
+
+    // BRITAIN: Naval Blockade VP — +1 VP/turn for each faction Britain is actively blockading
+    if (fid === 'britain') {
+      let blockadeVP = 0;
+      Object.keys(factions).forEach(targetFid => {
+        if (targetFid === 'britain' || targetFid === 'krupp' || targetFid === 'schneider') return;
+        const target = factions[targetFid];
+        if (target.blockadedBy && target.blockadedBy.some(b => b.fid === 'britain')) {
+          blockadeVP += 1;
+        }
+      });
+      if (blockadeVP > 0) {
+        f.vp = (f.vp || 0) + blockadeVP;
+        logAction(fid, 'objective', 'Naval Blockade VP: +' + blockadeVP + ' (Britannia rules the waves — ' + blockadeVP + ' nation' + (blockadeVP > 1 ? 's' : '') + ' blockaded)');
+      }
+    }
+
+    // BRITAIN: Continental Balance — SECRET +7 VP (one-time) when France and Germany are BOTH at war
+    // Britain profits from continental rivals weakening each other — but France must survive
+    if (fid === 'britain' && !f.continentalBalanceAwarded) {
+      const franceAtWar = factions.france && factions.france.atWar;
+      const germanyAtWar = factions.germany && factions.germany.atWar;
+      if (franceAtWar && germanyAtWar) {
+        f.continentalBalanceAwarded = true;
+        f.vp = (f.vp || 0) + 7;
+        if (!gameState.resolutionLog) gameState.resolutionLog = [];
+        gameState.resolutionLog.push({
+          icon: '🇬🇧',
+          text: 'SECRET OBJECTIVE COMPLETE: Britain earns +7 hidden VP — Continental Balance. France and Germany are at war, weakening both rivals. Britain profits from the chaos.',
+          manual: false
+        });
+      }
+    }
+
+    // BRITAIN: France Collapse Penalty — if France gets rebellion/collapse, Britain takes a massive hit
+    if (fid === 'britain') {
+      const franceCollapsed = factions.france && factions.france.status && factions.france.status.includes('rebellion');
+      if (franceCollapsed && !f.franceCollapsePenalty) {
+        f.franceCollapsePenalty = true;
+        f.vp = (f.vp || 0) - 7;
+        logAction(fid, 'penalty', 'FRANCE HAS FALLEN! -7 VP — Britain\'s continental strategy collapses. The balance of power is destroyed.');
+      }
+    }
+
+    // BRITAIN: Kaiser Overthrown — SECRET +7 VP (one-time) if Germany gets rebellion/collapse
+    // Requires destabilizing Germany (blockade + fund a coup = the British way)
+    if (fid === 'britain' && !f.kaiserOverthrown) {
+      const germanyCollapsed = factions.germany && factions.germany.status && factions.germany.status.includes('rebellion');
+      if (germanyCollapsed) {
+        f.kaiserOverthrown = true;
+        f.vp = (f.vp || 0) + 7;
+        if (!gameState.resolutionLog) gameState.resolutionLog = [];
+        gameState.resolutionLog.push({
+          icon: '🇬🇧',
+          text: 'SECRET OBJECTIVE COMPLETE: Britain earns +7 hidden VP — The Kaiser is Overthrown! Germany\'s government has collapsed. The Royal Navy\'s blockade and British covert action have broken the German Empire.',
+          manual: false
+        });
+      }
+    }
+
+    // BRITAIN: Splendid Isolation — +3 VP at end of game if Britain NEVER deployed troops to France
+    // Tracked per-turn: if troops are ever in France, mark it
+    if (fid === 'britain') {
+      const befInFrance = (f.troops && ((f.troops['france'] || 0) + (f.troops['paris'] || 0))) || 0;
+      if (befInFrance > 0) {
+        f.troopsDeployedToFrance = true;
+      }
+    }
+
     // Process arms dealer loans (repayment)
     const isDealerFaction = fid === 'krupp' || fid === 'schneider';
     if (isDealerFaction && f.loans && f.loans.length > 0) {
@@ -8060,6 +8288,15 @@ function advanceTurn() {
     // Arms dealer: Escalation VP (accumulated from war influence actions)
     if (isDealerFaction && f.escalationVP > 0) {
       // escalationVP is added directly when events happen, already in f.vp via addEscalationVP
+    }
+
+    // BRITAIN: Splendid Isolation — +3 VP at end of game if Britain never sent troops to France
+    if (fid === 'britain' && gameState.currentTurnNum >= 6 && !f.splendidIsolationAwarded) {
+      if (!f.troopsDeployedToFrance) {
+        f.splendidIsolationAwarded = true;
+        f.vp = (f.vp || 0) + 3;
+        logAction(fid, 'objective', 'Splendid Isolation: +3 VP — Britain kept its army home and let the continent bleed. The Empire endures.');
+      }
     }
 
     summary.push({
@@ -9149,7 +9386,7 @@ function renderMilitaryTab(fid) {
   if (isDealer) {
     decisions.push(
       { id: 'loans', icon: '$', title: 'Offer Loans', desc: 'Extend credit to nations at 40% interest', cost: 'Variable' },
-      { id: 'crisis', icon: '!', title: 'Manufacture Crisis', desc: 'Border incidents, leaked treaties, assassination attempts', cost: '2-4 Gold' }
+      { id: 'crisis', icon: '!', title: 'Manufacture Crisis', desc: 'Border incidents, leaked treaties, assassination attempts', cost: '3-5 Gold' }
     );
   }
 
@@ -9715,14 +9952,14 @@ function renderSpecialTab(fid) {
       <label style="font-size:0.8em;">Target</label>
       <select id="crisisTarget2" style="display:block; width:100%; max-width:250px;">${targetOpts}</select>
     </div>`;
-    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget2').value)" ${f.gold >= 2 && !isSubmitted ? '' : 'disabled'}>
-      <span>Border Incident — force diplomatic response or -1 VP</span><span class="action-cost">2g</span>
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget2').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
+      <span>Border Incident — force diplomatic response or -1 VP</span><span class="action-cost">3g</span>
     </button>`;
-    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget2').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
-      <span>Leaked Treaty — expose alliances, cause fallout</span><span class="action-cost">3g</span>
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget2').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
+      <span>Leaked Treaty — expose alliances, cause fallout</span><span class="action-cost">4g</span>
     </button>`;
-    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget2').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
-      <span>Assassination Attempt — create casus belli</span><span class="action-cost">4g</span>
+    html += `<button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget2').value)" ${f.gold >= 5 && !isSubmitted ? '' : 'disabled'}>
+      <span>Assassination Attempt — create casus belli</span><span class="action-cost">5g</span>
     </button>`;
 
     // Crisis history
@@ -9970,17 +10207,17 @@ function renderActionTabContent(fid) {
         <label style="font-size:0.85em;">Target</label>
         <select id="crisisTarget" style="display:block; width:100%; max-width:300px; margin-bottom:8px;">${targetOpts}</select>
       </div>
-      <button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget').value)" ${f.gold >= 2 && !isSubmitted ? '' : 'disabled'}>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','border_incident',document.getElementById('crisisTarget').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
         <span>Border Incident — force diplomatic response or -1 VP</span>
-        <span class="action-cost">2 Gold</span>
-      </button>
-      <button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget').value)" ${f.gold >= 3 && !isSubmitted ? '' : 'disabled'}>
-        <span>Leaked Treaty — expose alliances, cause diplomatic fallout</span>
         <span class="action-cost">3 Gold</span>
       </button>
-      <button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
-        <span>Assassination Attempt — create casus belli for nearby powers</span>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','leaked_treaty',document.getElementById('crisisTarget').value)" ${f.gold >= 4 && !isSubmitted ? '' : 'disabled'}>
+        <span>Leaked Treaty — expose alliances, cause diplomatic fallout</span>
         <span class="action-cost">4 Gold</span>
+      </button>
+      <button class="action-btn" onclick="manufactureCrisis('${fid}','assassination_attempt',document.getElementById('crisisTarget').value)" ${f.gold >= 5 && !isSubmitted ? '' : 'disabled'}>
+        <span>Assassination Attempt — create casus belli for nearby powers</span>
+        <span class="action-cost">5 Gold</span>
       </button>
       ${historyHtml}
     `;
@@ -10971,6 +11208,43 @@ function renderGMControl() {
     </div>
   `;
 
+  // Schlieffen Plan status
+  const schlieffenResolved = gameState.factions.germany && gameState.factions.germany.schlieffenResolved;
+  const germanyAtWar = gameState.factions.germany && gameState.factions.germany.atWar;
+  const germanWestDivs = gameState.factions.germany ? ((gameState.factions.germany.troops['france'] || 0) + (gameState.factions.germany.troops['paris'] || 0) + (gameState.factions.germany.troops['alsace_lorraine'] || 0)) : 0;
+  const befDeployed = gameState.factions.britain ? ((gameState.factions.britain.troops['france'] || 0) + (gameState.factions.britain.troops['paris'] || 0)) : 0;
+  const hasArtillery = gameState.factions.germany && gameState.factions.germany.upgrades && gameState.factions.germany.upgrades.artillery;
+  const frenchTrenches = gameState.factions.france && gameState.factions.france.upgrades && gameState.factions.france.upgrades.trenches;
+  const frenchDivs = gameState.factions.france ? ((gameState.factions.france.troops['france'] || 0) + (gameState.factions.france.troops['paris'] || 0)) : 0;
+
+  let schlieffenStatusHtml = '';
+  if (schlieffenResolved) {
+    schlieffenStatusHtml = '<div class="empty-state">The Schlieffen Plan has already been resolved.</div>';
+  } else if (!germanyAtWar) {
+    schlieffenStatusHtml = '<div class="empty-state">Germany is not at war. The Schlieffen Plan cannot be executed yet.</div>';
+  } else {
+    let readiness = '<div style="margin:8px 0; font-size:0.9em;">';
+    readiness += '<div style="margin-bottom:4px;"><strong>Western Front Divisions:</strong> ' + germanWestDivs + '/16 required ' + (germanWestDivs >= 16 ? '\u2705' : '\u274C') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>Artillery Upgrade:</strong> ' + (hasArtillery ? '\u2705 +1 bonus' : '\u274C No bonus') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>BEF in France:</strong> ' + (befDeployed > 0 ? '\u26A0 ' + befDeployed + ' British divisions! <strong>-2 penalty!</strong>' : '\u2705 None — plan viable') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>French Trenches:</strong> ' + (frenchTrenches ? '\u26A0 -1 penalty' : '\u2705 None') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>German vs French:</strong> ' + germanWestDivs + ' vs ' + frenchDivs + ' ' + (germanWestDivs > frenchDivs ? '(\u2705 +1 outnumber)' : (germanWestDivs < frenchDivs ? '(\u26A0 -1 outnumbered)' : '(even)')) + '</div>';
+    readiness += '</div>';
+
+    schlieffenStatusHtml = readiness + '<button class="roll-btn" onclick="resolveSchlieffenPlan()" ' + (germanWestDivs >= 16 ? '' : 'disabled') + ' style="width:100%; margin-top:8px;">\u2694 Execute the Schlieffen Plan \u2694</button>';
+  }
+
+  let specialOpsSection = `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Special Operations</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">
+      <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.9em; margin-bottom:8px;">The Schlieffen Plan</h4>
+      <p style="font-size:0.85em; margin-bottom:8px; font-style:italic;">Germany's secret war plan to knock out France through Belgium in 2 turns. Requires 16+ divisions on the western front. Roll d6: base 4+ succeeds. Modifiers: +1 for 18+ divisions, +1 if outnumbering France, +1 for Artillery, -2 if British BEF deployed in France, -1 if French trenches.</p>
+      ${schlieffenStatusHtml}
+    </div>
+  </div>`;
+
   let battleSection = `<div class="gm-section">
     <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
       <span>Battle Resolution</span><span>\u25BC</span>
@@ -11177,7 +11451,7 @@ function renderGMControl() {
   </div>`;
 
   const messagesSection = renderGMMessagesSection();
-  container.innerHTML = turnSection + storylineHtml + messagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
+  container.innerHTML = turnSection + storylineHtml + messagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + specialOpsSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
 
   // Render turn tracker into GM console
   renderGMTurnTracker();
