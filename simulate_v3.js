@@ -5,7 +5,7 @@
 //        Austria/Germany foment revolution, Krupp arms-to-win, France/Britain fund Russia,
 //        Russia secret obj = get gold from allies
 
-const NUM_GAMES = 10;
+const NUM_GAMES = 20;
 
 function d6() { return Math.floor(Math.random() * 6) + 1; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
@@ -629,7 +629,7 @@ function scoreGame(g) {
 }
 
 // --- Run simulations ---
-console.log('# The Guns of August — V3.4 Balance: 10-Game Simulation\n');
+console.log(`# The Guns of August — V3.5 Balance: ${NUM_GAMES}-Game Simulation\n`);
 console.log('## V3.4 Changes');
 console.log('- **Germany**: Alsace +5 defense, Prussian doctrine +3, East Prussia +2. Only attacks via Schlieffen.');
 console.log('- **France**: Lobbies Britain for BEF (spends gold). +5 VP if Britain joins, +3 VP if BEF sent, +3 VP if Russia survives.');
@@ -687,7 +687,7 @@ for (let game = 1; game <= NUM_GAMES; game++) {
 }
 
 // Summary
-console.log('---\n## Summary: 10-Game Average VP\n');
+console.log(`---\n## Summary: ${NUM_GAMES}-Game Average VP\n`);
 console.log('| Faction | Avg VP | Wins | Best | Worst |');
 console.log('|---------|--------|------|------|-------|');
 const fids = ['germany','france','britain','russia','austria','ottoman','krupp','schneider'];
