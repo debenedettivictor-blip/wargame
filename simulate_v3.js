@@ -1,6 +1,9 @@
 #!/usr/bin/env node
-// V3.1 Balance Simulator — 10 games, turn-by-turn output
-// Changes from V3: Russia cheap divs (1.5g via Krupp loans), Germany cancels Schlieffen if BEF deployed, Austria peace VP +3
+// V3.2 Balance Simulator — 10 games, turn-by-turn output
+// V3.1: Russia cheap divs, Germany cancels Schlieffen if BEF, Austria peace VP +3
+// V3.2: Germany Alsace defense bonus, Russia Tsar 10VP public + Balkan/Eastern objectives,
+//        Austria/Germany foment revolution, Krupp arms-to-win, France/Britain fund Russia,
+//        Russia secret obj = get gold from allies
 
 const NUM_GAMES = 10;
 
@@ -16,10 +19,10 @@ function newGame() {
       germany:  { gold: 25, army: 14, navy: 4, vp: 0, stab: 8, atWar: false, warTurns: 0, mobTurn: 0, deployed: false, alsace: true, parisCaptured: false, schlieffenDone: false },
       france:   { gold: 20, army: 12, navy: 4, vp: 0, stab: 7, atWar: false, warTurns: 0, mobTurn: 0, deployed: false, lostAlsace: false, rebellion: false },
       britain:  { gold: 30, army: 8, navy: 14, vp: 0, stab: 9, atWar: false, warTurns: 0, mobTurn: 0, deployed: false, befSent: false },
-      russia:   { gold: 18, army: 14, navy: 3, vp: 0, stab: 5, atWar: false, warTurns: 0, mobTurn: 0, deployed: false, revolution: false },
+      russia:   { gold: 18, army: 14, navy: 3, vp: 0, stab: 5, atWar: false, warTurns: 0, mobTurn: 0, deployed: false, revolution: false, allyGoldReceived: 0, easternWins: 0, balkanProtected: true },
       austria:  { gold: 14, army: 8, navy: 2, vp: 0, stab: 5, atWar: false, warTurns: 0, mobTurn: 0, deployed: false, collapsed: false, serbiaConquered: false },
       ottoman:  { gold: 10, army: 6, navy: 2, vp: 0, stab: 4, atWar: false, warTurns: 0, mobTurn: 0, deployed: false },
-      krupp:    { gold: 22, vp: 0, sales: 0 },
+      krupp:    { gold: 22, vp: 0, sales: 0, cpArmsSold: 0 },
       schneider:{ gold: 16, vp: 0, sales: 0 },
     },
     warDeclaredTurn: 0,
@@ -101,8 +104,8 @@ function simulateTurn(g) {
 
   // --- Phase: Arms purchases (T1-T3) ---
   if (t <= 3) {
-    // Krupp sells to Germany (2 divs/turn)
-    g.factions.krupp.gold += 4; g.factions.krupp.sales += 2;
+    // Krupp sells to Germany (2 divs/turn) — tracked as CP arms
+    g.factions.krupp.gold += 4; g.factions.krupp.sales += 2; g.factions.krupp.cpArmsSold += 2;
     g.factions.germany.gold -= 4; g.factions.germany.army += 2;
     log.push(`Krupp sells 2 army to Germany (4g)`);
 
@@ -301,9 +304,12 @@ function simulateTurn(g) {
         if (befBonus > 0) { brit.befSent = true; brit.army -= 4; }
         const fraTotal = fraForce + befBonus;
 
-        const gerRoll = gerWest + d6();
+        // Germany gets +3 defense bonus for Alsace fortifications (Metz/Strasbourg)
+        const alsaceDefense = ger.alsace ? 3 : 0;
+        const gerRoll = gerWest + alsaceDefense + d6();
         const fraRoll = fraTotal + d6();
         const margin = gerRoll - fraRoll;
+        if (alsaceDefense > 0) log.push(`Germany Alsace fortification defense bonus: +${alsaceDefense}`);
 
         let gerLoss, fraLoss, result;
         if (margin >= 6) { result = 'Crushing German Victory'; gerLoss = pct(gerWest, 0.1); fraLoss = pct(fraTotal, 0.6); }
@@ -345,6 +351,8 @@ function simulateTurn(g) {
 
         ger.army -= Math.min(gerLoss, Math.max(0, ger.army - 1));
         rus.army -= Math.min(rusLoss, Math.max(0, rus.army - 1));
+        // Track Russian Eastern Front victories
+        if (margin <= -3) rus.easternWins++;
         log.push(`Eastern Front: Ger ${gerEast} vs Rus ${rusForce} → ${result} (margin ${margin}). Ger -${gerLoss}, Rus -${rusLoss}.`);
       }
 
@@ -372,7 +380,8 @@ function simulateTurn(g) {
           if (margin >= 3 && !aus.serbiaConquered) {
             aus.serbiaConquered = true;
             aus.vp += 2;
-            log.push(`Austria conquers Serbia! +2 VP.`);
+            rus.balkanProtected = false; // Russia failed to protect Slavic brothers
+            log.push(`Austria conquers Serbia! +2 VP. Russia fails to protect the Balkans.`);
           }
           log.push(`Balkans: Aus ${ausForce} vs Entente ${enemyForce} → ${result} (margin ${margin}). Aus -${ausLoss}.`);
         }
@@ -432,6 +441,57 @@ function simulateTurn(g) {
       g.factions.krupp.gold += 2; g.factions.schneider.gold += 2;
       g.factions.krupp.vp += 1; g.factions.schneider.vp += 1;
     }
+
+    // --- Krupp wartime arms to Germany/Austria (incentivized to help CP win) ---
+    if (g.factions.krupp.gold >= 4 && g.factions.germany.atWar) {
+      // Krupp sends 1 div to Germany, 1 to Austria during war
+      g.factions.krupp.gold -= 4; g.factions.krupp.sales += 2; g.factions.krupp.cpArmsSold += 2;
+      g.factions.germany.army += 1; g.factions.germany.gold -= 2;
+      log.push(`Krupp wartime sale: 1 army to Germany (2g)`);
+      if (g.factions.austria.atWar && g.factions.austria.army >= 2) {
+        g.factions.austria.army += 1; g.factions.austria.gold -= 2;
+        log.push(`Krupp wartime sale: 1 army to Austria (2g)`);
+      }
+    }
+
+    // --- France/Britain fund Russia (keep Eastern Front alive) ---
+    const rus = g.factions.russia;
+    const fra = g.factions.france;
+    const brit = g.factions.britain;
+    if (rus.atWar && !rus.revolution) {
+      // France sends 3g to Russia if France can afford it
+      if (fra.atWar && fra.gold >= 6) {
+        fra.gold -= 3;
+        rus.gold += 3;
+        rus.allyGoldReceived += 3;
+        log.push(`France sends 3g to Russia (keep the Eastern Front open)`);
+      }
+      // Britain sends 4g to Russia if Britain can afford it
+      if (brit.atWar && brit.gold >= 8) {
+        brit.gold -= 4;
+        rus.gold += 4;
+        rus.allyGoldReceived += 4;
+        log.push(`Britain sends 4g to Russia (sustain the Steamroller)`);
+      }
+    }
+
+    // --- Austria/Germany foment Russian revolution ---
+    const ger = g.factions.germany;
+    const aus = g.factions.austria;
+    if (rus.atWar && !rus.revolution && rus.stab <= 5) {
+      // Germany spends 3g to destabilize Russia (Lenin's sealed train!)
+      if (ger.gold >= 6 && Math.random() < 0.5) {
+        ger.gold -= 3;
+        rus.stab = clamp(rus.stab - 1, 0, 10);
+        log.push(`Germany funds Russian agitators (-3g) → Russia stability -1 (now ${rus.stab})`);
+      }
+      // Austria intelligence ops
+      if (aus.atWar && aus.gold >= 4 && Math.random() < 0.3) {
+        aus.gold -= 2;
+        rus.stab = clamp(rus.stab - 1, 0, 10);
+        log.push(`Austria intelligence ops in Russia (-2g) → Russia stability -1 (now ${rus.stab})`);
+      }
+    }
   }
 
   // Snapshot faction state for display
@@ -454,39 +514,74 @@ function scoreGame(g) {
   const armies = ['germany','france','britain','russia','austria','ottoman'].map(fid => ({fid, army: f[fid].army}));
   armies.sort((a,b) => b.army - a.army);
   if (armies[0].fid === 'germany') gerSecret += 4;
+  // Germany bonus: +3 if Russia had revolution (fomented internal strife)
+  if (f.russia.revolution) gerSecret += 3;
   scores.germany = f.germany.vp + gerSecret;
 
   // France: Alsace capture already counted (+5 public +7 secret in combat)
-  scores.france = f.france.vp;
+  let fraSecret = 0;
+  // France bonus: +3 if Russia is still fighting (kept ally alive)
+  if (f.russia.atWar && !f.russia.revolution) fraSecret += 3;
+  scores.france = f.france.vp + fraSecret;
 
-  // Britain: Continental Balance +7 (if France & Germany both at war), Kaiser Overthrown +7 (if Germany collapsed),
-  //          Splendid Isolation +3 (if never deployed troops to France), France Must Not Fall -7 (if France rebellion)
+  // Britain: Continental Balance +7, Kaiser Overthrown +7, Splendid Isolation +3, France Must Not Fall -7
   let britSecret = 0;
   if (f.germany.atWar && f.france.atWar) britSecret += 7; // Continental Balance
   if (f.germany.collapsed) britSecret += 7; // Kaiser Overthrown
   if (!f.britain.befSent) britSecret += 3; // Splendid Isolation
   if (f.france.rebellion) britSecret -= 7; // France Must Not Fall
+  // Britain bonus: +3 if Russia is still fighting (kept Eastern Front alive)
+  if (f.russia.atWar && !f.russia.revolution) britSecret += 3;
   scores.britain = f.britain.vp + britSecret;
 
-  // Russia
-  scores.russia = f.russia.vp;
-  // Austria
-  scores.austria = f.austria.vp;
+  // --- RUSSIA ---
+  let rusPublic = 0;
+  // PUBLIC: +10 VP if Tsar stays in power (no revolution at game end) — EVERYONE KNOWS THIS
+  if (!f.russia.revolution) rusPublic += 10;
+  // Secret: +4 VP if protected Balkans (Serbia not conquered by Austria)
+  let rusSecret = 0;
+  if (f.russia.balkanProtected) rusSecret += 4;
+  // Secret: +2 VP if won 2+ Eastern Front battles (dominated the front)
+  if (f.russia.easternWins >= 2) rusSecret += 2;
+  // Secret: +3 VP if received 8+ gold from allies (successful wartime diplomacy)
+  if (f.russia.allyGoldReceived >= 8) rusSecret += 3;
+  scores.russia = f.russia.vp + rusPublic + rusSecret;
+
+  // Austria: +3 if Russia had revolution (helped cause internal strife)
+  let ausSecret = 0;
+  if (f.russia.revolution) ausSecret += 3;
+  scores.austria = f.austria.vp + ausSecret;
+
   // Ottoman
   scores.ottoman = f.ottoman.vp;
-  // Dealers: -8 VP if no wars happened
-  scores.krupp = f.krupp.vp + (g.warDeclaredTurn ? 0 : -8);
+
+  // Krupp: -8 VP if no wars. +5 VP if Central Powers (Germany) has most VP among nations at end (armed the winners)
+  let kruppBonus = g.warDeclaredTurn ? 0 : -8;
+  // Krupp gets +5 if Germany wins (arms led to victory), +2 if Austria wins
+  const nationScores = { germany: f.germany.vp, france: f.france.vp, britain: f.britain.vp, russia: f.russia.vp, austria: f.austria.vp, ottoman: f.ottoman.vp };
+  const topNation = Object.entries(nationScores).sort((a,b) => b[1] - a[1])[0][0];
+  if (topNation === 'germany') kruppBonus += 5;
+  else if (topNation === 'austria') kruppBonus += 3;
+  // Krupp bonus for CP arms sold (incentivize arming Germany/Austria): +1 per 4 CP arms
+  kruppBonus += Math.floor(f.krupp.cpArmsSold / 4);
+  scores.krupp = f.krupp.vp + kruppBonus;
+
+  // Schneider: -8 VP if no wars
   scores.schneider = f.schneider.vp + (g.warDeclaredTurn ? 0 : -8);
 
   return scores;
 }
 
 // --- Run simulations ---
-console.log('# The Guns of August — V3.1 Balance: 10-Game Simulation\n');
-console.log('## V3.1 Changes (from V3)');
-console.log('- **Russia**: Cheap divisions (1.5g/div) — incentivizes Krupp loans, builds the Steamroller');
-console.log('- **Germany**: Cancels Schlieffen Plan if BEF deployed — shifts to conventional defense, preserves army');
-console.log('- **Austria**: Peace VP increased to +3/turn (was +2) — thrives on peace');
+console.log('# The Guns of August — V3.2 Balance: 10-Game Simulation\n');
+console.log('## V3.2 Changes');
+console.log('- **Germany**: Alsace fortification defense +3 (harder for France to take)');
+console.log('- **Germany/Austria**: Can foment Russian revolution (spend gold to destabilize)');
+console.log('- **Russia PUBLIC**: +10 VP if Tsar stays in power (no revolution at game end)');
+console.log('- **Russia Secret**: +4 VP protect Balkans, +2 VP Eastern Front wins, +3 VP allied gold ≥8');
+console.log('- **France/Britain**: Send gold to Russia during war (keep Eastern Front alive) — +3 VP each if Russia survives');
+console.log('- **Krupp**: +5 VP if Germany wins, wartime arms sales to Germany/Austria, +1 VP per 4 CP arms');
+console.log('- **Austria**: +3 secret VP if Russia revolution (helped cause it)');
 console.log('');
 
 const allScores = [];
