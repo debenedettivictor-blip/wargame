@@ -628,6 +628,189 @@ function scoreGame(g) {
   return scores;
 }
 
+// --- Individual Player Scoring ---
+// Each player gets: faction VP base + personal objectives + gold bonus (+25 if faction received gold)
+// The faction's top scorer gets 1.5x multiplier
+function scoreIndividualPlayers(g, factionScores) {
+  const f = g.factions;
+  const players = {};
+
+  // Helper: personal objective rolls (simulated — in real game GM tracks these)
+  function personalRoll(chance) { return Math.random() < chance; }
+
+  // --- GERMANY players ---
+  const gerBase = factionScores.germany;
+  const gerGold = f.germany.gold;
+
+  // Kaiser Wilhelm II
+  let kaiserVP = gerBase;
+  kaiserVP += 25; // gold bonus (Germany always receives gold from income/trade)
+  if (f.germany.navy >= 10) kaiserVP += 4; // Navy Obsession
+  if (!f.britain.atWar) kaiserVP += 3; // Cousin George — peace with Britain
+  else kaiserVP -= 2; // at war with Britain
+  if (personalRoll(0.2)) kaiserVP -= 2; // Fear of Weakness (20% chance Chancellor overrules)
+  players.kaiser = { name: 'Kaiser Wilhelm II', faction: 'germany', vp: kaiserVP };
+
+  // Chancellor
+  let chanVP = gerBase;
+  chanVP += 25;
+  if (personalRoll(0.25)) chanVP += 4; // Topple the Kaiser (25% chance)
+  if (personalRoll(0.2)) chanVP += 3; // Diplomatic Mastermind (20% chance)
+  if (!f.germany.atWar || (g.warDeclaredTurn && g.warDeclaredTurn > 4)) chanVP += 2; // Delay the War
+  players.chancellor = { name: 'The Chancellor', faction: 'germany', vp: chanVP };
+
+  // Chief of General Staff
+  let cosVP = gerBase;
+  cosVP += 25;
+  if (f.germany.schlieffenDone) { cosVP += 3; if (g.schlieffen === 'success') cosVP += 3; } // My Legacy
+  if (f.germany.army >= 12) cosVP += 2; // Militarism
+  cosVP += personalRoll(0.5) ? 2 : 1; // Kingmaker (50/50 Chancellor vs Kaiser)
+  players.chief_staff = { name: 'Chief of General Staff', faction: 'germany', vp: cosVP };
+
+  // --- FRANCE players ---
+  const fraBase = factionScores.france;
+
+  // President
+  let presVP = fraBase;
+  presVP += 25;
+  if (f.russia.allyGoldReceived >= 5) presVP += 3; // The Banker
+  if (personalRoll(0.4)) presVP += 2; // Fortress France (40% built forts)
+  if (personalRoll(0.3)) presVP -= 2; else presVP += 2; // Control the General
+  players.president = { name: 'The President', faction: 'france', vp: presVP };
+
+  // Commanding General
+  let genVP = fraBase;
+  genVP += 25;
+  if (f.france.atWar) { genVP += 3; if (!f.france.lostAlsace) genVP += 3; } // Plan XVII
+  if (personalRoll(0.4)) genVP -= 1; // Offense Over Defense (40% forts built = penalty)
+  if (f.france.army <= 8 && personalRoll(0.15)) genVP -= 3; // Military Coup (rare)
+  players.general = { name: 'Commanding General', faction: 'france', vp: genVP };
+
+  // --- BRITAIN players ---
+  const britBase = factionScores.britain;
+
+  // Prime Minister
+  let pmVP = britBase;
+  pmVP += 25;
+  if (!f.britain.atWar) pmVP += 4; // Keep the Peace
+  pmVP += 3; // Imperial Unity (colonies stable — always true in sim)
+  players.pm = { name: 'Prime Minister', faction: 'britain', vp: pmVP };
+
+  // First Lord of the Admiralty
+  let admVP = britBase;
+  admVP += 25;
+  if (f.britain.navy >= f.germany.navy + 2) admVP += 4; // Dreadnought Race
+  if (f.britain.atWar && g.blockadeOn) admVP += 3; // The Blockade
+  players.admiralty = { name: 'First Lord of the Admiralty', faction: 'britain', vp: admVP };
+
+  // Foreign Secretary
+  let fsVP = britBase;
+  fsVP += 25;
+  if (personalRoll(0.5)) fsVP += 3; // Entente Cordiale (50% maintained)
+  fsVP += 4; // Balance of Power (no single power dominates — usually true)
+  players.foreign_sec = { name: 'Foreign Secretary', faction: 'britain', vp: fsVP };
+
+  // --- RUSSIA players ---
+  const rusBase = factionScores.russia;
+
+  // Tsar Nicholas II
+  let tsarVP = rusBase;
+  tsarVP += 25;
+  if (f.russia.stab >= 5) tsarVP += 4; // Dynasty
+  if (personalRoll(0.1)) tsarVP += 5; // Cousin Nicky letter (rare)
+  players.tsar = { name: 'Tsar Nicholas II', faction: 'russia', vp: tsarVP };
+
+  // War Minister
+  let wmVP = rusBase;
+  wmVP += 25;
+  if (f.russia.army >= 18) wmVP += 3; // The Steamroller
+  if (f.russia.deployed) wmVP += 2; // Full Mobilization
+  players.war_minister = { name: 'War Minister', faction: 'russia', vp: wmVP };
+
+  // Duma Representative
+  let dumaVP = rusBase;
+  dumaVP += 25;
+  if (f.russia.revolution) dumaVP += 6; // Led the revolution
+  else if (personalRoll(0.2)) dumaVP += 4; // Reform accepted
+  if (!f.russia.atWar) dumaVP += 3; // Peace Faction
+  players.duma = { name: 'Duma Representative', faction: 'russia', vp: dumaVP };
+
+  // --- AUSTRIA players ---
+  const ausBase = factionScores.austria;
+
+  // Emperor Franz Josef
+  let empVP = ausBase;
+  empVP += 25;
+  if (!f.austria.collapsed) empVP += 5; // Habsburg Dynasty
+  if (personalRoll(0.6)) empVP += 2; // German Alliance maintained
+  players.emperor = { name: 'Emperor Franz Josef', faction: 'austria', vp: empVP };
+
+  // Conrad von Hötzendorf
+  let conVP = ausBase;
+  conVP += 25;
+  if (f.austria.serbiaConquered) conVP += 4; // Crush Serbia
+  if (f.austria.atWar && (g.warDeclaredTurn && g.warDeclaredTurn <= 4)) conVP += 2; // War Hawk
+  players.conrad = { name: 'Conrad von Hötzendorf', faction: 'austria', vp: conVP };
+
+  // --- OTTOMAN players ---
+  const ottBase = factionScores.ottoman;
+
+  // Sultan
+  let sulVP = ottBase;
+  sulVP += 25;
+  if (!f.ottoman.atWar) sulVP += 4; // Armed Neutrality
+  if (f.ottoman.atWar) sulVP += 3; // Caliphate
+  players.sultan = { name: 'The Sultan', faction: 'ottoman', vp: sulVP };
+
+  // Young Turk Leader
+  let ytVP = ottBase;
+  ytVP += 25;
+  if (f.ottoman.army >= 10) ytVP += 3; // Modernize
+  if (personalRoll(0.4)) ytVP += 3; // German Alliance
+  if (personalRoll(0.15)) ytVP += 2; // Seize Power
+  players.young_turk = { name: 'Young Turk Leader', faction: 'ottoman', vp: ytVP };
+
+  // --- ARMS DEALER players ---
+  // Krupp Director
+  let kdVP = factionScores.krupp;
+  kdVP += 25;
+  if (f.krupp.sales >= 6) kdVP += 3; // Monopoly (sold to 3+ nations)
+  if (personalRoll(0.15)) kdVP += 2; // Sabotage Schneider
+  players.krupp_dir = { name: 'Krupp Director', faction: 'krupp', vp: kdVP };
+
+  // Vickers Director
+  let vdVP = factionScores.krupp;
+  vdVP += 25;
+  if (g.warDeclaredTurn) vdVP += 4; // Entente Sales (sold to both sides)
+  if (f.britain.navy >= 12) vdVP += 2; // British Interests
+  players.vickers_dir = { name: 'Vickers Director', faction: 'krupp', vp: vdVP };
+
+  // Schneider — Merchant of Death
+  let merVP = factionScores.schneider;
+  merVP += 25;
+  if (g.warDeclaredTurn) merVP += 6; // War Architect
+  if (personalRoll(0.3)) merVP += 4; // Puppet Master
+  if (f.russia.revolution) merVP += 4; // Bankroll the Revolution
+  if (personalRoll(0.15)) merVP += 3; // Destroy Krupp
+  players.merchant = { name: 'Merchant of Death', faction: 'schneider', vp: merVP };
+
+  // --- Apply 1.5x multiplier to faction winner ---
+  // Group players by faction, find top scorer in each faction
+  const factionGroups = {};
+  for (const [pid, p] of Object.entries(players)) {
+    if (!factionGroups[p.faction]) factionGroups[p.faction] = [];
+    factionGroups[p.faction].push({ pid, ...p });
+  }
+  for (const [fac, group] of Object.entries(factionGroups)) {
+    group.sort((a, b) => b.vp - a.vp);
+    const winner = group[0];
+    players[winner.pid].vp = Math.round(winner.vp * 1.5);
+    players[winner.pid].factionWinner = true;
+  }
+
+  return players;
+}
+
 // --- Run simulations ---
 console.log(`# The Guns of August — V3.5 Balance: ${NUM_GAMES}-Game Simulation\n`);
 console.log('## V3.4 Changes');
@@ -640,6 +823,7 @@ console.log('- **Diplomatic chain**: France lobbies Britain → BEF deployed →
 console.log('');
 
 const allScores = [];
+const allPlayerScores = [];
 
 for (let game = 1; game <= NUM_GAMES; game++) {
   const g = newGame();
@@ -668,7 +852,7 @@ for (let game = 1; game <= NUM_GAMES; game++) {
   }
 
   const scores = scoreGame(g);
-  console.log('### Final Scores (including secret objectives)');
+  console.log('### Final Faction Scores');
   console.log('| Faction | Public VP | Secret Bonus | Total |');
   console.log('|---------|-----------|-------------|-------|');
   const fids = ['germany','france','britain','russia','austria','ottoman','krupp','schneider'];
@@ -679,15 +863,33 @@ for (let game = 1; game <= NUM_GAMES; game++) {
   }
   console.log('');
 
-  // Determine winner
-  const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
-  console.log(`**Winner: ${sorted[0][0].toUpperCase()} (${sorted[0][1]} VP)**\n`);
+  // Individual player scores
+  const playerScores = scoreIndividualPlayers(g, scores);
+  console.log('### Individual Player Scores');
+  console.log('| Player | Faction | Base | +Gold | +Personal | x1.5? | **Total** |');
+  console.log('|--------|---------|------|-------|-----------|-------|-----------|');
+  const playersSorted = Object.entries(playerScores).sort((a,b) => b[1].vp - a[1].vp);
+  for (const [pid, p] of playersSorted) {
+    const factionBase = scores[p.faction];
+    const goldBonus = 25;
+    const personalBonus = p.factionWinner ? Math.round(p.vp / 1.5) - factionBase - goldBonus : p.vp - factionBase - goldBonus;
+    const multiplier = p.factionWinner ? 'YES' : '';
+    console.log(`| ${p.name} | ${p.faction} | ${factionBase} | +${goldBonus} | ${personalBonus >= 0 ? '+' : ''}${personalBonus} | ${multiplier} | **${p.vp}** |`);
+  }
+  console.log('');
+
+  // Overall winner (individual)
+  const topPlayer = playersSorted[0];
+  console.log(`**FACTION WINNER: ${Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0].toUpperCase()} (${Object.entries(scores).sort((a,b) => b[1] - a[1])[0][1]} VP)**`);
+  console.log(`**INDIVIDUAL WINNER: ${topPlayer[1].name} (${topPlayer[1].vp} VP) \u2014 ${topPlayer[1].factionWinner ? '1.5x faction leader bonus!' : ''}`);
+  console.log('');
 
   allScores.push(scores);
+  allPlayerScores.push(playerScores);
 }
 
-// Summary
-console.log(`---\n## Summary: ${NUM_GAMES}-Game Average VP\n`);
+// ==================== FACTION SUMMARY ====================
+console.log(`---\n## Faction Summary: ${NUM_GAMES} Games\n`);
 console.log('| Faction | Avg VP | Wins | Best | Worst |');
 console.log('|---------|--------|------|------|-------|');
 const fids = ['germany','france','britain','russia','austria','ottoman','krupp','schneider'];
@@ -703,8 +905,33 @@ for (const fid of fids) {
   console.log(`| ${fid.charAt(0).toUpperCase()+fid.slice(1)} | ${avg} | ${wins} | ${best} | ${worst} |`);
 }
 
-// Schlieffen success rate
-const schlGames = allScores.length;
-// We'd need to track this separately — let me add a quick summary
-console.log('\n### Key Observations');
-console.log('(See individual games above for Schlieffen Plan outcomes, British secret objective impacts, and Alsace-Lorraine captures)');
+// ==================== INDIVIDUAL PLAYER SUMMARY ====================
+console.log(`\n---\n## Individual Player Summary: ${NUM_GAMES} Games\n`);
+console.log('| Player | Faction | Avg VP | Wins | Best | Worst |');
+console.log('|--------|---------|--------|------|------|-------|');
+
+// Collect all player IDs
+const allPids = Object.keys(allPlayerScores[0]);
+const playerSummaries = allPids.map(pid => {
+  const vpArr = allPlayerScores.map(ps => ps[pid].vp);
+  const avg = (vpArr.reduce((a,b) => a+b, 0) / vpArr.length).toFixed(1);
+  const wins = allPlayerScores.filter(ps => {
+    const sorted = Object.entries(ps).sort((a,b) => b[1].vp - a[1].vp);
+    return sorted[0][0] === pid;
+  }).length;
+  const best = Math.max(...vpArr);
+  const worst = Math.min(...vpArr);
+  const name = allPlayerScores[0][pid].name;
+  const faction = allPlayerScores[0][pid].faction;
+  return { pid, name, faction, avg: parseFloat(avg), wins, best, worst };
+}).sort((a, b) => b.avg - a.avg);
+
+for (const p of playerSummaries) {
+  console.log(`| ${p.name} | ${p.faction} | ${p.avg.toFixed(1)} | ${p.wins} | ${p.best} | ${p.worst} |`);
+}
+
+console.log('\n### Scoring Rules');
+console.log('- **Base**: Faction VP (public + secret objectives)');
+console.log('- **Gold Bonus**: +25 VP to every player for receiving gold');
+console.log('- **Personal**: Individual secret objective bonuses/penalties');
+console.log('- **1.5x Multiplier**: Top scorer within each faction gets 1.5x their total');
