@@ -4052,7 +4052,7 @@ body::before {
   </div>
   <div class="secret-obj" style="margin-bottom:8px;">
     <strong>🔒 Shared Secret Objectives (only Germany sees)</strong><br>
-    ◈ <strong>The Schlieffen Plan (+5 VP, –3 VP if failed):</strong> Invade France through Belgium within 2 turns of war. <strong>Requirements for success:</strong> Germany must commit 10+ divisions to the western front, must have Artillery upgrade, and Britain must NOT have troops deployed in France. If Britain has BEF deployed, the plan has very low chance of success. GM rolls d6: base 4+ succeeds, +1 if 12+ divisions committed, +1 if France has fewer divisions, –2 if British troops in France, –1 if France has trenches. Success = capture Paris, +5 VP. Failure = –3 VP, heavy losses.
+    ◈ <strong>The Schlieffen Plan (+5 VP, –3 VP if failed):</strong> Invade France through Belgium within 2 turns of war. <strong>Requirements for success:</strong> Germany must commit 16+ divisions to the western front, must have Artillery upgrade, and Britain must NOT have troops deployed in France. If Britain has BEF deployed, the plan has very low chance of success. GM rolls d6: base 4+ succeeds, +1 if 18+ divisions committed, +1 if France has fewer divisions, –2 if British troops in France, –1 if France has trenches. Success = capture Paris, +5 VP. Failure = –3 VP, heavy losses.
   </div>
   <div style="display:grid; gap:10px; margin-top:14px;">
     <div class="role-card" data-role="kaiser">
@@ -7597,14 +7597,14 @@ function resolveSchlieffenPlan() {
   let modifier = 0;
   let modDetails = [];
 
-  // Base requirement: need 10+ divisions committed
-  if (germanWestDivs < 10) {
-    alert('Schlieffen Plan requires at least 10 divisions on the western front!\nCurrently committed: ' + germanWestDivs + ' divisions (france + paris + alsace_lorraine regions).');
+  // Base requirement: need 16+ divisions committed
+  if (germanWestDivs < 16) {
+    alert('Schlieffen Plan requires at least 16 divisions on the western front!\nCurrently committed: ' + germanWestDivs + ' divisions (france + paris + alsace_lorraine regions).');
     return;
   }
 
   // Modifiers
-  if (germanWestDivs >= 12) { modifier += 1; modDetails.push('+1 (12+ divisions committed: ' + germanWestDivs + ')'); }
+  if (germanWestDivs >= 18) { modifier += 1; modDetails.push('+1 (18+ divisions committed: ' + germanWestDivs + ')'); }
   if (germanWestDivs < frenchDivs) { modifier -= 1; modDetails.push('-1 (outnumbered by French: ' + germanWestDivs + ' vs ' + frenchDivs + ')'); }
   if (germanWestDivs > frenchDivs) { modifier += 1; modDetails.push('+1 (outnumber French: ' + germanWestDivs + ' vs ' + frenchDivs + ')'); }
   if (hasArtillery) { modifier += 1; modDetails.push('+1 (Artillery upgrade)'); }
@@ -7734,7 +7734,7 @@ const FACTION_SPECIALS = {
   germany: {
     title: 'Imperial German Command',
     abilities: [
-      { name: 'Schlieffen Plan', desc: 'Invade France through Belgium within 2 turns of war. Requires 10+ divisions on western front and Artillery upgrade. If Britain has troops in France, plan is nearly impossible (–2 penalty). GM rolls d6: base 4+, +1 for 12+ divisions, +1 if outnumbering France, –2 if BEF deployed, –1 if French trenches. Success: capture Paris, +5 VP. Failure: –3 VP, heavy losses.', type: 'strategic' },
+      { name: 'Schlieffen Plan', desc: 'Invade France through Belgium within 2 turns of war. Requires 16+ divisions on western front and Artillery upgrade. If Britain has troops in France, plan is nearly impossible (–2 penalty). GM rolls d6: base 4+, +1 for 18+ divisions, +1 if outnumbering France, –2 if BEF deployed, –1 if French trenches. Success: capture Paris, +5 VP. Failure: –3 VP, heavy losses.', type: 'strategic' },
       { name: 'Fortress Alsace', desc: 'Retain Alsace-Lorraine at game end: +8 VP. This is Germany\'s most valuable objective — defend it at all costs.', type: 'strategic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
       { name: 'Capture Paris', desc: '+5 VP if Germany captures Paris. France collapses. The war is won in the west.', type: 'strategic' },
       { name: 'Continental Supremacy', desc: '+4 VP for maintaining the strongest army on the continent at game end.', type: 'strategic' },
@@ -11224,14 +11224,14 @@ function renderGMControl() {
     schlieffenStatusHtml = '<div class="empty-state">Germany is not at war. The Schlieffen Plan cannot be executed yet.</div>';
   } else {
     let readiness = '<div style="margin:8px 0; font-size:0.9em;">';
-    readiness += '<div style="margin-bottom:4px;"><strong>Western Front Divisions:</strong> ' + germanWestDivs + '/10 required ' + (germanWestDivs >= 10 ? '\u2705' : '\u274C') + '</div>';
+    readiness += '<div style="margin-bottom:4px;"><strong>Western Front Divisions:</strong> ' + germanWestDivs + '/16 required ' + (germanWestDivs >= 16 ? '\u2705' : '\u274C') + '</div>';
     readiness += '<div style="margin-bottom:4px;"><strong>Artillery Upgrade:</strong> ' + (hasArtillery ? '\u2705 +1 bonus' : '\u274C No bonus') + '</div>';
     readiness += '<div style="margin-bottom:4px;"><strong>BEF in France:</strong> ' + (befDeployed > 0 ? '\u26A0 ' + befDeployed + ' British divisions! <strong>-2 penalty!</strong>' : '\u2705 None — plan viable') + '</div>';
     readiness += '<div style="margin-bottom:4px;"><strong>French Trenches:</strong> ' + (frenchTrenches ? '\u26A0 -1 penalty' : '\u2705 None') + '</div>';
     readiness += '<div style="margin-bottom:4px;"><strong>German vs French:</strong> ' + germanWestDivs + ' vs ' + frenchDivs + ' ' + (germanWestDivs > frenchDivs ? '(\u2705 +1 outnumber)' : (germanWestDivs < frenchDivs ? '(\u26A0 -1 outnumbered)' : '(even)')) + '</div>';
     readiness += '</div>';
 
-    schlieffenStatusHtml = readiness + '<button class="roll-btn" onclick="resolveSchlieffenPlan()" ' + (germanWestDivs >= 10 ? '' : 'disabled') + ' style="width:100%; margin-top:8px;">\u2694 Execute the Schlieffen Plan \u2694</button>';
+    schlieffenStatusHtml = readiness + '<button class="roll-btn" onclick="resolveSchlieffenPlan()" ' + (germanWestDivs >= 16 ? '' : 'disabled') + ' style="width:100%; margin-top:8px;">\u2694 Execute the Schlieffen Plan \u2694</button>';
   }
 
   let specialOpsSection = `<div class="gm-section">
@@ -11240,7 +11240,7 @@ function renderGMControl() {
     </div>
     <div class="gm-section-body">
       <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.9em; margin-bottom:8px;">The Schlieffen Plan</h4>
-      <p style="font-size:0.85em; margin-bottom:8px; font-style:italic;">Germany's secret war plan to knock out France through Belgium in 2 turns. Roll d6: base 4+ succeeds. Modifiers: +1 for 12+ divisions, +1 if outnumbering France, +1 for Artillery, -2 if British BEF deployed in France, -1 if French trenches.</p>
+      <p style="font-size:0.85em; margin-bottom:8px; font-style:italic;">Germany's secret war plan to knock out France through Belgium in 2 turns. Requires 16+ divisions on the western front. Roll d6: base 4+ succeeds. Modifiers: +1 for 18+ divisions, +1 if outnumbering France, +1 for Artillery, -2 if British BEF deployed in France, -1 if French trenches.</p>
       ${schlieffenStatusHtml}
     </div>
   </div>`;
