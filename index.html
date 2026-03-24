@@ -6704,7 +6704,7 @@ function defaultGameState() {
       blockadedBy: [], blockadeTurns: 0, atWar: false, warTurns: 0
     },
     austria: {
-      gold: 14, income: 5, army: 8, navy: 2, vp: 0, stability: 3,
+      gold: 14, income: 5, army: 8, navy: 2, vp: 0, stability: 5,
       troops: { austria: 6, balkans: 2 },
       fleets: { mediterranean: 2 },
       alliances: ['germany'], status: [], upgrades: {}, modernization: 0,
@@ -6817,7 +6817,7 @@ function loadGameState() {
         if (state.factions[fid].warTurns === undefined) state.factions[fid].warTurns = 0;
         if (state.factions[fid].modernization === undefined) state.factions[fid].modernization = 0;
         if (state.factions[fid].stability === undefined) {
-          const defaultStab = { germany: 8, france: 7, britain: 9, russia: 5, austria: 3, ottoman: 4 };
+          const defaultStab = { germany: 8, france: 7, britain: 9, russia: 5, austria: 5, ottoman: 4 };
           state.factions[fid].stability = defaultStab[fid] || 7;
         }
         // Migrate: backfill unit names
@@ -6943,15 +6943,15 @@ const WAR_PENALTIES = {
 // Peace is profitable — factions NOT at war earn VP and gold each turn
 // Each faction values peace differently based on their strategic situation
 const PEACE_BONUSES = {
-  endGameVP: 3,            // +3 VP at game end for factions that never went to war
+  endGameVP: 2,            // +2 VP at game end for factions that never went to war (reduced from 3)
   // Per-turn rewards while at peace: { gold: g/turn, vp: VP/turn }
   perFaction: {
     germany:  { gold: 1, vp: 1, label: 'Industrial prosperity' },
-    france:   { gold: 0, vp: 0, label: 'Revanchism simmers' },        // France gains NOTHING from peace — they want Alsace back
-    britain:  { gold: 2, vp: 1, label: 'Pax Britannica' },            // Britain profits most from stable trade
+    france:   { gold: 1, vp: 1, label: 'Diplomatic prestige' },       // France now earns modest peace VP — Republic thrives
+    britain:  { gold: 2, vp: 2, label: 'Pax Britannica' },            // Britain profits most from stable trade — increased VP
     russia:   { gold: 1, vp: 2, label: 'Reform & stability' },        // Russia desperately needs peace to modernize and avoid revolution
-    austria:  { gold: 1, vp: 2, label: 'Imperial harmony' },          // Austria benefits from peace but less dominantly
-    ottoman:  { gold: 1, vp: 2, label: 'Ottoman revival' }            // Ottoman needs peace to reform
+    austria:  { gold: 1, vp: 2, label: 'Imperial harmony' },          // Austria benefits from peace
+    ottoman:  { gold: 1, vp: 1, label: 'Ottoman revival' }            // Ottoman peace VP reduced (was 2) — less rewarding to sit out
   }
 };
 
@@ -7148,12 +7148,12 @@ function computeEconomy(fid) {
     desertionRisk = 1;
   }
 
-  // --- War dividend for arms dealers (increased: +3g/turn) ---
+  // --- War dividend for arms dealers (reduced: +2g/turn, was +3g) ---
   let warDividend = 0;
   if (isDealer) {
     const atWarFactions = Object.keys(gameState.factions).filter(fk => gameState.factions[fk].atWar);
     if (atWarFactions.length >= 2) {
-      warDividend = 3;
+      warDividend = 2;
     }
   }
 
@@ -7477,7 +7477,7 @@ function offerLoan(dealerFid, borrowerFid, principal) {
 // Manufacture a crisis (arms dealer action)
 function manufactureCrisis(dealerFid, crisisType, targetFid) {
   const dealer = gameState.factions[dealerFid];
-  const crisisCosts = { border_incident: 2, leaked_treaty: 3, assassination_attempt: 4 };
+  const crisisCosts = { border_incident: 3, leaked_treaty: 4, assassination_attempt: 5 };
   const cost = crisisCosts[crisisType];
 
   if (!cost) { alert('Invalid crisis type.'); return; }
@@ -7507,8 +7507,8 @@ function manufactureCrisis(dealerFid, crisisType, targetFid) {
   logAction(dealerFid, 'crisis', crisisLabels[crisisType] + ' manufactured for ' + cost + 'g — ' + crisisDescs[crisisType]);
 
   // Crises directly destabilize the target faction!
-  // Border Incident: -1 stability, Leaked Treaty: -1 stability, Assassination: -2 stability
-  const stabilityDamage = { border_incident: 1, leaked_treaty: 1, assassination_attempt: 2 };
+  // Border Incident: -1 stability, Leaked Treaty: -1 stability, Assassination: -1 stability (reduced from -2)
+  const stabilityDamage = { border_incident: 1, leaked_treaty: 1, assassination_attempt: 1 };
   const stabDmg = stabilityDamage[crisisType] || 0;
   const targetFaction = gameState.factions[targetFid];
   if (targetFaction && targetFaction.stability !== undefined && stabDmg > 0) {
@@ -7645,7 +7645,9 @@ const FACTION_SPECIALS = {
     title: 'French Republic Command',
     abilities: [
       { name: 'Lorraine Reconquest', desc: '+4 Gold/turn if you retake Alsace-Lorraine. Moving troops there also denies Germany their +4g bonus — a 8g swing!', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
+      { name: 'Alsace Revanche', desc: '+2 VP/turn if you hold Alsace-Lorraine, +1 VP/turn if contesting it. The sacred mission of the Republic!', type: 'strategic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
       { name: 'Fortress Paris', desc: 'Paris is always considered fortified (+2 defense) at no cost.', type: 'military' },
+      { name: 'Entente Leader', desc: '+1 VP/turn while maintaining 2+ alliances. France leads the diplomatic coalition against the Central Powers.', type: 'strategic', check: function(f) { return f.alliances && f.alliances.length >= 2; } },
       { name: 'Entente Coordination', desc: 'Combined with Britain (20 army + 18 fleet), you outmatch Germany on land and sea. Coordinate to overwhelm.', type: 'strategic' }
     ]
   },
@@ -7653,7 +7655,9 @@ const FACTION_SPECIALS = {
     title: 'British Imperial Command',
     abilities: [
       { name: 'Naval Supremacy', desc: '14 fleets dominate the seas. Blockading Germany cuts their trade immediately and crushes their industry over time.', type: 'strategic' },
+      { name: 'Blockade VP', desc: '+1 VP/turn for each nation Britain is actively blockading. Command the seas to strangle enemy economies and earn VP!', type: 'strategic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).some(function(fid) { var t = gameState.factions[fid]; return t.blockadedBy && t.blockadedBy.some(function(b) { return b.fid === 'britain'; }); }); } },
       { name: 'Colonial Trade Network', desc: 'Highest trade income (7g) but expensive navy. War disrupts your own trade too — peace keeps the money flowing.', type: 'economic' },
+      { name: 'BEF Deployed', desc: '+1 VP/turn while British troops are stationed in France or Paris. The Expeditionary Force supports the Entente front line.', type: 'military', check: function(f) { return f.troops && ((f.troops['france'] || 0) + (f.troops['paris'] || 0)) > 0; } },
       { name: 'Expeditionary Force', desc: '8 army divisions can reinforce France via the Channel — but losing them is costly to replace (2g each).', type: 'military' },
       { name: 'BEF Rapid Deployment', desc: 'Deploy 4 divisions to France instantly for 2 Gold. Can only be used once per game — the professional army crosses the Channel.', type: 'military', check: function(f) { return !(f.upgrades && f.upgrades.bef_deployed); } }
     ]
@@ -7670,6 +7674,7 @@ const FACTION_SPECIALS = {
     title: 'Dual Monarchy Command',
     abilities: [
       { name: 'Dual Monarchy Stability', desc: '+2g/turn while at peace AND no rebellion. Austria profits enormously from maintaining the status quo.', type: 'economic', check: function(f) { return !f.atWar && !(f.status && f.status.includes('rebellion')); } },
+      { name: 'Strained Empire', desc: 'Starts at stability 5 (Strained). More resilient than before but still vulnerable to crises and prolonged war.', type: 'strategic' },
       { name: 'War Rally', desc: 'Early war BOOSTS stability (+2 for first 2 turns) as the nation rallies. But war weariness kicks in hard after Turn 2.', type: 'strategic' },
       { name: 'Nationality Tensions', desc: 'While at war: lose 1 army division per turn to desertion. Manageable if war is short.', type: 'penalty', check: function(f) { return f.atWar; } },
       { name: 'Internal Rebellion', desc: 'Rebellion costs -2 Gold/turn and may cause unit desertion.', type: 'penalty', check: function(f) { return f.status && f.status.includes('rebellion'); } },
@@ -7680,7 +7685,8 @@ const FACTION_SPECIALS = {
     title: 'Ottoman Imperial Command',
     abilities: [
       { name: 'Straits Control', desc: '+2 Gold/turn from Dardanelles tolls while holding the region.', type: 'economic', check: function(f) { return f.troops && f.troops['dardanelles'] > 0; } },
-      { name: 'Gallipoli Defense', desc: 'Defenders in Dardanelles get +2 to defense rolls. The straits are a fortress.', type: 'military' }
+      { name: 'Gallipoli Defense', desc: 'Defenders in Dardanelles get +2 to defense rolls. The straits are a fortress.', type: 'military' },
+      { name: 'Sick Man of Europe', desc: 'Reduced peace VP (+1/turn). The Ottoman Empire is in decline — neutrality alone will not win the game. Must take territory or join a coalition.', type: 'penalty' }
     ]
   },
   krupp: {
@@ -7690,7 +7696,7 @@ const FACTION_SPECIALS = {
       { name: 'Fund a Coup', desc: 'Pay 3 Gold to secretly bribe a junior player to betray their faction leader.', type: 'dealer' },
       { name: 'Plant a Crisis', desc: 'Pay 3 Gold to write a fake news headline. GM reads it next turn as if real.', type: 'dealer' },
       { name: 'Fear Campaign', desc: 'Free (Vickers Director only): spread a rumor about enemy troop buildup to drive sales.', type: 'dealer' },
-      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war. No war = -5 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
+      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war (reduced from +3). No war = -8 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
     ]
   },
   schneider: {
@@ -7700,7 +7706,7 @@ const FACTION_SPECIALS = {
       { name: 'Exclusive Contracts', desc: 'Pay 2 Gold to lock a nation into buying only from you for 3 turns.', type: 'dealer' },
       { name: 'Industrial Espionage', desc: 'Pay 2 Gold to learn rival consortium\'s total sales, treasury, and latest client.', type: 'dealer' },
       { name: 'Regime Change', desc: 'Fund a Coup costs only 2 Gold instead of 3 Gold.', type: 'dealer' },
-      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war. No war = -5 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
+      { name: 'War Dividend', desc: '+2 Gold/turn while 2+ major powers are at war (reduced from +3). No war = -8 VP at game end.', type: 'economic', check: function(f) { return typeof gameState !== 'undefined' && Object.keys(gameState.factions).filter(function(k) { return k !== 'krupp' && k !== 'schneider' && gameState.factions[k].atWar; }).length >= 2; } }
     ]
   }
 };
@@ -8010,6 +8016,54 @@ function advanceTurn() {
     if (fid === 'germany' && f.atWar && gameState.factions.austria && gameState.factions.austria.atWar) {
       f.vp = (f.vp || 0) + 1;
       logAction(fid, 'alliance', 'Central Powers coordination VP: +1 (Austria fighting alongside Germany)');
+    }
+
+    // === SECONDARY OBJECTIVES ===
+
+    // FRANCE: Alsace Revanche — +2 VP/turn if French troops are in Alsace-Lorraine (contesting or holding)
+    if (fid === 'france') {
+      const frenchInAlsace = (f.troops && f.troops['alsace_lorraine']) || 0;
+      if (frenchInAlsace > 0) {
+        const germanInAlsace = (factions.germany && factions.germany.troops && factions.germany.troops['alsace_lorraine']) || 0;
+        if (germanInAlsace === 0) {
+          f.vp = (f.vp || 0) + 2;
+          logAction(fid, 'objective', 'Alsace Liberated! +2 VP (French control of Alsace-Lorraine)');
+        } else {
+          f.vp = (f.vp || 0) + 1;
+          logAction(fid, 'objective', 'Alsace Contested! +1 VP (French troops contesting Alsace-Lorraine)');
+        }
+      }
+    }
+
+    // FRANCE: Entente Leader — +1 VP/turn if France has 2+ allies (alliance network)
+    if (fid === 'france' && f.alliances && f.alliances.length >= 2) {
+      f.vp = (f.vp || 0) + 1;
+      logAction(fid, 'objective', 'Entente Leader: +1 VP (diplomatic alliance network of ' + f.alliances.length + ' allies)');
+    }
+
+    // BRITAIN: Naval Blockade VP — +1 VP/turn for each faction Britain is actively blockading
+    if (fid === 'britain') {
+      let blockadeVP = 0;
+      Object.keys(factions).forEach(targetFid => {
+        if (targetFid === 'britain' || targetFid === 'krupp' || targetFid === 'schneider') return;
+        const target = factions[targetFid];
+        if (target.blockadedBy && target.blockadedBy.some(b => b.fid === 'britain')) {
+          blockadeVP += 1;
+        }
+      });
+      if (blockadeVP > 0) {
+        f.vp = (f.vp || 0) + blockadeVP;
+        logAction(fid, 'objective', 'Naval Blockade VP: +' + blockadeVP + ' (Britannia rules the waves — ' + blockadeVP + ' nation' + (blockadeVP > 1 ? 's' : '') + ' blockaded)');
+      }
+    }
+
+    // BRITAIN: BEF Deployed VP — +1 VP/turn if British troops are stationed in France (expeditionary force)
+    if (fid === 'britain') {
+      const befInFrance = (f.troops && (f.troops['france'] || 0) + (f.troops['paris'] || 0)) || 0;
+      if (befInFrance > 0) {
+        f.vp = (f.vp || 0) + 1;
+        logAction(fid, 'objective', 'BEF Deployed: +1 VP (British Expeditionary Force supporting France with ' + befInFrance + ' divisions)');
+      }
     }
 
     // Process arms dealer loans (repayment)
