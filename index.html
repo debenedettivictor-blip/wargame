@@ -4676,8 +4676,8 @@ body::before {
 <table class="ref-table">
   <tr><th>Faction</th><th>Industry</th><th>Trade</th><th>Agreements</th><th>Peace VP</th><th>Special</th></tr>
   <tr><td>Germany</td><td>8</td><td>3</td><td>+3</td><td>+1/turn</td><td>+4 from Alsace-Lorraine (contested if enemy present)</td></tr>
-  <tr><td>Britain</td><td>4</td><td>7</td><td>+2</td><td>+1/turn</td><td>+2g peace dividend. 14 fleets = blockade power.</td></tr>
-  <tr><td>France</td><td>5</td><td>3</td><td>+2</td><td>0</td><td>+4 if Alsace recaptured. No peace VP — wants war!</td></tr>
+  <tr><td>Britain</td><td>4</td><td>7</td><td>+2</td><td>+2/turn</td><td>+2g peace dividend. 14 fleets = blockade VP. BEF VP.</td></tr>
+  <tr><td>France</td><td>5</td><td>3</td><td>+2</td><td>+1/turn</td><td>+4g if Alsace recaptured. +5 VP capture bonus! Entente Leader VP.</td></tr>
   <tr><td>Russia</td><td>5</td><td>2</td><td>+2</td><td>+2/turn</td><td>–2 if revolution. Needs peace to reform.</td></tr>
   <tr><td>Austria-Hungary</td><td>4</td><td>1</td><td>+1</td><td>+3/turn</td><td>+2g stability bonus at peace. War = desertion risk.</td></tr>
   <tr><td>Ottoman Empire</td><td>2</td><td>2</td><td>+2</td><td>+2/turn</td><td>+2 from Straits tolls (if Dardanelles held).</td></tr>
@@ -7645,7 +7645,7 @@ const FACTION_SPECIALS = {
     title: 'French Republic Command',
     abilities: [
       { name: 'Lorraine Reconquest', desc: '+4 Gold/turn if you retake Alsace-Lorraine. Moving troops there also denies Germany their +4g bonus — a 8g swing!', type: 'economic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
-      { name: 'Alsace Revanche', desc: '+2 VP/turn if you hold Alsace-Lorraine, +1 VP/turn if contesting it. The sacred mission of the Republic!', type: 'strategic', check: function(f) { return f.troops && f.troops['alsace_lorraine'] > 0; } },
+      { name: 'Alsace Revanche', desc: '+5 VP one-time bonus when you liberate Alsace-Lorraine (no German troops present). +1 VP/turn while contesting. The sacred mission of the Republic!', type: 'strategic', check: function(f) { return f.alsaceCaptured || (f.troops && f.troops['alsace_lorraine'] > 0); } },
       { name: 'Fortress Paris', desc: 'Paris is always considered fortified (+2 defense) at no cost.', type: 'military' },
       { name: 'Entente Leader', desc: '+1 VP/turn while maintaining 2+ alliances. France leads the diplomatic coalition against the Central Powers.', type: 'strategic', check: function(f) { return f.alliances && f.alliances.length >= 2; } },
       { name: 'Entente Coordination', desc: 'Combined with Britain (20 army + 18 fleet), you outmatch Germany on land and sea. Coordinate to overwhelm.', type: 'strategic' }
@@ -8020,18 +8020,27 @@ function advanceTurn() {
 
     // === SECONDARY OBJECTIVES ===
 
-    // FRANCE: Alsace Revanche — +2 VP/turn if French troops are in Alsace-Lorraine (contesting or holding)
+    // FRANCE: Alsace Revanche — ONE-TIME massive VP bonus when France captures Alsace-Lorraine
+    // 5 VP public (visible to all) + 7 VP secret (only GM knows, added silently)
     if (fid === 'france') {
       const frenchInAlsace = (f.troops && f.troops['alsace_lorraine']) || 0;
-      if (frenchInAlsace > 0) {
-        const germanInAlsace = (factions.germany && factions.germany.troops && factions.germany.troops['alsace_lorraine']) || 0;
-        if (germanInAlsace === 0) {
-          f.vp = (f.vp || 0) + 2;
-          logAction(fid, 'objective', 'Alsace Liberated! +2 VP (French control of Alsace-Lorraine)');
-        } else {
-          f.vp = (f.vp || 0) + 1;
-          logAction(fid, 'objective', 'Alsace Contested! +1 VP (French troops contesting Alsace-Lorraine)');
-        }
+      const germanInAlsace = (factions.germany && factions.germany.troops && factions.germany.troops['alsace_lorraine']) || 0;
+      if (frenchInAlsace > 0 && germanInAlsace === 0 && !f.alsaceCaptured) {
+        // One-time capture bonus!
+        f.alsaceCaptured = true;
+        f.vp = (f.vp || 0) + 5;
+        logAction(fid, 'objective', 'ALSACE-LORRAINE LIBERATED! +5 VP — The sacred provinces are restored to France! Vive la France!');
+        // Secret bonus — 7 VP added silently (only GM sees this in resolution log)
+        f.vp = (f.vp || 0) + 7;
+        if (!gameState.resolutionLog) gameState.resolutionLog = [];
+        gameState.resolutionLog.push({
+          icon: '🇫🇷',
+          text: 'SECRET OBJECTIVE COMPLETE: France earns +7 hidden VP for Alsace-Lorraine liberation (total capture bonus: 12 VP). Only the GM knows about this bonus.',
+          manual: false
+        });
+      } else if (frenchInAlsace > 0 && germanInAlsace > 0) {
+        f.vp = (f.vp || 0) + 1;
+        logAction(fid, 'objective', 'Alsace Contested! +1 VP (French troops contesting Alsace-Lorraine)');
       }
     }
 
