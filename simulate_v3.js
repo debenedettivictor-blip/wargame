@@ -36,7 +36,7 @@ function newGame() {
 // Economy constants
 const ECON = {
   germany:  { ind: 8, trade: 3, alsaceBonus: 4, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
-  france:   { ind: 5, trade: 3, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
+  france:   { ind: 5, trade: 3, peaceGold: 1, peaceVP: 0, maint: f => f.army*0.5 + f.navy*0.75 },
   britain:  { ind: 4, trade: 7, peaceGold: 2, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
   russia:   { ind: 5, trade: 2, peaceGold: 1, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
   austria:  { ind: 4, trade: 1, peaceGold: 1, peaceVP: 3, maint: f => f.army*0.5 + f.navy*0.75 },
