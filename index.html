@@ -12733,8 +12733,6 @@ function renderGMControl() {
 
 function renderGMAISection() {
   const aiChars = typeof AI_PLAYER !== 'undefined' ? AI_PLAYER.getAICharacters() : [];
-  const hasKey = typeof AI_PLAYER !== 'undefined' && AI_PLAYER.getApiKey();
-  const keyDisplay = hasKey ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' + AI_PLAYER.getApiKey().slice(-4) : 'Not set';
 
   // All characters grouped by faction
   const factionGroups = {
@@ -12798,26 +12796,16 @@ function renderGMAISection() {
     </div>
     <div class="gm-section-body">
       <p style="font-family:'Crimson Text',serif; font-size:0.95em; color:var(--ink-light); margin-bottom:12px;">
-        Let Claude play characters autonomously. AI characters generate orders and send in-character dispatches each turn.
+        Let the computer play characters autonomously. AI characters use rule-based strategy to generate orders and send in-character dispatches each turn. Runs instantly in-browser \u2014 no API key or external service needed.
       </p>
 
-      <div class="ai-config-row">
-        <label style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px;">Anthropic API Key</label>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <input type="password" id="aiApiKeyInput" placeholder="sk-ant-..." value="${hasKey ? AI_PLAYER.getApiKey() : ''}"
-            style="flex:1; font-family:monospace; font-size:0.85em; padding:6px 10px; border:1px solid var(--ink-light); background:var(--cream);">
-          <button class="btn-ai" onclick="saveAIApiKey()">Save Key</button>
-        </div>
-        <div style="font-size:0.75em; color:var(--ink-light); margin-top:4px;">Key: ${keyDisplay} \u2014 Uses Claude Sonnet. ~$0.02/character/turn.</div>
-      </div>
-
-      <div class="ai-char-grid" style="margin-top:16px;">
+      <div class="ai-char-grid">
         <label style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:8px;">Select AI-Controlled Characters</label>
         ${charTogglesHtml}
       </div>
 
       <div style="margin-top:16px; display:flex; gap:8px; align-items:center;">
-        <button class="btn-ai btn-ai-primary" onclick="runAITurn()" ${!hasKey ? 'disabled title="Set API key first"' : ''}>
+        <button class="btn-ai btn-ai-primary" onclick="runAITurn()" ${aiChars.length === 0 ? 'disabled title="Select at least one AI character"' : ''}>
           \u2699 Generate AI Orders (Turn ${gameState.currentTurnNum})
         </button>
         <span id="aiStatus" style="font-family:'IM Fell English',serif; font-style:italic; font-size:0.9em; color:var(--ink-light);"></span>
@@ -12837,17 +12825,8 @@ function toggleAICharacter(charId) {
   }
 }
 
-function saveAIApiKey() {
-  const input = document.getElementById('aiApiKeyInput');
-  if (input && typeof AI_PLAYER !== 'undefined') {
-    AI_PLAYER.setApiKey(input.value.trim());
-    renderGMControl();
-  }
-}
-
-async function runAITurn() {
+function runAITurn() {
   if (typeof AI_PLAYER === 'undefined') { alert('AI Player module not loaded.'); return; }
-  if (!AI_PLAYER.getApiKey()) { alert('Set your Anthropic API key first.'); return; }
 
   const chars = AI_PLAYER.getAICharacters();
   if (chars.length === 0) { alert('No AI characters selected. Toggle at least one character.'); return; }
@@ -12877,7 +12856,7 @@ async function runAITurn() {
   }
 
   try {
-    const result = await AI_PLAYER.runAllAI(progressCallback);
+    const result = AI_PLAYER.runAllAI(progressCallback);
 
     // Save to AI log
     if (!gameState.aiLog) gameState.aiLog = [];
