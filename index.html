@@ -11201,6 +11201,100 @@ function sendGMToChar(charId) {
   });
   saveGameState();
   renderCharacterDashboard();
+  renderGMControl();
+}
+
+// ==================== GM Character Dispatches Section ====================
+let gmSelectedCharId = null;
+
+function getCharUnreadCountForGM(charId) {
+  const msgs = getCharMessages(charId);
+  return msgs.filter(m => m.channel === 'gm' && m.fromId !== '_gm' && !m.readByGM).length;
+}
+
+function sendGMToCharFromGMPanel(charId) {
+  const input = document.getElementById('gmCharMsgInput');
+  if (!input || !input.value.trim() || !charId) return;
+  const msgs = getCharMessages(charId);
+  msgs.push({
+    fromId: '_gm', fromName: 'Game Master', toName: CHAR_DATA[charId].name,
+    channel: 'gm', text: input.value.trim(), turn: gameState.currentTurnNum,
+    timestamp: Date.now(), read: false
+  });
+  saveGameState();
+  renderGMControl();
+  setTimeout(() => {
+    const thread = document.getElementById('gmCharMsgThread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  }, 50);
+}
+
+function gmSelectChar(charId) {
+  gmSelectedCharId = charId;
+  renderGMControl();
+  setTimeout(() => {
+    const thread = document.getElementById('gmCharMsgThread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  }, 50);
+}
+
+function renderGMCharMessagesSection() {
+  const allChars = Object.keys(CHAR_DATA);
+  if (!gmSelectedCharId) gmSelectedCharId = allChars[0];
+
+  const charListHtml = allChars.map(cid => {
+    const c = CHAR_DATA[cid];
+    const unread = getCharUnreadCountForGM(cid);
+    const isActive = cid === gmSelectedCharId;
+    const fColor = FACTION_COLORS[c.faction] || '#3A2A1A';
+    return `<div class="gm-msg-faction-item ${isActive ? 'active' : ''}" onclick="gmSelectChar('${cid}')" style="${isActive ? 'border-left-color:' + fColor : ''}">
+      <span>${c.icon} ${c.name}</span>
+      ${unread > 0 ? '<span class="unread-dot"></span>' : ''}
+    </div>`;
+  }).join('');
+
+  // Mark messages as read by GM
+  const msgs = getCharMessages(gmSelectedCharId);
+  msgs.filter(m => m.channel === 'gm' && m.fromId !== '_gm').forEach(m => m.readByGM = true);
+
+  const gmMsgs = msgs.filter(m => m.channel === 'gm');
+  let threadHtml = '';
+  if (gmMsgs.length === 0) {
+    threadHtml = '<div class="msg-empty">No dispatches with this character yet.</div>';
+  } else {
+    threadHtml = gmMsgs.map(m => {
+      const cls = m.fromId === '_gm' ? 'from-gm' : 'from-faction';
+      const sender = m.fromId === '_gm' ? 'Game Master' : m.fromName;
+      const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      return `<div class="msg-bubble ${cls}">
+        <div class="msg-sender">${sender}</div>
+        <div>${m.text}</div>
+        <div class="msg-time">Turn ${m.turn} &mdash; ${time}</div>
+      </div>`;
+    }).join('');
+  }
+
+  const totalUnread = allChars.reduce((s, cid) => s + getCharUnreadCountForGM(cid), 0);
+  const selChar = CHAR_DATA[gmSelectedCharId];
+
+  return `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>Character Dispatches${totalUnread > 0 ? ' (' + totalUnread + ' unread)' : ''}</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">
+      <div class="gm-msg-inbox">
+        <div class="gm-msg-factions" style="max-height:400px;">${charListHtml}</div>
+        <div class="gm-msg-thread-panel">
+          <div class="gm-msg-thread-header">${selChar.icon} ${selChar.name} <span style="font-weight:400; font-size:0.8em; color:var(--ink-light);">(${FACTION_NAMES[selChar.faction]})</span></div>
+          <div class="messages-thread" id="gmCharMsgThread" style="flex:1;">${threadHtml}</div>
+          <div class="msg-compose">
+            <input type="text" id="gmCharMsgInput" placeholder="Reply to ${selChar.name}..." onkeydown="if(event.key==='Enter')sendGMToCharFromGMPanel('${gmSelectedCharId}')">
+            <button onclick="sendGMToCharFromGMPanel('${gmSelectedCharId}')">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderCharacterDashboard() {
@@ -12311,7 +12405,8 @@ function renderGMControl() {
   </div>`;
 
   const messagesSection = renderGMMessagesSection();
-  container.innerHTML = turnSection + storylineHtml + messagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + specialOpsSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
+  const charMessagesSection = renderGMCharMessagesSection();
+  container.innerHTML = turnSection + storylineHtml + messagesSection + charMessagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + specialOpsSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
 
   // Render turn tracker into GM console
   renderGMTurnTracker();
