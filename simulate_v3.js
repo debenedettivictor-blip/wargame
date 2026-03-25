@@ -891,7 +891,41 @@ for (let game = 1; game <= NUM_GAMES; game++) {
   }
 
   const scores = scoreGame(g);
-  console.log('### Final Faction Scores');
+
+  // Individual player scores — primary results view
+  const playerScores = scoreIndividualPlayers(g, scores);
+  const factionWinnerFid = Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0];
+  const playersSorted = Object.entries(playerScores).sort((a,b) => b[1].vp - a[1].vp);
+  const topPlayer = playersSorted[0];
+  const crossFactionWin = topPlayer[1].faction !== factionWinnerFid;
+
+  // Winners banner first
+  console.log(`**FACTION WINNER: ${factionWinnerFid.toUpperCase()} (${scores[factionWinnerFid]} VP)**`);
+  console.log(`**INDIVIDUAL WINNER: ${topPlayer[1].name} (${topPlayer[1].faction}) -- ${topPlayer[1].vp} VP**`);
+  if (crossFactionWin) {
+    console.log(`> **CROSS-FACTION WIN!** Individual winner (${topPlayer[1].faction}) != Faction winner (${factionWinnerFid})`);
+  }
+  console.log('');
+
+  // Player results table
+  console.log('### Results by Player');
+  console.log('');
+  console.log('| # | Player | Faction | VP | Fac VP (x1.2) | Indiv | Key Objectives |');
+  console.log('|---|--------|---------|-----|--------------|-------|----------------|');
+  playersSorted.forEach(([pid, p], i) => {
+    const facX = Math.round(p.factionBase * 1.2);
+    const isFacWin = p.faction === factionWinnerFid;
+    const isIndWin = i === 0;
+    const objStr = p.objs.filter(o => o.label !== 'Gold bonus').map(o => `${o.points >= 0 ? '+' : ''}${o.points} ${o.label}`).join(', ');
+    const marker = isIndWin ? ' *' : (isFacWin ? ' +' : '');
+    console.log(`| ${i+1} | **${p.name}**${marker} | ${p.faction} | **${p.vp}** | ${p.factionBase} (${facX}) | +${p.individualScore} | ${objStr || '--'} |`);
+  });
+  console.log('');
+  console.log('> \\* = Individual Winner, + = Faction Winner team');
+  console.log('');
+
+  // Faction scores (secondary)
+  console.log('### Faction Scores');
   console.log('| Faction | Public VP | Secret Bonus | Total |');
   console.log('|---------|-----------|-------------|-------|');
   const fids = ['germany','france','britain','russia','austria','ottoman','krupp','schneider'];
@@ -902,50 +936,22 @@ for (let game = 1; game <= NUM_GAMES; game++) {
   }
   console.log('');
 
-  // Individual player scores
-  const playerScores = scoreIndividualPlayers(g, scores);
-  const factionWinnerFid = Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0];
-  console.log('### Individual Player Score Breakdown');
-  console.log('');
-  const playersSorted = Object.entries(playerScores).sort((a,b) => b[1].vp - a[1].vp);
-  playersSorted.forEach(([pid, p], i) => {
-    const facX = Math.round(p.factionBase * 1.2);
-    const isFacWin = p.faction === factionWinnerFid;
-    const objStr = p.objs.filter(o => o.label !== 'Gold bonus').map(o => `${o.points >= 0 ? '+' : ''}${o.points} ${o.label}`).join(', ');
-    console.log(`**${i+1}. ${p.name}** (${p.faction}${isFacWin ? ' \u2605FAC WIN' : ''}) — **${p.vp} VP**`);
-    console.log(`   Faction: ${p.factionBase} x1.2 = ${facX} | Individual: +${p.individualScore} (Gold +25${objStr ? ', ' + objStr : ''})`);
-  });
-  console.log('');
-
-  // Winners
-  const topPlayer = playersSorted[0];
-  console.log(`**FACTION WINNER: ${factionWinnerFid.toUpperCase()} (${scores[factionWinnerFid]} VP)**`);
-  console.log(`**INDIVIDUAL WINNER: ${topPlayer[1].name} (${topPlayer[1].vp} VP)**`);
-  console.log('');
-
   allScores.push(scores);
   allPlayerScores.push(playerScores);
 }
 
-// ==================== FACTION SUMMARY ====================
-console.log(`---\n## Faction Summary: ${NUM_GAMES} Games\n`);
-console.log('| Faction | Avg VP | Wins | Best | Worst |');
-console.log('|---------|--------|------|------|-------|');
-const fids = ['germany','france','britain','russia','austria','ottoman','krupp','schneider'];
-for (const fid of fids) {
-  const vpArr = allScores.map(s => s[fid]);
-  const avg = (vpArr.reduce((a,b) => a+b, 0) / vpArr.length).toFixed(1);
-  const wins = allScores.filter(s => {
-    const sorted = Object.entries(s).sort((a,b) => b[1] - a[1]);
-    return sorted[0][0] === fid;
-  }).length;
-  const best = Math.max(...vpArr);
-  const worst = Math.min(...vpArr);
-  console.log(`| ${fid.charAt(0).toUpperCase()+fid.slice(1)} | ${avg} | ${wins} | ${best} | ${worst} |`);
-}
+// ==================== INDIVIDUAL PLAYER SUMMARY (PRIMARY) ====================
+console.log(`---\n## Player Results: ${NUM_GAMES} Games\n`);
 
-// ==================== INDIVIDUAL PLAYER SUMMARY ====================
-console.log(`\n---\n## Individual Player Summary: ${NUM_GAMES} Games\n`);
+// Count cross-faction wins
+let crossFactionWins = 0;
+for (let gi = 0; gi < allScores.length; gi++) {
+  const facWinner = Object.entries(allScores[gi]).sort((a,b) => b[1] - a[1])[0][0];
+  const indWinner = Object.entries(allPlayerScores[gi]).sort((a,b) => b[1].vp - a[1].vp)[0][1];
+  if (indWinner.faction !== facWinner) crossFactionWins++;
+}
+console.log(`**Cross-faction wins: ${crossFactionWins}/${NUM_GAMES}** (individual winner from different faction than faction winner)\n`);
+
 console.log('| # | Player | Faction | Avg VP | Wins | Fac Wins | Best | Worst |');
 console.log('|---|--------|---------|--------|------|----------|------|-------|');
 
@@ -982,6 +988,23 @@ console.log('\n### Scoring Formula');
 console.log('- **Final Score = (Faction VP x 1.2) + Individual Score** (reduced from x1.5 — personal objectives matter more)');
 console.log('- **Individual Score** = +25 gold bonus + personal secret objective bonuses/penalties');
 console.log('- **Fac Wins** = how often that player\'s faction won (drives the x1.2 base)');
+
+// ==================== FACTION SUMMARY (SECONDARY) ====================
+console.log(`\n---\n## Faction Summary: ${NUM_GAMES} Games\n`);
+console.log('| Faction | Avg VP | Wins | Best | Worst |');
+console.log('|---------|--------|------|------|-------|');
+const fidsSum = ['germany','france','britain','russia','austria','ottoman','krupp','schneider'];
+for (const fid of fidsSum) {
+  const vpArr = allScores.map(s => s[fid]);
+  const avg = (vpArr.reduce((a,b) => a+b, 0) / vpArr.length).toFixed(1);
+  const wins = allScores.filter(s => {
+    const sorted = Object.entries(s).sort((a,b) => b[1] - a[1]);
+    return sorted[0][0] === fid;
+  }).length;
+  const best = Math.max(...vpArr);
+  const worst = Math.min(...vpArr);
+  console.log(`| ${fid.charAt(0).toUpperCase()+fid.slice(1)} | ${avg} | ${wins} | ${best} | ${worst} |`);
+}
 
 // ==================== OBJECTIVE HIT RATE ====================
 console.log(`\n---\n## Objective Hit Rates: ${NUM_GAMES} Games\n`);
