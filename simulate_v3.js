@@ -638,178 +638,185 @@ function scoreIndividualPlayers(g, factionScores) {
   // Helper: personal objective rolls (simulated — in real game GM tracks these)
   function personalRoll(chance) { return Math.random() < chance; }
 
+  // Helper to track objectives
+  function makePlayer(name, faction, base) {
+    return { name, faction, vp: base, factionBase: base, objs: [], gold: 25 };
+  }
+  function obj(p, points, label) {
+    p.vp += points;
+    p.objs.push({ label, points });
+  }
+
   // --- GERMANY players ---
   const gerBase = factionScores.germany;
-  const gerGold = f.germany.gold;
 
   // Kaiser Wilhelm II
-  let kaiserVP = gerBase;
-  kaiserVP += 25; // gold bonus
-  if (f.germany.navy >= 6) kaiserVP += 4; // Navy Obsession (lowered threshold from 10 to 6)
-  if (f.germany.navy >= 10) kaiserVP += 3; // Grand Fleet bonus (built the Hochseeflotte)
-  if (!f.britain.atWar) kaiserVP += 5; // Cousin George — peace with Britain (boosted from 3)
-  else kaiserVP -= 1; // at war with Britain (softened from -2)
-  if (f.germany.alsace) kaiserVP += 3; // Imperial Prestige — Alsace held
-  if (f.germany.army >= 16) kaiserVP += 3; // Military Grandeur — army at full strength
-  if (personalRoll(0.15)) kaiserVP -= 2; // Fear of Weakness (reduced from 20% to 15%)
-  players.kaiser = { name: 'Kaiser Wilhelm II', faction: 'germany', vp: kaiserVP };
+  const kaiser = makePlayer('Kaiser Wilhelm II', 'germany', gerBase);
+  obj(kaiser, 25, 'Gold bonus');
+  if (f.germany.navy >= 6) obj(kaiser, 4, 'Navy Obsession (navy>=6)');
+  if (f.germany.navy >= 10) obj(kaiser, 3, 'Grand Fleet (navy>=10)');
+  if (!f.britain.atWar) obj(kaiser, 5, 'Cousin George (peace w/ Britain)');
+  else obj(kaiser, -1, 'At war with Britain');
+  if (f.germany.alsace) obj(kaiser, 3, 'Imperial Prestige (Alsace held)');
+  if (f.germany.army >= 16) obj(kaiser, 3, 'Military Grandeur (army>=16)');
+  if (personalRoll(0.15)) obj(kaiser, -2, 'Fear of Weakness (Chancellor overrules)');
+  players.kaiser = kaiser;
 
   // Chancellor
-  let chanVP = gerBase;
-  chanVP += 25;
-  if (personalRoll(0.25)) chanVP += 4; // Topple the Kaiser (25% chance)
-  if (personalRoll(0.2)) chanVP += 3; // Diplomatic Mastermind (20% chance)
-  if (!f.germany.atWar || (g.warDeclaredTurn && g.warDeclaredTurn > 4)) chanVP += 2; // Delay the War
-  players.chancellor = { name: 'The Chancellor', faction: 'germany', vp: chanVP };
+  const chancellor = makePlayer('The Chancellor', 'germany', gerBase);
+  obj(chancellor, 25, 'Gold bonus');
+  if (personalRoll(0.25)) obj(chancellor, 4, 'Topple the Kaiser');
+  if (personalRoll(0.2)) obj(chancellor, 3, 'Diplomatic Mastermind');
+  if (!f.germany.atWar || (g.warDeclaredTurn && g.warDeclaredTurn > 4)) obj(chancellor, 2, 'Delay the War');
+  players.chancellor = chancellor;
 
   // Chief of General Staff
-  let cosVP = gerBase;
-  cosVP += 25;
-  if (f.germany.schlieffenDone) { cosVP += 3; if (g.schlieffen === 'success') cosVP += 3; } // My Legacy
-  if (f.germany.army >= 12) cosVP += 2; // Militarism
-  cosVP += personalRoll(0.5) ? 2 : 1; // Kingmaker (50/50 Chancellor vs Kaiser)
-  players.chief_staff = { name: 'Chief of General Staff', faction: 'germany', vp: cosVP };
+  const chief = makePlayer('Chief of General Staff', 'germany', gerBase);
+  obj(chief, 25, 'Gold bonus');
+  if (f.germany.schlieffenDone) { obj(chief, 3, 'Schlieffen executed'); if (g.schlieffen === 'success') obj(chief, 3, 'Schlieffen SUCCESS'); }
+  if (f.germany.army >= 12) obj(chief, 2, 'Militarism (army>=12)');
+  if (personalRoll(0.5)) obj(chief, 2, 'Kingmaker (backed Chancellor)');
+  else obj(chief, 1, 'Kingmaker (backed Kaiser)');
+  players.chief_staff = chief;
 
   // --- FRANCE players ---
   const fraBase = factionScores.france;
 
   // President
-  let presVP = fraBase;
-  presVP += 25;
-  if (f.russia.allyGoldReceived >= 5) presVP += 3; // The Banker
-  if (personalRoll(0.4)) presVP += 2; // Fortress France (40% built forts)
-  if (personalRoll(0.3)) presVP -= 2; else presVP += 2; // Control the General
-  players.president = { name: 'The President', faction: 'france', vp: presVP };
+  const president = makePlayer('The President', 'france', fraBase);
+  obj(president, 25, 'Gold bonus');
+  if (f.russia.allyGoldReceived >= 5) obj(president, 3, 'The Banker (funded Russia)');
+  if (personalRoll(0.4)) obj(president, 2, 'Fortress France (forts built)');
+  if (personalRoll(0.3)) obj(president, -2, 'Lost control of General');
+  else obj(president, 2, 'Control the General');
+  players.president = president;
 
   // Commanding General
-  let genVP = fraBase;
-  genVP += 25;
-  if (f.france.atWar) { genVP += 3; if (!f.france.lostAlsace) genVP += 3; } // Plan XVII
-  if (personalRoll(0.4)) genVP -= 1; // Offense Over Defense (40% forts built = penalty)
-  if (f.france.army <= 8 && personalRoll(0.15)) genVP -= 3; // Military Coup (rare)
-  players.general = { name: 'Commanding General', faction: 'france', vp: genVP };
+  const general = makePlayer('Commanding General', 'france', fraBase);
+  obj(general, 25, 'Gold bonus');
+  if (f.france.atWar) { obj(general, 3, 'Plan XVII (at war)'); if (!f.france.lostAlsace) obj(general, 3, 'Plan XVII (Alsace not lost)'); }
+  if (personalRoll(0.4)) obj(general, -1, 'Offense Over Defense (forts penalty)');
+  if (f.france.army <= 8 && personalRoll(0.15)) obj(general, -3, 'Military Coup attempt');
+  players.general = general;
 
   // --- BRITAIN players ---
   const britBase = factionScores.britain;
 
   // Prime Minister
-  let pmVP = britBase;
-  pmVP += 25;
-  if (!f.britain.atWar) pmVP += 4; // Keep the Peace
-  pmVP += 3; // Imperial Unity (colonies stable — always true in sim)
-  players.pm = { name: 'Prime Minister', faction: 'britain', vp: pmVP };
+  const pm = makePlayer('Prime Minister', 'britain', britBase);
+  obj(pm, 25, 'Gold bonus');
+  if (!f.britain.atWar) obj(pm, 4, 'Keep the Peace');
+  obj(pm, 3, 'Imperial Unity (colonies stable)');
+  players.pm = pm;
 
   // First Lord of the Admiralty
-  let admVP = britBase;
-  admVP += 25;
-  if (f.britain.navy >= f.germany.navy + 2) admVP += 6; // Dreadnought Race (boosted from 4)
-  else if (f.britain.navy >= f.germany.navy) admVP += 3; // Naval Parity — still acceptable
-  if (f.britain.atWar && g.blockadeOn) admVP += 5; // The Blockade (boosted from 3)
-  admVP += 3; // Sea Lords' Confidence — the navy is always Britain's pride
-  if (f.britain.navy >= 12) admVP += 3; // Rule Britannia — 12+ ships maintained
-  players.admiralty = { name: 'First Lord of the Admiralty', faction: 'britain', vp: admVP };
+  const admiralty = makePlayer('First Lord of the Admiralty', 'britain', britBase);
+  obj(admiralty, 25, 'Gold bonus');
+  if (f.britain.navy >= f.germany.navy + 2) obj(admiralty, 6, 'Dreadnought Race (navy lead +2)');
+  else if (f.britain.navy >= f.germany.navy) obj(admiralty, 3, 'Naval Parity');
+  if (f.britain.atWar && g.blockadeOn) obj(admiralty, 5, 'The Blockade');
+  obj(admiralty, 3, "Sea Lords' Confidence");
+  if (f.britain.navy >= 12) obj(admiralty, 3, 'Rule Britannia (navy>=12)');
+  players.admiralty = admiralty;
 
   // Foreign Secretary
-  let fsVP = britBase;
-  fsVP += 25;
-  if (personalRoll(0.6)) fsVP += 4; // Entente Cordiale (boosted from 50%/+3 to 60%/+4)
-  fsVP += 5; // Balance of Power (boosted from 4)
-  if (!f.france.rebellion) fsVP += 3; // France Preserved — the Entente holds
-  if (g.warDeclaredTurn && !f.britain.atWar) fsVP += 3; // Diplomatic Masterstroke — war rages, Britain stays out
-  players.foreign_sec = { name: 'Foreign Secretary', faction: 'britain', vp: fsVP };
+  const foreignSec = makePlayer('Foreign Secretary', 'britain', britBase);
+  obj(foreignSec, 25, 'Gold bonus');
+  if (personalRoll(0.6)) obj(foreignSec, 4, 'Entente Cordiale');
+  obj(foreignSec, 5, 'Balance of Power');
+  if (!f.france.rebellion) obj(foreignSec, 3, 'France Preserved');
+  if (g.warDeclaredTurn && !f.britain.atWar) obj(foreignSec, 3, 'Diplomatic Masterstroke (war but neutral)');
+  players.foreign_sec = foreignSec;
 
   // --- RUSSIA players ---
   const rusBase = factionScores.russia;
 
   // Tsar Nicholas II
-  let tsarVP = rusBase;
-  tsarVP += 25;
-  if (f.russia.stab >= 5) tsarVP += 4; // Dynasty
-  if (personalRoll(0.1)) tsarVP += 5; // Cousin Nicky letter (rare)
-  players.tsar = { name: 'Tsar Nicholas II', faction: 'russia', vp: tsarVP };
+  const tsar = makePlayer('Tsar Nicholas II', 'russia', rusBase);
+  obj(tsar, 25, 'Gold bonus');
+  if (f.russia.stab >= 5) obj(tsar, 4, 'Dynasty (stability>=5)');
+  if (personalRoll(0.1)) obj(tsar, 5, 'Cousin Nicky letter');
+  players.tsar = tsar;
 
   // War Minister
-  let wmVP = rusBase;
-  wmVP += 25;
-  if (f.russia.army >= 18) wmVP += 3; // The Steamroller
-  if (f.russia.deployed) wmVP += 2; // Full Mobilization
-  players.war_minister = { name: 'War Minister', faction: 'russia', vp: wmVP };
+  const warMin = makePlayer('War Minister', 'russia', rusBase);
+  obj(warMin, 25, 'Gold bonus');
+  if (f.russia.army >= 18) obj(warMin, 3, 'The Steamroller (army>=18)');
+  if (f.russia.deployed) obj(warMin, 2, 'Full Mobilization');
+  players.war_minister = warMin;
 
   // Duma Representative
-  let dumaVP = rusBase;
-  dumaVP += 25;
-  if (f.russia.revolution) dumaVP += 6; // Led the revolution
-  else if (personalRoll(0.2)) dumaVP += 4; // Reform accepted
-  if (!f.russia.atWar) dumaVP += 3; // Peace Faction
-  players.duma = { name: 'Duma Representative', faction: 'russia', vp: dumaVP };
+  const duma = makePlayer('Duma Representative', 'russia', rusBase);
+  obj(duma, 25, 'Gold bonus');
+  if (f.russia.revolution) obj(duma, 6, 'Led the Revolution');
+  else if (personalRoll(0.2)) obj(duma, 4, 'Reform accepted');
+  if (!f.russia.atWar) obj(duma, 3, 'Peace Faction');
+  players.duma = duma;
 
   // --- AUSTRIA players ---
   const ausBase = factionScores.austria;
 
   // Emperor Franz Josef
-  let empVP = ausBase;
-  empVP += 25;
-  if (!f.austria.collapsed) empVP += 5; // Habsburg Dynasty
-  if (personalRoll(0.6)) empVP += 2; // German Alliance maintained
-  players.emperor = { name: 'Emperor Franz Josef', faction: 'austria', vp: empVP };
+  const emperor = makePlayer('Emperor Franz Josef', 'austria', ausBase);
+  obj(emperor, 25, 'Gold bonus');
+  if (!f.austria.collapsed) obj(emperor, 5, 'Habsburg Dynasty');
+  if (personalRoll(0.6)) obj(emperor, 2, 'German Alliance maintained');
+  players.emperor = emperor;
 
   // Conrad von Hötzendorf
-  let conVP = ausBase;
-  conVP += 25;
-  if (f.austria.serbiaConquered) conVP += 4; // Crush Serbia
-  if (f.austria.atWar && (g.warDeclaredTurn && g.warDeclaredTurn <= 4)) conVP += 2; // War Hawk
-  players.conrad = { name: 'Conrad von Hötzendorf', faction: 'austria', vp: conVP };
+  const conrad = makePlayer('Conrad von Hötzendorf', 'austria', ausBase);
+  obj(conrad, 25, 'Gold bonus');
+  if (f.austria.serbiaConquered) obj(conrad, 4, 'Crush Serbia');
+  if (f.austria.atWar && (g.warDeclaredTurn && g.warDeclaredTurn <= 4)) obj(conrad, 2, 'War Hawk (early war)');
+  players.conrad = conrad;
 
   // --- OTTOMAN players ---
   const ottBase = factionScores.ottoman;
 
   // Sultan
-  let sulVP = ottBase;
-  sulVP += 25;
-  if (!f.ottoman.atWar) sulVP += 4; // Armed Neutrality
-  if (f.ottoman.atWar) sulVP += 3; // Caliphate
-  players.sultan = { name: 'The Sultan', faction: 'ottoman', vp: sulVP };
+  const sultan = makePlayer('The Sultan', 'ottoman', ottBase);
+  obj(sultan, 25, 'Gold bonus');
+  if (!f.ottoman.atWar) obj(sultan, 4, 'Armed Neutrality');
+  if (f.ottoman.atWar) obj(sultan, 3, 'Caliphate');
+  players.sultan = sultan;
 
   // Young Turk Leader
-  let ytVP = ottBase;
-  ytVP += 25;
-  if (f.ottoman.army >= 10) ytVP += 3; // Modernize
-  if (personalRoll(0.4)) ytVP += 3; // German Alliance
-  if (personalRoll(0.15)) ytVP += 2; // Seize Power
-  players.young_turk = { name: 'Young Turk Leader', faction: 'ottoman', vp: ytVP };
+  const youngTurk = makePlayer('Young Turk Leader', 'ottoman', ottBase);
+  obj(youngTurk, 25, 'Gold bonus');
+  if (f.ottoman.army >= 10) obj(youngTurk, 3, 'Modernize (army>=10)');
+  if (personalRoll(0.4)) obj(youngTurk, 3, 'German Alliance');
+  if (personalRoll(0.15)) obj(youngTurk, 2, 'Seize Power');
+  players.young_turk = youngTurk;
 
   // --- ARMS DEALER players ---
   // Krupp Director
-  let kdVP = factionScores.krupp;
-  kdVP += 25;
-  if (f.krupp.sales >= 6) kdVP += 3; // Monopoly (sold to 3+ nations)
-  if (personalRoll(0.15)) kdVP += 2; // Sabotage Schneider
-  players.krupp_dir = { name: 'Krupp Director', faction: 'krupp', vp: kdVP };
+  const krupDir = makePlayer('Krupp Director', 'krupp', factionScores.krupp);
+  obj(krupDir, 25, 'Gold bonus');
+  if (f.krupp.sales >= 6) obj(krupDir, 3, 'Monopoly (sales>=6)');
+  if (personalRoll(0.15)) obj(krupDir, 2, 'Sabotage Schneider');
+  players.krupp_dir = krupDir;
 
   // Vickers Director
-  let vdVP = factionScores.krupp;
-  vdVP += 25;
-  if (g.warDeclaredTurn) vdVP += 4; // Entente Sales (sold to both sides)
-  if (f.britain.navy >= 12) vdVP += 2; // British Interests
-  players.vickers_dir = { name: 'Vickers Director', faction: 'krupp', vp: vdVP };
+  const vickDir = makePlayer('Vickers Director', 'krupp', factionScores.krupp);
+  obj(vickDir, 25, 'Gold bonus');
+  if (g.warDeclaredTurn) obj(vickDir, 4, 'Entente Sales (war profits)');
+  if (f.britain.navy >= 12) obj(vickDir, 2, 'British Interests (navy>=12)');
+  players.vickers_dir = vickDir;
 
   // Schneider — Merchant of Death
-  let merVP = factionScores.schneider;
-  merVP += 25;
-  if (g.warDeclaredTurn) merVP += 6; // War Architect
-  if (personalRoll(0.3)) merVP += 4; // Puppet Master
-  if (f.russia.revolution) merVP += 4; // Bankroll the Revolution
-  if (personalRoll(0.15)) merVP += 3; // Destroy Krupp
-  players.merchant = { name: 'Merchant of Death', faction: 'schneider', vp: merVP };
+  const merchant = makePlayer('Merchant of Death', 'schneider', factionScores.schneider);
+  obj(merchant, 25, 'Gold bonus');
+  if (g.warDeclaredTurn) obj(merchant, 6, 'War Architect');
+  if (personalRoll(0.3)) obj(merchant, 4, 'Puppet Master');
+  if (f.russia.revolution) obj(merchant, 4, 'Bankroll the Revolution');
+  if (personalRoll(0.15)) obj(merchant, 3, 'Destroy Krupp');
+  players.merchant = merchant;
 
   // --- Final score = faction score * 1.5 + individual score ---
-  // Individual score = gold bonus (25) + personal objective bonuses
   for (const [pid, p] of Object.entries(players)) {
-    const factionBase = factionScores[p.faction];
-    const individualScore = p.vp - factionBase; // gold + personal objectives
+    const individualScore = p.vp - p.factionBase; // gold + personal objectives
     p.individualScore = individualScore;
-    p.factionBase = factionBase;
-    p.vp = Math.round(factionBase * 1.5) + individualScore; // final = faction*1.5 + individual
+    p.vp = Math.round(p.factionBase * 1.5) + individualScore; // final = faction*1.5 + individual
   }
 
   return players;
@@ -870,14 +877,15 @@ for (let game = 1; game <= NUM_GAMES; game++) {
   // Individual player scores
   const playerScores = scoreIndividualPlayers(g, scores);
   const factionWinnerFid = Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0];
-  console.log('### Individual Player Scores');
-  console.log('| # | Player | Faction | Fac x1.5 | +Individual | **Total** | Fac Win? |');
-  console.log('|---|--------|---------|----------|-------------|-----------|----------|');
+  console.log('### Individual Player Score Breakdown');
+  console.log('');
   const playersSorted = Object.entries(playerScores).sort((a,b) => b[1].vp - a[1].vp);
   playersSorted.forEach(([pid, p], i) => {
     const facX = Math.round(p.factionBase * 1.5);
-    const isFacWin = p.faction === factionWinnerFid ? '\u2605' : '';
-    console.log(`| ${i+1} | ${p.name} | ${p.faction} | ${facX} | +${p.individualScore} | **${p.vp}** | ${isFacWin} |`);
+    const isFacWin = p.faction === factionWinnerFid;
+    const objStr = p.objs.filter(o => o.label !== 'Gold bonus').map(o => `${o.points >= 0 ? '+' : ''}${o.points} ${o.label}`).join(', ');
+    console.log(`**${i+1}. ${p.name}** (${p.faction}${isFacWin ? ' \u2605FAC WIN' : ''}) — **${p.vp} VP**`);
+    console.log(`   Faction: ${p.factionBase} x1.5 = ${facX} | Individual: +${p.individualScore} (Gold +25${objStr ? ', ' + objStr : ''})`);
   });
   console.log('');
 
@@ -946,3 +954,61 @@ console.log('\n### Scoring Formula');
 console.log('- **Final Score = (Faction VP x 1.5) + Individual Score**');
 console.log('- **Individual Score** = +25 gold bonus + personal secret objective bonuses/penalties');
 console.log('- **Fac Wins** = how often that player\'s faction won (drives the x1.5 base)');
+
+// ==================== OBJECTIVE HIT RATE ====================
+console.log(`\n---\n## Objective Hit Rates: ${NUM_GAMES} Games\n`);
+// Aggregate objective hits per player
+const objStats = {}; // pid -> { label -> { count, totalPts } }
+for (const ps of allPlayerScores) {
+  for (const [pid, p] of Object.entries(ps)) {
+    if (!objStats[pid]) objStats[pid] = { name: p.name, faction: p.faction, objs: {} };
+    for (const o of p.objs) {
+      if (o.label === 'Gold bonus') continue;
+      if (!objStats[pid].objs[o.label]) objStats[pid].objs[o.label] = { count: 0, pts: o.points };
+      objStats[pid].objs[o.label].count++;
+    }
+  }
+}
+for (const [pid, data] of Object.entries(objStats)) {
+  const lines = Object.entries(data.objs)
+    .sort((a,b) => b[1].count - a[1].count)
+    .map(([label, s]) => `${s.pts >= 0 ? '+' : ''}${s.pts} ${label}: ${s.count}/${NUM_GAMES} (${Math.round(s.count/NUM_GAMES*100)}%)`)
+    .join(' | ');
+  if (lines) console.log(`- **${data.name}** (${data.faction}): ${lines}`);
+}
+
+// ==================== COMMENTARY ====================
+console.log(`\n---\n## Analysis & Commentary\n`);
+
+// Top 3 / Bottom 3
+const top3 = playerSummaries.slice(0, 3);
+const bot3 = playerSummaries.slice(-3);
+console.log('### Top 3 Players');
+for (const p of top3) {
+  console.log(`- **${p.name}** (${p.faction}): avg ${p.avg.toFixed(1)} VP, ${p.wins} wins. ${p.facWins}/${NUM_GAMES} faction wins give strong x1.5 base.`);
+}
+console.log('');
+console.log('### Bottom 3 Players');
+for (const p of bot3) {
+  console.log(`- **${p.name}** (${p.faction}): avg ${p.avg.toFixed(1)} VP, ${p.wins} wins. ${p.facWins}/${NUM_GAMES} faction wins — low base hurts.`);
+}
+console.log('');
+
+// Key observations
+console.log('### Key Observations');
+const kaiserStats = playerSummaries.find(p => p.pid === 'kaiser');
+const admStats = playerSummaries.find(p => p.pid === 'admiralty');
+const fsStats = playerSummaries.find(p => p.pid === 'foreign_sec');
+if (kaiserStats) console.log(`- **Kaiser Wilhelm II**: avg ${kaiserStats.avg.toFixed(1)}, ${kaiserStats.wins} wins (${kaiserStats.facWins}/${NUM_GAMES} fac wins). Navy Obsession + Cousin George + Imperial Prestige give strong individual ceiling.`);
+if (admStats) console.log(`- **First Lord of Admiralty**: avg ${admStats.avg.toFixed(1)}, ${admStats.wins} wins. Sea Lords + Dreadnought Race + Rule Britannia carry despite Britain's low faction VP.`);
+if (fsStats) console.log(`- **Foreign Secretary**: avg ${fsStats.avg.toFixed(1)}, ${fsStats.wins} wins. Balance of Power + France Preserved are reliable; Entente Cordiale fires ~60%.`);
+
+// Faction dominance
+const facAvgs = {};
+for (const fid of ['germany','france','britain','russia','austria','ottoman','krupp','schneider']) {
+  const arr = allScores.map(s => s[fid]);
+  facAvgs[fid] = arr.reduce((a,b) => a+b, 0) / arr.length;
+}
+const topFac = Object.entries(facAvgs).sort((a,b) => b[1] - a[1]);
+console.log(`- **Faction dominance**: ${topFac[0][0]} leads (avg ${topFac[0][1].toFixed(1)}), ${topFac[1][0]} second (${topFac[1][1].toFixed(1)}). The x1.5 multiplier means faction VP swings are amplified in individual scores.`);
+console.log(`- **Win distribution**: ${Object.entries(factionWinCounts).sort((a,b) => b[1] - a[1]).map(([f,c]) => `${f} ${c}`).join(', ')} out of ${NUM_GAMES} games.`);
