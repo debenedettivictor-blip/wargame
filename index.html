@@ -4433,7 +4433,7 @@ body::before {
   </div>
   <div class="secret-obj" style="margin-bottom:8px;">
     <strong>🔒 Shared Secret Objectives (only Britain sees)</strong><br>
-    ◈ <strong>Continental Balance (+7 hidden VP):</strong> When France and Germany are BOTH at war with each other, Britain earns +7 hidden VP. The continent bleeds; the Empire profits. Encourage war — but don't get dragged in too deep.<br>
+    ◈ <strong>Continental Balance (+7 hidden VP):</strong> Evaluated at end of Turn 6: France and Germany must BOTH be at war, Britain must NOT have committed the BEF to France, AND the war must have a clear winner (not a stalemate where Germany still holds Alsace-Lorraine). The continent bleeds; the Empire profits. Encourage war — but stay out and let one side break.<br>
     ◈ <strong>The Kaiser Must Fall (+7 hidden VP):</strong> If Germany's government collapses into rebellion, Britain earns +7 hidden VP. The play: blockade Germany to crush their economy, then fund a coup to push the Kaiser over the edge. Classic British statecraft.<br>
     ◈ <strong>Not Committing Troops (+3 VP):</strong> If Britain never sends troops to France, +3 VP at game end (Splendid Isolation). Let others do the dying. But if France falls without your help, it's –7 VP. Thread the needle.
   </div>
@@ -8508,20 +8508,36 @@ function advanceTurn() {
       }
     }
 
-    // BRITAIN: Continental Balance — SECRET +7 VP (one-time) when France and Germany are BOTH at war
-    // Britain profits from continental rivals weakening each other — but France must survive
-    if (fid === 'britain' && !f.continentalBalanceAwarded) {
+    // BRITAIN: Continental Balance — SECRET +7 VP (one-time, evaluated on Turn 6 only)
+    // Conditions: France & Germany both at war, BEF NOT committed to France, AND a clear winner
+    // has emerged (not a stalemate where Germany still holds Alsace and France is still fighting).
+    // Britain profits from continental rivals weakening each other — classic British statecraft.
+    if (fid === 'britain' && !f.continentalBalanceAwarded && gameState.currentTurnNum >= 6) {
       const franceAtWar = factions.france && factions.france.atWar;
       const germanyAtWar = factions.germany && factions.germany.atWar;
-      if (franceAtWar && germanyAtWar) {
+      const befInFrance = (f.troops && ((f.troops['france'] || 0) + (f.troops['paris'] || 0) + (f.troops['alsace_lorraine'] || 0))) || 0;
+      const befCommitted = befInFrance > 0 || f.troopsDeployedToFrance;
+      // Check for stalemate: Germany still holds Alsace AND France is still fighting = both sides bleeding, no winner
+      const germanyHoldsAlsace = (factions.germany && factions.germany.troops && (factions.germany.troops['alsace_lorraine'] || 0) > 0);
+      const franceStillFighting = factions.france && factions.france.atWar && !factions.france.status.includes('rebellion');
+      const isStalemate = germanyHoldsAlsace && franceStillFighting;
+      if (franceAtWar && germanyAtWar && !befCommitted && !isStalemate) {
         f.continentalBalanceAwarded = true;
         f.vp = (f.vp || 0) + 7;
         if (!gameState.resolutionLog) gameState.resolutionLog = [];
         gameState.resolutionLog.push({
           icon: '🇬🇧',
-          text: 'SECRET OBJECTIVE COMPLETE: Britain earns +7 hidden VP — Continental Balance. France and Germany are at war, weakening both rivals. Britain profits from the chaos.',
+          text: 'SECRET OBJECTIVE COMPLETE: Britain earns +7 hidden VP — Continental Balance. France and Germany bled each other while Britain stayed out. One rival is broken, and the Empire stands supreme.',
           manual: false
         });
+      } else if (franceAtWar && germanyAtWar && gameState.currentTurnNum >= 6 && !f.continentalBalanceAwarded) {
+        // Log why it didn't fire for GM transparency
+        let reason = '';
+        if (befCommitted) reason = 'BEF was committed to France — Britain got dragged into the war';
+        else if (isStalemate) reason = 'Stalemate — Germany holds Alsace-Lorraine while France still fights. Both bleed with no clear winner';
+        if (reason) {
+          logAction(fid, 'objective', 'Continental Balance: NOT awarded — ' + reason);
+        }
       }
     }
 
