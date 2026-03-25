@@ -6875,7 +6875,7 @@ function generateUnitsFromTroops(fid, troops, fleets) {
     const count = troops[region] || 0;
     for (let i = 0; i < count; i++) {
       const name = names.army[armyIdx] || ('Division ' + (armyIdx + 1));
-      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, name: name, type: 'army', state: 'deployed', region: region, createdTurn: 0 });
+      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, name: name, type: 'army', state: 'reserve', region: region, createdTurn: 0 });
       idx++; armyIdx++;
     }
   });
@@ -6883,7 +6883,7 @@ function generateUnitsFromTroops(fid, troops, fleets) {
     const count = fleets[region] || 0;
     for (let i = 0; i < count; i++) {
       const name = names.fleet[fleetIdx] || ('Fleet ' + (fleetIdx + 1));
-      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, name: name, type: 'fleet', state: 'deployed', region: region, createdTurn: 0 });
+      units.push({ id: 'u_' + fid.substring(0,3) + '_' + idx, name: name, type: 'fleet', state: 'reserve', region: region, createdTurn: 0 });
       idx++; fleetIdx++;
     }
   });
