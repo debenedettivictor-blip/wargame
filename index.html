@@ -3361,6 +3361,8 @@ body::before {
 .order-item.type-attack { border-left: 4px solid var(--red-empire); }
 .order-item.type-support { border-left: 4px solid #7b2d8b; }
 .order-item.type-upgrade { border-left: 4px solid var(--steel); }
+.order-item.type-blockade { border-left: 4px solid var(--blue-entente); }
+.order-item.type-special { border-left: 4px solid #7b2d8b; }
 
 .submit-orders-btn { display: block; width: 100%; padding: 18px; margin-top: 24px; font-family: 'Playfair Display', serif; font-size: 1.2em; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; background: var(--gold-accent); color: white; border: 3px solid var(--ink); cursor: pointer; transition: all 0.2s; }
 .submit-orders-btn:hover { background: var(--ink); }
@@ -4325,6 +4327,8 @@ body::before {
 .order-modal-item.type-attack { border-left-color: var(--red-empire); }
 .order-modal-item.type-upgrade { border-left-color: var(--steel); }
 .order-modal-item.type-diplomacy { border-left-color: var(--blue-entente); }
+.order-modal-item.type-blockade { border-left-color: var(--blue-entente); }
+.order-modal-item.type-special { border-left-color: #7b2d8b; }
 .order-modal-footer { display: flex; gap: 12px; padding: 16px 20px; border-top: 2px solid var(--ink-light); background: var(--parchment); }
 .order-modal-btn { flex: 1; padding: 14px; font-family: 'Playfair Display', serif; font-size: 0.9em; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; border: 2px solid var(--ink); cursor: pointer; transition: all 0.2s; }
 .order-modal-btn.cancel { background: var(--cream); color: var(--ink); }
@@ -8582,6 +8586,47 @@ function deployBEF(fid) {
   });
 }
 
+// Queue a blockade request from a faction (player-initiated)
+function queueBlockadeRequest(fid) {
+  const f = gameState.factions[fid];
+  // Find sea zones where this faction has fleets
+  const fleetZones = [];
+  SEA_REGIONS.forEach(function(r) {
+    if (f.fleets && f.fleets[r] > 0) fleetZones.push(r);
+  });
+  if (fleetZones.length === 0) { alert('No fleets deployed at sea. Move fleets to a sea zone first.'); return; }
+
+  // Find which factions can be blockaded (those with trade routes through those seas)
+  const targets = [];
+  Object.keys(TRADE_ROUTES || {}).forEach(function(tFid) {
+    if (tFid === fid || tFid === 'krupp' || tFid === 'schneider') return;
+    const routes = TRADE_ROUTES[tFid];
+    if (!routes || !routes.seas) return;
+    fleetZones.forEach(function(sz) {
+      if (routes.seas.includes(sz)) {
+        targets.push({ fid: tFid, sea: sz });
+      }
+    });
+  });
+
+  if (targets.length === 0) { alert('No enemy trade routes pass through your fleet positions. Reposition fleets.'); return; }
+
+  // If only one target, queue directly; otherwise let them pick
+  if (targets.length === 1) {
+    const t = targets[0];
+    addOrder(fid, { type: 'blockade', targetFid: t.fid, seaZone: t.sea, desc: '\u2693 Blockade ' + FACTION_NAMES[t.fid] + ' in ' + REGION_NAMES[t.sea] });
+  } else {
+    // Show a simple prompt with options
+    const msg = targets.map(function(t, i) { return (i+1) + '. ' + FACTION_NAMES[t.fid] + ' via ' + REGION_NAMES[t.sea]; }).join('\n');
+    const choice = prompt('Select blockade target:\n' + msg + '\n\nEnter number:');
+    const idx = parseInt(choice) - 1;
+    if (idx >= 0 && idx < targets.length) {
+      const t = targets[idx];
+      addOrder(fid, { type: 'blockade', targetFid: t.fid, seaZone: t.sea, desc: '\u2693 Blockade ' + FACTION_NAMES[t.fid] + ' in ' + REGION_NAMES[t.sea] });
+    }
+  }
+}
+
 // Declare a blockade: blockading faction deploys fleets to sea zone
 function declareBlockade(blockaderFid, targetFid, seaZone) {
   const blockader = gameState.factions[blockaderFid];
@@ -9095,7 +9140,8 @@ function showOrderConfirmation(fid) {
   const groupLabels = {
     recruit: 'Build Forces', deploy: 'Deploy Troops', move: 'Move Forces',
     attack: 'Attack Orders', support: 'Support Pledges', upgrade: 'Upgrades',
-    diplomacy: 'Diplomacy', modernize: 'Investment & Development'
+    diplomacy: 'Diplomacy', modernize: 'Investment & Development',
+    blockade: 'Naval Blockade', special: 'Special Abilities'
   };
   actions.forEach(function(a) {
     const type = a.type || 'other';
@@ -9883,6 +9929,16 @@ function beginResolution() {
         case 'attack': {
           attackOrders.push({ fid, action });
           gameState.resolutionLog.push({ fid, icon: '\u2694', text: `${FACTION_NAMES[fid]} attacks ${REGION_NAMES[action.target] || action.target} (${action.divisions || '?'} div from ${REGION_NAMES[action.from] || action.from})`, battle: true });
+          break;
+        }
+        case 'blockade': {
+          gameState.resolutionLog.push({ fid, icon: '\u2693', text: `${FACTION_NAMES[fid]} requests BLOCKADE of ${FACTION_NAMES[action.targetFid] || '?'} in ${REGION_NAMES[action.seaZone] || '?'}`, manual: true });
+          logAction(fid, 'blockade', `Requested blockade of ${FACTION_NAMES[action.targetFid]} in ${REGION_NAMES[action.seaZone]}`);
+          break;
+        }
+        case 'special': {
+          gameState.resolutionLog.push({ fid, icon: '\u2605', text: `${FACTION_NAMES[fid]}: ${action.desc || 'Special ability'} (GM to adjudicate)`, manual: true });
+          logAction(fid, 'orders', action.desc || 'Special ability requested');
           break;
         }
         case 'diplomacy':
@@ -10801,6 +10857,12 @@ function renderFinanceTab(fid) {
   if (econ.modernizationIncome > 0) {
     incomeRows += `<div class="ledger-row"><span class="ledger-label">Modernization</span><span class="ledger-value positive">+${econ.modernizationIncome}</span></div>`;
   }
+  if (econ.minorNationBonus > 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">${econ.minorNationLabel || 'Minor Nations'}</span><span class="ledger-value positive">+${econ.minorNationBonus}</span></div>`;
+  }
+  if (econ.allianceWarBonus > 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">${econ.allianceWarLabel || 'Alliance Bonus'}</span><span class="ledger-value positive">+${econ.allianceWarBonus}</span></div>`;
+  }
 
   let expenseRows = '';
   const armyUpkeep = Math.ceil(f.army * MAINTENANCE_COSTS.army);
@@ -10824,8 +10886,32 @@ function renderFinanceTab(fid) {
   }
 
   const netCls = econ.net >= 0 ? 'positive' : 'negative';
+  const projectedGold = Math.max(0, f.gold + econ.net);
 
-  return `<div class="finance-ledger">
+  // Prominent gold receipt banner
+  const goldBannerColor = econ.net >= 0 ? '#2d5016' : '#8b1a1a';
+  const goldBannerBg = econ.net >= 0 ? 'rgba(45,80,22,0.08)' : 'rgba(139,26,26,0.08)';
+
+  return `
+  <div style="margin-bottom:20px; padding:16px 20px; border:3px solid ${goldBannerColor}; border-radius:6px; background:${goldBannerBg};">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div style="font-family:'Source Serif 4',serif; font-size:0.7em; text-transform:uppercase; letter-spacing:2px; color:${goldBannerColor}; font-weight:700;">Gold You Will Receive Next Turn</div>
+        <div style="font-family:'Playfair Display',serif; font-size:2.4em; font-weight:900; color:${goldBannerColor}; line-height:1.1;">${econ.net >= 0 ? '+' : ''}${econ.net} <span style="font-size:0.35em; text-transform:uppercase; letter-spacing:2px; opacity:0.7;">Gold</span></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:0.75em; color:var(--ink-light); text-transform:uppercase; letter-spacing:1px;">Current Treasury</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.5em; font-weight:700;">${f.gold}g</div>
+        <div style="font-size:0.8em; color:var(--ink-light); margin-top:2px;">Projected: <strong style="color:${goldBannerColor};">${projectedGold}g</strong></div>
+      </div>
+    </div>
+    ${econ.net >= 0
+      ? '<div style="margin-top:8px; font-size:0.82em; color:' + goldBannerColor + ';"><strong>Income ' + econ.grossIncome + 'g</strong> minus expenses ' + (econ.totalUpkeep + (econ.blockadePenalty || 0)) + 'g = <strong>net ' + (econ.net >= 0 ? '+' : '') + econ.net + 'g</strong> per turn</div>'
+      : '<div style="margin-top:8px; font-size:0.82em; color:' + goldBannerColor + '; font-weight:600;">WARNING: Expenses exceed income! Treasury is shrinking by ' + Math.abs(econ.net) + 'g per turn.</div>'
+    }
+  </div>
+
+  <div class="finance-ledger">
     <div>
       <div class="ledger-title income">Income</div>
       ${incomeRows}
@@ -10839,12 +10925,15 @@ function renderFinanceTab(fid) {
   </div>
   <div style="margin-top:20px; padding:16px; border:2px solid var(--ink); background:var(--parchment); display:flex; justify-content:space-between; align-items:center;">
     <div>
-      <div style="font-family:'Source Serif 4',serif; font-size:0.75em; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-light);">Treasury</div>
+      <div style="font-family:'Source Serif 4',serif; font-size:0.75em; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-light);">Treasury Now</div>
       <div style="font-family:'Playfair Display',serif; font-size:2em; font-weight:900;">${f.gold} <span style="font-size:0.4em; text-transform:uppercase; letter-spacing:2px; color:var(--ink-light);">Gold</span></div>
     </div>
+    <div style="text-align:center;">
+      <div style="font-size:1.5em; color:var(--ink-light);">\u2192</div>
+    </div>
     <div>
-      <div style="font-family:'Source Serif 4',serif; font-size:0.75em; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-light);">Net Per Turn</div>
-      <div style="font-family:'Playfair Display',serif; font-size:2em; font-weight:900;" class="${netCls}">${econ.net >= 0 ? '+' : ''}${econ.net} <span style="font-size:0.4em; text-transform:uppercase; letter-spacing:2px; color:var(--ink-light);">Gold</span></div>
+      <div style="font-family:'Source Serif 4',serif; font-size:0.75em; text-transform:uppercase; letter-spacing:1.5px; color:${goldBannerColor};">After Income</div>
+      <div style="font-family:'Playfair Display',serif; font-size:2em; font-weight:900; color:${goldBannerColor};">${projectedGold} <span style="font-size:0.4em; text-transform:uppercase; letter-spacing:2px; opacity:0.7;">Gold</span></div>
     </div>
   </div>
   ${econ.isBlockaded ? '<div class="ledger-note">' + econ.blockadeDetail + '</div>' : ''}`;
@@ -11350,21 +11439,135 @@ function renderSpecialTab(fid) {
     </div>`;
   }
 
+  // --- DEPLOYABLE SPECIAL ABILITIES ---
+  const specOrders = getOrders(fid);
+  const specSubmitted = specOrders.submitted;
+
   // --- BEF Rapid Deployment for Britain ---
   if (fid === 'britain') {
     const befUsed = f.upgrades && f.upgrades.bef_deployed;
-    const orders = getOrders(fid);
-    const isSubmitted = orders.submitted;
-    html += '<div class="tab-section-title">Special Deployment</div>';
+    html += '<div class="tab-section-title">\u2694 Deploy Special Abilities</div>';
     html += `<div class="ability-card military" style="display:flex; justify-content:space-between; align-items:center;">
       <div>
-        <div class="ability-name">BEF Rapid Deployment</div>
+        <div class="ability-name">\u2693 BEF Rapid Deployment</div>
         <div class="ability-desc">Instantly deploy 4 divisions from Britain to France. The professional army crosses the Channel.</div>
       </div>
       <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
         onclick="deployBEF('${fid}')"
-        ${isSubmitted || befUsed || f.gold < 2 ? 'disabled' : ''}>
-        ${befUsed ? 'Already Deployed' : '2 Gold'}
+        ${specSubmitted || befUsed || f.gold < 2 ? 'disabled' : ''}>
+        ${befUsed ? 'Already Deployed' : '\u2694 Deploy BEF (2g)'}
+      </button>
+    </div>`;
+
+    // Blockade action for Britain
+    const hasFleets = Object.keys(f.fleets || {}).some(r => f.fleets[r] > 0 && SEA_REGIONS.includes(r));
+    html += `<div class="ability-card strategic" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="ability-name">\u2693 Request Naval Blockade</div>
+        <div class="ability-desc">Deploy your fleets to blockade enemy trade. Requires fleets in a sea zone. Blockades strangle enemy economies — cutting trade immediately and crushing industry over time.</div>
+      </div>
+      <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
+        onclick="queueBlockadeRequest('${fid}')"
+        ${specSubmitted || !hasFleets ? 'disabled' : ''}>
+        ${hasFleets ? '\u2693 Request Blockade' : 'No Fleets at Sea'}
+      </button>
+    </div>`;
+  }
+
+  // --- Germany: Schlieffen Plan readiness ---
+  if (fid === 'germany') {
+    if (!specSubmitted) html += '<div class="tab-section-title">\u2694 Deploy Special Abilities</div>';
+    const westRegions = ['france', 'paris', 'alsace_lorraine', 'belgium'];
+    const westDivs = westRegions.reduce((s, r) => s + (f.troops[r] || 0), 0);
+    const hasArt = f.upgrades && f.upgrades.artillery;
+    const isAtWar = f.atWar;
+    const canExecute = isAtWar && westDivs >= 16 && hasArt;
+    const britain = gameState.factions.britain;
+    const befInFrance = britain ? ((britain.troops['france'] || 0) + (britain.troops['paris'] || 0)) : 0;
+
+    html += `<div class="ability-card strategic" style="display:flex; justify-content:space-between; align-items:center; border-color:${canExecute ? '#2d5016' : 'var(--ink-faint)'};">
+      <div>
+        <div class="ability-name">\u2694 Schlieffen Plan</div>
+        <div class="ability-desc" style="font-size:0.8em;">
+          Knock out France through Belgium. Requirements:<br>
+          ${isAtWar ? '\u2705' : '\u274C'} At war &nbsp;
+          ${westDivs >= 16 ? '\u2705' : '\u274C'} 16+ western divisions (${westDivs}/16) &nbsp;
+          ${hasArt ? '\u2705' : '\u274C'} Artillery upgrade<br>
+          ${befInFrance > 0 ? '<span style="color:var(--red-empire);">\u26A0 BEF in France: -2 penalty!</span>' : '\u2705 No BEF in France'}
+        </div>
+      </div>
+      <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
+        onclick="addOrder('${fid}',{type:'special',action:'schlieffen_request',desc:'\u2694 Request Schlieffen Plan execution (GM resolves)'})"
+        ${specSubmitted || !canExecute ? 'disabled' : ''}>
+        ${canExecute ? '\u2694 Request Execution' : 'Not Ready'}
+      </button>
+    </div>`;
+  }
+
+  // --- France: Request Entente Support ---
+  if (fid === 'france' && f.atWar) {
+    html += '<div class="tab-section-title">\u2694 Deploy Special Abilities</div>';
+    html += `<div class="ability-card strategic" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="ability-name">\u2690 Request Entente Support</div>
+        <div class="ability-desc">Send urgent request for British/Russian military support. Queues a diplomatic order visible to the GM.</div>
+      </div>
+      <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
+        onclick="addOrder('${fid}',{type:'special',action:'entente_support',desc:'\u2690 Urgent request for Entente military support'})"
+        ${specSubmitted ? 'disabled' : ''}>
+        \u2690 Send Request
+      </button>
+    </div>`;
+  }
+
+  // --- Ottoman: Fortify Dardanelles ---
+  if (fid === 'ottoman') {
+    const dardTroops = f.troops && f.troops['dardanelles'] || 0;
+    const hasTroopsToSend = Object.keys(f.troops || {}).some(r => r !== 'dardanelles' && f.troops[r] > 0);
+    html += '<div class="tab-section-title">\u2694 Deploy Special Abilities</div>';
+    html += `<div class="ability-card military" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="ability-name">\u2616 Fortify the Dardanelles</div>
+        <div class="ability-desc">Reinforce the Dardanelles (currently ${dardTroops} div). Defenders here get +2 to defense rolls (Gallipoli Defense). Queue a move order to reinforce.</div>
+      </div>
+      <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
+        onclick="setDashTab('military'); setActionTab('move');"
+        ${!hasTroopsToSend ? 'disabled' : ''}>
+        \u2192 Move Troops
+      </button>
+    </div>`;
+  }
+
+  // --- Austria: Request German Support ---
+  if (fid === 'austria' && f.atWar) {
+    html += '<div class="tab-section-title">\u2694 Deploy Special Abilities</div>';
+    html += `<div class="ability-card strategic" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="ability-name">\u2690 Request German Alliance Support</div>
+        <div class="ability-desc">Send urgent request for German military coordination. If Germany is also at war, you receive +1g/turn from German support.</div>
+      </div>
+      <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
+        onclick="addOrder('${fid}',{type:'special',action:'alliance_support',desc:'\u2690 Request German alliance military support'})"
+        ${specSubmitted ? 'disabled' : ''}>
+        \u2690 Send Request
+      </button>
+    </div>`;
+  }
+
+  // --- Russia: Mobilize the Steamroller ---
+  if (fid === 'russia') {
+    const reserveUnits = (f.units || []).filter(u => u.state === 'reserve');
+    const hasReserves = reserveUnits.length > 0;
+    html += '<div class="tab-section-title">\u2694 Deploy Special Abilities</div>';
+    html += `<div class="ability-card military" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="ability-name">\u2691 Mobilize the Steamroller</div>
+        <div class="ability-desc">Russia has ${(f.units || []).length} total units (${reserveUnits.length} in reserve). Mobilize reserves to prepare for war. Warning: only half forces available on Turn 1 of any war.</div>
+      </div>
+      <button class="action-btn" style="width:auto; margin:0; padding:8px 16px; white-space:nowrap;"
+        onclick="setDashTab('military'); setActionTab('readiness');"
+        ${!hasReserves ? 'disabled' : ''}>
+        ${hasReserves ? '\u2691 Mobilize (' + reserveUnits.length + ' reserves)' : 'All Mobilized'}
       </button>
     </div>`;
   }
@@ -11607,14 +11810,18 @@ function renderActionTabContent(fid) {
     const srcOpts = sourceRegions.map(r => `<option value="${r}">${REGION_NAMES[r]} (${f.troops[r]||0} div, ${f.fleets[r]||0} fleets)</option>`).join('');
     setTimeout(function() { initMoveSelector(); }, 0);
     return `
-      <div class="move-selector">
-        <div><label>From Region</label><select id="moveFrom" onchange="updateMoveDestinations()">${srcOpts}</select></div>
-        <div style="text-align:center; padding-top:18px;">\u2192</div>
-        <div><label>To Region</label><select id="moveTo"><option value="">Select source first</option></select></div>
-        <div><label>Count</label><input type="number" id="moveCount" min="1" value="1"></div>
+      <div style="background:rgba(45,80,22,0.06); border:2px solid var(--green-neutral); border-radius:6px; padding:14px 16px; margin-bottom:12px;">
+        <div style="font-size:0.8em; text-transform:uppercase; letter-spacing:1.5px; color:var(--green-neutral); font-weight:700; margin-bottom:10px;">Region-to-Region Movement</div>
+        <div class="move-selector">
+          <div><label style="font-weight:700;">From Region</label><select id="moveFrom" onchange="updateMoveDestinations()">${srcOpts}</select></div>
+          <div style="text-align:center; padding-top:18px; font-size:1.5em; color:var(--green-neutral);">\u2192</div>
+          <div><label style="font-weight:700;">To Region</label><select id="moveTo"><option value="">Select source first</option></select></div>
+          <div><label>Count</label><input type="number" id="moveCount" min="1" value="1"></div>
+        </div>
       </div>
+      <div style="font-size:0.8em; color:var(--ink-light); margin-bottom:8px; font-style:italic;">Move forces to adjacent regions only. Movement is free.</div>
       <button class="action-btn" style="max-width:200px;" onclick="queueMoveOrder('${fid}')" ${isSubmitted ? 'disabled' : ''}>
-        <span>Queue Move</span>
+        <span>\u2192 Queue Move</span>
       </button>
     `;
   }
@@ -11626,14 +11833,25 @@ function renderActionTabContent(fid) {
     const srcOpts = sourceRegions.map(r => `<option value="${r}">${REGION_NAMES[r]} (${f.troops[r]||0} div)</option>`).join('');
     setTimeout(function() { initAttackSelector(); }, 0);
     return `
-      <div class="move-selector">
-        <div><label>Attack From</label><select id="atkFrom" onchange="updateAttackTargets()">${srcOpts}</select></div>
-        <div style="text-align:center; padding-top:18px;">\u2694</div>
-        <div><label>Target Region</label><select id="atkTarget"><option value="">Select source first</option></select></div>
-        <div><label>Divisions</label><input type="number" id="atkCount" min="1" value="1"></div>
+      <div style="background:rgba(139,26,26,0.06); border:2px solid var(--red-empire); border-radius:6px; padding:14px 16px; margin-bottom:12px;">
+        <div style="font-size:0.8em; text-transform:uppercase; letter-spacing:1.5px; color:var(--red-empire); font-weight:700; margin-bottom:10px;">Region-to-Region Attack Order</div>
+        <div class="move-selector">
+          <div>
+            <label style="font-weight:700; color:var(--ink);">Your Region (From)</label>
+            <select id="atkFrom" onchange="updateAttackTargets()">${srcOpts}</select>
+          </div>
+          <div style="text-align:center; padding-top:18px; font-size:1.5em; color:var(--red-empire);">\u2694\u2192</div>
+          <div>
+            <label style="font-weight:700; color:var(--ink);">Target Region (To)</label>
+            <select id="atkTarget" onchange="updateAttackIntel('${fid}')"><option value="">Select source first</option></select>
+          </div>
+          <div><label>Divisions</label><input type="number" id="atkCount" min="1" value="1"></div>
+        </div>
+        <div id="atkIntel" style="margin-top:10px; font-size:0.85em; padding:8px 12px; background:var(--parchment); border:1px solid var(--ink-faint); border-radius:4px; display:none;"></div>
       </div>
-      <button class="action-btn" style="max-width:200px;" onclick="queueAttackOrder('${fid}')" ${isSubmitted ? 'disabled' : ''}>
-        <span>Queue Attack</span>
+      <div style="font-size:0.8em; color:var(--ink-light); margin-bottom:8px; font-style:italic;">Armies can only attack adjacent regions. Select where your forces are, then pick the neighboring region to assault.</div>
+      <button class="action-btn" style="max-width:250px;" onclick="queueAttackOrder('${fid}')" ${isSubmitted ? 'disabled' : ''}>
+        <span>\u2694 Queue Attack Order</span>
       </button>
     `;
   }
@@ -11786,7 +12004,60 @@ function updateAttackTargets() {
   var adj = ADJACENCY[src] || [];
   var dest = document.getElementById('atkTarget');
   if (!dest) return;
-  dest.innerHTML = adj.map(function(r) { return '<option value="'+r+'">'+(REGION_NAMES[r]||r)+'</option>'; }).join('');
+  // Show enemy forces in each adjacent region
+  dest.innerHTML = adj.filter(function(r) { return !SEA_REGIONS.includes(r); }).map(function(r) {
+    var enemyForces = [];
+    Object.keys(gameState.factions).forEach(function(fk) {
+      if (fk === 'krupp' || fk === 'schneider') return;
+      var ft = gameState.factions[fk].troops;
+      if (ft && ft[r] > 0) {
+        enemyForces.push(FACTION_NAMES[fk].split(' ')[0] + ': ' + ft[r] + ' div');
+      }
+    });
+    var label = REGION_NAMES[r] || r;
+    if (enemyForces.length > 0) label += ' [' + enemyForces.join(', ') + ']';
+    else label += ' [undefended]';
+    return '<option value="'+r+'">'+label+'</option>';
+  }).join('');
+  // Update intel panel
+  var fid = document.getElementById('factionSelect') ? document.getElementById('factionSelect').value : '';
+  if (fid) updateAttackIntel(fid);
+}
+
+function updateAttackIntel(fid) {
+  var intelEl = document.getElementById('atkIntel');
+  var targetSel = document.getElementById('atkTarget');
+  if (!intelEl || !targetSel || !targetSel.value) { if (intelEl) intelEl.style.display = 'none'; return; }
+  var target = targetSel.value;
+  var f = gameState.factions[fid];
+  var fromSel = document.getElementById('atkFrom');
+  var from = fromSel ? fromSel.value : '';
+
+  var yourForces = from ? (f.troops[from] || 0) : 0;
+  var enemyLines = [];
+  var totalEnemy = 0;
+  Object.keys(gameState.factions).forEach(function(fk) {
+    if (fk === fid || fk === 'krupp' || fk === 'schneider') return;
+    var ft = gameState.factions[fk].troops;
+    if (ft && ft[target] > 0) {
+      enemyLines.push('<span style="color:' + (FACTION_COLORS[fk] || 'var(--ink)') + '; font-weight:600;">' + FACTION_NAMES[fk] + '</span>: ' + ft[target] + ' div');
+      totalEnemy += ft[target];
+    }
+  });
+
+  var isFortified = (target === 'paris' && fid !== 'france') || (target === 'dardanelles' && fid !== 'ottoman');
+  var html = '<div style="display:flex; gap:20px; flex-wrap:wrap;">';
+  html += '<div><strong>Your forces in ' + (REGION_NAMES[from] || from) + ':</strong> ' + yourForces + ' div</div>';
+  html += '<div><strong>Enemy in ' + (REGION_NAMES[target] || target) + ':</strong> ' + (enemyLines.length > 0 ? enemyLines.join(', ') : '<span style="color:#2d5016;">None (uncontested advance)</span>') + '</div>';
+  html += '</div>';
+  if (totalEnemy > 0) {
+    var ratio = yourForces > 0 ? (yourForces / totalEnemy).toFixed(1) : '0';
+    html += '<div style="margin-top:6px;">Force ratio: <strong>' + ratio + ':1</strong>' + (isFortified ? ' <span style="color:var(--red-empire);">(Fortified region: defenders get +2)</span>' : '') + '</div>';
+  } else if (isFortified) {
+    html += '<div style="margin-top:6px; color:var(--red-empire);">Fortified region: defenders get +2 if reinforced.</div>';
+  }
+  intelEl.innerHTML = html;
+  intelEl.style.display = 'block';
 }
 
 function initMoveSelector() {
@@ -11841,7 +12112,7 @@ function renderPlayerDashboard(container) {
     <div class="dash-header-stat" onclick="setDashTab('finance')" style="cursor:pointer;">
       <span class="stat-label">Gold</span>
       <span class="stat-value">${f.gold}</span>
-      <span class="stat-sub ${netCls}">${econ.net >= 0 ? '+' : ''}${econ.net}/turn</span>
+      <span class="stat-sub ${netCls}" style="font-weight:700;">${econ.net >= 0 ? '+' : ''}${econ.net}/turn \u2192 ${Math.max(0, f.gold + econ.net)}g</span>
     </div>
     <div class="dash-header-stat" onclick="setDashTab('vp')" style="cursor:pointer;">
       <span class="stat-label">Victory</span>
