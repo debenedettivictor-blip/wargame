@@ -3752,6 +3752,59 @@ body::before {
 .readiness-badge.reserve { background: #88888818; border-color: #999; color: #777; }
 .readiness-badge.mobilized { background: #b8860b1a; border-color: var(--gold-accent); color: var(--gold-accent); }
 .readiness-badge.deployed { background: #2d50161a; border-color: var(--green-neutral); color: var(--green-neutral); }
+.gold-coin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f0d060, #b8860b 70%, #8a6508);
+  color: #4a3000;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.7em;
+  font-weight: 700;
+  border: 1.5px solid #8a6508;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,200,0.4);
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+.readiness-summary {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: var(--parchment-dark);
+  border: 1px solid #d4c9a8;
+  border-radius: 4px;
+}
+.readiness-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9em;
+  color: var(--ink);
+}
+.readiness-summary-item .summary-count {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.15em;
+}
+.readiness-summary-item .summary-label {
+  font-size: 0.8em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600;
+}
+.readiness-summary-divider {
+  width: 1px;
+  background: #c4b898;
+  align-self: stretch;
+}
 
 /* Ability Cards */
 .ability-card {
@@ -10523,7 +10576,7 @@ function renderReadinessTab(fid) {
     // Build action cell based on unit state
     let actionHtml = '';
     if (u.state === 'reserve') {
-      actionHtml = '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em;" onclick="addOrder(\'' + fid + '\',{type:\'mobilize\',unitId:\'' + u.id + '\',desc:\'Mobilize ' + safeName + '\'})" ' + (isSubmitted ? 'disabled' : '') + '><span>Mobilize</span><span class="action-cost">1g</span></button>';
+      actionHtml = '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em; gap:6px;" onclick="addOrder(\'' + fid + '\',{type:\'mobilize\',unitId:\'' + u.id + '\',desc:\'Mobilize ' + safeName + '\'})" ' + (isSubmitted ? 'disabled' : '') + '><span>Mobilize</span><span class="gold-coin">1</span></button>';
     } else if (u.state === 'mobilized') {
       const speed = MOBILIZATION_SPEED[fid];
       const mobilizedTurn = u.mobilizedTurn || 0;
@@ -10554,10 +10607,32 @@ function renderReadinessTab(fid) {
     '</tr>';
   });
 
+  // Build summary counts
+  const activeUnits = units.filter(u => u.state !== 'destroyed');
+  const reserveCount = activeUnits.filter(u => u.state === 'reserve').length;
+  const mobilizedCount = activeUnits.filter(u => u.state === 'mobilized').length;
+  const deployedCount = activeUnits.filter(u => u.state === 'deployed').length;
+  const armyCount = activeUnits.filter(u => u.type === 'army').length;
+  const fleetCount = activeUnits.filter(u => u.type === 'fleet').length;
+
+  const summary = '<div class="readiness-summary">' +
+    '<div class="readiness-summary-item"><span class="summary-count">' + activeUnits.length + '</span><span class="summary-label">Total Units</span></div>' +
+    '<div class="readiness-summary-divider"></div>' +
+    '<div class="readiness-summary-item"><span class="summary-count" style="color:#777;">' + reserveCount + '</span><span class="summary-label">Reserve</span></div>' +
+    '<div class="readiness-summary-divider"></div>' +
+    '<div class="readiness-summary-item"><span class="summary-count" style="color:var(--gold-accent);">' + mobilizedCount + '</span><span class="summary-label">Mobilized</span></div>' +
+    '<div class="readiness-summary-divider"></div>' +
+    '<div class="readiness-summary-item"><span class="summary-count" style="color:var(--green-neutral);">' + deployedCount + '</span><span class="summary-label">Deployed</span></div>' +
+    '<div class="readiness-summary-divider"></div>' +
+    '<div class="readiness-summary-item"><span class="summary-count">' + armyCount + ' \u2694</span><span class="summary-label">Armies</span></div>' +
+    '<div class="readiness-summary-divider"></div>' +
+    '<div class="readiness-summary-item"><span class="summary-count">' + fleetCount + ' \u2693</span><span class="summary-label">Fleets</span></div>' +
+    '</div>';
+
   return toolbar + `<table class="readiness-table">
     <tr><th></th><th>Unit</th><th>Status</th><th>Location</th><th>Action</th></tr>
     ${rows}
-  </table>`;
+  </table>` + summary;
 }
 
 function renderActionTabContent(fid) {
