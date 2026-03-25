@@ -37,12 +37,12 @@ function newGame() {
 
 // Economy constants
 const ECON = {
-  germany:  { ind: 8, trade: 3, alsaceBonus: 4, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
-  france:   { ind: 5, trade: 3, peaceGold: 1, peaceVP: 0, maint: f => f.army*0.5 + f.navy*0.75 },
-  britain:  { ind: 4, trade: 7, peaceGold: 2, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
-  russia:   { ind: 5, trade: 2, peaceGold: 1, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
-  austria:  { ind: 4, trade: 1, peaceGold: 1, peaceVP: 3, maint: f => f.army*0.5 + f.navy*0.75 },
-  ottoman:  { ind: 2, trade: 2, straitsBonus: 2, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
+  germany:  { ind: 8, trade: 3, alsaceBonus: 4, peaceGold: 1, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
+  france:   { ind: 5, trade: 3, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
+  britain:  { ind: 4, trade: 7, peaceGold: 2, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
+  russia:   { ind: 5, trade: 2, peaceGold: 1, peaceVP: 1, maint: f => f.army*0.5 + f.navy*0.75 },
+  austria:  { ind: 4, trade: 1, peaceGold: 1, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
+  ottoman:  { ind: 2, trade: 2, straitsBonus: 2, peaceGold: 1, peaceVP: 2, maint: f => f.army*0.5 + f.navy*0.75 },
   krupp:    { ind: 2, trade: 0 },
   schneider:{ ind: 1, trade: 0 },
 };
@@ -375,8 +375,8 @@ function simulateTurn(g) {
           ger.alsace = false;
           fra.lostAlsace = false;
           fra.vp += 5; // public capture bonus (one-time)
-          fra.vp += 7; // secret La Revanche
-          log.push(`France captures Alsace-Lorraine! +5 VP (public) + 7 VP (secret La Revanche) = +12 total`);
+          fra.vp += 4; // secret La Revanche (reduced from +7)
+          log.push(`France captures Alsace-Lorraine! +5 VP (public) + 4 VP (secret La Revanche) = +9 total`);
         }
       }
 
@@ -575,41 +575,59 @@ function scoreGame(g) {
   let fraSecret = 0;
   // France bonus: +3 if Russia is still fighting (kept ally alive)
   if (f.russia.atWar && !f.russia.revolution) fraSecret += 3;
-  // France bonus: +5 if Britain joined the war (successful diplomacy — "l'Entente Cordiale holds!")
-  if (f.britain.atWar) fraSecret += 5;
-  // France bonus: +3 if BEF was sent to France (convinced Britain to commit troops)
-  if (f.britain.befSent) fraSecret += 3;
+  // France bonus: +3 if Britain joined the war (successful diplomacy)
+  if (f.britain.atWar) fraSecret += 3;
+  // France bonus: +2 if BEF was sent to France
+  if (f.britain.befSent) fraSecret += 2;
+  // France bonus: +2 if France survived without rebellion
+  if (!f.france.rebellion) fraSecret += 2;
   scores.france = f.france.vp + fraSecret;
 
-  // Britain: Kaiser Overthrown +7, Splendid Isolation +3, France Must Not Fall -7
+  // Britain: Balance of Power arbiter
   let britSecret = 0;
   if (f.germany.collapsed) britSecret += 7; // Kaiser Overthrown
-  if (!f.britain.befSent) britSecret += 3; // Splendid Isolation
-  if (f.france.rebellion) britSecret -= 7; // France Must Not Fall
+  if (!f.britain.befSent && !f.britain.atWar) britSecret += 3; // Splendid Isolation (only if truly stayed out)
+  if (f.france.rebellion) britSecret -= 3; // France Must Not Fall (reduced from -7)
   // Britain bonus: +3 if Russia is still fighting (kept Eastern Front alive)
   if (f.russia.atWar && !f.russia.revolution) britSecret += 3;
+  // Britain bonus: +4 if blockade is active (Rule the Waves)
+  if (g.blockadeOn) britSecret += 4;
+  // Britain bonus: +3 if no single power dominates (true balance of power)
+  const topFacVP = Math.max(f.germany.vp, f.france.vp, f.russia.vp, f.austria.vp);
+  if (topFacVP <= 15) britSecret += 3;
   scores.britain = f.britain.vp + britSecret;
 
   // --- RUSSIA ---
   let rusPublic = 0;
-  // PUBLIC: +10 VP if Tsar stays in power (no revolution at game end) — EVERYONE KNOWS THIS
-  if (!f.russia.revolution) rusPublic += 10;
-  // Secret: +4 VP if protected Balkans (Serbia not conquered by Austria)
+  // PUBLIC: +7 VP if Tsar stays in power (no revolution at game end)
+  if (!f.russia.revolution) rusPublic += 7;
+  // Secret: +3 VP if protected Balkans (Serbia not conquered by Austria)
   let rusSecret = 0;
-  if (f.russia.balkanProtected) rusSecret += 4;
+  if (f.russia.balkanProtected) rusSecret += 3;
   // Secret: +2 VP if won 2+ Eastern Front battles (dominated the front)
   if (f.russia.easternWins >= 2) rusSecret += 2;
-  // Secret: +3 VP if received 8+ gold from allies (successful wartime diplomacy)
-  if (f.russia.allyGoldReceived >= 8) rusSecret += 3;
+  // Secret: +2 VP if received 8+ gold from allies
+  if (f.russia.allyGoldReceived >= 8) rusSecret += 2;
   scores.russia = f.russia.vp + rusPublic + rusSecret;
 
-  // Austria: +3 if Russia had revolution (helped cause internal strife)
+  // Austria: survived + destabilized Russia
   let ausSecret = 0;
   if (f.russia.revolution) ausSecret += 3;
+  // Austria bonus: +4 if empire hasn't collapsed (Dual Monarchy endures)
+  if (!f.austria.collapsed) ausSecret += 4;
+  // Austria bonus: +2 if Serbia conquered
+  if (f.austria.serbiaConquered) ausSecret += 2;
   scores.austria = f.austria.vp + ausSecret;
 
-  // Ottoman
-  scores.ottoman = f.ottoman.vp;
+  // Ottoman: strategic opportunism
+  let ottSecret = 0;
+  // Ottoman bonus: +4 if stayed neutral and profited (Armed Neutrality pays)
+  if (!f.ottoman.atWar && f.ottoman.gold >= 30) ottSecret += 4;
+  // Ottoman bonus: +3 if joined war and army survived (>=4)
+  if (f.ottoman.atWar && f.ottoman.army >= 4) ottSecret += 3;
+  // Ottoman bonus: +3 if stability >= 3 (The Sick Man recovers)
+  if (f.ottoman.stab >= 3) ottSecret += 3;
+  scores.ottoman = f.ottoman.vp + ottSecret;
 
   // Krupp: -8 VP if no wars. +5 VP if Central Powers (Germany) has most VP among nations at end (armed the winners)
   let kruppBonus = g.warDeclaredTurn ? 0 : -8;
@@ -687,14 +705,17 @@ function scoreIndividualPlayers(g, factionScores) {
   obj(president, 25, 'Gold bonus');
   if (f.russia.allyGoldReceived >= 5) obj(president, 3, 'The Banker (funded Russia)');
   if (personalRoll(0.4)) obj(president, 2, 'Fortress France (forts built)');
+  if (!f.france.rebellion) obj(president, 3, 'La République tient! (no rebellion)');
   if (personalRoll(0.3)) obj(president, -2, 'Lost control of General');
   else obj(president, 2, 'Control the General');
+  if (f.britain.befSent) obj(president, 2, 'Entente Architect (secured BEF)');
   players.president = president;
 
   // Commanding General
   const general = makePlayer('Commanding General', 'france', fraBase);
   obj(general, 25, 'Gold bonus');
   if (f.france.atWar) { obj(general, 3, 'Plan XVII (at war)'); if (!f.france.lostAlsace) obj(general, 3, 'Plan XVII (Alsace not lost)'); }
+  if (f.france.army >= 10) obj(general, 3, 'Maintained fighting strength');
   if (personalRoll(0.4)) obj(general, -1, 'Offense Over Defense (forts penalty)');
   if (f.france.army <= 8 && personalRoll(0.15)) obj(general, -3, 'Military Coup attempt');
   players.general = general;
@@ -735,7 +756,8 @@ function scoreIndividualPlayers(g, factionScores) {
   const tsar = makePlayer('Tsar Nicholas II', 'russia', rusBase);
   obj(tsar, 25, 'Gold bonus');
   if (f.russia.stab >= 5) obj(tsar, 4, 'Dynasty (stability>=5)');
-  if (personalRoll(0.1)) obj(tsar, 5, 'Cousin Nicky letter');
+  if (personalRoll(0.1)) obj(tsar, 4, 'Cousin Nicky letter');
+  if (f.russia.revolution) obj(tsar, -3, 'Overthrown! (revolution)');
   players.tsar = tsar;
 
   // War Minister
@@ -743,6 +765,7 @@ function scoreIndividualPlayers(g, factionScores) {
   obj(warMin, 25, 'Gold bonus');
   if (f.russia.army >= 18) obj(warMin, 3, 'The Steamroller (army>=18)');
   if (f.russia.deployed) obj(warMin, 2, 'Full Mobilization');
+  if (f.russia.revolution) obj(warMin, -2, 'Army mutinies (revolution)');
   players.war_minister = warMin;
 
   // Duma Representative
@@ -776,16 +799,19 @@ function scoreIndividualPlayers(g, factionScores) {
   // Sultan
   const sultan = makePlayer('The Sultan', 'ottoman', ottBase);
   obj(sultan, 25, 'Gold bonus');
-  if (!f.ottoman.atWar) obj(sultan, 4, 'Armed Neutrality');
-  if (f.ottoman.atWar) obj(sultan, 3, 'Caliphate');
+  if (!f.ottoman.atWar) obj(sultan, 5, 'Armed Neutrality');
+  if (f.ottoman.atWar) obj(sultan, 4, 'Caliphate');
+  if (f.ottoman.stab >= 3) obj(sultan, 3, 'Empire Endures (stab>=3)');
+  if (f.ottoman.gold >= 25) obj(sultan, 3, 'Ottoman Treasury (gold>=25)');
   players.sultan = sultan;
 
   // Young Turk Leader
   const youngTurk = makePlayer('Young Turk Leader', 'ottoman', ottBase);
   obj(youngTurk, 25, 'Gold bonus');
-  if (f.ottoman.army >= 10) obj(youngTurk, 3, 'Modernize (army>=10)');
-  if (personalRoll(0.4)) obj(youngTurk, 3, 'German Alliance');
-  if (personalRoll(0.15)) obj(youngTurk, 2, 'Seize Power');
+  if (f.ottoman.army >= 8) obj(youngTurk, 4, 'Modernize (army>=8)');
+  if (personalRoll(0.4)) obj(youngTurk, 4, 'German Alliance');
+  if (personalRoll(0.2)) obj(youngTurk, 3, 'Seize Power');
+  if (f.ottoman.atWar && f.ottoman.army >= 4) obj(youngTurk, 3, 'Military Prestige (survived war)');
   players.young_turk = youngTurk;
 
   // --- ARMS DEALER players ---
@@ -812,11 +838,13 @@ function scoreIndividualPlayers(g, factionScores) {
   if (personalRoll(0.15)) obj(merchant, 3, 'Destroy Krupp');
   players.merchant = merchant;
 
-  // --- Final score = faction score * 1.5 + individual score ---
+  // --- Final score = faction score * 1.2 + individual score ---
+  // Reduced from 1.5 to 1.2 so individual objectives have more weight
+  // This means a player with strong personal objectives can beat a faction winner
   for (const [pid, p] of Object.entries(players)) {
     const individualScore = p.vp - p.factionBase; // gold + personal objectives
     p.individualScore = individualScore;
-    p.vp = Math.round(p.factionBase * 1.5) + individualScore; // final = faction*1.5 + individual
+    p.vp = Math.round(p.factionBase * 1.2) + individualScore; // final = faction*1.2 + individual
   }
 
   return players;
@@ -881,11 +909,11 @@ for (let game = 1; game <= NUM_GAMES; game++) {
   console.log('');
   const playersSorted = Object.entries(playerScores).sort((a,b) => b[1].vp - a[1].vp);
   playersSorted.forEach(([pid, p], i) => {
-    const facX = Math.round(p.factionBase * 1.5);
+    const facX = Math.round(p.factionBase * 1.2);
     const isFacWin = p.faction === factionWinnerFid;
     const objStr = p.objs.filter(o => o.label !== 'Gold bonus').map(o => `${o.points >= 0 ? '+' : ''}${o.points} ${o.label}`).join(', ');
     console.log(`**${i+1}. ${p.name}** (${p.faction}${isFacWin ? ' \u2605FAC WIN' : ''}) — **${p.vp} VP**`);
-    console.log(`   Faction: ${p.factionBase} x1.5 = ${facX} | Individual: +${p.individualScore} (Gold +25${objStr ? ', ' + objStr : ''})`);
+    console.log(`   Faction: ${p.factionBase} x1.2 = ${facX} | Individual: +${p.individualScore} (Gold +25${objStr ? ', ' + objStr : ''})`);
   });
   console.log('');
 
@@ -951,9 +979,9 @@ playerSummaries.forEach((p, i) => {
 });
 
 console.log('\n### Scoring Formula');
-console.log('- **Final Score = (Faction VP x 1.5) + Individual Score**');
+console.log('- **Final Score = (Faction VP x 1.2) + Individual Score** (reduced from x1.5 — personal objectives matter more)');
 console.log('- **Individual Score** = +25 gold bonus + personal secret objective bonuses/penalties');
-console.log('- **Fac Wins** = how often that player\'s faction won (drives the x1.5 base)');
+console.log('- **Fac Wins** = how often that player\'s faction won (drives the x1.2 base)');
 
 // ==================== OBJECTIVE HIT RATE ====================
 console.log(`\n---\n## Objective Hit Rates: ${NUM_GAMES} Games\n`);
@@ -985,7 +1013,7 @@ const top3 = playerSummaries.slice(0, 3);
 const bot3 = playerSummaries.slice(-3);
 console.log('### Top 3 Players');
 for (const p of top3) {
-  console.log(`- **${p.name}** (${p.faction}): avg ${p.avg.toFixed(1)} VP, ${p.wins} wins. ${p.facWins}/${NUM_GAMES} faction wins give strong x1.5 base.`);
+  console.log(`- **${p.name}** (${p.faction}): avg ${p.avg.toFixed(1)} VP, ${p.wins} wins. ${p.facWins}/${NUM_GAMES} faction wins give strong x1.2 base.`);
 }
 console.log('');
 console.log('### Bottom 3 Players');
@@ -1010,5 +1038,5 @@ for (const fid of ['germany','france','britain','russia','austria','ottoman','kr
   facAvgs[fid] = arr.reduce((a,b) => a+b, 0) / arr.length;
 }
 const topFac = Object.entries(facAvgs).sort((a,b) => b[1] - a[1]);
-console.log(`- **Faction dominance**: ${topFac[0][0]} leads (avg ${topFac[0][1].toFixed(1)}), ${topFac[1][0]} second (${topFac[1][1].toFixed(1)}). The x1.5 multiplier means faction VP swings are amplified in individual scores.`);
+console.log(`- **Faction dominance**: ${topFac[0][0]} leads (avg ${topFac[0][1].toFixed(1)}), ${topFac[1][0]} second (${topFac[1][1].toFixed(1)}). The x1.2 multiplier means faction VP swings are amplified in individual scores.`);
 console.log(`- **Win distribution**: ${Object.entries(factionWinCounts).sort((a,b) => b[1] - a[1]).map(([f,c]) => `${f} ${c}`).join(', ')} out of ${NUM_GAMES} games.`);
