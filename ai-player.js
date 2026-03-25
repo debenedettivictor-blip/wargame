@@ -41,24 +41,24 @@ const AI_PLAYER = (function() {
   //   economy: tendency to modernize (0-10)
   //   caution: tendency to save gold / do nothing (0-10)
   const PERSONALITIES = {
-    kaiser:      { militarism: 6, navalism: 10, diplomacy: 3, aggression: 5, economy: 4, caution: 2 },
-    chancellor:  { militarism: 3, navalism: 2, diplomacy: 9, aggression: 2, economy: 7, caution: 7 },
-    chief_staff: { militarism: 10, navalism: 1, diplomacy: 1, aggression: 9, economy: 2, caution: 1 },
-    president:   { militarism: 5, navalism: 2, diplomacy: 9, aggression: 3, economy: 6, caution: 5 },
-    general:     { militarism: 10, navalism: 1, diplomacy: 1, aggression: 8, economy: 1, caution: 1 },
-    pm:          { militarism: 2, navalism: 5, diplomacy: 8, aggression: 1, economy: 6, caution: 9 },
-    admiralty:   { militarism: 2, navalism: 10, diplomacy: 3, aggression: 5, economy: 3, caution: 3 },
-    foreign_sec: { militarism: 1, navalism: 3, diplomacy: 10, aggression: 2, economy: 5, caution: 6 },
-    tsar:        { militarism: 3, navalism: 1, diplomacy: 6, aggression: 2, economy: 4, caution: 8 },
-    war_minister:{ militarism: 10, navalism: 1, diplomacy: 2, aggression: 6, economy: 3, caution: 2 },
-    duma:        { militarism: 1, navalism: 0, diplomacy: 7, aggression: 1, economy: 8, caution: 6 },
-    emperor:     { militarism: 3, navalism: 1, diplomacy: 6, aggression: 2, economy: 5, caution: 9 },
-    conrad:      { militarism: 9, navalism: 1, diplomacy: 1, aggression: 10, economy: 2, caution: 1 },
-    sultan:      { militarism: 3, navalism: 2, diplomacy: 7, aggression: 1, economy: 6, caution: 8 },
-    young_turk:  { militarism: 8, navalism: 2, diplomacy: 4, aggression: 5, economy: 7, caution: 2 },
-    krupp_dir:   { militarism: 2, navalism: 1, diplomacy: 5, aggression: 7, economy: 3, caution: 4 },
-    vickers_dir: { militarism: 1, navalism: 3, diplomacy: 7, aggression: 4, economy: 4, caution: 5 },
-    merchant:    { militarism: 1, navalism: 1, diplomacy: 4, aggression: 9, economy: 3, caution: 2 }
+    kaiser:      { militarism: 8, navalism: 10, diplomacy: 3, aggression: 7, economy: 3, caution: 1 },
+    chancellor:  { militarism: 4, navalism: 2, diplomacy: 7, aggression: 5, economy: 6, caution: 4 },
+    chief_staff: { militarism: 10, navalism: 1, diplomacy: 1, aggression: 10, economy: 2, caution: 1 },
+    president:   { militarism: 6, navalism: 2, diplomacy: 7, aggression: 5, economy: 5, caution: 3 },
+    general:     { militarism: 10, navalism: 1, diplomacy: 1, aggression: 10, economy: 1, caution: 1 },
+    pm:          { militarism: 3, navalism: 6, diplomacy: 6, aggression: 4, economy: 5, caution: 5 },
+    admiralty:   { militarism: 3, navalism: 10, diplomacy: 2, aggression: 7, economy: 3, caution: 2 },
+    foreign_sec: { militarism: 2, navalism: 3, diplomacy: 8, aggression: 5, economy: 4, caution: 4 },
+    tsar:        { militarism: 5, navalism: 1, diplomacy: 5, aggression: 5, economy: 3, caution: 4 },
+    war_minister:{ militarism: 10, navalism: 1, diplomacy: 2, aggression: 8, economy: 3, caution: 1 },
+    duma:        { militarism: 2, navalism: 0, diplomacy: 6, aggression: 4, economy: 7, caution: 4 },
+    emperor:     { militarism: 4, navalism: 1, diplomacy: 5, aggression: 5, economy: 4, caution: 5 },
+    conrad:      { militarism: 10, navalism: 1, diplomacy: 1, aggression: 10, economy: 2, caution: 1 },
+    sultan:      { militarism: 5, navalism: 3, diplomacy: 5, aggression: 4, economy: 5, caution: 5 },
+    young_turk:  { militarism: 9, navalism: 3, diplomacy: 3, aggression: 8, economy: 6, caution: 1 },
+    krupp_dir:   { militarism: 3, navalism: 1, diplomacy: 4, aggression: 9, economy: 3, caution: 2 },
+    vickers_dir: { militarism: 2, navalism: 3, diplomacy: 5, aggression: 7, economy: 3, caution: 3 },
+    merchant:    { militarism: 2, navalism: 1, diplomacy: 3, aggression: 10, economy: 3, caution: 1 }
   };
 
   // --- Dispatch templates per character ---
@@ -385,6 +385,84 @@ const AI_PLAYER = (function() {
     }
   };
 
+  // --- Border threat intelligence: detect enemy troops near our territory ---
+  // Returns { threats: [{fid, region, troops}], totalThreat: N, threatenedBy: [fids] }
+  function assessBorderThreats(factionId) {
+    var f = gameState.factions[factionId];
+    if (!f) return { threats: [], totalThreat: 0, threatenedBy: [] };
+
+    // Which regions belong to or border this faction?
+    var HOME = {
+      germany: ['germany', 'alsace_lorraine', 'poland'],
+      france: ['france', 'paris', 'alsace_lorraine'],
+      britain: ['britain'],
+      russia: ['russia', 'poland'],
+      austria: ['austria', 'serbia', 'balkans'],
+      ottoman: ['ottoman', 'dardanelles']
+    };
+    var homeRegions = HOME[factionId] || [factionId];
+
+    // Find all regions adjacent to our home regions
+    var borderRegions = {};
+    var ADJACENCY = typeof window !== 'undefined' && window.ADJACENCY ? window.ADJACENCY : {
+      france: ['paris','alsace_lorraine','belgium','italy','english_channel','mediterranean'],
+      paris: ['france','belgium','alsace_lorraine'],
+      alsace_lorraine: ['france','paris','germany','belgium'],
+      belgium: ['france','paris','alsace_lorraine','germany','english_channel','north_sea'],
+      britain: ['english_channel','north_sea'],
+      germany: ['alsace_lorraine','belgium','poland','austria','north_sea','baltic'],
+      austria: ['germany','serbia','italy','poland','balkans','romania'],
+      serbia: ['austria','balkans','ottoman','montenegro','bulgaria'],
+      russia: ['poland','baltic','ottoman','balkans','romania'],
+      poland: ['germany','austria','russia','baltic'],
+      ottoman: ['serbia','dardanelles','balkans','russia','mediterranean','bulgaria'],
+      dardanelles: ['ottoman','mediterranean'],
+      italy: ['france','austria','mediterranean','greece'],
+      balkans: ['serbia','austria','russia','ottoman','bulgaria','romania','greece','montenegro']
+    };
+
+    homeRegions.forEach(function(r) {
+      var adj = ADJACENCY[r] || [];
+      adj.forEach(function(a) {
+        if (homeRegions.indexOf(a) === -1) borderRegions[a] = true;
+      });
+    });
+
+    // Scan all factions for troops in our border regions
+    var threats = [];
+    var threatenedBy = {};
+    var allFactions = ['germany', 'france', 'britain', 'russia', 'austria', 'ottoman'];
+
+    allFactions.forEach(function(otherFid) {
+      if (otherFid === factionId) return;
+      var otherF = gameState.factions[otherFid];
+      if (!otherF || !otherF.troops) return;
+
+      // Check if enemy has troops on our borders or in contested regions
+      Object.keys(otherF.troops).forEach(function(region) {
+        var count = otherF.troops[region] || 0;
+        if (count > 0 && (borderRegions[region] || homeRegions.indexOf(region) !== -1)) {
+          threats.push({ fid: otherFid, region: region, troops: count });
+          threatenedBy[otherFid] = (threatenedBy[otherFid] || 0) + count;
+        }
+      });
+
+      // Also check their total army size as a general threat
+      if (otherF.army && otherF.army > (f.army || 0) + 4) {
+        threatenedBy[otherFid] = (threatenedBy[otherFid] || 0) + 2; // general military superiority threat
+      }
+    });
+
+    var totalThreat = threats.reduce(function(sum, t) { return sum + t.troops; }, 0);
+
+    return {
+      threats: threats,
+      totalThreat: totalThreat,
+      threatenedBy: Object.keys(threatenedBy),
+      threatByFaction: threatenedBy
+    };
+  }
+
   // --- Objective analysis: scan what this character needs for VP ---
   function analyzeObjectives(charId, factionId) {
     var char = CHAR_DATA[charId];
@@ -530,11 +608,20 @@ const AI_PLAYER = (function() {
     }
 
     // Characters who want war (Conrad, Chief of Staff) — lobby Austria
-    if (needs.war && !atWar && turn <= 4 && budgetRemaining >= 2) {
-      if (factionId !== 'austria' && chance(p.aggression * 10)) {
+    if (needs.war && !atWar && turn <= 5 && budgetRemaining >= 2) {
+      if (factionId !== 'austria' && chance(p.aggression * 15)) {
         orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Objective: need war to score VP' });
         budgetRemaining -= 2;
         thinking += 'Lobbying Austria toward war for my objectives. ';
+      }
+    }
+
+    // Even characters without explicit war objectives may lobby if highly aggressive
+    if (!needs.war && !atWar && turn <= 4 && budgetRemaining >= 2 && p.aggression >= 6) {
+      if (factionId !== 'austria' && chance(p.aggression * 8)) {
+        orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Hawkish posture — pushing for confrontation' });
+        budgetRemaining -= 2;
+        thinking += 'Aggressively lobbying for war even without a direct objective. ';
       }
     }
 
@@ -590,6 +677,75 @@ const AI_PLAYER = (function() {
       }
     }
 
+    // --- Priority 5: THREAT-REACTIVE ORDERS — respond to enemy troops on our borders ---
+    var borderIntel = assessBorderThreats(factionId);
+    if (borderIntel.totalThreat > 0) {
+      thinking += 'INTELLIGENCE: ' + borderIntel.threats.length + ' enemy force(s) detected near our borders (' + borderIntel.totalThreat + ' divisions). ';
+
+      // Reactive military buildup — build army if threatened
+      if (budgetRemaining >= armyCost && borderIntel.totalThreat >= 2) {
+        var reactiveBuilds = Math.min(3, Math.floor(budgetRemaining / armyCost), Math.ceil(borderIntel.totalThreat / 3));
+        for (var rb = 0; rb < reactiveBuilds; rb++) {
+          orders.push({ type: 'recruit', unitType: 'army', reason: 'Reactive buildup — enemy troops on our border (' + borderIntel.totalThreat + ' div detected)' });
+          budgetRemaining -= armyCost;
+        }
+        thinking += 'Recruiting ' + reactiveBuilds + ' divisions in response to border threat. ';
+      }
+
+      // If highly threatened and aggressive, lobby for war preemptively
+      if (!atWar && borderIntel.totalThreat >= 4 && p.aggression >= 4 && budgetRemaining >= 2) {
+        if (factionId !== 'austria' && chance(60 + p.aggression * 5)) {
+          orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Preemptive war lobbying — ' + borderIntel.totalThreat + ' enemy divisions on our borders' });
+          budgetRemaining -= 2;
+          thinking += 'Enemy buildup is alarming — lobbying for preemptive action. ';
+        }
+      }
+
+      // Request allies for help via subsidies if outmatched
+      if (budgetRemaining >= 2 && borderIntel.totalThreat >= 3) {
+        var allies = getDefaultSubsidyTargets(factionId);
+        if (allies.length > 0) {
+          var allyTarget = pick(allies);
+          var subsidyAmt = Math.min(3, Math.floor(budgetRemaining / 2));
+          if (subsidyAmt >= 1) {
+            orders.push({ type: 'diplomacy', action: 'subsidize', target: allyTarget, amount: subsidyAmt, reason: 'Emergency ally funding — under threat from ' + borderIntel.threatenedBy.join(', ') });
+            budgetRemaining -= subsidyAmt;
+            thinking += 'Sending ' + subsidyAmt + 'g to ' + (FACTION_NAMES[allyTarget] || allyTarget) + ' for support. ';
+          }
+        }
+      }
+    }
+
+    // --- Priority 6: REQUEST LOANS when gold-starved but need military buildup ---
+    if (budgetRemaining < armyCost && (needs.army || needs.war || borderIntel.totalThreat >= 2)) {
+      // Find an arms dealer who might lend to us
+      var potentialLenders = [];
+      if (factionId === 'germany' || factionId === 'austria' || factionId === 'ottoman') {
+        potentialLenders.push('krupp');
+      }
+      if (factionId === 'france' || factionId === 'russia') {
+        potentialLenders.push('schneider');
+      }
+      // Desperate factions will borrow from anyone
+      if (borderIntel.totalThreat >= 4 || atWar) {
+        potentialLenders = ['krupp', 'schneider'];
+      }
+
+      for (var li = 0; li < potentialLenders.length; li++) {
+        var lender = gameState.factions[potentialLenders[li]];
+        if (lender && lender.gold >= 3) {
+          // Check if we already have a loan from this dealer
+          var existingLoan = (lender.loans || []).some(function(l) { return l.borrower === factionId && l.turnsRemaining > 0; });
+          if (!existingLoan) {
+            var loanAmt = Math.min(Math.max(3, Math.floor(lender.gold / 2)), atWar ? 8 : 5);
+            orders.push({ type: 'loan_request', lender: potentialLenders[li], amount: loanAmt, reason: 'Need funds for military — treasury empty, threat level ' + borderIntel.totalThreat });
+            thinking += 'Requesting ' + loanAmt + 'g loan from ' + (FACTION_NAMES[potentialLenders[li]] || potentialLenders[li]) + '. ';
+            break; // Only request from one lender
+          }
+        }
+      }
+    }
+
     // --- Fallback: personality-driven spending if no objectives triggered ---
     if (orders.length === 0) {
       // Build something based on personality
@@ -601,6 +757,48 @@ const AI_PLAYER = (function() {
         thinking += 'Building fleet (general strategy). ';
       } else {
         thinking += 'Conserving resources — saving gold for VP bonus at endgame. ';
+      }
+    }
+
+    // --- MINIMUM 3 ORDERS: pad with useful actions if below threshold ---
+    if (orders.length < 3 && budgetRemaining >= 1) {
+      // Try to build up military
+      while (orders.length < 3 && budgetRemaining >= armyCost && p.militarism >= 3) {
+        orders.push({ type: 'recruit', unitType: 'army', reason: 'Standing order: maintain military readiness' });
+        budgetRemaining -= armyCost;
+        thinking += 'Additional army recruitment (standing orders). ';
+      }
+      // Try diplomatic actions
+      if (orders.length < 3 && !atWar && budgetRemaining >= 2) {
+        var allies = getDefaultSubsidyTargets(factionId);
+        if (allies.length > 0) {
+          var allyTarget = pick(allies);
+          orders.push({ type: 'diplomacy', action: 'subsidize', target: allyTarget, amount: 1, reason: 'Standing order: maintain alliances' });
+          budgetRemaining -= 1;
+          thinking += 'Subsidizing ' + (FACTION_NAMES[allyTarget] || allyTarget) + ' (standing order). ';
+        }
+      }
+      // Try trade proposals
+      if (orders.length < 3 && !atWar) {
+        var tradeOps = getTradeOpportunities(factionId);
+        if (tradeOps.length > 0) {
+          orders.push({ type: 'trade', action: 'propose', target: pick(tradeOps), reason: 'Standing order: expand trade network' });
+          thinking += 'Proposing trade (standing order). ';
+        }
+      }
+      // Try upgrade if affordable
+      if (orders.length < 3 && budgetRemaining >= 3) {
+        var hasArtillery = f.upgrades && f.upgrades.artillery;
+        var hasTrenches = f.upgrades && f.upgrades.trenches;
+        if (!hasArtillery && budgetRemaining >= 4) {
+          orders.push({ type: 'upgrade', upgradeId: 'artillery', reason: 'Standing order: improve military capability' });
+          budgetRemaining -= 4;
+          thinking += 'Purchasing artillery upgrade (standing order). ';
+        } else if (!hasTrenches && budgetRemaining >= 3) {
+          orders.push({ type: 'upgrade', upgradeId: 'trenches', reason: 'Standing order: improve defenses' });
+          budgetRemaining -= 3;
+          thinking += 'Purchasing trench networks (standing order). ';
+        }
       }
     }
 
@@ -618,9 +816,9 @@ const AI_PLAYER = (function() {
 
     // Dealers don't recruit or modernize the same way — they mostly observe
     // But they can lobby and do diplomacy
-    if (p.aggression >= 6 && turn <= 3 && budgetRemaining >= 2) {
+    if (p.aggression >= 4 && turn <= 5 && budgetRemaining >= 2) {
       // Aggressive dealers lobby Austria toward war
-      if (chance(p.aggression * 8)) {
+      if (chance(p.aggression * 12)) {
         orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Stoking tensions for profit' });
         thinking += 'Lobbying Austria toward war. ';
       }
@@ -656,6 +854,52 @@ const AI_PLAYER = (function() {
       }
     }
 
+    // Dealers proactively offer loans to factions that are at war, threatened, or aggressive
+    if (f.gold >= 4) {
+      var loanTargets = factionId === 'krupp'
+        ? ['germany', 'austria', 'ottoman']
+        : ['france', 'russia'];
+      // Also offer to anyone at war (war = arms sales = profit)
+      var allNations = ['germany', 'france', 'britain', 'russia', 'austria', 'ottoman'];
+      allNations.forEach(function(nfid) {
+        var nf = gameState.factions[nfid];
+        if (nf && nf.atWar && loanTargets.indexOf(nfid) === -1) loanTargets.push(nfid);
+      });
+
+      for (var lt = 0; lt < loanTargets.length; lt++) {
+        var target = loanTargets[lt];
+        var targetF = gameState.factions[target];
+        if (!targetF) continue;
+
+        // Offer loan if target is gold-starved or at war
+        var existingLoan = (f.loans || []).some(function(l) { return l.borrower === target && l.turnsRemaining > 0; });
+        if (existingLoan) continue;
+
+        var shouldOffer = (targetF.gold < 4 && targetF.army < 10) || targetF.atWar || (turn >= 3 && chance(40));
+        if (shouldOffer && f.gold >= 4) {
+          var loanAmt = Math.min(Math.max(3, Math.floor(f.gold / 3)), 6);
+          orders.push({ type: 'loan_offer', borrower: target, amount: loanAmt, reason: 'Arms dealer loan — funding ' + (FACTION_NAMES[target] || target) + ' for profit' });
+          thinking += 'Offering ' + loanAmt + 'g loan to ' + (FACTION_NAMES[target] || target) + ' (40% interest). ';
+          break; // One loan offer per turn
+        }
+      }
+    }
+
+    // Minimum 3 orders for dealers too
+    if (orders.length < 3 && budgetRemaining >= 2) {
+      // Subsidize a client state if under order minimum
+      var clientTargets = factionId === 'krupp'
+        ? ['germany', 'austria', 'ottoman']
+        : ['france', 'russia'];
+      while (orders.length < 3 && clientTargets.length > 0 && budgetRemaining >= 2) {
+        var ct = pick(clientTargets);
+        clientTargets = clientTargets.filter(function(t) { return t !== ct; });
+        orders.push({ type: 'diplomacy', action: 'subsidize', target: ct, amount: 1, reason: 'Maintaining client relationships' });
+        budgetRemaining -= 1;
+        thinking += 'Subsidizing ' + (FACTION_NAMES[ct] || ct) + ' (dealer standing order). ';
+      }
+    }
+
     if (!thinking) thinking = 'Observing the market and biding our time.';
 
     const dispatch = generateDispatch(charId);
@@ -684,7 +928,7 @@ const AI_PLAYER = (function() {
 
       // Chief of Staff: needs war + Schlieffen executed → bribe Conrad to push Austria into war
       //                 needs 12+ army by T4 → bribe arms dealers for equipment
-      chief_staff: { targets: ['conrad', 'krupp_dir'], chance: 45,
+      chief_staff: { targets: ['conrad', 'krupp_dir'], chance: 65,
         reason: 'Funding war preparations — need Schlieffen executed for +6 VP',
         thinkMsg: 'Paying Conrad and Krupp to make war happen — my legacy depends on it.' },
 
@@ -695,7 +939,7 @@ const AI_PLAYER = (function() {
         thinkMsg: 'Sending gold to Russia — need 5+ total for Banker VP.' },
 
       // General: needs war and offensive action (+3/+6 Plan XVII) → fund war hawks
-      general:     { targets: ['war_minister', 'conrad', 'chief_staff'], chance: 35,
+      general:     { targets: ['war_minister', 'conrad', 'chief_staff'], chance: 55,
         reason: 'Funding war hawks — I need war for Plan XVII VP (+6 if it succeeds)',
         thinkMsg: 'Paying war hawks to make the war happen — Plan XVII needs a war.' },
 
@@ -725,7 +969,7 @@ const AI_PLAYER = (function() {
 
       // War Minister: needs 18+ divisions (+3 Steamroller) → buy from arms dealers
       //               needs Eastern Front wins (+2) → fund military coordination
-      war_minister:{ targets: ['krupp_dir', 'merchant', 'general'], chance: 35,
+      war_minister:{ targets: ['krupp_dir', 'merchant', 'general'], chance: 50,
         reason: 'Buying arms for the Steamroller — need 18+ divisions for +3 VP',
         thinkMsg: 'Paying arms dealers to build the Steamroller.' },
 
@@ -741,7 +985,7 @@ const AI_PLAYER = (function() {
         thinkMsg: 'Sending gold to maintain German alliance and buy stability.' },
 
       // Conrad: needs Serbia crushed (+4) and early war (+2) → fund war hawks
-      conrad:      { targets: ['chief_staff', 'krupp_dir', 'merchant'], chance: 45,
+      conrad:      { targets: ['chief_staff', 'krupp_dir', 'merchant'], chance: 65,
         reason: 'Funding war preparations — need Serbia crushed for +4 VP and early war for +2',
         thinkMsg: 'Paying everyone who can make war happen — Serbia must fall.' },
 
@@ -751,12 +995,12 @@ const AI_PLAYER = (function() {
         thinkMsg: 'Sending gifts to both sides to maintain profitable neutrality.' },
 
       // Young Turk: needs 4+ divs + artillery (+3) and German alliance (+3) → fund German ties
-      young_turk:  { targets: ['chief_staff', 'krupp_dir', 'kaiser'], chance: 40,
+      young_turk:  { targets: ['chief_staff', 'krupp_dir', 'kaiser'], chance: 55,
         reason: 'Buying German military alliance — need it for +3 VP modernization objective',
         thinkMsg: 'Paying for German alliance and military training — +3 VP at stake.' },
 
       // Krupp: needs arms sales VP + German Victory (+5) → fund buyers and war hawks
-      krupp_dir:   { targets: ['conrad', 'young_turk', 'chief_staff'], chance: 40,
+      krupp_dir:   { targets: ['conrad', 'young_turk', 'chief_staff'], chance: 60,
         reason: 'Creating demand for arms — more war = more sales = more VP',
         thinkMsg: 'Investing in clients who will buy more arms — VP through sales.' },
 
@@ -766,7 +1010,7 @@ const AI_PLAYER = (function() {
         thinkMsg: 'Funding buyers on both sides for Entente Sales VP.' },
 
       // Merchant: needs war to break out (+6), fund revolution (+4), destroy Krupp (+3 each)
-      merchant:    { targets: ['duma', 'conrad', 'chief_staff', 'young_turk'], chance: 50,
+      merchant:    { targets: ['duma', 'conrad', 'chief_staff', 'young_turk'], chance: 70,
         reason: 'Fomenting war and revolution — War Architect +6 VP, Revolution +4 VP',
         thinkMsg: 'Bankrolling chaos — war, revolution, instability all score me VP.' }
     };
@@ -775,14 +1019,14 @@ const AI_PLAYER = (function() {
     if (!config) return null;
 
     // Higher chance in later turns (more desperate to score) and when at war
-    var adjustedChance = config.chance + (turn >= 4 ? 15 : 0) + (turn >= 5 ? 15 : 0) + (atWar ? 10 : 0);
+    var adjustedChance = config.chance + (turn >= 3 ? 15 : 0) + (turn >= 4 ? 20 : 0) + (turn >= 5 ? 20 : 0) + (atWar ? 15 : 0);
     if (!chance(adjustedChance)) return null;
 
     var target = pick(config.targets);
-    // Send 1-3 gold, scaled to what we have (never more than half our stash)
+    // Send 1-4 gold, scaled to what we have (never more than 2/3 our stash)
     // Send MORE in late game (urgency to score)
-    var maxSend = Math.min(turn >= 5 ? 4 : 3, Math.floor(personalGold / 2));
-    var amount = Math.max(1, Math.min(maxSend, Math.ceil(Math.random() * (turn >= 4 ? 3 : 2))));
+    var maxSend = Math.min(turn >= 4 ? 5 : 4, Math.floor(personalGold * 2 / 3));
+    var amount = Math.max(1, Math.min(maxSend, Math.ceil(Math.random() * (turn >= 3 ? 3 : 2))));
 
     return {
       to: target,
@@ -956,6 +1200,48 @@ const AI_PLAYER = (function() {
               }
             }
             break;
+
+          case 'loan_request': {
+            // AI faction requests a loan from an arms dealer
+            var lenderFid = order.lender;
+            var lenderF = gameState.factions[lenderFid];
+            var reqAmt = order.amount || 3;
+            if (lenderF && lenderF.gold >= reqAmt && typeof offerLoan === 'function') {
+              // Check no existing loan
+              var hasLoan = (lenderF.loans || []).some(function(l) { return l.borrower === factionId && l.turnsRemaining > 0; });
+              if (!hasLoan) {
+                offerLoan(lenderFid, factionId, reqAmt);
+                results.push('Loan received: ' + reqAmt + 'g from ' + (FACTION_NAMES[lenderFid] || lenderFid));
+              }
+            }
+            break;
+          }
+
+          case 'loan_offer': {
+            // Arms dealer AI offers a loan to a faction
+            var borrowerFid = order.borrower;
+            var offerAmt = order.amount || 3;
+            if (borrowerFid && f.gold >= offerAmt && typeof offerLoan === 'function') {
+              var hasExisting = (f.loans || []).some(function(l) { return l.borrower === borrowerFid && l.turnsRemaining > 0; });
+              if (!hasExisting) {
+                offerLoan(factionId, borrowerFid, offerAmt);
+                results.push('Loan offered: ' + offerAmt + 'g to ' + (FACTION_NAMES[borrowerFid] || borrowerFid));
+              }
+            }
+            break;
+          }
+
+          case 'upgrade': {
+            if (order.upgradeId) {
+              addOrder(factionId, {
+                type: 'upgrade',
+                upgradeId: order.upgradeId,
+                desc: 'Purchase ' + order.upgradeId + ' upgrade — ' + (order.reason || 'AI decision')
+              });
+              results.push('Queued: upgrade ' + order.upgradeId);
+            }
+            break;
+          }
 
           default:
             results.push('Unknown order type: ' + order.type);
