@@ -3439,6 +3439,212 @@ body::before {
 .vp-change-pos { color: var(--green-neutral); font-size: 0.8em; }
 .vp-change-neg { color: var(--red-empire); font-size: 0.8em; }
 
+/* Winner Popup */
+.winner-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: recapFadeIn 0.8s ease;
+}
+.winner-popup {
+  background: linear-gradient(135deg, #fdf6e3, #f0e6c8);
+  border: 4px solid var(--gold-accent);
+  max-width: 700px;
+  width: 92%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 0 60px rgba(184,134,11,0.4), 0 8px 32px rgba(0,0,0,0.5);
+}
+.winner-masthead {
+  background: linear-gradient(135deg, #1a1008, #2a2419);
+  color: var(--gold-accent);
+  text-align: center;
+  padding: 28px 20px 20px;
+  border-bottom: 4px double var(--gold-accent);
+}
+.winner-masthead .winner-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2em;
+  font-weight: 900;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.winner-masthead .winner-subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 1em;
+  color: rgba(184,134,11,0.7);
+}
+.winner-body { padding: 24px; }
+.winner-category {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.winner-category::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+}
+.winner-category.faction-winner::before { background: var(--gold-accent); }
+.winner-category.char-winner::before { background: var(--blue-entente); }
+.winner-category.dealer-winner::before { background: #b8860b; }
+.winner-category-label {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink-light);
+  margin-bottom: 8px;
+}
+.winner-category-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.winner-category-detail {
+  font-family: 'Crimson Text', serif;
+  font-size: 1em;
+  color: var(--ink-light);
+  line-height: 1.4;
+}
+.winner-category-vp {
+  font-family: 'Playfair Display', serif;
+  font-size: 2em;
+  font-weight: 900;
+  color: var(--gold-accent);
+  float: right;
+  margin-top: -8px;
+}
+.winner-standings {
+  margin-top: 20px;
+  border-top: 2px solid var(--ink);
+  padding-top: 16px;
+}
+.winner-standings-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.winner-standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Crimson Text', serif;
+}
+.winner-standings-table th {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-light);
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 2px solid var(--ink);
+}
+.winner-standings-table td {
+  padding: 6px 8px;
+  border-bottom: 1px dotted var(--parchment-dark);
+}
+.winner-standings-table tr:first-child td {
+  font-weight: 700;
+  background: rgba(184,134,11,0.08);
+}
+.winner-footer {
+  text-align: center;
+  padding: 20px 24px;
+  border-top: 3px double var(--ink);
+}
+.winner-footer button {
+  padding: 14px 40px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  background: var(--gold-accent);
+  color: white;
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.winner-footer button:hover { background: var(--ink); color: var(--gold-accent); }
+
+/* Leaderboard Tab */
+.leaderboard-section {
+  margin-bottom: 24px;
+}
+.leaderboard-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ink);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--ink);
+}
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95em;
+  margin-bottom: 8px;
+}
+.leaderboard-table th {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-light);
+  text-align: left;
+  padding: 5px 8px;
+  border-bottom: 2px solid var(--ink);
+}
+.leaderboard-table td {
+  padding: 6px 8px;
+  border-bottom: 1px dotted var(--parchment-dark);
+}
+.leaderboard-table tr.rank-1 td {
+  font-weight: 700;
+  background: rgba(184,134,11,0.1);
+}
+.leaderboard-table tr.rank-2 td { background: rgba(192,192,192,0.08); }
+.leaderboard-table tr.rank-3 td { background: rgba(205,127,50,0.06); }
+.leaderboard-rank {
+  font-weight: 900;
+  color: var(--ink-light);
+  width: 28px;
+  text-align: center;
+}
+.leaderboard-rank-1 { color: var(--gold-accent); }
+.leaderboard-rank-2 { color: #888; }
+.leaderboard-rank-3 { color: #cd7f32; }
+.leaderboard-vp {
+  text-align: right;
+  font-weight: 700;
+  font-family: 'Source Serif 4', serif;
+}
+
 /* Checklist Action Popup */
 .checklist-popup-overlay {
   position: fixed;
@@ -8928,8 +9134,12 @@ function advanceTurn() {
   renderMap();
   renderGMControl();
 
-  // Show dramatic turn recap
-  showTurnRecap(prevTurnNum);
+  // Show dramatic turn recap or winner popup on final turn
+  if (prevTurnNum >= turns.length) {
+    showWinnerPopup();
+  } else {
+    showTurnRecap(prevTurnNum);
+  }
 }
 
 // ==================== TURN RESOLUTION ENGINE ====================
@@ -10312,6 +10522,127 @@ function renderVPTab(fid) {
   return html;
 }
 
+function renderLeaderboardTab(currentFid) {
+  const factions = gameState.factions;
+  let html = '';
+
+  // === Country Leaderboard ===
+  html += '<div class="leaderboard-section">';
+  html += '<div class="leaderboard-section-title">Country Rankings</div>';
+
+  const countryFactions = Object.keys(FACTION_NAMES).filter(fid => fid !== 'krupp' && fid !== 'schneider');
+  const countryRanked = countryFactions.map(fid => {
+    const f = factions[fid];
+    return {
+      fid,
+      name: FACTION_NAMES[fid],
+      vp: f.vp || 0,
+      gold: f.gold || 0,
+      army: f.army || 0,
+      navy: f.navy || 0,
+      stability: f.stability || 0,
+      atWar: f.atWar || false,
+      color: FACTION_COLORS[fid]
+    };
+  }).sort((a, b) => b.vp - a.vp);
+
+  html += `<table class="leaderboard-table">
+    <tr><th>#</th><th>Nation</th><th style="text-align:right">VP</th><th style="text-align:right">Gold</th><th style="text-align:right">Army</th><th style="text-align:right">Navy</th><th style="text-align:center">Status</th></tr>
+    ${countryRanked.map((r, i) => `<tr class="rank-${i + 1}"${r.fid === currentFid ? ' style="background:rgba(184,134,11,0.15);"' : ''}>
+      <td class="leaderboard-rank leaderboard-rank-${i + 1}">${i + 1}</td>
+      <td style="color:${r.color}; font-weight:600;">${r.name}${r.fid === currentFid ? ' \u25C0' : ''}</td>
+      <td class="leaderboard-vp">${r.vp}</td>
+      <td style="text-align:right;">${r.gold}</td>
+      <td style="text-align:right;">${r.army}</td>
+      <td style="text-align:right;">${r.navy}</td>
+      <td style="text-align:center;">${r.atWar ? '\u2694' : '\u262E'}</td>
+    </tr>`).join('')}
+  </table>`;
+  html += '</div>';
+
+  // === Arms Dealer Leaderboard ===
+  const dealerFactions = ['krupp', 'schneider'].filter(fid => factions[fid]);
+  if (dealerFactions.length > 0) {
+    html += '<div class="leaderboard-section">';
+    html += '<div class="leaderboard-section-title">Arms Dealer Rankings</div>';
+    const dealerRanked = dealerFactions.map(fid => {
+      const f = factions[fid];
+      return { fid, name: FACTION_NAMES[fid], vp: f.vp || 0, gold: f.gold || 0, unitsSold: f.unitsSold || 0, color: FACTION_COLORS[fid] };
+    }).sort((a, b) => b.vp - a.vp);
+
+    html += `<table class="leaderboard-table">
+      <tr><th>#</th><th>Corporation</th><th style="text-align:right">VP</th><th style="text-align:right">Gold</th><th style="text-align:right">Units Sold</th></tr>
+      ${dealerRanked.map((r, i) => `<tr class="rank-${i + 1}"${r.fid === currentFid ? ' style="background:rgba(184,134,11,0.15);"' : ''}>
+        <td class="leaderboard-rank leaderboard-rank-${i + 1}">${i + 1}</td>
+        <td style="color:${r.color}; font-weight:600;">${r.name}${r.fid === currentFid ? ' \u25C0' : ''}</td>
+        <td class="leaderboard-vp">${r.vp}</td>
+        <td style="text-align:right;">${r.gold}</td>
+        <td style="text-align:right;">${r.unitsSold}</td>
+      </tr>`).join('')}
+    </table>`;
+    html += '</div>';
+  }
+
+  // === Character/Player Leaderboard ===
+  html += '<div class="leaderboard-section">';
+  html += '<div class="leaderboard-section-title">Player Rankings (by Faction VP)</div>';
+
+  const charRanked = Object.keys(CHAR_DATA).map(cid => {
+    const c = CHAR_DATA[cid];
+    const factionVP = factions[c.faction] ? (factions[c.faction].vp || 0) : 0;
+    const personalGold = (gameState.charGold && gameState.charGold[cid]) || 0;
+    return {
+      cid, name: c.name, subtitle: c.subtitle, icon: c.icon,
+      faction: c.faction, factionName: FACTION_NAMES[c.faction],
+      factionVP, personalGold, color: FACTION_COLORS[c.faction]
+    };
+  }).sort((a, b) => b.factionVP - a.factionVP || b.personalGold - a.personalGold);
+
+  html += `<table class="leaderboard-table">
+    <tr><th>#</th><th>Character</th><th>Faction</th><th style="text-align:right">Faction VP</th><th style="text-align:right">Personal Gold</th></tr>
+    ${charRanked.map((r, i) => `<tr class="rank-${i + 1}"${r.faction === currentFid ? ' style="background:rgba(184,134,11,0.08);"' : ''}>
+      <td class="leaderboard-rank leaderboard-rank-${i + 1}">${i + 1}</td>
+      <td>${r.icon} ${r.name}<div style="font-size:0.8em; color:var(--ink-light); font-style:italic;">${r.subtitle}</div></td>
+      <td style="color:${r.color}; font-size:0.9em;">${r.factionName}</td>
+      <td class="leaderboard-vp">${r.factionVP}</td>
+      <td style="text-align:right; color:var(--gold-accent);">${r.personalGold}g</td>
+    </tr>`).join('')}
+  </table>`;
+  html += '</div>';
+
+  // === VP History Chart (text-based) ===
+  const vpH = gameState.vpHistory || {};
+  const maxTurn = Math.max(0, ...countryFactions.flatMap(fid => (vpH[fid] || []).map(e => e.turn)));
+  if (maxTurn > 0) {
+    html += '<div class="leaderboard-section">';
+    html += '<div class="leaderboard-section-title">VP Progression by Turn</div>';
+    const turnNums = [];
+    for (let t = 1; t <= maxTurn; t++) turnNums.push(t);
+
+    html += `<table class="leaderboard-table">
+      <tr><th>Nation</th>${turnNums.map(t => `<th style="text-align:center; min-width:36px;">T${t}</th>`).join('')}<th style="text-align:right">Now</th></tr>
+      ${countryRanked.map(r => {
+        const hist = vpH[r.fid] || [];
+        return `<tr${r.fid === currentFid ? ' style="font-weight:700; background:rgba(184,134,11,0.08);"' : ''}>
+          <td style="color:${r.color}; font-weight:600; font-size:0.9em;">${r.name}</td>
+          ${turnNums.map(t => {
+            const entry = hist.find(e => e.turn === t);
+            const prev = t > 1 ? (hist.find(e => e.turn === t - 1) || { vp: 0 }) : { vp: 0 };
+            const vp = entry ? entry.vp : '';
+            const delta = entry && t > 1 ? entry.vp - prev.vp : 0;
+            const deltaHtml = delta > 0 ? `<span class="vp-change-pos">+${delta}</span>` : delta < 0 ? `<span class="vp-change-neg">${delta}</span>` : '';
+            return `<td style="text-align:center;">${vp}${deltaHtml ? '<br>' + deltaHtml : ''}</td>`;
+          }).join('')}
+          <td class="leaderboard-vp">${r.vp}</td>
+        </tr>`;
+      }).join('')}
+    </table>`;
+    html += '</div>';
+  }
+
+  return html;
+}
+
 function renderStabilityTab(fid) {
   const f = gameState.factions[fid];
   const stab = computeStability(fid);
@@ -10953,8 +11284,8 @@ function renderPlayerDashboard(container) {
   // Top-level tab definitions
   const dashTabs = isDealer
     ? ['finance','trade','diplomacy','special','messages']
-    : ['military','finance','trade','diplomacy','vp','stability','special','messages'];
-  const dashTabLabels = { military:'Military', finance:'Finance', trade:'Trade', diplomacy:'Diplomacy', vp:'VP', stability:'Stability', special:'Special', messages:'Messages' };
+    : ['military','finance','trade','diplomacy','vp','leaderboard','stability','special','messages'];
+  const dashTabLabels = { military:'Military', finance:'Finance', trade:'Trade', diplomacy:'Diplomacy', vp:'VP', leaderboard:'Leaderboard', stability:'Stability', special:'Special', messages:'Messages' };
   if (!dashTabs.includes(activeDashTab)) activeDashTab = dashTabs[0];
 
   // Unread message count for badge
@@ -10972,6 +11303,7 @@ function renderPlayerDashboard(container) {
   else if (activeDashTab === 'trade') tabContent = renderTradeTab(fid);
   else if (activeDashTab === 'diplomacy') tabContent = renderDiplomacyTab(fid);
   else if (activeDashTab === 'vp') tabContent = renderVPTab(fid);
+  else if (activeDashTab === 'leaderboard') tabContent = renderLeaderboardTab(fid);
   else if (activeDashTab === 'stability') tabContent = renderStabilityTab(fid);
   else if (activeDashTab === 'special') tabContent = renderSpecialTab(fid);
   else if (activeDashTab === 'messages') tabContent = renderMessagesTab(fid);
@@ -12107,6 +12439,143 @@ function dismissTurnRecap() {
   if (overlay) overlay.remove();
 }
 
+// ==================== WINNER POPUP ====================
+
+function showWinnerPopup() {
+  const factions = gameState.factions;
+
+  // 1. Faction Winner — all factions ranked by VP
+  const allFactions = Object.keys(FACTION_NAMES);
+  const factionRanked = allFactions
+    .map(fid => ({ fid, name: FACTION_NAMES[fid], vp: factions[fid].vp || 0, color: FACTION_COLORS[fid] }))
+    .sort((a, b) => b.vp - a.vp);
+
+  // Countries only (exclude arms dealers)
+  const countryRanked = factionRanked.filter(f => f.fid !== 'krupp' && f.fid !== 'schneider');
+  const factionWinner = countryRanked[0];
+
+  // 2. Arms Dealer Winner
+  const dealerRanked = factionRanked.filter(f => f.fid === 'krupp' || f.fid === 'schneider');
+  const dealerWinner = dealerRanked.length > 0 ? dealerRanked[0] : null;
+
+  // 3. Character Winner — characters with their faction VP + personal gold as tiebreaker
+  const charRanked = Object.keys(CHAR_DATA).map(cid => {
+    const c = CHAR_DATA[cid];
+    const factionVP = factions[c.faction] ? (factions[c.faction].vp || 0) : 0;
+    const personalGold = (gameState.charGold && gameState.charGold[cid]) || 0;
+    return {
+      cid,
+      name: c.name,
+      subtitle: c.subtitle,
+      faction: c.faction,
+      factionName: FACTION_NAMES[c.faction],
+      icon: c.icon,
+      factionVP: factionVP,
+      personalGold: personalGold,
+      color: FACTION_COLORS[c.faction]
+    };
+  }).sort((a, b) => b.factionVP - a.factionVP || b.personalGold - a.personalGold);
+  const charWinner = charRanked[0];
+
+  // Build standings tables
+  const countryRows = countryRanked.map((r, i) => `<tr${i === 0 ? ' style="font-weight:700; background:rgba(184,134,11,0.08);"' : ''}>
+    <td style="width:28px; text-align:center; font-weight:900; color:${i === 0 ? 'var(--gold-accent)' : 'var(--ink-light)'};">${i + 1}</td>
+    <td style="color:${r.color}; font-weight:600;">${r.name}</td>
+    <td style="text-align:right; font-weight:700;">${r.vp}</td>
+  </tr>`).join('');
+
+  const charRows = charRanked.slice(0, 10).map((r, i) => `<tr${i === 0 ? ' style="font-weight:700; background:rgba(184,134,11,0.08);"' : ''}>
+    <td style="width:28px; text-align:center; font-weight:900; color:${i === 0 ? 'var(--gold-accent)' : 'var(--ink-light)'};">${i + 1}</td>
+    <td>${r.icon} ${r.name}</td>
+    <td style="color:${r.color}; font-size:0.85em;">${r.factionName}</td>
+    <td style="text-align:right; font-weight:700;">${r.factionVP}</td>
+    <td style="text-align:right; color:var(--gold-accent);">${r.personalGold}g</td>
+  </tr>`).join('');
+
+  const dealerRows = dealerRanked.map((r, i) => `<tr${i === 0 ? ' style="font-weight:700; background:rgba(184,134,11,0.08);"' : ''}>
+    <td style="width:28px; text-align:center; font-weight:900; color:${i === 0 ? 'var(--gold-accent)' : 'var(--ink-light)'};">${i + 1}</td>
+    <td style="color:${r.color}; font-weight:600;">${r.name}</td>
+    <td style="text-align:right; font-weight:700;">${r.vp}</td>
+  </tr>`).join('');
+
+  // Determine overall game narrative
+  const anyWar = Object.keys(factions).some(fid => factions[fid].atWar);
+  const narrativeText = anyWar
+    ? 'The Great War has reshaped the map of Europe. Empires have crumbled, millions have fallen, and the victors survey the wreckage of the old world.'
+    : 'Against all odds, Europe has avoided the cataclysm of total war. But at what cost? The arms race continues, alliances remain tense, and the peace is fragile.';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'winner-overlay';
+  overlay.id = 'winnerOverlay';
+  overlay.innerHTML = `
+    <div class="winner-popup">
+      <div class="winner-masthead">
+        <div class="winner-title">The Reckoning</div>
+        <div class="winner-subtitle">1910\u20131916 \u2014 The Final Tally</div>
+      </div>
+      <div class="winner-body">
+        <div style="text-align:center; margin-bottom:20px; font-family:'IM Fell English',serif; font-style:italic; color:var(--ink-light); line-height:1.6;">
+          ${narrativeText}
+        </div>
+
+        <div class="winner-category faction-winner">
+          <div class="winner-category-vp">${factionWinner.vp} VP</div>
+          <div class="winner-category-label">Victorious Nation</div>
+          <div class="winner-category-name" style="color:${factionWinner.color};">${factionWinner.name}</div>
+          <div class="winner-category-detail">The ${factionWinner.name} ${factionWinner.vp > 0 ? 'emerges triumphant from the crucible of great power politics.' : 'survives the storm, battered but unbroken.'}</div>
+        </div>
+
+        <div class="winner-category char-winner">
+          <div class="winner-category-vp">${charWinner.factionVP} VP</div>
+          <div class="winner-category-label">Most Distinguished Leader</div>
+          <div class="winner-category-name">${charWinner.icon} ${charWinner.name}</div>
+          <div class="winner-category-detail">${charWinner.subtitle} \u2014 ${charWinner.factionName}${charWinner.personalGold > 0 ? ' \u2014 Personal fortune: ' + charWinner.personalGold + ' Gold' : ''}</div>
+        </div>
+
+        ${dealerWinner ? `<div class="winner-category dealer-winner">
+          <div class="winner-category-vp">${dealerWinner.vp} VP</div>
+          <div class="winner-category-label">Arms Dealer Victor</div>
+          <div class="winner-category-name" style="color:#b8860b;">${dealerWinner.name}</div>
+          <div class="winner-category-detail">${dealerWinner.vp > 0 ? 'The merchants of death have profited handsomely from the chaos of nations.' : 'War proved elusive \u2014 the arms dealers\u2019 gamble did not pay off.'}</div>
+        </div>` : ''}
+
+        <div class="winner-standings">
+          <div class="winner-standings-title">Final Country Standings</div>
+          <table class="winner-standings-table">
+            <tr><th>#</th><th>Nation</th><th style="text-align:right">VP</th></tr>
+            ${countryRows}
+          </table>
+        </div>
+
+        <div class="winner-standings" style="margin-top:16px;">
+          <div class="winner-standings-title">Top Characters</div>
+          <table class="winner-standings-table">
+            <tr><th>#</th><th>Character</th><th>Faction</th><th style="text-align:right">VP</th><th style="text-align:right">Gold</th></tr>
+            ${charRows}
+          </table>
+        </div>
+
+        ${dealerRanked.length > 0 ? `<div class="winner-standings" style="margin-top:16px;">
+          <div class="winner-standings-title">Arms Dealer Standings</div>
+          <table class="winner-standings-table">
+            <tr><th>#</th><th>Corporation</th><th style="text-align:right">VP</th></tr>
+            ${dealerRows}
+          </table>
+        </div>` : ''}
+      </div>
+      <div class="winner-footer">
+        <button onclick="dismissWinnerPopup()">Return to the Map</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function dismissWinnerPopup() {
+  const overlay = document.getElementById('winnerOverlay');
+  if (overlay) overlay.remove();
+}
+
 // ==================== GM CONTROL ====================
 
 function renderGMControl() {
@@ -12171,9 +12640,15 @@ function renderGMControl() {
       </button>`;
     }
   } else if (phase === 'complete') {
-    phaseActionsHtml = `<button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
-      ${isLastTurn ? 'Final Turn' : 'Advance Turn \u2192'}
-    </button>`;
+    if (isLastTurn) {
+      phaseActionsHtml = `<button class="btn-advance" onclick="showWinnerPopup()" style="background:var(--gold-accent); color:white; border-color:var(--gold-accent);">
+        Show Final Results \u2605
+      </button>`;
+    } else {
+      phaseActionsHtml = `<button class="btn-advance" onclick="advanceTurn()">
+        Advance Turn \u2192
+      </button>`;
+    }
   }
 
   // Resolution log
