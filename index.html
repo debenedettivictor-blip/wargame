@@ -3598,24 +3598,112 @@ body::before {
 }
 
 /* Readiness Table */
-.readiness-table { width: 100%; border-collapse: collapse; }
+.readiness-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: var(--parchment-dark);
+  border: 1px solid #d4c9a8;
+  border-radius: 4px;
+}
+.readiness-toolbar .bulk-select-all {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-light);
+  cursor: pointer;
+  user-select: none;
+}
+.readiness-toolbar .bulk-select-all input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--gold-accent);
+  cursor: pointer;
+}
+.readiness-toolbar .bulk-mobilize-btn {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 16px;
+  background: var(--gold-accent);
+  color: var(--parchment);
+  border: 1px solid #96700a;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.readiness-toolbar .bulk-mobilize-btn:hover:not(:disabled) {
+  background: #96700a;
+  transform: translateY(-1px);
+}
+.readiness-toolbar .bulk-mobilize-btn:disabled {
+  background: #b8b8a0;
+  border-color: #a0a090;
+  color: #e8e0d0;
+  cursor: not-allowed;
+}
+.readiness-toolbar .bulk-info {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.85em;
+  color: var(--ink-light);
+  margin-left: auto;
+}
+.readiness-table { width: 100%; border-collapse: separate; border-spacing: 0; }
 .readiness-table th {
   font-family: 'Source Serif 4', serif;
-  font-size: 0.75em;
+  font-size: 0.72em;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
   text-align: left;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-bottom: 2px solid var(--ink);
   color: var(--ink-light);
+  background: var(--parchment);
+  position: sticky;
+  top: 0;
 }
+.readiness-table th:first-child { width: 36px; text-align: center; }
 .readiness-table td {
   font-family: 'Crimson Text', serif;
   font-size: 0.95em;
-  padding: 6px 10px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--parchment-dark);
+  vertical-align: middle;
+  transition: background 0.1s;
 }
+.readiness-table td:first-child { text-align: center; }
+.readiness-table td input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--gold-accent);
+  cursor: pointer;
+}
+.readiness-table tr:nth-child(even) td { background: #f0e8cc; }
+.readiness-table tr:hover td { background: #e8ddb8; }
+.readiness-table tr.unit-deployed td { opacity: 0.7; }
+.readiness-table .unit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.85em;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.readiness-table .unit-icon.army { background: #8b1a1a20; color: var(--red-empire); border: 1px solid #8b1a1a40; }
+.readiness-table .unit-icon.navy { background: #1a3a6b20; color: var(--blue-entente); border: 1px solid #1a3a6b40; }
 .readiness-badge {
   display: inline-block;
   font-family: 'Source Serif 4', serif;
@@ -3623,12 +3711,13 @@ body::before {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border: 1px solid;
+  border-radius: 3px;
 }
-.readiness-badge.reserve { background: #88888820; border-color: #888; color: #666; }
-.readiness-badge.mobilized { background: #b8860b20; border-color: var(--gold-accent); color: var(--gold-accent); }
-.readiness-badge.deployed { background: #2d501620; border-color: var(--green-neutral); color: var(--green-neutral); }
+.readiness-badge.reserve { background: #88888818; border-color: #999; color: #777; }
+.readiness-badge.mobilized { background: #b8860b1a; border-color: var(--gold-accent); color: var(--gold-accent); }
+.readiness-badge.deployed { background: #2d50161a; border-color: var(--green-neutral); color: var(--green-neutral); }
 
 /* Ability Cards */
 .ability-card {
@@ -10207,6 +10296,34 @@ function renderSpecialTab(fid) {
   return html;
 }
 
+function bulkMobilizeSelected(fid) {
+  const checkboxes = document.querySelectorAll('.readiness-unit-cb:checked');
+  if (checkboxes.length === 0) return;
+  const f = gameState.factions[fid];
+  checkboxes.forEach(function(cb) {
+    const unitId = cb.dataset.unitId;
+    const unit = f.units.find(u => u.id === unitId && u.state === 'reserve');
+    if (unit) {
+      const safeName = getUnitName(unit).replace(/'/g, "\\'");
+      addOrder(fid, { type: 'mobilize', unitId: unit.id, desc: 'Mobilize ' + safeName });
+    }
+  });
+}
+
+function toggleAllReadinessCheckboxes(master) {
+  const checkboxes = document.querySelectorAll('.readiness-unit-cb');
+  checkboxes.forEach(function(cb) { cb.checked = master.checked; });
+  updateBulkMobilizeCount();
+}
+
+function updateBulkMobilizeCount() {
+  const checked = document.querySelectorAll('.readiness-unit-cb:checked').length;
+  const infoEl = document.getElementById('bulk-select-info');
+  const btnEl = document.getElementById('bulk-mobilize-btn');
+  if (infoEl) infoEl.textContent = checked > 0 ? checked + ' selected' : '';
+  if (btnEl) btnEl.disabled = checked === 0;
+}
+
 function renderReadinessTab(fid) {
   const f = gameState.factions[fid];
   const units = f.units || [];
@@ -10215,6 +10332,20 @@ function renderReadinessTab(fid) {
   const orders = getOrders(fid);
   const isSubmitted = orders.submitted;
 
+  const reserveUnits = units.filter(u => u.state === 'reserve');
+  const hasReserves = reserveUnits.length > 0;
+  const totalMobCost = reserveUnits.length;
+  const fullDiscount = reserveUnits.length >= 2 ? Math.ceil(reserveUnits.length * MOBILIZATION_COSTS.fullMobilization) : null;
+
+  let toolbar = '';
+  if (hasReserves && !isSubmitted) {
+    toolbar = '<div class="readiness-toolbar">' +
+      '<label class="bulk-select-all"><input type="checkbox" onchange="toggleAllReadinessCheckboxes(this)"> Select All Reserves</label>' +
+      '<button id="bulk-mobilize-btn" class="bulk-mobilize-btn" disabled onclick="bulkMobilizeSelected(\'' + fid + '\')">\u2691 Mobilize Selected</button>' +
+      '<span id="bulk-select-info" class="bulk-info"></span>' +
+      '</div>';
+  }
+
   let rows = '';
   units.forEach(function(u) {
     if (u.state === 'destroyed') return;
@@ -10222,14 +10353,21 @@ function renderReadinessTab(fid) {
     const stateLabel = stateClass.charAt(0).toUpperCase() + stateClass.slice(1);
     const location = u.state === 'deployed' && u.region ? (REGION_NAMES[u.region] || u.region) : '\u2014';
     const typeIcon = u.type === 'army' ? '\u2694' : '\u2693';
+    const typeClass = u.type === 'army' ? 'army' : 'navy';
     const safeName = getUnitName(u).replace(/'/g, "\\'");
+    const rowClass = u.state === 'deployed' ? ' class="unit-deployed"' : '';
+
+    // Checkbox for reserve units
+    let checkboxHtml = '';
+    if (u.state === 'reserve' && !isSubmitted) {
+      checkboxHtml = '<input type="checkbox" class="readiness-unit-cb" data-unit-id="' + u.id + '" onchange="updateBulkMobilizeCount()">';
+    }
 
     // Build action cell based on unit state
     let actionHtml = '';
     if (u.state === 'reserve') {
       actionHtml = '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em;" onclick="addOrder(\'' + fid + '\',{type:\'mobilize\',unitId:\'' + u.id + '\',desc:\'Mobilize ' + safeName + '\'})" ' + (isSubmitted ? 'disabled' : '') + '><span>Mobilize</span><span class="action-cost">1g</span></button>';
     } else if (u.state === 'mobilized') {
-      // Check if enough mobilization turns have passed for this faction
       const speed = MOBILIZATION_SPEED[fid];
       const mobilizedTurn = u.mobilizedTurn || 0;
       const turnsInMobilized = gameState.currentTurnNum - mobilizedTurn;
@@ -10239,28 +10377,28 @@ function renderReadinessTab(fid) {
       if (canDeploy) {
         const regionOptions = (u.type === 'army' ? LAND_REGIONS : SEA_REGIONS).map(function(r) { return '<option value="' + r + '">' + REGION_NAMES[r] + '</option>'; }).join('');
         actionHtml = '<div style="display:flex; align-items:center; gap:6px;">' +
-          '<select id="rdeploy_' + u.id + '" style="padding:4px; border:1px solid var(--ink-light); font-family:\'Crimson Text\',serif; font-size:0.85em;">' + regionOptions + '</select>' +
+          '<select id="rdeploy_' + u.id + '" style="padding:4px 6px; border:1px solid var(--ink-light); border-radius:3px; font-family:\'Crimson Text\',serif; font-size:0.85em; background:var(--parchment);">' + regionOptions + '</select>' +
           '<button class="action-btn" style="width:auto; margin:0; padding:4px 12px; font-size:0.85em;" onclick="addOrder(\'' + fid + '\',{type:\'deploy\',unitId:\'' + u.id + '\',region:document.getElementById(\'rdeploy_' + u.id + '\').value,desc:\'Deploy ' + safeName + ' to \'+REGION_NAMES[document.getElementById(\'rdeploy_' + u.id + '\').value]})" ' + (isSubmitted ? 'disabled' : '') + '><span>Deploy</span></button>' +
           '</div>';
       } else {
         const turnsLeft = requiredTurns - turnsInMobilized;
-        actionHtml = '<span style="color:#b8860b; font-size:0.85em;">⏳ Mobilizing (' + turnsLeft + ' turn' + (turnsLeft > 1 ? 's' : '') + ' remaining)</span>';
+        actionHtml = '<span style="color:#b8860b; font-size:0.85em;">\u23F3 Mobilizing \u2014 ' + turnsLeft + ' turn' + (turnsLeft > 1 ? 's' : '') + ' remaining</span>';
       }
     } else {
-      actionHtml = '<span style="color:var(--ink-light); font-size:0.85em;">\u2714 In position</span>';
+      actionHtml = '<span style="color:var(--green-neutral); font-size:0.85em;">\u2714 In position</span>';
     }
 
-    rows += '<tr>' +
-      '<td>' + typeIcon + ' ' + getUnitName(u) + '</td>' +
-      '<td>' + (u.type === 'army' ? 'Division' : 'Fleet') + '</td>' +
+    rows += '<tr' + rowClass + '>' +
+      '<td>' + checkboxHtml + '</td>' +
+      '<td><span class="unit-icon ' + typeClass + '">' + typeIcon + '</span>' + getUnitName(u) + '</td>' +
       '<td><span class="readiness-badge ' + stateClass + '">' + stateLabel + '</span></td>' +
       '<td>' + location + '</td>' +
       '<td>' + actionHtml + '</td>' +
     '</tr>';
   });
 
-  return `<table class="readiness-table">
-    <tr><th>Unit</th><th>Type</th><th>Status</th><th>Location</th><th>Action</th></tr>
+  return toolbar + `<table class="readiness-table">
+    <tr><th></th><th>Unit</th><th>Status</th><th>Location</th><th>Action</th></tr>
     ${rows}
   </table>`;
 }
