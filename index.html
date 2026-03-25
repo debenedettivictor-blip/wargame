@@ -4044,6 +4044,89 @@ body::before {
   transition: background 0.2s;
 }
 .char-msg-compose button:hover { background: #1a0a00; }
+
+/* Character Gold Panel */
+.char-gold-panel {
+  background: var(--parchment); border: 2px solid var(--ink);
+  border-radius: 8px; margin-bottom: 20px; overflow: hidden;
+}
+.char-gold-header {
+  padding: 12px 16px; font-family: 'Playfair Display', serif; font-weight: 700;
+  font-size: 0.95em; text-transform: uppercase; letter-spacing: 1px;
+  border-bottom: 2px solid var(--ink); display: flex; justify-content: space-between;
+  align-items: center; background: linear-gradient(135deg, #f5e6c8, #e8d5a0);
+}
+.char-gold-header .gold-icon { font-size: 1.2em; }
+.char-gold-body { padding: 16px; }
+.char-gold-balance {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  padding: 12px 16px; background: linear-gradient(135deg, #fdf6e3, #f5e6c8);
+  border: 1px solid #b8860b; border-radius: 6px;
+}
+.char-gold-balance .gold-amount {
+  font-family: 'Playfair Display', serif; font-size: 2em; font-weight: 900;
+  color: #8b6914;
+}
+.char-gold-balance .gold-label {
+  font-family: 'Source Serif 4', serif; font-size: 0.75em;
+  text-transform: uppercase; letter-spacing: 1px; color: #8b6914;
+}
+.char-gold-transfer {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.char-gold-transfer select, .char-gold-transfer input[type="number"] {
+  padding: 6px 10px; font-family: 'Crimson Text', serif; font-size: 0.9em;
+  border: 1px solid var(--ink); border-radius: 4px; background: var(--cream);
+}
+.char-gold-transfer input[type="number"] { width: 70px; }
+.char-gold-transfer button {
+  padding: 6px 14px; font-family: 'Playfair Display', serif;
+  font-weight: 700; text-transform: uppercase; font-size: 0.7em;
+  letter-spacing: 1px; cursor: pointer; background: #8b6914;
+  color: #fdf6e3; border: none; border-radius: 4px; transition: background 0.2s;
+}
+.char-gold-transfer button:hover { background: #6a5010; }
+.char-gold-log {
+  margin-top: 12px; max-height: 150px; overflow-y: auto;
+}
+.char-gold-log-entry {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 10px; border-bottom: 1px solid var(--ink-light);
+  font-family: 'Crimson Text', serif; font-size: 0.85em;
+}
+.char-gold-log-entry:last-child { border-bottom: none; }
+.char-gold-log-entry .gold-change {
+  font-weight: 700; font-family: 'Playfair Display', serif; min-width: 50px; text-align: right;
+}
+.char-gold-log-entry .gold-change.positive { color: #2a5a2a; }
+.char-gold-log-entry .gold-change.negative { color: #8b1a1a; }
+.char-gold-log-entry .gold-log-turn {
+  font-size: 0.8em; color: var(--ink-light); min-width: 50px;
+}
+/* GM gold adjust in dispatch panel */
+.gm-char-gold-adjust {
+  display: flex; gap: 6px; align-items: center; padding: 8px 12px;
+  background: linear-gradient(135deg, #fdf6e3, #f5e6c8);
+  border-top: 1px solid #b8860b; flex-wrap: wrap;
+}
+.gm-char-gold-adjust input[type="number"] {
+  width: 65px; padding: 4px 8px; font-family: 'Crimson Text', serif;
+  border: 1px solid #b8860b; border-radius: 3px; background: #fff;
+}
+.gm-char-gold-adjust input[type="text"] {
+  flex: 1; min-width: 100px; padding: 4px 8px; font-family: 'Crimson Text', serif;
+  border: 1px solid #b8860b; border-radius: 3px; background: #fff; font-size: 0.85em;
+}
+.gm-char-gold-adjust button {
+  padding: 4px 10px; font-family: 'Source Serif 4', serif; font-size: 0.75em;
+  text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+  background: #8b6914; color: #fdf6e3; border: none; border-radius: 3px;
+}
+.gm-char-gold-adjust button:hover { background: #6a5010; }
+.gm-char-gold-badge {
+  font-family: 'Playfair Display', serif; font-weight: 700;
+  color: #8b6914; font-size: 0.8em;
+}
 </style>
 </head>
 <body>
@@ -7081,9 +7164,30 @@ function defaultGameState() {
     };
   });
 
+  // Character personal gold — starting amounts by role
+  const charGold = {
+    // Germany
+    kaiser: 5, chancellor: 4, chief_staff: 3, grand_admiral: 3, spymaster: 4,
+    // France
+    president: 5, general: 3, socialist: 2, colonial_gov: 4,
+    // Britain
+    pm: 5, admiralty: 3, foreign_sec: 4, press_baron: 6, india_sec: 4,
+    // Russia
+    tsar: 5, war_minister: 3, duma: 3, okhrana: 4, industrialist: 6,
+    // Austria
+    emperor: 5, conrad: 3, hungarian: 4, archduke_aide: 3,
+    // Ottoman
+    sultan: 5, young_turk: 3, grand_vizier: 4, german_advisor: 3,
+    // Arms Dealers
+    krupp_dir: 10, vickers_dir: 8, lobbyist: 6,
+    merchant: 12, fence: 8
+  };
+
   return {
     factions: factions,
     minorNations: minorNations,
+    charGold: charGold,
+    charGoldLog: {},
     battleLog: [],
     turnLog: [],
     actionLog: [],
@@ -7192,6 +7296,20 @@ function loadGameState() {
           };
         });
       }
+      // Migrate: add character gold system if missing
+      if (!state.charGold) {
+        state.charGold = {
+          kaiser: 5, chancellor: 4, chief_staff: 3, grand_admiral: 3, spymaster: 4,
+          president: 5, general: 3, socialist: 2, colonial_gov: 4,
+          pm: 5, admiralty: 3, foreign_sec: 4, press_baron: 6, india_sec: 4,
+          tsar: 5, war_minister: 3, duma: 3, okhrana: 4, industrialist: 6,
+          emperor: 5, conrad: 3, hungarian: 4, archduke_aide: 3,
+          sultan: 5, young_turk: 3, grand_vizier: 4, german_advisor: 3,
+          krupp_dir: 10, vickers_dir: 8, lobbyist: 6,
+          merchant: 12, fence: 8
+        };
+      }
+      if (!state.charGoldLog) state.charGoldLog = {};
       return state;
     }
   } catch(e) {}
@@ -11220,6 +11338,105 @@ function sendGMToChar(charId) {
   renderGMControl();
 }
 
+// ==================== CHARACTER GOLD SYSTEM ====================
+
+function getCharGold(charId) {
+  if (!gameState.charGold) gameState.charGold = {};
+  if (gameState.charGold[charId] === undefined) gameState.charGold[charId] = 0;
+  return gameState.charGold[charId];
+}
+
+function getCharGoldLog(charId) {
+  if (!gameState.charGoldLog) gameState.charGoldLog = {};
+  if (!gameState.charGoldLog[charId]) gameState.charGoldLog[charId] = [];
+  return gameState.charGoldLog[charId];
+}
+
+function addCharGoldLogEntry(charId, entry) {
+  const log = getCharGoldLog(charId);
+  log.push({ ...entry, turn: gameState.currentTurnNum, timestamp: Date.now() });
+}
+
+function sendCharGold(fromCharId) {
+  const amountInput = document.getElementById('charGoldAmount');
+  const recipientSelect = document.getElementById('charGoldRecipient');
+  if (!amountInput || !recipientSelect) return;
+
+  const amount = parseInt(amountInput.value);
+  const toCharId = recipientSelect.value;
+  const toChar = CHAR_DATA[toCharId];
+  const fromChar = CHAR_DATA[fromCharId];
+  if (!toChar || !fromChar || !amount || amount <= 0) return;
+
+  const fromGold = getCharGold(fromCharId);
+  if (fromGold < amount) {
+    alert('Insufficient gold! You only have ' + fromGold + ' gold.');
+    return;
+  }
+
+  // Transfer gold
+  gameState.charGold[fromCharId] -= amount;
+  if (gameState.charGold[toCharId] === undefined) gameState.charGold[toCharId] = 0;
+  gameState.charGold[toCharId] += amount;
+
+  // Log for both parties
+  addCharGoldLogEntry(fromCharId, {
+    type: 'sent', amount: -amount, otherCharId: toCharId,
+    desc: 'Sent ' + amount + ' gold to ' + toChar.name
+  });
+  addCharGoldLogEntry(toCharId, {
+    type: 'received', amount: amount, otherCharId: fromCharId,
+    desc: 'Received ' + amount + ' gold from ' + fromChar.name
+  });
+
+  // Also add as player messages so both see the transaction
+  const transferMsg = '\u2694 Gold Transfer: ' + amount + ' gold sent';
+  const fromMsgs = getCharMessages(fromCharId);
+  fromMsgs.push({
+    fromId: fromCharId, fromName: fromChar.name,
+    toId: toCharId, toName: toChar.name,
+    channel: 'player', text: transferMsg, turn: gameState.currentTurnNum,
+    timestamp: Date.now(), read: false
+  });
+  const toMsgs = getCharMessages(toCharId);
+  toMsgs.push({
+    fromId: fromCharId, fromName: fromChar.name,
+    toId: toCharId, toName: toChar.name,
+    channel: 'player', text: transferMsg, turn: gameState.currentTurnNum,
+    timestamp: Date.now(), read: false
+  });
+
+  saveGameState();
+  renderCharacterDashboard();
+}
+
+function gmAdjustCharGold(charId, amount, reason) {
+  if (!charId || !amount) return;
+  if (gameState.charGold[charId] === undefined) gameState.charGold[charId] = 0;
+  gameState.charGold[charId] += amount;
+  if (gameState.charGold[charId] < 0) gameState.charGold[charId] = 0;
+
+  addCharGoldLogEntry(charId, {
+    type: amount > 0 ? 'gm_grant' : 'gm_deduct',
+    amount: amount,
+    desc: (amount > 0 ? 'GM granted ' : 'GM deducted ') + Math.abs(amount) + ' gold' + (reason ? ': ' + reason : '')
+  });
+
+  saveGameState();
+}
+
+function gmAdjustCharGoldFromPanel() {
+  if (!gmSelectedCharId) return;
+  const input = document.getElementById('gmCharGoldAmount');
+  const reasonInput = document.getElementById('gmCharGoldReason');
+  if (!input) return;
+  const amount = parseInt(input.value);
+  if (!amount || amount === 0) return;
+  const reason = reasonInput ? reasonInput.value.trim() : '';
+  gmAdjustCharGold(gmSelectedCharId, amount, reason);
+  renderGMControl();
+}
+
 // ==================== GM Character Dispatches Section ====================
 let gmSelectedCharId = null;
 
@@ -11263,9 +11480,13 @@ function renderGMCharMessagesSection() {
     const unread = getCharUnreadCountForGM(cid);
     const isActive = cid === gmSelectedCharId;
     const fColor = FACTION_COLORS[c.faction] || '#3A2A1A';
+    const cGold = getCharGold(cid);
     return `<div class="gm-msg-faction-item ${isActive ? 'active' : ''}" onclick="gmSelectChar('${cid}')" style="${isActive ? 'border-left-color:' + fColor : ''}">
       <span>${c.icon} ${c.name}</span>
-      ${unread > 0 ? '<span class="unread-dot"></span>' : ''}
+      <span style="display:flex;align-items:center;gap:4px;">
+        <span class="gm-char-gold-badge">${cGold}g</span>
+        ${unread > 0 ? '<span class="unread-dot"></span>' : ''}
+      </span>
     </div>`;
   }).join('');
 
@@ -11301,7 +11522,13 @@ function renderGMCharMessagesSection() {
       <div class="gm-msg-inbox">
         <div class="gm-msg-factions" style="max-height:400px;">${charListHtml}</div>
         <div class="gm-msg-thread-panel">
-          <div class="gm-msg-thread-header">${selChar.icon} ${selChar.name} <span style="font-weight:400; font-size:0.8em; color:var(--ink-light);">(${FACTION_NAMES[selChar.faction]})</span></div>
+          <div class="gm-msg-thread-header">${selChar.icon} ${selChar.name} <span style="font-weight:400; font-size:0.8em; color:var(--ink-light);">(${FACTION_NAMES[selChar.faction]})</span> <span class="gm-char-gold-badge" style="margin-left:auto;">${getCharGold(gmSelectedCharId)} Gold</span></div>
+          <div class="gm-char-gold-adjust">
+            <span style="font-family:'Source Serif 4',serif; font-size:0.7em; text-transform:uppercase; letter-spacing:0.5px;">Adjust Gold:</span>
+            <input type="number" id="gmCharGoldAmount" value="1" style="width:65px;">
+            <input type="text" id="gmCharGoldReason" placeholder="Reason (optional)...">
+            <button onclick="gmAdjustCharGoldFromPanel()">Apply</button>
+          </div>
           <div class="messages-thread" id="gmCharMsgThread" style="flex:1;">${threadHtml}</div>
           <div class="msg-compose">
             <input type="text" id="gmCharMsgInput" placeholder="Reply to ${selChar.name}..." onkeydown="if(event.key==='Enter')sendGMToCharFromGMPanel('${gmSelectedCharId}')">
@@ -11332,8 +11559,12 @@ function renderCharacterDashboard() {
       <div class="char-faction-badge" style="border-color:${fColor}; color:${fColor};">${FACTION_NAMES[char.faction]}</div>
     </div>
     <div class="char-stats-row">
+      <div class="char-stat-box" style="background: linear-gradient(135deg, #fdf6e3, #f5e6c8); border-color: #b8860b;">
+        <div class="stat-label" style="color:#8b6914;">Personal Gold</div>
+        <div class="stat-value" style="color:#8b6914;">${getCharGold(charId)}</div>
+      </div>
       <div class="char-stat-box">
-        <div class="stat-label">Gold</div>
+        <div class="stat-label">Faction Gold</div>
         <div class="stat-value">${f.gold}</div>
       </div>
       <div class="char-stat-box">
@@ -11348,6 +11579,44 @@ function renderCharacterDashboard() {
         <div class="stat-label">Army</div>
         <div class="stat-value">${f.army || 0}</div>
       </div>
+    </div>
+  </div>`;
+
+  // Gold transfer panel
+  const goldRecipientOptions = Object.keys(CHAR_DATA)
+    .filter(cid => cid !== charId)
+    .map(cid => `<option value="${cid}">${CHAR_DATA[cid].name} (${FACTION_NAMES[CHAR_DATA[cid].faction]})</option>`)
+    .join('');
+
+  const goldLog = getCharGoldLog(charId);
+  let goldLogHtml = '';
+  if (goldLog.length > 0) {
+    const logEntries = goldLog.slice().reverse().slice(0, 20).map(e => {
+      const cls = e.amount > 0 ? 'positive' : 'negative';
+      const sign = e.amount > 0 ? '+' : '';
+      return `<div class="char-gold-log-entry">
+        <span class="gold-log-turn">Turn ${e.turn}</span>
+        <span style="flex:1;">${e.desc}</span>
+        <span class="gold-change ${cls}">${sign}${e.amount}</span>
+      </div>`;
+    }).join('');
+    goldLogHtml = `<div class="char-gold-log">${logEntries}</div>`;
+  }
+
+  let goldPanelHtml = `<div class="char-gold-panel">
+    <div class="char-gold-header">
+      <span><span class="gold-icon">\u2694</span> Personal Treasury</span>
+      <span class="gm-char-gold-badge">${getCharGold(charId)} Gold</span>
+    </div>
+    <div class="char-gold-body">
+      <div class="char-gold-transfer">
+        <span style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px;">Send Gold:</span>
+        <input type="number" id="charGoldAmount" min="1" max="${getCharGold(charId)}" value="1" style="width:60px;">
+        <span style="font-family:'Crimson Text',serif;">to</span>
+        <select id="charGoldRecipient">${goldRecipientOptions}</select>
+        <button onclick="sendCharGold('${charId}')">Send Gold</button>
+      </div>
+      ${goldLogHtml}
     </div>
   </div>`;
 
@@ -11462,7 +11731,7 @@ function renderCharacterDashboard() {
     ${composeHtml}
   </div>`;
 
-  container.innerHTML = headerHtml + objHtml + msgHtml;
+  container.innerHTML = headerHtml + goldPanelHtml + objHtml + msgHtml;
 }
 
 function renderGMMessagesSection() {
