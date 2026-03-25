@@ -1409,6 +1409,197 @@ body::before {
 
 .btn-delete-news:hover { background: var(--red-empire); color: var(--cream); }
 
+/* Dashboard Theme Picker */
+.theme-picker {
+  background: linear-gradient(135deg, var(--parchment) 0%, #f0e6d2 100%);
+  border: 2px solid var(--rust);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.theme-picker-header {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--rust);
+  text-align: center;
+  margin-bottom: 6px;
+}
+.theme-picker-subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.95em;
+  color: var(--ink-light);
+  text-align: center;
+  margin-bottom: 16px;
+}
+.theme-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.theme-picker-card {
+  border: 2px solid var(--ink-light);
+  background: var(--cream);
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.theme-picker-card:hover {
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+.theme-picker-card.economic { border-top: 4px solid #b8860b; }
+.theme-picker-card.diplomatic { border-top: 4px solid #1a3a6b; }
+.theme-picker-card.aggressive { border-top: 4px solid #8b1a1a; }
+.theme-picker-card.crisis { border-top: 4px solid #5c0a0a; }
+.theme-picker-card-tone { margin-bottom: 6px; }
+.theme-picker-card-name {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+  margin-bottom: 6px;
+}
+.theme-picker-card-headline {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.82em;
+  font-weight: 700;
+  color: var(--rust);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.theme-picker-card-effect {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.82em;
+  color: var(--ink-light);
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+.theme-picker-card-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.8em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  transition: all 0.15s;
+}
+.theme-picker-card:hover .theme-picker-card-btn.economic { background: #b8860b; border-color: #b8860b; color: var(--cream); }
+.theme-picker-card:hover .theme-picker-card-btn.diplomatic { background: #1a3a6b; border-color: #1a3a6b; color: var(--cream); }
+.theme-picker-card:hover .theme-picker-card-btn.aggressive { background: #8b1a1a; border-color: #8b1a1a; color: var(--cream); }
+.theme-picker-card:hover .theme-picker-card-btn.crisis { background: #5c0a0a; border-color: #5c0a0a; color: var(--cream); }
+
+/* Active theme summary */
+.theme-picker-active {
+  background: var(--parchment);
+  border: 2px solid var(--ink-light);
+  border-left: 5px solid var(--rust);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.theme-picker-active-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.theme-picker-active-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.theme-picker-active-headline {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.88em;
+  color: var(--ink-light);
+  font-style: italic;
+}
+
+/* Theme selection modal (shown before advancing turn) */
+.theme-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.theme-modal {
+  background: var(--parchment);
+  border: 3px solid var(--rust);
+  max-width: 1100px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+.theme-modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--rust);
+  padding-bottom: 14px;
+}
+.theme-modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--rust);
+  margin-bottom: 6px;
+}
+.theme-modal-subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 1em;
+  color: var(--ink-light);
+}
+.theme-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.theme-modal-card {
+  border: 2px solid var(--ink-light);
+  background: var(--cream);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.theme-modal-card:hover {
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+.theme-modal-card.economic { border-top: 4px solid #b8860b; }
+.theme-modal-card.diplomatic { border-top: 4px solid #1a3a6b; }
+.theme-modal-card.aggressive { border-top: 4px solid #8b1a1a; }
+.theme-modal-card.crisis { border-top: 4px solid #5c0a0a; }
+.theme-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--ink-faint);
+}
+.theme-modal-footer .btn-storyline {
+  width: auto;
+  padding: 10px 24px;
+}
+
 /* Quick Reference */
 .ref-table {
   width: 100%;
@@ -6309,14 +6500,52 @@ function filterScenariosByType(btn, type) {
 function renderDispatchFeed() {
   const container = document.getElementById('dispatchFeed');
   if (!container) return;
-  const dispatches = (gameState.customNews || []).filter(n => n.turnNum === gameState.currentTurnNum);
-  if (dispatches.length === 0) {
-    container.innerHTML = '';
-    container.style.display = 'none';
-    return;
+
+  // Theme/Storyline selection for the current turn (shown before storyline is picked)
+  let themePickerHtml = '';
+  const currentTurnStoryline = TURN_STORYLINE_EVENTS[gameState.currentTurnNum];
+  const storylineChoices = gameState.storylineChoices || {};
+  const currentChoice = storylineChoices[gameState.currentTurnNum];
+
+  if (currentTurnStoryline) {
+    if (!currentChoice) {
+      // No storyline selected yet — show the theme picker
+      themePickerHtml = `<div class="theme-picker">
+        <div class="theme-picker-header">SELECT THIS TURN'S STORYLINE</div>
+        <div class="theme-picker-subtitle">${currentTurnStoryline.title} — ${currentTurnStoryline.desc}</div>
+        <div class="theme-picker-grid">
+          ${currentTurnStoryline.choices.map(c => {
+            const toneClass = c.tone || 'economic';
+            return `<div class="theme-picker-card ${toneClass}" onclick="applyStorylineEvent(${gameState.currentTurnNum}, '${c.id}')">
+              <div class="theme-picker-card-tone"><span class="storyline-tone-badge ${toneClass}">${TONE_LABELS[c.tone] || c.tone}</span></div>
+              <div class="theme-picker-card-name">${c.name}</div>
+              <div class="theme-picker-card-headline">${c.headline}</div>
+              <div class="theme-picker-card-effect">${c.effect}</div>
+              <div class="theme-picker-card-btn ${toneClass}">Select This Theme</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    } else {
+      // Storyline already selected — show a compact summary
+      const chosen = currentTurnStoryline.choices.find(c => c.id === currentChoice);
+      if (chosen) {
+        const toneClass = chosen.tone || 'economic';
+        themePickerHtml = `<div class="theme-picker-active">
+          <div class="theme-picker-active-header">
+            <span class="storyline-tone-badge ${toneClass}">${TONE_LABELS[chosen.tone] || chosen.tone}</span>
+            <span class="theme-picker-active-title">TURN ${gameState.currentTurnNum} THEME: ${chosen.name}</span>
+          </div>
+          <div class="theme-picker-active-headline">${chosen.headline}</div>
+        </div>`;
+      }
+    }
   }
-  container.style.display = 'block';
-  container.innerHTML = `
+
+  const dispatches = (gameState.customNews || []).filter(n => n.turnNum === gameState.currentTurnNum);
+  let dispatchHtml = '';
+  if (dispatches.length > 0) {
+    dispatchHtml = `
     <div class="dispatch-feed">
       <div class="dispatch-feed-header">DISPATCHES — TURN ${gameState.currentTurnNum}</div>
       ${dispatches.map(d => {
@@ -6334,6 +6563,15 @@ function renderDispatchFeed() {
         </div>`;
       }).join('')}
     </div>`;
+  }
+
+  if (!themePickerHtml && !dispatchHtml) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'block';
+  container.innerHTML = themePickerHtml + dispatchHtml;
 }
 
 // GM Reset with multi-step confirmation
@@ -6396,6 +6634,56 @@ const TURN_STORYLINE_EVENTS = {
           gameState.factions.ottoman.gold += 2;
           gameState.factions.britain.vp = Math.max(0, gameState.factions.britain.vp - 1);
         }
+      },
+      {
+        id: 't1_dreadnought_race',
+        name: 'Dreadnought Arms Race',
+        tone: 'aggressive',
+        headline: 'NAVAL ARMS RACE INTENSIFIES — ADMIRALTIES DEMAND MORE SHIPS',
+        body: 'The launch of revolutionary all-big-gun battleships has rendered every existing fleet obsolete overnight. Every naval power scrambles to build dreadnoughts or risk irrelevance at sea.',
+        effect: 'Britain and Germany each gain 1 free fleet. All other powers must spend 2 Gold on naval preparedness or lose 1 fleet.',
+        apply: function() {
+          gameState.factions.britain.navy += 1;
+          gameState.factions.britain.units.push({ id: 'dread_b_' + Date.now(), type: 'fleet', state: 'deployed' });
+          gameState.factions.germany.navy += 1;
+          gameState.factions.germany.units.push({ id: 'dread_g_' + Date.now(), type: 'fleet', state: 'deployed' });
+          ['france','russia','austria','ottoman'].forEach(fid => {
+            if (gameState.factions[fid].gold >= 2) {
+              gameState.factions[fid].gold -= 2;
+            } else {
+              gameState.factions[fid].navy = Math.max(0, gameState.factions[fid].navy - 1);
+            }
+          });
+        }
+      },
+      {
+        id: 't1_moroccan_crisis',
+        name: 'First Moroccan Crisis',
+        tone: 'crisis',
+        headline: 'KAISER LANDS AT TANGIER — FRANCE AND GERMANY ON COLLISION COURSE',
+        body: 'Kaiser Wilhelm II makes a provocative visit to Tangier, challenging French influence in Morocco. The crisis tests the new Entente Cordiale between France and Britain.',
+        effect: 'France loses 2 Gold to military preparations. Germany gains +1 VP for forcing the crisis. Britain and France forge closer ties (+1 Gold each from mutual support).',
+        apply: function() {
+          gameState.factions.france.gold = Math.max(0, gameState.factions.france.gold - 2);
+          gameState.factions.germany.vp += 1;
+          gameState.factions.britain.gold += 1;
+          gameState.factions.france.gold += 1;
+        }
+      },
+      {
+        id: 't1_russian_reform',
+        name: 'Russian Military Reform',
+        tone: 'diplomatic',
+        headline: 'TSAR LAUNCHES SWEEPING ARMY REFORMS — "NEVER AGAIN" AFTER MANCHURIA',
+        body: 'Stung by the humiliation of the Russo-Japanese War, Tsar Nicholas II pours resources into modernizing the Russian military. New rifles, railways, and training programs transform the empire\'s fighting capability.',
+        effect: 'Russia gains +3 Gold and 1 free army. But the expense strains finances — Russia loses 1 stability.',
+        apply: function() {
+          gameState.factions.russia.gold += 3;
+          gameState.factions.russia.army += 1;
+          gameState.factions.russia.troops.russia = (gameState.factions.russia.troops.russia || 0) + 1;
+          gameState.factions.russia.units.push({ id: 'reform_' + Date.now(), type: 'army', state: 'deployed' });
+          gameState.factions.russia.stability = Math.max(0, (gameState.factions.russia.stability || 5) - 1);
+        }
       }
     ]
   },
@@ -6447,6 +6735,38 @@ const TURN_STORYLINE_EVENTS = {
               gameState.factions[fid].vp = Math.max(0, gameState.factions[fid].vp - 1);
             }
           });
+        }
+      },
+      {
+        id: 't2_agadir_crisis',
+        name: 'Agadir Crisis',
+        tone: 'crisis',
+        headline: 'GERMAN GUNBOAT ARRIVES AT AGADIR — WAR SCARE GRIPS EUROPE',
+        body: 'Germany dispatches the gunboat SMS Panther to the Moroccan port of Agadir, ostensibly to protect German interests. France and Britain see it as naked aggression. War seems imminent before diplomats pull back from the brink.',
+        effect: 'Germany gains +2 Gold in concessions but loses 1 VP from diplomatic backlash. France gains +1 VP for standing firm. Arms dealers each gain +1 Gold from panic buying.',
+        apply: function() {
+          gameState.factions.germany.gold += 2;
+          gameState.factions.germany.vp = Math.max(0, gameState.factions.germany.vp - 1);
+          gameState.factions.france.vp += 1;
+          gameState.factions.krupp.gold += 1;
+          gameState.factions.schneider.gold += 1;
+        }
+      },
+      {
+        id: 't2_balkan_league',
+        name: 'Balkan League Forms',
+        tone: 'aggressive',
+        headline: 'SECRET BALKAN ALLIANCE REVEALED — SMALL NATIONS UNITE AGAINST OTTOMAN',
+        body: 'Serbia, Greece, Bulgaria, and Montenegro have formed a secret military alliance aimed at driving the Ottoman Empire from Europe. Russia is suspected of orchestrating the pact. Austria-Hungary watches nervously.',
+        effect: 'Ottoman loses 2 Gold to emergency preparations. Russia gains +1 VP for Slavic patronage. Austria must spend 1 Gold on intelligence or lose 1 VP.',
+        apply: function() {
+          gameState.factions.ottoman.gold = Math.max(0, gameState.factions.ottoman.gold - 2);
+          gameState.factions.russia.vp += 1;
+          if (gameState.factions.austria.gold >= 1) {
+            gameState.factions.austria.gold -= 1;
+          } else {
+            gameState.factions.austria.vp = Math.max(0, gameState.factions.austria.vp - 1);
+          }
         }
       }
     ]
@@ -6516,6 +6836,42 @@ const TURN_STORYLINE_EVENTS = {
           gameState.factions.austria.gold = Math.max(0, gameState.factions.austria.gold - 2);
           gameState.factions.russia.vp += 1;
         }
+      },
+      {
+        id: 't3_ottoman_defeat',
+        name: 'Ottoman Rout in the Balkans',
+        tone: 'aggressive',
+        headline: 'OTTOMAN ARMIES SHATTERED — BALKAN ALLIES MARCH ON CONSTANTINOPLE',
+        body: 'The Balkan League has delivered a crushing defeat to Ottoman forces. Turkish armies flee in disarray as Greek, Serbian, and Bulgarian troops advance. The Ottoman Empire in Europe is collapsing.',
+        effect: 'Ottoman loses 2 armies and 2 Gold. Austria gains +1 VP for Balkan influence. Russia gains +1 VP. Arms dealers each gain +2 Gold from wartime sales.',
+        apply: function() {
+          const ot = gameState.factions.ottoman;
+          ot.army = Math.max(0, ot.army - 2);
+          ot.gold = Math.max(0, ot.gold - 2);
+          let removed = 0;
+          for (let i = (ot.units||[]).length - 1; i >= 0 && removed < 2; i--) {
+            if (ot.units[i].type === 'army') { ot.units.splice(i, 1); removed++; }
+          }
+          gameState.factions.austria.vp += 1;
+          gameState.factions.russia.vp += 1;
+          gameState.factions.krupp.gold += 2;
+          gameState.factions.schneider.gold += 2;
+        }
+      },
+      {
+        id: 't3_franco_russian_pact',
+        name: 'Franco-Russian Military Convention',
+        tone: 'diplomatic',
+        headline: 'FRANCE AND RUSSIA SIGN SECRET MILITARY PACT — GERMANY ENCIRCLED',
+        body: 'French and Russian generals have concluded a detailed military convention specifying exactly how many troops each nation will commit if Germany attacks. The two-front war Germany fears is now a certainty.',
+        effect: 'France and Russia each gain +2 Gold for joint military preparations. Germany loses 1 VP from strategic encirclement. Both nations gain +1 VP.',
+        apply: function() {
+          gameState.factions.france.gold += 2;
+          gameState.factions.russia.gold += 2;
+          gameState.factions.france.vp += 1;
+          gameState.factions.russia.vp += 1;
+          gameState.factions.germany.vp = Math.max(0, gameState.factions.germany.vp - 1);
+        }
       }
     ]
   },
@@ -6576,6 +6932,37 @@ const TURN_STORYLINE_EVENTS = {
           gameState.factions.ottoman.troops.ottoman = (gameState.factions.ottoman.troops.ottoman || 0) + 1;
           gameState.factions.ottoman.units.push({ id: 'coup_' + Date.now(), type: 'army', state: 'deployed' });
           gameState.factions.ottoman.alliances = [];
+        }
+      },
+      {
+        id: 't4_july_ultimatum',
+        name: 'The July Ultimatum',
+        tone: 'aggressive',
+        headline: 'AUSTRIA ISSUES IMPOSSIBLE ULTIMATUM TO SERBIA — 48 HOURS TO COMPLY',
+        body: 'Austria-Hungary delivers an ultimatum with demands so extreme that no sovereign nation could accept them all. Serbia scrambles to respond while Russia begins quiet mobilization. The clock is ticking.',
+        effect: 'Austria gains +2 VP for decisive action. Serbia (minor nation) becomes contested. Russia must spend 2 Gold on mobilization or lose 1 VP. Germany gains +1 Gold for backing Austria.',
+        apply: function() {
+          gameState.factions.austria.vp += 2;
+          gameState.factions.germany.gold += 1;
+          if (gameState.factions.russia.gold >= 2) {
+            gameState.factions.russia.gold -= 2;
+          } else {
+            gameState.factions.russia.vp = Math.max(0, gameState.factions.russia.vp - 1);
+          }
+        }
+      },
+      {
+        id: 't4_schlieffen_leak',
+        name: 'Schlieffen Plan Leaked',
+        tone: 'crisis',
+        headline: 'FRENCH INTELLIGENCE OBTAINS GERMAN WAR PLANS — INVASION THROUGH BELGIUM!',
+        body: 'A stolen document reveals Germany\'s plan to invade France through neutral Belgium. Britain is furious — Belgian neutrality is guaranteed by treaty. France fortifies its northern border. Germany\'s element of surprise is compromised.',
+        effect: 'France gains +2 Gold for defensive preparations and +1 VP. Britain gains +1 VP (treaty defender). Germany loses 2 VP from the leak. Belgium becomes a flashpoint.',
+        apply: function() {
+          gameState.factions.france.gold += 2;
+          gameState.factions.france.vp += 1;
+          gameState.factions.britain.vp += 1;
+          gameState.factions.germany.vp = Math.max(0, gameState.factions.germany.vp - 2);
         }
       }
     ]
@@ -6668,6 +7055,44 @@ const TURN_STORYLINE_EVENTS = {
         effect: 'Any faction may spend 4 Gold to attempt separate peace. GM rolls d6: 1-2 rejected, 3-4 ceasefire, 5-6 favorable terms (+3 VP). All factions gain +1 Gold to enable bidding.',
         apply: function() {
           ['germany','france','britain','russia','austria','ottoman'].forEach(fid => {
+            gameState.factions[fid].gold += 1;
+          });
+        }
+      },
+      {
+        id: 't5_unrestricted_subs',
+        name: 'Unrestricted Submarine Warfare',
+        tone: 'aggressive',
+        headline: 'GERMANY UNLEASHES U-BOATS — ALL SHIPPING NOW A TARGET',
+        body: 'The Kaiser authorizes unrestricted submarine warfare. Merchant ships of all nations are now legitimate targets. Neutral shipping is devastated. Britain\'s food supply is threatened.',
+        effect: 'Britain loses 3 Gold from disrupted trade. Germany gains +1 VP for naval aggression. All trade agreements with Germany are suspended. Arms dealers lose 1 Gold each from disrupted shipping.',
+        apply: function() {
+          gameState.factions.britain.gold = Math.max(0, gameState.factions.britain.gold - 3);
+          gameState.factions.germany.vp += 1;
+          gameState.factions.krupp.gold = Math.max(0, gameState.factions.krupp.gold - 1);
+          gameState.factions.schneider.gold = Math.max(0, gameState.factions.schneider.gold - 1);
+        }
+      },
+      {
+        id: 't5_verdun',
+        name: 'The Meat Grinder',
+        tone: 'crisis',
+        headline: 'BATTLE OF ATTRITION — "THEY SHALL NOT PASS!"',
+        body: 'A massive offensive aimed at bleeding the enemy white has turned into a nightmare for both sides. Hundreds of thousands fall for a few miles of shattered earth. The generals promise victory is just one more push away.',
+        effect: 'The two factions with the most armies each lose 2 armies. Both gain +1 VP for "holding the line." All other factions gain +1 Gold from reduced pressure.',
+        apply: function() {
+          const powers = ['germany','france','britain','russia','austria','ottoman'];
+          const sorted = [...powers].sort((a,b) => (gameState.factions[b].army||0) - (gameState.factions[a].army||0));
+          [sorted[0], sorted[1]].forEach(fid => {
+            const f = gameState.factions[fid];
+            f.army = Math.max(0, f.army - 2);
+            let removed = 0;
+            for (let i = (f.units||[]).length - 1; i >= 0 && removed < 2; i--) {
+              if (f.units[i].type === 'army') { f.units.splice(i, 1); removed++; }
+            }
+            f.vp = (f.vp || 0) + 1;
+          });
+          powers.filter(f => f !== sorted[0] && f !== sorted[1]).forEach(fid => {
             gameState.factions[fid].gold += 1;
           });
         }
@@ -6773,6 +7198,57 @@ const TURN_STORYLINE_EVENTS = {
           });
           gameState.factions[most].vp += 3;
           powers.filter(f => f !== most).forEach(fid => { gameState.factions[fid].vp += 1; });
+        }
+      },
+      {
+        id: 't6_mutiny',
+        name: 'Mass Mutiny',
+        tone: 'aggressive',
+        headline: 'SOLDIERS REFUSE TO FIGHT — MUTINIES SPREAD ALONG THE FRONT',
+        body: 'After years of slaughter, entire divisions refuse orders to attack. Officers are shot by their own men. The armies of Europe are breaking from within.',
+        effect: 'Every faction at war loses 1 army. The faction with the lowest stability loses an additional 2 armies. Arms dealers lose 2 Gold each as orders are cancelled.',
+        apply: function() {
+          const powers = ['germany','france','britain','russia','austria','ottoman'];
+          let lowestStab = powers[0];
+          powers.forEach(fid => {
+            const f = gameState.factions[fid];
+            if (f.atWar) {
+              f.army = Math.max(0, f.army - 1);
+              let removed = 0;
+              for (let i = (f.units||[]).length - 1; i >= 0 && removed < 1; i--) {
+                if (f.units[i].type === 'army') { f.units.splice(i, 1); removed++; }
+              }
+            }
+            if ((f.stability||0) < (gameState.factions[lowestStab].stability||0)) lowestStab = fid;
+          });
+          const lf = gameState.factions[lowestStab];
+          lf.army = Math.max(0, lf.army - 2);
+          let removed = 0;
+          for (let i = (lf.units||[]).length - 1; i >= 0 && removed < 2; i--) {
+            if (lf.units[i].type === 'army') { lf.units.splice(i, 1); removed++; }
+          }
+          gameState.factions.krupp.gold = Math.max(0, gameState.factions.krupp.gold - 2);
+          gameState.factions.schneider.gold = Math.max(0, gameState.factions.schneider.gold - 2);
+        }
+      },
+      {
+        id: 't6_war_exhaustion',
+        name: 'Total War Exhaustion',
+        tone: 'economic',
+        headline: 'ECONOMIES COLLAPSE UNDER STRAIN OF TOTAL WAR — RATIONING IMPOSED',
+        body: 'Four years of industrial warfare have drained every treasury. Currencies are debased, factories run short of raw materials, and civilian populations face starvation. The nation that manages its resources best will survive.',
+        effect: 'All factions lose half their Gold (rounded down). The faction with the most Gold remaining gains +2 VP for superior economic management. All factions gain +1 VP for enduring.',
+        apply: function() {
+          const powers = ['germany','france','britain','russia','austria','ottoman'];
+          powers.forEach(fid => {
+            gameState.factions[fid].gold = Math.floor(gameState.factions[fid].gold / 2);
+          });
+          let richest = powers[0];
+          powers.forEach(fid => {
+            if (gameState.factions[fid].gold > gameState.factions[richest].gold) richest = fid;
+          });
+          gameState.factions[richest].vp += 2;
+          powers.forEach(fid => { gameState.factions[fid].vp = (gameState.factions[fid].vp||0) + 1; });
         }
       }
     ]
@@ -8585,6 +9061,24 @@ function advanceTurn() {
     alert('Cannot advance turn yet. Current phase: ' + gameState.turnPhase.toUpperCase() + '.\n\nComplete all phases (Orders → Resolution → Battles) before advancing.\n\nOr use "Skip to Complete" to override.');
     return;
   }
+
+  // Require storyline selection for current turn before advancing
+  const storylineChoices = gameState.storylineChoices || {};
+  const currentTurnStoryline = TURN_STORYLINE_EVENTS[gameState.currentTurnNum];
+  if (currentTurnStoryline && !storylineChoices[gameState.currentTurnNum]) {
+    alert('You must select a storyline theme for Turn ' + gameState.currentTurnNum + ' before advancing.\n\nGo to the "Turn ' + gameState.currentTurnNum + ' Storyline" section or use the theme picker on the Dashboard to choose a narrative event.');
+    return;
+  }
+
+  // Check if next turn has storylines — show the picker as a modal before confirming
+  const nextTurnNum = gameState.currentTurnNum + 1;
+  const nextTurnStoryline = TURN_STORYLINE_EVENTS[nextTurnNum];
+  if (nextTurnStoryline && !storylineChoices[nextTurnNum] && !gameState._skipThemeCheck) {
+    // Show a selection dialog for the next turn's theme
+    showNextTurnThemePicker(nextTurnNum, nextTurnStoryline);
+    return;
+  }
+
   if (!confirm('Advance to next turn? This will collect income and deduct maintenance for ALL factions.')) return;
 
   const summary = [];
@@ -8930,6 +9424,106 @@ function advanceTurn() {
 
   // Show dramatic turn recap
   showTurnRecap(prevTurnNum);
+}
+
+// Next-turn theme picker modal — shown before advancing to the next turn
+function showNextTurnThemePicker(nextTurnNum, storylineData) {
+  // Remove any existing modal
+  const existing = document.getElementById('themePickerModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'themePickerModal';
+  modal.className = 'theme-modal-overlay';
+  modal.innerHTML = `
+    <div class="theme-modal">
+      <div class="theme-modal-header">
+        <div class="theme-modal-title">CHOOSE TURN ${nextTurnNum} STORYLINE</div>
+        <div class="theme-modal-subtitle">${storylineData.title} — ${storylineData.desc}</div>
+      </div>
+      <div class="theme-modal-grid">
+        ${storylineData.choices.map(c => {
+          const toneClass = c.tone || 'economic';
+          return `<div class="theme-modal-card ${toneClass}" onclick="selectNextTurnTheme(${nextTurnNum}, '${c.id}')">
+            <div class="theme-picker-card-tone"><span class="storyline-tone-badge ${toneClass}">${TONE_LABELS[c.tone] || c.tone}</span></div>
+            <div class="theme-picker-card-name">${c.name}</div>
+            <div class="theme-picker-card-headline">${c.headline}</div>
+            <div class="theme-picker-card-effect">${c.effect}</div>
+            <div class="theme-picker-card-btn ${toneClass}">Select This Theme</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="theme-modal-footer">
+        <button class="btn-storyline" onclick="document.getElementById('themePickerModal').remove()">Cancel — Go Back</button>
+        <button class="btn-storyline diplomatic" onclick="skipThemeAndAdvance()">Skip — Advance Without Choosing</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function selectNextTurnTheme(turnNum, choiceId) {
+  const turnEvents = TURN_STORYLINE_EVENTS[turnNum];
+  if (!turnEvents) return;
+  const choice = turnEvents.choices.find(c => c.id === choiceId);
+  if (!choice) return;
+
+  if (!confirm(`TURN ${turnNum} STORYLINE: "${choice.name}"\n\n${choice.effect}\n\nThis theme will be applied when the turn begins. Continue?`)) return;
+
+  // Apply the storyline event
+  choice.apply();
+
+  if (!gameState.storylineChoices) gameState.storylineChoices = {};
+  gameState.storylineChoices[turnNum] = choiceId;
+
+  if (!gameState.customNews) gameState.customNews = [];
+  gameState.customNews.push({
+    id: Date.now(),
+    headline: choice.headline,
+    body: choice.body,
+    effect: choice.effect,
+    faction: null,
+    turnNum: turnNum,
+    timestamp: new Date().toISOString(),
+    storylineEvent: true,
+    scenarioType: 'storyline'
+  });
+
+  gameState.actionLog.push({
+    turn: turnNum,
+    fid: 'gm',
+    type: 'storyline',
+    description: `Turn ${turnNum} storyline: "${choice.name}" — ${choice.effect}`
+  });
+
+  saveGameState();
+
+  // Close modal and proceed with advance
+  const modal = document.getElementById('themePickerModal');
+  if (modal) modal.remove();
+
+  // Now actually advance the turn
+  if (!confirm('Theme selected! Advance to Turn ' + turnNum + '? This will collect income and deduct maintenance for ALL factions.')) {
+    renderGMControl();
+    renderDashboard();
+    renderDispatchFeed();
+    return;
+  }
+
+  // Call advanceTurn again — this time the storyline is set so it will proceed
+  advanceTurn();
+}
+
+function skipThemeAndAdvance() {
+  const modal = document.getElementById('themePickerModal');
+  if (modal) modal.remove();
+
+  if (!confirm('Advance without selecting a theme? You can still choose one from the dashboard next turn.\n\nThis will collect income and deduct maintenance for ALL factions.')) return;
+
+  // Temporarily bypass the check by setting a skip flag
+  gameState._skipThemeCheck = true;
+  advanceTurn();
+  delete gameState._skipThemeCheck;
 }
 
 // ==================== TURN RESOLUTION ENGINE ====================
@@ -12171,9 +12765,20 @@ function renderGMControl() {
       </button>`;
     }
   } else if (phase === 'complete') {
+    const nextTurnNum = gameState.currentTurnNum + 1;
+    const nextStoryline = TURN_STORYLINE_EVENTS[nextTurnNum];
+    const nextThemeChosen = (gameState.storylineChoices || {})[nextTurnNum];
+    const currentThemeChosen = (gameState.storylineChoices || {})[gameState.currentTurnNum];
+    const currentStoryline = TURN_STORYLINE_EVENTS[gameState.currentTurnNum];
+    const needsCurrentTheme = currentStoryline && !currentThemeChosen;
+    const themeHint = needsCurrentTheme
+      ? '<p class="phase-hint" style="color:var(--red-empire);">A storyline theme must be selected for the current turn before advancing. Use the Storyline section above or the Dashboard theme picker.</p>'
+      : (nextStoryline && !nextThemeChosen
+        ? '<p class="phase-hint">You\'ll be asked to pick a storyline theme for Turn ' + nextTurnNum + ' before advancing.</p>'
+        : '');
     phaseActionsHtml = `<button class="btn-advance" onclick="advanceTurn()" ${isLastTurn ? 'disabled title="Final turn reached"' : ''}>
       ${isLastTurn ? 'Final Turn' : 'Advance Turn \u2192'}
-    </button>`;
+    </button>${themeHint}`;
   }
 
   // Resolution log
