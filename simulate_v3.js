@@ -644,11 +644,14 @@ function scoreIndividualPlayers(g, factionScores) {
 
   // Kaiser Wilhelm II
   let kaiserVP = gerBase;
-  kaiserVP += 25; // gold bonus (Germany always receives gold from income/trade)
-  if (f.germany.navy >= 10) kaiserVP += 4; // Navy Obsession
-  if (!f.britain.atWar) kaiserVP += 3; // Cousin George — peace with Britain
-  else kaiserVP -= 2; // at war with Britain
-  if (personalRoll(0.2)) kaiserVP -= 2; // Fear of Weakness (20% chance Chancellor overrules)
+  kaiserVP += 25; // gold bonus
+  if (f.germany.navy >= 6) kaiserVP += 4; // Navy Obsession (lowered threshold from 10 to 6)
+  if (f.germany.navy >= 10) kaiserVP += 3; // Grand Fleet bonus (built the Hochseeflotte)
+  if (!f.britain.atWar) kaiserVP += 5; // Cousin George — peace with Britain (boosted from 3)
+  else kaiserVP -= 1; // at war with Britain (softened from -2)
+  if (f.germany.alsace) kaiserVP += 3; // Imperial Prestige — Alsace held
+  if (f.germany.army >= 16) kaiserVP += 3; // Military Grandeur — army at full strength
+  if (personalRoll(0.15)) kaiserVP -= 2; // Fear of Weakness (reduced from 20% to 15%)
   players.kaiser = { name: 'Kaiser Wilhelm II', faction: 'germany', vp: kaiserVP };
 
   // Chancellor
@@ -699,15 +702,20 @@ function scoreIndividualPlayers(g, factionScores) {
   // First Lord of the Admiralty
   let admVP = britBase;
   admVP += 25;
-  if (f.britain.navy >= f.germany.navy + 2) admVP += 4; // Dreadnought Race
-  if (f.britain.atWar && g.blockadeOn) admVP += 3; // The Blockade
+  if (f.britain.navy >= f.germany.navy + 2) admVP += 6; // Dreadnought Race (boosted from 4)
+  else if (f.britain.navy >= f.germany.navy) admVP += 3; // Naval Parity — still acceptable
+  if (f.britain.atWar && g.blockadeOn) admVP += 5; // The Blockade (boosted from 3)
+  admVP += 3; // Sea Lords' Confidence — the navy is always Britain's pride
+  if (f.britain.navy >= 12) admVP += 3; // Rule Britannia — 12+ ships maintained
   players.admiralty = { name: 'First Lord of the Admiralty', faction: 'britain', vp: admVP };
 
   // Foreign Secretary
   let fsVP = britBase;
   fsVP += 25;
-  if (personalRoll(0.5)) fsVP += 3; // Entente Cordiale (50% maintained)
-  fsVP += 4; // Balance of Power (no single power dominates — usually true)
+  if (personalRoll(0.6)) fsVP += 4; // Entente Cordiale (boosted from 50%/+3 to 60%/+4)
+  fsVP += 5; // Balance of Power (boosted from 4)
+  if (!f.france.rebellion) fsVP += 3; // France Preserved — the Entente holds
+  if (g.warDeclaredTurn && !f.britain.atWar) fsVP += 3; // Diplomatic Masterstroke — war rages, Britain stays out
   players.foreign_sec = { name: 'Foreign Secretary', faction: 'britain', vp: fsVP };
 
   // --- RUSSIA players ---
@@ -794,18 +802,14 @@ function scoreIndividualPlayers(g, factionScores) {
   if (personalRoll(0.15)) merVP += 3; // Destroy Krupp
   players.merchant = { name: 'Merchant of Death', faction: 'schneider', vp: merVP };
 
-  // --- Apply 1.5x multiplier to faction winner ---
-  // Group players by faction, find top scorer in each faction
-  const factionGroups = {};
+  // --- Final score = faction score * 1.5 + individual score ---
+  // Individual score = gold bonus (25) + personal objective bonuses
   for (const [pid, p] of Object.entries(players)) {
-    if (!factionGroups[p.faction]) factionGroups[p.faction] = [];
-    factionGroups[p.faction].push({ pid, ...p });
-  }
-  for (const [fac, group] of Object.entries(factionGroups)) {
-    group.sort((a, b) => b.vp - a.vp);
-    const winner = group[0];
-    players[winner.pid].vp = Math.round(winner.vp * 1.5);
-    players[winner.pid].factionWinner = true;
+    const factionBase = factionScores[p.faction];
+    const individualScore = p.vp - factionBase; // gold + personal objectives
+    p.individualScore = individualScore;
+    p.factionBase = factionBase;
+    p.vp = Math.round(factionBase * 1.5) + individualScore; // final = faction*1.5 + individual
   }
 
   return players;
@@ -865,23 +869,22 @@ for (let game = 1; game <= NUM_GAMES; game++) {
 
   // Individual player scores
   const playerScores = scoreIndividualPlayers(g, scores);
+  const factionWinnerFid = Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0];
   console.log('### Individual Player Scores');
-  console.log('| Player | Faction | Base | +Gold | +Personal | x1.5? | **Total** |');
-  console.log('|--------|---------|------|-------|-----------|-------|-----------|');
+  console.log('| # | Player | Faction | Fac x1.5 | +Individual | **Total** | Fac Win? |');
+  console.log('|---|--------|---------|----------|-------------|-----------|----------|');
   const playersSorted = Object.entries(playerScores).sort((a,b) => b[1].vp - a[1].vp);
-  for (const [pid, p] of playersSorted) {
-    const factionBase = scores[p.faction];
-    const goldBonus = 25;
-    const personalBonus = p.factionWinner ? Math.round(p.vp / 1.5) - factionBase - goldBonus : p.vp - factionBase - goldBonus;
-    const multiplier = p.factionWinner ? 'YES' : '';
-    console.log(`| ${p.name} | ${p.faction} | ${factionBase} | +${goldBonus} | ${personalBonus >= 0 ? '+' : ''}${personalBonus} | ${multiplier} | **${p.vp}** |`);
-  }
+  playersSorted.forEach(([pid, p], i) => {
+    const facX = Math.round(p.factionBase * 1.5);
+    const isFacWin = p.faction === factionWinnerFid ? '\u2605' : '';
+    console.log(`| ${i+1} | ${p.name} | ${p.faction} | ${facX} | +${p.individualScore} | **${p.vp}** | ${isFacWin} |`);
+  });
   console.log('');
 
-  // Overall winner (individual)
+  // Winners
   const topPlayer = playersSorted[0];
-  console.log(`**FACTION WINNER: ${Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0].toUpperCase()} (${Object.entries(scores).sort((a,b) => b[1] - a[1])[0][1]} VP)**`);
-  console.log(`**INDIVIDUAL WINNER: ${topPlayer[1].name} (${topPlayer[1].vp} VP) \u2014 ${topPlayer[1].factionWinner ? '1.5x faction leader bonus!' : ''}`);
+  console.log(`**FACTION WINNER: ${factionWinnerFid.toUpperCase()} (${scores[factionWinnerFid]} VP)**`);
+  console.log(`**INDIVIDUAL WINNER: ${topPlayer[1].name} (${topPlayer[1].vp} VP)**`);
   console.log('');
 
   allScores.push(scores);
@@ -907,8 +910,16 @@ for (const fid of fids) {
 
 // ==================== INDIVIDUAL PLAYER SUMMARY ====================
 console.log(`\n---\n## Individual Player Summary: ${NUM_GAMES} Games\n`);
-console.log('| Player | Faction | Avg VP | Wins | Best | Worst |');
-console.log('|--------|---------|--------|------|------|-------|');
+console.log('| # | Player | Faction | Avg VP | Wins | Fac Wins | Best | Worst |');
+console.log('|---|--------|---------|--------|------|----------|------|-------|');
+
+// Count faction wins per faction
+const factionWinCounts = {};
+for (const s of allScores) {
+  const sorted = Object.entries(s).sort((a,b) => b[1] - a[1]);
+  const winFid = sorted[0][0];
+  factionWinCounts[winFid] = (factionWinCounts[winFid] || 0) + 1;
+}
 
 // Collect all player IDs
 const allPids = Object.keys(allPlayerScores[0]);
@@ -923,15 +934,15 @@ const playerSummaries = allPids.map(pid => {
   const worst = Math.min(...vpArr);
   const name = allPlayerScores[0][pid].name;
   const faction = allPlayerScores[0][pid].faction;
-  return { pid, name, faction, avg: parseFloat(avg), wins, best, worst };
+  const facWins = factionWinCounts[faction] || 0;
+  return { pid, name, faction, avg: parseFloat(avg), wins, facWins, best, worst };
 }).sort((a, b) => b.avg - a.avg);
 
-for (const p of playerSummaries) {
-  console.log(`| ${p.name} | ${p.faction} | ${p.avg.toFixed(1)} | ${p.wins} | ${p.best} | ${p.worst} |`);
-}
+playerSummaries.forEach((p, i) => {
+  console.log(`| ${i+1} | ${p.name} | ${p.faction} | ${p.avg.toFixed(1)} | ${p.wins} | ${p.facWins}/${NUM_GAMES} | ${p.best} | ${p.worst} |`);
+});
 
-console.log('\n### Scoring Rules');
-console.log('- **Base**: Faction VP (public + secret objectives)');
-console.log('- **Gold Bonus**: +25 VP to every player for receiving gold');
-console.log('- **Personal**: Individual secret objective bonuses/penalties');
-console.log('- **1.5x Multiplier**: Top scorer within each faction gets 1.5x their total');
+console.log('\n### Scoring Formula');
+console.log('- **Final Score = (Faction VP x 1.5) + Individual Score**');
+console.log('- **Individual Score** = +25 gold bonus + personal secret objective bonuses/penalties');
+console.log('- **Fac Wins** = how often that player\'s faction won (drives the x1.5 base)');
