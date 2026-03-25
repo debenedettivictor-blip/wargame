@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Text:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="ai-player.js"></script>
 <style>
 :root {
   --parchment: #f4eed5;
@@ -3179,6 +3180,39 @@ body::before {
 .gm-section-header { font-family: 'Playfair Display', serif; font-size: 1em; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; padding: 12px 16px; background: var(--ink); color: var(--parchment); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
 .gm-section-body { padding: 16px; }
 .gm-section-body.collapsed { display: none; }
+
+/* AI Player Controls */
+.ai-config-row { margin-bottom: 12px; }
+.ai-config-row label { display: block; margin-bottom: 4px; }
+.btn-ai { font-family: 'Playfair Display', serif; font-size: 0.75em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px; border: 2px solid var(--ink); background: var(--cream); cursor: pointer; transition: all 0.2s; }
+.btn-ai:hover { background: var(--parchment-dark); }
+.btn-ai:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ai-primary { background: var(--ink); color: var(--parchment); }
+.btn-ai-primary:hover { background: var(--ink-light); }
+
+.ai-faction-group { margin-bottom: 10px; border: 1px solid var(--parchment-dark); padding: 8px; background: var(--parchment); }
+.ai-faction-label { font-family: 'Playfair Display', serif; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); margin-bottom: 6px; }
+.ai-char-toggle { display: flex; align-items: center; gap: 8px; padding: 4px 8px; cursor: pointer; font-family: 'Crimson Text', serif; font-size: 0.95em; transition: all 0.15s; border: 1px solid transparent; margin-bottom: 2px; }
+.ai-char-toggle:hover { background: var(--parchment-dark); }
+.ai-char-toggle.active { background: rgba(184, 134, 11, 0.1); border-color: var(--gold-accent); }
+.ai-char-toggle input[type="checkbox"] { accent-color: var(--gold-accent); }
+.ai-char-icon { font-size: 1.1em; }
+.ai-char-name { flex: 1; }
+.ai-badge { font-family: 'Source Serif 4', serif; font-size: 0.65em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; background: var(--gold-accent); color: white; padding: 2px 6px; border-radius: 2px; }
+
+.ai-log { margin-top: 16px; border: 1px solid var(--ink-light); }
+.ai-log-header { font-family: 'Playfair Display', serif; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; background: var(--parchment-dark); border-bottom: 1px solid var(--ink-light); }
+.ai-log-entry { padding: 8px 12px; border-bottom: 1px solid var(--parchment-dark); font-family: 'Crimson Text', serif; font-size: 0.9em; }
+.ai-log-entry:last-child { border-bottom: none; }
+.ai-log-icon { margin-right: 6px; }
+.ai-log-name { font-weight: 700; margin-right: 6px; }
+.ai-log-turn { font-family: 'Source Serif 4', serif; font-size: 0.75em; color: var(--ink-light); text-transform: uppercase; letter-spacing: 1px; }
+.ai-log-ok .ai-log-icon { color: var(--green-neutral); }
+.ai-log-err .ai-log-icon { color: var(--red-empire); }
+.ai-thinking { font-family: 'IM Fell English', serif; font-style: italic; color: var(--ink-light); font-size: 0.9em; margin-top: 4px; }
+.ai-orders { font-size: 0.85em; color: var(--ink-light); margin-top: 2px; }
+.ai-dispatch { font-size: 0.85em; color: var(--blue-entente); margin-top: 2px; }
+.ai-error { font-size: 0.85em; color: var(--red-empire); margin-top: 2px; }
 
 .order-review-faction { border: 1px solid var(--ink-light); margin-bottom: 8px; }
 .order-review-header { font-family: 'Playfair Display', serif; font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; background: var(--parchment-dark); cursor: pointer; display: flex; justify-content: space-between; }
@@ -12009,13 +12043,15 @@ function renderGMControl() {
   let orderStatusHtml = playableFactions.map(fid => {
     const orders = getOrders(fid);
     const isSubmitted = orders.submitted;
+    const isAIGenerated = orders.aiGenerated;
     const actionCount = orders.actions.length;
     const statusIcon = isSubmitted ? '\u2714' : '\u25CB';
     const statusClass = isSubmitted ? 'submitted' : 'pending';
+    const aiBadge = isAIGenerated ? ' <span class="ai-badge">AI</span>' : '';
     const confirmBtn = (!isSubmitted && phase === 'orders') ? `<button class="btn-confirm-no-orders" onclick="confirmNoOrders('${fid}')">Confirm No Orders</button>` : '';
     return `<div class="order-status-row ${statusClass}">
       <span class="order-status-icon">${statusIcon}</span>
-      <span class="order-status-name">${FACTION_NAMES[fid]}</span>
+      <span class="order-status-name">${FACTION_NAMES[fid]}${aiBadge}</span>
       <span class="order-status-detail">${isSubmitted ? (actionCount > 0 ? actionCount + ' order' + (actionCount > 1 ? 's' : '') : 'No orders') : 'Pending'}</span>
       ${confirmBtn}
     </div>`;
@@ -12680,7 +12716,8 @@ function renderGMControl() {
 
   const messagesSection = renderGMMessagesSection();
   const charMessagesSection = renderGMCharMessagesSection();
-  container.innerHTML = turnSection + storylineHtml + messagesSection + charMessagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + specialOpsSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
+  const aiSection = renderGMAISection();
+  container.innerHTML = turnSection + storylineHtml + aiSection + messagesSection + charMessagesSection + turnTrackerSection + newsSection + scenarioSection + newsEventsSection + orderSection + specialOpsSection + battleSection + economySection + minorNationsSection + factionSection + overviewSection + logSection;
 
   // Render turn tracker into GM console
   renderGMTurnTracker();
@@ -12690,6 +12727,185 @@ function renderGMControl() {
   // Render the faction editor for the currently selected faction
   renderGMFactionEditor();
   renderBattleLog();
+}
+
+// ==================== AI PLAYER GM SECTION ====================
+
+function renderGMAISection() {
+  const aiChars = typeof AI_PLAYER !== 'undefined' ? AI_PLAYER.getAICharacters() : [];
+  const hasKey = typeof AI_PLAYER !== 'undefined' && AI_PLAYER.getApiKey();
+  const keyDisplay = hasKey ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' + AI_PLAYER.getApiKey().slice(-4) : 'Not set';
+
+  // All characters grouped by faction
+  const factionGroups = {
+    'German Empire': ['kaiser','chancellor','chief_staff'],
+    'French Republic': ['president','general'],
+    'British Empire': ['pm','admiralty','foreign_sec'],
+    'Russian Empire': ['tsar','war_minister','duma'],
+    'Austria-Hungary': ['emperor','conrad'],
+    'Ottoman Empire': ['sultan','young_turk'],
+    'Krupp-Vickers': ['krupp_dir','vickers_dir'],
+    'Schneider-\u0160koda': ['merchant']
+  };
+
+  let charTogglesHtml = '';
+  Object.keys(factionGroups).forEach(factionLabel => {
+    const chars = factionGroups[factionLabel];
+    let charItems = chars.map(cid => {
+      const c = CHAR_DATA[cid];
+      if (!c) return '';
+      const isAI = typeof AI_PLAYER !== 'undefined' && AI_PLAYER.isAI(cid);
+      return `<label class="ai-char-toggle ${isAI ? 'active' : ''}">
+        <input type="checkbox" ${isAI ? 'checked' : ''} onchange="toggleAICharacter('${cid}')">
+        <span class="ai-char-icon">${c.icon}</span>
+        <span class="ai-char-name">${c.name}</span>
+        ${isAI ? '<span class="ai-badge">AI</span>' : ''}
+      </label>`;
+    }).join('');
+    charTogglesHtml += `<div class="ai-faction-group">
+      <div class="ai-faction-label">${factionLabel}</div>
+      ${charItems}
+    </div>`;
+  });
+
+  // AI results log
+  let aiLogHtml = '';
+  if (gameState.aiLog && gameState.aiLog.length > 0) {
+    const recentLog = gameState.aiLog.slice(-10).reverse();
+    aiLogHtml = `<div class="ai-log">
+      <div class="ai-log-header">AI Activity Log</div>
+      ${recentLog.map(entry => {
+        const icon = entry.success ? '\u2714' : '\u2718';
+        const cls = entry.success ? 'ai-log-ok' : 'ai-log-err';
+        let detail = '';
+        if (entry.thinking) detail += `<div class="ai-thinking">"${entry.thinking}"</div>`;
+        if (entry.orders && entry.orders.length > 0) detail += `<div class="ai-orders">${entry.orders.length} order(s): ${entry.execResults ? entry.execResults.join(', ') : ''}</div>`;
+        if (entry.dispatch) detail += `<div class="ai-dispatch">Dispatch to ${entry.dispatch.to}: "${entry.dispatch.message}"</div>`;
+        if (entry.error) detail += `<div class="ai-error">${entry.error}</div>`;
+        return `<div class="ai-log-entry ${cls}">
+          <span class="ai-log-icon">${icon}</span>
+          <span class="ai-log-name">${entry.charName}</span>
+          <span class="ai-log-turn">T${entry.turn}</span>
+          ${detail}
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  return `<div class="gm-section">
+    <div class="gm-section-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+      <span>AI Players (${aiChars.length} active)</span><span>\u25BC</span>
+    </div>
+    <div class="gm-section-body">
+      <p style="font-family:'Crimson Text',serif; font-size:0.95em; color:var(--ink-light); margin-bottom:12px;">
+        Let Claude play characters autonomously. AI characters generate orders and send in-character dispatches each turn.
+      </p>
+
+      <div class="ai-config-row">
+        <label style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px;">Anthropic API Key</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="password" id="aiApiKeyInput" placeholder="sk-ant-..." value="${hasKey ? AI_PLAYER.getApiKey() : ''}"
+            style="flex:1; font-family:monospace; font-size:0.85em; padding:6px 10px; border:1px solid var(--ink-light); background:var(--cream);">
+          <button class="btn-ai" onclick="saveAIApiKey()">Save Key</button>
+        </div>
+        <div style="font-size:0.75em; color:var(--ink-light); margin-top:4px;">Key: ${keyDisplay} \u2014 Uses Claude Sonnet. ~$0.02/character/turn.</div>
+      </div>
+
+      <div class="ai-char-grid" style="margin-top:16px;">
+        <label style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:8px;">Select AI-Controlled Characters</label>
+        ${charTogglesHtml}
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:8px; align-items:center;">
+        <button class="btn-ai btn-ai-primary" onclick="runAITurn()" ${!hasKey ? 'disabled title="Set API key first"' : ''}>
+          \u2699 Generate AI Orders (Turn ${gameState.currentTurnNum})
+        </button>
+        <span id="aiStatus" style="font-family:'IM Fell English',serif; font-style:italic; font-size:0.9em; color:var(--ink-light);"></span>
+      </div>
+
+      <div id="aiProgressContainer" style="display:none; margin-top:12px;"></div>
+
+      ${aiLogHtml}
+    </div>
+  </div>`;
+}
+
+function toggleAICharacter(charId) {
+  if (typeof AI_PLAYER !== 'undefined') {
+    AI_PLAYER.toggleAI(charId);
+    renderGMControl();
+  }
+}
+
+function saveAIApiKey() {
+  const input = document.getElementById('aiApiKeyInput');
+  if (input && typeof AI_PLAYER !== 'undefined') {
+    AI_PLAYER.setApiKey(input.value.trim());
+    renderGMControl();
+  }
+}
+
+async function runAITurn() {
+  if (typeof AI_PLAYER === 'undefined') { alert('AI Player module not loaded.'); return; }
+  if (!AI_PLAYER.getApiKey()) { alert('Set your Anthropic API key first.'); return; }
+
+  const chars = AI_PLAYER.getAICharacters();
+  if (chars.length === 0) { alert('No AI characters selected. Toggle at least one character.'); return; }
+
+  const statusEl = document.getElementById('aiStatus');
+  const progressEl = document.getElementById('aiProgressContainer');
+  if (progressEl) { progressEl.style.display = 'block'; progressEl.innerHTML = ''; }
+  if (statusEl) statusEl.textContent = 'Generating AI orders...';
+
+  function progressCallback(charId, current, total, status) {
+    const char = CHAR_DATA[charId];
+    const name = char ? char.name : charId;
+    const icons = { generating: '\u23F3', done: '\u2714', error: '\u2718' };
+    const colors = { generating: 'var(--gold-accent)', done: 'var(--green-neutral)', error: 'var(--red-empire)' };
+
+    if (progressEl) {
+      let existing = document.getElementById('ai-prog-' + charId);
+      if (!existing) {
+        existing = document.createElement('div');
+        existing.id = 'ai-prog-' + charId;
+        existing.style.cssText = 'font-family:"Crimson Text",serif; font-size:0.95em; padding:4px 0;';
+        progressEl.appendChild(existing);
+      }
+      existing.innerHTML = `<span style="color:${colors[status]}">${icons[status]}</span> ${name} (${current}/${total}) \u2014 ${status === 'generating' ? 'thinking...' : status}`;
+    }
+    if (statusEl) statusEl.textContent = `Processing ${current}/${total}: ${name}...`;
+  }
+
+  try {
+    const result = await AI_PLAYER.runAllAI(progressCallback);
+
+    // Save to AI log
+    if (!gameState.aiLog) gameState.aiLog = [];
+    result.results.forEach(r => {
+      gameState.aiLog.push({
+        turn: gameState.currentTurnNum,
+        charId: r.charId,
+        charName: r.charName,
+        success: r.success,
+        thinking: r.thinking,
+        orders: r.orders,
+        dispatch: r.dispatch,
+        execResults: r.execResults,
+        error: r.error
+      });
+    });
+    saveGameState();
+
+    const successCount = result.results.filter(r => r.success).length;
+    if (statusEl) statusEl.textContent = `Done! ${successCount}/${result.results.length} AI characters processed.`;
+
+    // Refresh the GM control panel
+    renderGMControl();
+    renderDashboard();
+  } catch (e) {
+    if (statusEl) statusEl.textContent = 'Error: ' + e.message;
+    console.error('AI turn error:', e);
+  }
 }
 
 function renderGMFactionEditor() {
