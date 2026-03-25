@@ -420,11 +420,11 @@ const AI_PLAYER = (function() {
     let budgetRemaining = gold;
 
     // --- Decision: Modernize? ---
-    // High economy characters modernize early; cautious characters also prefer income
-    if (canModernize && isEarly && budgetRemaining >= modConfig.cost + 4) {
-      const modChance = p.economy * 8 + (isEarly ? 15 : 0);
+    // Modernization now gives +2g/turn, +1 stability, recruit discounts at level 2+, combat bonus at level 2+
+    if (canModernize && budgetRemaining >= modConfig.cost + 2) {
+      const modChance = p.economy * 12 + (isEarly ? 30 : 10) + (currentMod === 0 ? 20 : 0);
       if (chance(modChance)) {
-        orders.push({ type: 'modernize', reason: 'Investing in long-term income' });
+        orders.push({ type: 'modernize', reason: 'Investing in long-term income and military modernization' });
         budgetRemaining -= modConfig.cost;
         thinking += 'Investing in economy. ';
       }

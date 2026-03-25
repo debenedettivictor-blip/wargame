@@ -5404,6 +5404,7 @@ body::before {
     <div class="modifiers-list">
       <label><input type="checkbox" id="modArtillery"> Artillery Upgrade (+1)</label>
       <label><input type="checkbox" id="modGas"> Gas Warfare (+2)</label>
+      <label><input type="checkbox" id="modAtkModernized"> Modernized Industry (+1 attack)</label>
     </div>
   </div>
 
@@ -5432,6 +5433,7 @@ body::before {
       <select id="defRegion"><option value="">— Select defender first —</option></select>
     </div>
     <div class="modifiers-list">
+      <label><input type="checkbox" id="modDefModernized"> Modernized Industry (+1 defense)</label>
       <label><input type="checkbox" id="modFortified"> Fortified (+2 defense)</label>
       <label><input type="checkbox" id="modTrench"> Trench Warfare (+1 defense)</label>
       <label><input type="checkbox" id="modRussiaMob"> Russia 1st-turn mobilization (half forces)</label>
@@ -7675,10 +7677,10 @@ function computeEconomy(fid) {
     }
   }
 
-  // --- Modernization income ---
+  // --- Modernization income (2g per level) ---
   let modernizationIncome = 0;
   if (!isDealer && f.modernization && f.modernization > 0) {
-    modernizationIncome = f.modernization;
+    modernizationIncome = f.modernization * 2;
   }
 
   // --- Austria desertion risk (for GM reference) ---
@@ -7767,10 +7769,8 @@ function computeStability(fid) {
     delta += 1; modifiers.push({ label: 'Trade partnerships (' + agreements.length + ' agreements)', value: +1, type: 'positive' });
   }
   if (f.modernization && f.modernization > 0) {
-    const modBonus = Math.floor(f.modernization * 0.5);
-    if (modBonus > 0) {
-      delta += modBonus; modifiers.push({ label: 'Modernization investment', value: +modBonus, type: 'positive' });
-    }
+    const modBonus = f.modernization;
+    delta += modBonus; modifiers.push({ label: 'Modernization investment', value: +modBonus, type: 'positive' });
   }
 
   // --- War effects on stability (rally-round-the-flag, then war weariness) ---
@@ -7874,12 +7874,12 @@ function lobbyAustria(fid) {
 }
 
 const MODERNIZATION_CONFIG = {
-  austria: { name: 'Accelerate Industrialization', cost: 4, max: 3, desc: 'Invest in Bohemian and Hungarian industry. +1g/turn permanently.' },
-  russia:  { name: 'Railway Expansion', cost: 4, max: 3, desc: 'Extend the Trans-Siberian and military railway network. +1g/turn permanently.' },
-  ottoman: { name: 'Young Turk Reforms', cost: 3, max: 3, desc: 'Modernize Ottoman bureaucracy and industry. +1g/turn permanently.' },
-  france:  { name: 'Colonial Investment', cost: 3, max: 3, desc: 'Expand colonial trade networks in Africa and Indochina. +1g/turn permanently.' },
-  germany: { name: 'Industrial Expansion', cost: 5, max: 2, desc: 'Expand Ruhr steel and chemical industries. +1g/turn permanently.' },
-  britain: { name: 'Imperial Infrastructure', cost: 4, max: 2, desc: 'Invest in colonial railways and telegraph networks. +1g/turn permanently.' }
+  austria: { name: 'Accelerate Industrialization', cost: 4, max: 3, desc: 'Invest in Bohemian and Hungarian industry. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
+  russia:  { name: 'Railway Expansion', cost: 4, max: 3, desc: 'Extend the Trans-Siberian and military railway network. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
+  ottoman: { name: 'Young Turk Reforms', cost: 3, max: 3, desc: 'Modernize Ottoman bureaucracy and industry. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
+  france:  { name: 'Colonial Investment', cost: 3, max: 3, desc: 'Expand colonial trade networks in Africa and Indochina. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
+  germany: { name: 'Industrial Expansion', cost: 5, max: 2, desc: 'Expand Ruhr steel and chemical industries. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
+  britain: { name: 'Imperial Infrastructure', cost: 4, max: 2, desc: 'Invest in colonial railways and telegraph networks. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' }
 };
 
 function queueModernization(fid) {
@@ -8443,15 +8443,16 @@ function showOrderConfirmation(fid) {
   let newIncomePerTurn = 0;
   actions.forEach(function(a) {
     if (a.type === 'recruit') {
-      if (a.unitType === 'army') { orderCost += UNIT_COSTS.army; newArmies++; }
-      else if (a.unitType === 'fleet') { orderCost += UNIT_COSTS.fleet; newFleets++; }
+      const modDisc = (f.modernization >= 2) ? 1 : 0;
+      if (a.unitType === 'army') { orderCost += Math.max(1, UNIT_COSTS.army - modDisc); newArmies++; }
+      else if (a.unitType === 'fleet') { orderCost += Math.max(1, UNIT_COSTS.fleet - modDisc); newFleets++; }
     }
     if (a.type === 'upgrade' && a.upgradeId && UPGRADES[a.upgradeId]) {
       orderCost += UPGRADES[a.upgradeId].cost;
     }
     if (a.type === 'modernize') {
       var modConfig = MODERNIZATION_CONFIG[fid];
-      if (modConfig) { orderCost += modConfig.cost; newIncomePerTurn += 1; }
+      if (modConfig) { orderCost += modConfig.cost; newIncomePerTurn += 2; }
     }
     if (a.type === 'diplomacy') {
       var costMatch = (a.desc || '').match(/\((\d+)\s*Gold\)/);
@@ -9003,7 +9004,8 @@ function beginResolution() {
           break;
         }
         case 'recruit': {
-          const cost = action.unitType === 'army' ? UNIT_COSTS.army : UNIT_COSTS.fleet;
+          const modDiscount = (f.modernization >= 2) ? 1 : 0;
+          const cost = Math.max(1, (action.unitType === 'army' ? UNIT_COSTS.army : UNIT_COSTS.fleet) - modDiscount);
           if (f.gold >= cost) {
             f.gold -= cost;
             const unitId = 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
@@ -9389,7 +9391,8 @@ function renderGMNewsCards() {
 function purchaseUnit(fid, type) {
   const f = gameState.factions[fid];
   if (!f) return;
-  const cost = type === 'army' ? UNIT_COSTS.army : UNIT_COSTS.fleet;
+  const modDiscount = (f.modernization >= 2) ? 1 : 0;
+  const cost = Math.max(1, (type === 'army' ? UNIT_COSTS.army : UNIT_COSTS.fleet) - modDiscount);
   if (f.gold < cost) return;
 
   f.gold -= cost;
@@ -9432,8 +9435,12 @@ function renderPurchasePanel(fid) {
   const isDealer = fid === 'krupp' || fid === 'schneider';
   if (isDealer) return '';
 
-  const canArmy = f.gold >= UNIT_COSTS.army;
-  const canFleet = f.gold >= UNIT_COSTS.fleet;
+  const modDiscount = (f.modernization >= 2) ? 1 : 0;
+  const armyCost = Math.max(1, UNIT_COSTS.army - modDiscount);
+  const fleetCost = Math.max(1, UNIT_COSTS.fleet - modDiscount);
+  const canArmy = f.gold >= armyCost;
+  const canFleet = f.gold >= fleetCost;
+  const discountLabel = modDiscount > 0 ? ' <span style="color:#4CAF50; font-size:0.8em;">(Modernized)</span>' : '';
 
   return `
     <div class="purchase-panel">
@@ -9441,11 +9448,11 @@ function renderPurchasePanel(fid) {
       <div class="purchase-grid">
         <button class="purchase-btn" onclick="purchaseUnit('${fid}','army')" ${canArmy ? '' : 'disabled'}>
           Army Division → ${REGION_NAMES[HOME_REGIONS[fid]]}
-          <span class="cost">${UNIT_COSTS.army} Gold</span>
+          <span class="cost">${armyCost} Gold${discountLabel}</span>
         </button>
         <button class="purchase-btn" onclick="purchaseUnit('${fid}','fleet')" ${canFleet ? '' : 'disabled'}>
           Fleet → ${REGION_NAMES[HOME_SEAS[fid]]}
-          <span class="cost">${UNIT_COSTS.fleet} Gold</span>
+          <span class="cost">${fleetCost} Gold${discountLabel}</span>
         </button>
       </div>
     </div>
@@ -12517,6 +12524,7 @@ function renderGMControl() {
           <div class="modifiers-list">
             <label><input type="checkbox" id="modArtillery"> Artillery Upgrade (+1)</label>
             <label><input type="checkbox" id="modGas"> Gas Warfare (+2)</label>
+            <label><input type="checkbox" id="modAtkModernized"> Modernized Industry (+1 attack)</label>
           </div>
         </div>
         <div class="battle-vs">VS</div>
@@ -12531,6 +12539,7 @@ function renderGMControl() {
           <div class="battle-field"><label>Divisions Committed</label><input type="number" id="defDivisions" min="1" value="1"></div>
           <div class="battle-field"><label>Defending Region</label><select id="defRegion"><option value="">\u2014 Select defender first \u2014</option></select></div>
           <div class="modifiers-list">
+            <label><input type="checkbox" id="modDefModernized"> Modernized Industry (+1 defense)</label>
             <label><input type="checkbox" id="modFortified"> Fortified (+2 defense)</label>
             <label><input type="checkbox" id="modTrench"> Trench Warfare (+1 defense)</label>
             <label><input type="checkbox" id="modRussiaMob"> Russia 1st-turn mobilization (half forces)</label>
@@ -13951,6 +13960,8 @@ function populateBattleSimulator(battleId) {
   const defFaction = gameState.factions[primaryDef.fid];
   document.getElementById('modArtillery').checked = !!(atkFaction.upgrades && atkFaction.upgrades.artillery);
   document.getElementById('modGas').checked = !!(atkFaction.upgrades && atkFaction.upgrades.gas);
+  document.getElementById('modAtkModernized').checked = (atkFaction.modernization >= 2);
+  document.getElementById('modDefModernized').checked = (defFaction.modernization >= 2);
   document.getElementById('modTrench').checked = !!(defFaction.upgrades && defFaction.upgrades.trenches);
 
   // Check fortification for Paris/Dardanelles
@@ -14010,10 +14021,15 @@ function updateBattleOptions() {
   if (atkFid) {
     const maxAtk = getTotalTroops(atkFid);
     document.getElementById('atkDivisions').max = maxAtk;
+    // Auto-check modernization combat bonus (level 2+)
+    const atkF = gameState.factions[atkFid];
+    document.getElementById('modAtkModernized').checked = (atkF && atkF.modernization >= 2);
   }
   if (defFid) {
     const maxDef = getTotalTroops(defFid);
     document.getElementById('defDivisions').max = maxDef;
+    const defF = gameState.factions[defFid];
+    document.getElementById('modDefModernized').checked = (defF && defF.modernization >= 2);
   }
 }
 
@@ -14046,6 +14062,8 @@ function rollBattle() {
   let atkMod = 0, defMod = 0;
   if (document.getElementById('modArtillery').checked) atkMod += 1;
   if (document.getElementById('modGas').checked) atkMod += 2;
+  if (document.getElementById('modAtkModernized').checked) atkMod += 1;
+  if (document.getElementById('modDefModernized').checked) defMod += 1;
   if (document.getElementById('modFortified').checked) defMod += 2;
   if (document.getElementById('modTrench').checked) defMod += 1;
   if (document.getElementById('modRussiaMob').checked) defDiv = Math.ceil(defDiv / 2);
