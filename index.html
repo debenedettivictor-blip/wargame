@@ -11,6 +11,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="ai-player.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <style>
 :root {
   --parchment: #f4eed5;
@@ -4241,6 +4243,10 @@ body::before {
 <!-- ==================== OVERVIEW ==================== -->
 <div id="overview" class="tab-content active">
 
+<div style="text-align:right; margin-bottom:12px;">
+  <button class="print-btn" style="font-size:0.75em; padding:8px 18px;" onclick="exportRulesDocx()">📄 Export Rules as Word Doc</button>
+</div>
+
 <div class="section">
 <div class="section-title"><span class="icon">⚔</span> The Premise</div>
 <p>The year is 1910. The great empires of Europe stand at the height of their power — and at the brink of catastrophe. Ancient rivalries fester, colonial ambitions collide, and arms manufacturers grow fat on the paranoia of nations. Each faction pursues its own vision for Europe's future. Some seek peace; most do not. <strong>War is not inevitable — but it is very, very likely.</strong></p>
@@ -4288,7 +4294,7 @@ body::before {
     <div style="background:var(--ink); color:var(--parchment); min-width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:900; font-size:1.1em; border-radius:2px;">2</div>
     <div>
       <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px;">DIPLOMACY (8–10 min)</strong><br>
-      The heart of the game. Players talk, argue, threaten, and negotiate. Form alliances. Broker trade deals. Send written dispatches between boats. Buy weapons from arms dealers. Whisper promises you may not keep. <em>Everything said is non-binding unless written down and shown to the GM.</em>
+      The heart of the game. Players talk, argue, threaten, and negotiate. Form alliances. Broker trade deals. Send written dispatches to rival factions. Buy weapons from arms dealers. Whisper promises you may not keep. <em>Everything said is non-binding unless written down and shown to the GM.</em>
     </div>
   </div>
 
@@ -4336,11 +4342,10 @@ body::before {
   <div style="background: #f0e8e8; border: 2px solid var(--red-empire); padding: 14px; border-radius: 2px;">
     <strong style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; color: var(--red-empire);">Incentives for War</strong>
     <ul style="margin-top:8px; margin-left:16px; font-size:0.95em;">
-      <li>France earns <strong>0 VP/turn at peace</strong> — needs war to win</li>
-      <li>Arms dealers get <strong>+2 gold/turn War Dividend</strong></li>
+      <li>Some factions earn little from peace — and need conflict to score</li>
+      <li>Arms dealers profit from instability</li>
       <li>Territory conquest earns massive faction VP</li>
-      <li>Many personal secret objectives require war</li>
-      <li>Russia's hidden revolutionary <em>wants</em> collapse</li>
+      <li>Bold action can pay off — if you survive</li>
     </ul>
   </div>
 </div>
@@ -4363,11 +4368,7 @@ body::before {
 
 <div class="section">
 <div class="section-title"><span class="icon">👥</span> Player Count & Setup</div>
-<p id="overviewPlayerCount"><strong>12-24 players</strong> divided into <strong>8 factions</strong> plus <strong>1 Game Master</strong>. Each faction has 1–5 players who collectively make decisions. Configure your player count in the <strong>Setup</strong> tab. The game is designed for <strong>two boats</strong> — factions on separate boats must communicate via written dispatches (paper notes ferried between boats), adding delicious delays and the possibility of intercepted messages.</p>
-
-<div class="highlight-box">
-  <strong>Two-Boat Setup:</strong> Place the Central Powers (Germany, Austria-Hungary, Ottoman Empire) and one arms dealer on <strong>Boat A</strong>. Place the Entente (France, Britain, Russia) and the other arms dealer on <strong>Boat B</strong>. This forces diplomacy across the water — messengers must physically carry notes between boats. The GM floats between both.
-</div>
+<p id="overviewPlayerCount"><strong>12-24 players</strong> divided into <strong>8 factions</strong> plus <strong>1 Game Master</strong>. Each faction has 1–5 players who collectively make decisions. Configure your player count in the <strong>Setup</strong> tab. Opposing alliances are separated — they must communicate via written dispatches (paper notes), adding delicious delays and the possibility of intercepted messages.</p>
 </div>
 
 <div class="section">
@@ -4396,7 +4397,7 @@ body::before {
 
 <div class="highlight-box" style="border-color: var(--red-empire);">
   <strong>⚠ The Inner Game — Personal Secret Objectives:</strong><br>
-  Every player has a named historical role with their OWN personal secret objectives — often in tension with their teammates. The Chancellor wants to topple the Kaiser. The French General wants reckless offensives the President opposes. The Sultan and the Young Turk are fighting for control of the Ottoman Empire. <strong>One player inside Russia is a secret revolutionary</strong> — outwardly loyal, secretly sabotaging the war effort and trying to trigger revolution. The Schneider-Škoda arms dealer is a solo "Merchant of Death" who roams between both boats, funding coups and starting wars for profit. Final victory goes to the INDIVIDUAL player with the most VP — not the faction.
+  Every player has a named historical role with their OWN personal secret objectives — often in tension with their teammates. Your allies may not share your ambitions. Trust no one completely. Final victory goes to the INDIVIDUAL player with the most VP — not the faction.
 </div>
 </div>
 </div>
@@ -5031,7 +5032,7 @@ body::before {
   ◆ <strong>Germany: +1 VP/turn</strong> — "Industrial Prosperity." Benefits from peace but strong enough for war.<br>
   ◆ <strong>France: +1 VP/turn</strong> — "Diplomatic Prestige." Plus Entente Leader VP and massive Alsace-Lorraine capture bonus.<br>
   ◆ <strong>Ottoman Empire: +1 VP/turn</strong> — "Ottoman Revival." Declining empire — neutrality alone won't win.<br><br>
-  <em>All great powers can now compete for VP. France and Britain have secondary objectives that reward bold action, while Austria and Russia profit from peace. Arms dealers must spark war or face -8 VP.</em>
+  <em>All great powers can compete for VP through different paths. Some factions thrive in peace, others need bold action to score.</em>
 </div>
 
 <div class="highlight-box" style="border-color: #8b1a1a;">
@@ -5053,7 +5054,7 @@ body::before {
 
 <p><strong style="font-family:'Playfair Display',serif;">Personal VP</strong> — earned from your individual role card's secret objectives. ONLY YOU receive these. Your teammates don't know what you're after — and their goals may conflict with yours.</p>
 
-<p style="margin-top:12px;"><strong>Final score = Faction VP + Personal VP.</strong> The INDIVIDUAL player with the highest combined total wins the game. Not the faction — the person. This means teammates are also competitors. The German Chancellor might sabotage the Kaiser to score personal VP, even if it hurts Germany slightly. The French General might launch a reckless offensive the President opposes. The Sultan and Young Turk might be tearing each other apart while Russia invades.</p>
+<p style="margin-top:12px;"><strong>Final score = Faction VP + Personal VP.</strong> The INDIVIDUAL player with the highest combined total wins the game. Not the faction — the person. This means teammates are also competitors. Your personal objectives may conflict with your faction's best interests — and your teammates won't know what you're really after.</p>
 
 <div class="highlight-box">
   <strong>Awards at Game End:</strong><br>
@@ -14551,6 +14552,135 @@ function updatePrintButtons() {
 
   const roleBtn = document.querySelector('.print-roles-btn');
   if (roleBtn) roleBtn.textContent = '\u2399 Print ' + totalRoles + ' Role Cards';
+}
+
+// ==================== EXPORT RULES AS WORD DOC ====================
+function exportRulesDocx() {
+  var D = window.docx;
+  var heading = function(text, level) {
+    return new D.Paragraph({ children: [new D.TextRun({ text: text, bold: true, size: level === 1 ? 36 : level === 2 ? 28 : 24, font: 'Georgia' })], spacing: { before: 300, after: 120 } });
+  };
+  var para = function(text, opts) {
+    opts = opts || {};
+    return new D.Paragraph({ children: [new D.TextRun({ text: text, bold: !!opts.bold, italics: !!opts.italic, size: opts.size || 22, font: 'Georgia' })], spacing: { after: 100 } });
+  };
+  var bullet = function(text) {
+    return new D.Paragraph({ children: [new D.TextRun({ text: text, size: 22, font: 'Georgia' })], bullet: { level: 0 }, spacing: { after: 60 } });
+  };
+
+  var children = [];
+
+  // Title
+  children.push(new D.Paragraph({ children: [new D.TextRun({ text: 'THE GUNS OF AUGUST', bold: true, size: 48, font: 'Georgia' })], alignment: D.AlignmentType.CENTER, spacing: { after: 60 } }));
+  children.push(new D.Paragraph({ children: [new D.TextRun({ text: 'A Grand Strategy Game', italics: true, size: 28, font: 'Georgia' })], alignment: D.AlignmentType.CENTER, spacing: { after: 300 } }));
+
+  // === OVERVIEW SECTION ===
+  children.push(heading('THE PREMISE', 1));
+  children.push(para('The year is 1910. The great empires of Europe stand at the height of their power \u2014 and at the brink of catastrophe. Ancient rivalries fester, colonial ambitions collide, and arms manufacturers grow fat on the paranoia of nations. Each faction pursues its own vision for Europe\u2019s future. Some seek peace; most do not. War is not inevitable \u2014 but it is very, very likely.'));
+  children.push(para('Players represent the leaders, generals, diplomats, and industrialists who will decide the fate of millions. The game is played over 6 turns, each representing roughly one year (1910\u20131915). Alliances will form, betrayals will occur, and the Game Master will ensure that history \u2014 or something like it \u2014 unfolds.'));
+
+  children.push(heading('HOW TO WIN', 1));
+  children.push(para('THE WINNER IS THE INDIVIDUAL PLAYER WITH THE MOST VICTORY POINTS (VP).', { bold: true }));
+  children.push(para('Not the best faction. Not the winning side. YOU, personally. Your teammate is also your rival.'));
+  children.push(bullet('Faction VP (Shared): Earned by achieving your faction\u2019s public objectives \u2014 controlling territory, maintaining alliances, winning wars. Split equally among all faction members.'));
+  children.push(bullet('Personal VP (Secret): Each player has a named historical role with hidden personal objectives \u2014 often in direct tension with their teammates. Only you earn these VP.'));
+
+  children.push(heading('WHAT PLAYERS DO EACH TURN', 1));
+  children.push(para('Every turn follows four phases:'));
+  children.push(bullet('Phase 1 \u2014 NEWS (3 min): The GM reads a dramatic headline aloud with real game effects.'));
+  children.push(bullet('Phase 2 \u2014 DIPLOMACY (8\u201310 min): Players talk, argue, threaten, and negotiate. Form alliances, broker trade deals. Everything said is non-binding unless written down and shown to the GM.'));
+  children.push(bullet('Phase 3 \u2014 ORDERS (3 min): All factions simultaneously write secret orders \u2014 spend gold, move forces, declare war, sign or break treaties.'));
+  children.push(bullet('Phase 4 \u2014 RESOLUTION (5 min): The GM reads all orders aloud. Purchases processed. Armies move. Battles resolved. Income distributed. VP tallied.'));
+
+  children.push(heading('SPENDING GOLD', 2));
+  children.push(bullet('Buy 1 Army Division: 2 Gold'));
+  children.push(bullet('Buy 1 Fleet: 6 Gold'));
+  children.push(bullet('Mobilize divisions for war: 1 Gold/division (0.5 Gold/div if full mobilization)'));
+  children.push(bullet('Modernization: 3\u20135 Gold (+1g/turn permanently)'));
+  children.push(bullet('Artillery Upgrade: 4 Gold (+1 to attack rolls)'));
+  children.push(bullet('Fortify a region: 3 Gold (+2 defense)'));
+  children.push(bullet('Espionage: 3 Gold \u2192 GM rolls d6, 4+ succeeds'));
+
+  children.push(heading('HOW BATTLES WORK', 1));
+  children.push(para('When armies clash in the same region during Resolution:'));
+  children.push(bullet('1. Count divisions on each side (allies combine forces)'));
+  children.push(bullet('2. Add modifiers \u2014 defender in fortified region gets +2; Russia fights at half strength in Turn 1 of war'));
+  children.push(bullet('3. Both sides roll 1d6, add divisions + modifiers'));
+  children.push(bullet('4. Compare totals \u2014 higher total wins; ties go to defender'));
+  children.push(bullet('5. Calculate losses \u2014 bigger victory margin = more enemy casualties, fewer of your own'));
+  children.push(para('Outcomes range from Crushing Victory (enemy routed, 60% losses) to Stalemate (both sides bleed, nobody retreats). Naval combat works the same way with fleets.'));
+
+  children.push(heading('PLAYER COUNT & SETUP', 1));
+  children.push(para('12\u201324 players divided into 8 factions plus 1 Game Master. Each faction has 1\u20135 players who collectively make decisions.'));
+
+  children.push(heading('TIME & PACING', 1));
+  children.push(para('Total game time: 2.5\u20133 hours.'));
+  children.push(bullet('Turns 1\u20133 (Peacetime): ~20 min each \u2014 Diplomacy-heavy. Build armies, forge alliances, scheme.'));
+  children.push(bullet('Turns 4\u20136 (Crisis/War): ~25 min each \u2014 Faster. War erupts. Battles resolve. Empires crumble.'));
+
+  // === RULES SECTION ===
+  children.push(new D.Paragraph({ children: [], spacing: { before: 400 } }));
+  children.push(heading('RULES', 1));
+
+  children.push(heading('ARMIES & NAVIES', 2));
+  children.push(para('Army Divisions represent ~100,000 troops. Fleets represent squadrons of warships. They are used to attack regions, defend territory, blockade ports, and project power.'));
+  children.push(para('Combat Resolution: When armies clash, each side totals their divisions. The GM rolls 1d6 for each side. Higher roll + more divisions wins. Ties go to the defender. Losing side loses divisions equal to half the difference (rounded up, minimum 1). Winner loses 1 division. Fortifications give the defender +2 to their roll.'));
+  children.push(para('Naval Combat: Same as above but with fleets. Naval superiority allows blockades \u2014 deploy fleets to a sea zone and declare a blockade to cut an enemy\u2019s trade income.'));
+
+  children.push(heading('THE MAP (Simplified Regions)', 2));
+  children.push(bullet('Western Europe: France, Paris, Alsace-Lorraine, Belgium, Britain'));
+  children.push(bullet('Central/Eastern Europe: Germany, Austria, Serbia, Russia, Poland'));
+  children.push(bullet('Southern/Mediterranean: Ottoman Empire, The Dardanelles, Italy, The Balkans'));
+  children.push(bullet('Seas: North Sea, English Channel, Mediterranean, Baltic Sea'));
+
+  children.push(heading('DIPLOMACY', 2));
+  children.push(bullet('Form Alliances: Written, signed agreements. Breaking costs \u20132 VP but is legal.'));
+  children.push(bullet('Trade: Exchange Gold, promise future payments, or trade arms.'));
+  children.push(bullet('Threaten: Promise consequences if a faction takes a certain action.'));
+  children.push(bullet('Send Dispatches: Messages between opposing alliances must be written on paper. The GM may intercept (roll 1d6: on a 1, message read aloud).'));
+  children.push(bullet('Secret Deals: Any deal not shown to the GM is not enforceable but IS possible.'));
+
+  children.push(heading('DECLARING WAR', 2));
+  children.push(bullet('Any nation may declare war during the Orders phase.'));
+  children.push(bullet('Allied nations must declare if they honor their alliance within the same turn.'));
+  children.push(bullet('Russia requires 1 full turn to mobilize (half army in first turn of war).'));
+  children.push(bullet('Britain automatically enters if Belgium is invaded.'));
+
+  children.push(heading('ECONOMICS OF PEACE & WAR', 2));
+  children.push(bullet('Maintenance: Each army division costs 0.5 Gold/turn. Each fleet costs 0.75 Gold/turn.'));
+  children.push(bullet('Trade Agreements: Give +1 Gold/turn to both parties. Breaking costs \u20132 VP.'));
+  children.push(bullet('Modernization: Invest 3\u20135 Gold for +1 Gold/turn permanently (max 3 times).'));
+  children.push(para('War Costs:', { bold: true }));
+  children.push(bullet('Lose 50% trade income'));
+  children.push(bullet('War exhaustion: \u20131 Gold/turn'));
+  children.push(bullet('After 2+ turns of war: Civilian unrest adds \u20131 Gold/turn'));
+  children.push(bullet('All peace VP stops immediately'));
+
+  children.push(heading('BLOCKADE RULES', 2));
+  children.push(bullet('Turn 1: Target loses ALL trade income.'));
+  children.push(bullet('Turn 2: Trade cut + 35% industry loss.'));
+  children.push(bullet('Turn 3+: Trade cut + 60% industry loss.'));
+  children.push(bullet('Break a blockade by winning a naval battle in that sea zone.'));
+
+  children.push(heading('VICTORY CONDITIONS', 2));
+  children.push(para('At the end of Turn 6, each player tallies their Victory Points.'));
+  children.push(bullet('Faction VP \u2014 earned from shared faction objectives. Split equally among faction members.'));
+  children.push(bullet('Personal VP \u2014 earned from your individual role card\u2019s secret objectives. Only you receive these.'));
+  children.push(para('Final score = Faction VP + Personal VP. The individual player with the highest combined total wins.', { bold: true }));
+
+  children.push(heading('AWARDS', 2));
+  children.push(bullet('Grand Victor: Player with the most total VP'));
+  children.push(bullet('Best Faction: Faction with the highest combined total'));
+  children.push(bullet('Best Betrayal: GM\u2019s award for the most dramatic backstab'));
+  children.push(bullet('The Peacemaker: GM\u2019s award for the player who tried hardest to prevent war'));
+
+  var doc = new D.Document({
+    sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: children }]
+  });
+
+  D.Packer.toBlob(doc).then(function(blob) {
+    saveAs(blob, 'Guns_of_August_Rules.docx');
+  });
 }
 
 // ==================== INIT NEW FEATURES ====================
