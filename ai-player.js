@@ -483,6 +483,21 @@ const AI_PLAYER = (function() {
       }
     }
 
+    // --- Decision: Send personal gold to incentivize another character? ---
+    var personalGold = (gameState.charGold && gameState.charGold[charId]) || 0;
+    if (personalGold >= 2) {
+      var goldTarget = getGoldTransferTarget(charId, factionId, turn, atWar, p);
+      if (goldTarget) {
+        orders.push({
+          type: 'gold_transfer',
+          toCharId: goldTarget.to,
+          amount: goldTarget.amount,
+          reason: goldTarget.reason
+        });
+        thinking += goldTarget.thinkMsg + ' ';
+      }
+    }
+
     // --- Decision: BEF deployment (Britain only)? ---
     if (factionId === 'britain' && charId === 'pm' && isMid && atWar) {
       const befDeployed = f.upgrades && f.upgrades.bef_deployed;
@@ -538,10 +553,86 @@ const AI_PLAYER = (function() {
       }
     }
 
+    // Dealers also send personal gold to grease palms
+    var personalGold = (gameState.charGold && gameState.charGold[charId]) || 0;
+    if (personalGold >= 2) {
+      var goldTarget = getGoldTransferTarget(charId, factionId, turn, false, p);
+      if (goldTarget) {
+        orders.push({
+          type: 'gold_transfer',
+          toCharId: goldTarget.to,
+          amount: goldTarget.amount,
+          reason: goldTarget.reason
+        });
+        thinking += goldTarget.thinkMsg + ' ';
+      }
+    }
+
     if (!thinking) thinking = 'Observing the market and biding our time.';
 
     const dispatch = generateDispatch(charId);
     return { thinking: thinking.trim(), orders, dispatch };
+  }
+
+  // --- Helper: decide who to send personal gold to ---
+  // Each character has strategic motivations for bribing/incentivizing specific others
+  function getGoldTransferTarget(charId, factionId, turn, atWar, p) {
+    var personalGold = (gameState.charGold && gameState.charGold[charId]) || 0;
+    if (personalGold < 2) return null;
+
+    // Character-specific gold transfer logic
+    var GOLD_TARGETS = {
+      // Germany: Kaiser bribes Ottoman/Austrian allies; Chancellor buys Entente goodwill
+      kaiser:      { targets: ['emperor', 'sultan'], chance: 25, reason: 'Securing alliance loyalty', thinkMsg: 'Sending gold to secure an ally.' },
+      chancellor:  { targets: ['foreign_sec', 'president'], chance: 30, reason: 'Diplomatic sweetener', thinkMsg: 'Sending gold to open diplomatic channels.' },
+      chief_staff: { targets: ['conrad'], chance: 35, reason: 'Coordinating war plans', thinkMsg: 'Funding Conrad to push for war.' },
+
+      // France: President funds Russia; General bribes War Minister for coordination
+      president:   { targets: ['tsar', 'war_minister'], chance: 40, reason: 'Funding the Franco-Russian alliance', thinkMsg: 'Sending gold to Russia as promised.' },
+      general:     { targets: ['war_minister'], chance: 25, reason: 'Military coordination funds', thinkMsg: 'Funding Russian military coordination.' },
+
+      // Britain: PM stays cautious; Admiralty funds naval allies; Foreign Sec buys influence
+      pm:          { targets: ['president', 'tsar'], chance: 15, reason: 'Quiet diplomatic support', thinkMsg: 'Discreetly supporting an ally.' },
+      admiralty:   { targets: ['vickers_dir'], chance: 20, reason: 'Naval procurement incentive', thinkMsg: 'Funding Vickers for naval expansion.' },
+      foreign_sec: { targets: ['president', 'chancellor'], chance: 25, reason: 'Maintaining the balance of power', thinkMsg: 'Sending gold to maintain influence.' },
+
+      // Russia: Tsar sends to Duma to prevent revolution; War Minister pays for arms
+      tsar:        { targets: ['duma'], chance: 30, reason: 'Placating reform demands', thinkMsg: 'Sending gold to the Duma to buy stability.' },
+      war_minister:{ targets: ['krupp_dir', 'merchant'], chance: 25, reason: 'Arms procurement', thinkMsg: 'Paying arms dealers for equipment.' },
+      duma:        { targets: ['tsar'], chance: 15, reason: 'Demonstrating loyalty', thinkMsg: 'Returning gold to the Tsar as show of faith.' },
+
+      // Austria: Emperor buys stability; Conrad funds German war hawks
+      emperor:     { targets: ['kaiser', 'chancellor'], chance: 20, reason: 'Strengthening the dual alliance', thinkMsg: 'Sending gold to Berlin to shore up the alliance.' },
+      conrad:      { targets: ['chief_staff', 'krupp_dir'], chance: 35, reason: 'Funding the coming war', thinkMsg: 'Sending gold to prepare for war.' },
+
+      // Ottoman: Sultan buys neutrality from both sides; Young Turk funds modernization
+      sultan:      { targets: ['kaiser', 'pm'], chance: 20, reason: 'Maintaining profitable neutrality', thinkMsg: 'Sending gifts to maintain relationships.' },
+      young_turk:  { targets: ['chief_staff', 'krupp_dir'], chance: 30, reason: 'Buying German military expertise', thinkMsg: 'Paying for German military training.' },
+
+      // Dealers: spread gold widely to create dependencies
+      krupp_dir:   { targets: ['kaiser', 'conrad', 'young_turk'], chance: 35, reason: 'Cultivating clients', thinkMsg: 'Greasing palms to secure arms contracts.' },
+      vickers_dir: { targets: ['admiralty', 'pm'], chance: 25, reason: 'Lobbying for naval orders', thinkMsg: 'Investing in political influence.' },
+      merchant:    { targets: ['duma', 'conrad', 'young_turk'], chance: 40, reason: 'Fomenting instability', thinkMsg: 'Bankrolling troublemakers across Europe.' }
+    };
+
+    var config = GOLD_TARGETS[charId];
+    if (!config) return null;
+
+    // Apply personality-scaled chance + turn pressure
+    var adjustedChance = config.chance + (p.diplomacy * 2) + (turn >= 3 ? 10 : 0) + (atWar ? 15 : 0);
+    if (!chance(adjustedChance)) return null;
+
+    var target = pick(config.targets);
+    // Send 1-3 gold, scaled to what we have (never more than half our stash)
+    var maxSend = Math.min(3, Math.floor(personalGold / 2));
+    var amount = Math.max(1, Math.min(maxSend, Math.ceil(Math.random() * 2)));
+
+    return {
+      to: target,
+      amount: amount,
+      reason: config.reason,
+      thinkMsg: config.thinkMsg
+    };
   }
 
   // --- Helper: get natural subsidy targets for a faction ---
@@ -664,6 +755,48 @@ const AI_PLAYER = (function() {
                 desc: 'BEF Rapid Deployment: 4 divisions to France (2 Gold, one-time)'
               });
               results.push('Queued: BEF deployment');
+            }
+            break;
+
+          case 'gold_transfer':
+            if (order.toCharId && order.amount > 0) {
+              var fromGold = (gameState.charGold && gameState.charGold[charId]) || 0;
+              var sendAmt = Math.min(order.amount, fromGold);
+              if (sendAmt > 0) {
+                var toCharData = CHAR_DATA[order.toCharId];
+                // Transfer the gold
+                gameState.charGold[charId] -= sendAmt;
+                if (gameState.charGold[order.toCharId] === undefined) gameState.charGold[order.toCharId] = 0;
+                gameState.charGold[order.toCharId] += sendAmt;
+                // Log for both parties
+                if (typeof addCharGoldLogEntry === 'function') {
+                  addCharGoldLogEntry(charId, {
+                    type: 'sent', amount: -sendAmt, otherCharId: order.toCharId,
+                    desc: 'Sent ' + sendAmt + ' gold to ' + (toCharData ? toCharData.name : order.toCharId) + ' — ' + (order.reason || 'AI strategy')
+                  });
+                  addCharGoldLogEntry(order.toCharId, {
+                    type: 'received', amount: sendAmt, otherCharId: charId,
+                    desc: 'Received ' + sendAmt + ' gold from ' + char.name + ' [AI]'
+                  });
+                }
+                // Send as player message so both see the transaction
+                var transferText = '\u2694 Gold Transfer: ' + sendAmt + ' gold sent \u2014 ' + (order.reason || '');
+                var senderMsgs = getCharMessages(charId);
+                senderMsgs.push({
+                  fromId: charId, fromName: char.name + ' [AI]',
+                  toId: order.toCharId, toName: toCharData ? toCharData.name : order.toCharId,
+                  channel: 'player', text: transferText, turn: gameState.currentTurnNum,
+                  timestamp: Date.now(), read: false, aiGenerated: true
+                });
+                var recipMsgs = getCharMessages(order.toCharId);
+                recipMsgs.push({
+                  fromId: charId, fromName: char.name + ' [AI]',
+                  toId: order.toCharId, toName: toCharData ? toCharData.name : order.toCharId,
+                  channel: 'player', text: transferText, turn: gameState.currentTurnNum,
+                  timestamp: Date.now(), read: false, aiGenerated: true
+                });
+                results.push('Gold transfer: ' + sendAmt + 'g to ' + (toCharData ? toCharData.name : order.toCharId));
+              }
             }
             break;
 
