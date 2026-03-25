@@ -7768,10 +7768,7 @@ function computeStability(fid) {
   if (agreements.length >= 2) {
     delta += 1; modifiers.push({ label: 'Trade partnerships (' + agreements.length + ' agreements)', value: +1, type: 'positive' });
   }
-  if (f.modernization && f.modernization > 0) {
-    const modBonus = f.modernization;
-    delta += modBonus; modifiers.push({ label: 'Modernization investment', value: +modBonus, type: 'positive' });
-  }
+  // Modernization stability is applied as a one-time +2.5 boost at purchase, not per-turn
 
   // --- War effects on stability (rally-round-the-flag, then war weariness) ---
   if (f.atWar) {
@@ -7874,12 +7871,12 @@ function lobbyAustria(fid) {
 }
 
 const MODERNIZATION_CONFIG = {
-  austria: { name: 'Accelerate Industrialization', cost: 4, max: 3, desc: 'Invest in Bohemian and Hungarian industry. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
-  russia:  { name: 'Railway Expansion', cost: 4, max: 3, desc: 'Extend the Trans-Siberian and military railway network. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
-  ottoman: { name: 'Young Turk Reforms', cost: 3, max: 3, desc: 'Modernize Ottoman bureaucracy and industry. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
-  france:  { name: 'Colonial Investment', cost: 3, max: 3, desc: 'Expand colonial trade networks in Africa and Indochina. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
-  germany: { name: 'Industrial Expansion', cost: 5, max: 2, desc: 'Expand Ruhr steel and chemical industries. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' },
-  britain: { name: 'Imperial Infrastructure', cost: 4, max: 2, desc: 'Invest in colonial railways and telegraph networks. Each level: +2g/turn, +1 stability, and at level 2+ recruits cost 1g less.' }
+  austria: { name: 'Accelerate Industrialization', cost: 4, max: 3, desc: 'Invest in Bohemian and Hungarian industry. Each level: +2g/turn permanently, +2.5 stability immediately. At level 2+ recruits cost 1g less.' },
+  russia:  { name: 'Railway Expansion', cost: 4, max: 3, desc: 'Extend the Trans-Siberian and military railway network. Each level: +2g/turn permanently, +2.5 stability immediately. At level 2+ recruits cost 1g less.' },
+  ottoman: { name: 'Young Turk Reforms', cost: 3, max: 3, desc: 'Modernize Ottoman bureaucracy and industry. Each level: +2g/turn permanently, +2.5 stability immediately. At level 2+ recruits cost 1g less.' },
+  france:  { name: 'Colonial Investment', cost: 3, max: 3, desc: 'Expand colonial trade networks in Africa and Indochina. Each level: +2g/turn permanently, +2.5 stability immediately. At level 2+ recruits cost 1g less.' },
+  germany: { name: 'Industrial Expansion', cost: 5, max: 2, desc: 'Expand Ruhr steel and chemical industries. Each level: +2g/turn permanently, +2.5 stability immediately. At level 2+ recruits cost 1g less.' },
+  britain: { name: 'Imperial Infrastructure', cost: 4, max: 2, desc: 'Invest in colonial railways and telegraph networks. Each level: +2g/turn permanently, +2.5 stability immediately. At level 2+ recruits cost 1g less.' }
 };
 
 function queueModernization(fid) {
@@ -9087,7 +9084,11 @@ function beginResolution() {
         case 'diplomacy':
         case 'trade':
         case 'modernize': {
-          gameState.resolutionLog.push({ fid, icon: '\u25C6', text: `${FACTION_NAMES[fid]}: ${action.desc || action.type} (GM to adjudicate)`, manual: true });
+          // Apply one-time +2.5 stability boost on purchase
+          if (typeof f.stability === 'number') {
+            f.stability = Math.min(10, f.stability + 2.5);
+          }
+          gameState.resolutionLog.push({ fid, icon: '\u25C6', text: `${FACTION_NAMES[fid]}: ${action.desc || action.type} (+2.5 stability) (GM to adjudicate)`, manual: true });
           break;
         }
         default: {
@@ -12524,7 +12525,6 @@ function renderGMControl() {
           <div class="modifiers-list">
             <label><input type="checkbox" id="modArtillery"> Artillery Upgrade (+1)</label>
             <label><input type="checkbox" id="modGas"> Gas Warfare (+2)</label>
-            <label><input type="checkbox" id="modAtkModernized"> Modernized Industry (+1 attack)</label>
           </div>
         </div>
         <div class="battle-vs">VS</div>
@@ -12539,7 +12539,6 @@ function renderGMControl() {
           <div class="battle-field"><label>Divisions Committed</label><input type="number" id="defDivisions" min="1" value="1"></div>
           <div class="battle-field"><label>Defending Region</label><select id="defRegion"><option value="">\u2014 Select defender first \u2014</option></select></div>
           <div class="modifiers-list">
-            <label><input type="checkbox" id="modDefModernized"> Modernized Industry (+1 defense)</label>
             <label><input type="checkbox" id="modFortified"> Fortified (+2 defense)</label>
             <label><input type="checkbox" id="modTrench"> Trench Warfare (+1 defense)</label>
             <label><input type="checkbox" id="modRussiaMob"> Russia 1st-turn mobilization (half forces)</label>
@@ -13960,8 +13959,6 @@ function populateBattleSimulator(battleId) {
   const defFaction = gameState.factions[primaryDef.fid];
   document.getElementById('modArtillery').checked = !!(atkFaction.upgrades && atkFaction.upgrades.artillery);
   document.getElementById('modGas').checked = !!(atkFaction.upgrades && atkFaction.upgrades.gas);
-  document.getElementById('modAtkModernized').checked = (atkFaction.modernization >= 2);
-  document.getElementById('modDefModernized').checked = (defFaction.modernization >= 2);
   document.getElementById('modTrench').checked = !!(defFaction.upgrades && defFaction.upgrades.trenches);
 
   // Check fortification for Paris/Dardanelles
@@ -14021,15 +14018,10 @@ function updateBattleOptions() {
   if (atkFid) {
     const maxAtk = getTotalTroops(atkFid);
     document.getElementById('atkDivisions').max = maxAtk;
-    // Auto-check modernization combat bonus (level 2+)
-    const atkF = gameState.factions[atkFid];
-    document.getElementById('modAtkModernized').checked = (atkF && atkF.modernization >= 2);
   }
   if (defFid) {
     const maxDef = getTotalTroops(defFid);
     document.getElementById('defDivisions').max = maxDef;
-    const defF = gameState.factions[defFid];
-    document.getElementById('modDefModernized').checked = (defF && defF.modernization >= 2);
   }
 }
 
@@ -14062,8 +14054,6 @@ function rollBattle() {
   let atkMod = 0, defMod = 0;
   if (document.getElementById('modArtillery').checked) atkMod += 1;
   if (document.getElementById('modGas').checked) atkMod += 2;
-  if (document.getElementById('modAtkModernized').checked) atkMod += 1;
-  if (document.getElementById('modDefModernized').checked) defMod += 1;
   if (document.getElementById('modFortified').checked) defMod += 2;
   if (document.getElementById('modTrench').checked) defMod += 1;
   if (document.getElementById('modRussiaMob').checked) defDiv = Math.ceil(defDiv / 2);

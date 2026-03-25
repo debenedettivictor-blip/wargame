@@ -385,8 +385,48 @@ const AI_PLAYER = (function() {
     }
   };
 
+  // --- Objective analysis: scan what this character needs for VP ---
+  function analyzeObjectives(charId, factionId) {
+    var char = CHAR_DATA[charId];
+    var f = gameState.factions[factionId];
+    var needs = { army: false, fleet: false, peace: false, war: false, alliance: false,
+                  subsidizeRussia: false, stability: false, modernize: false, navalSupremacy: false,
+                  befDeploy: false, befBlock: false, lobbyAustria: false, tradeDeal: false };
+    var allObjs = [].concat(char.publicObj || [], char.sharedSecret || [], char.personalSecret || []);
+
+    allObjs.forEach(function(obj) {
+      var d = (obj.desc + ' ' + obj.title).toLowerCase();
+      // Army objectives
+      if (d.includes('army') || d.includes('division') || d.includes('strongest') || d.includes('steamroller') || d.includes('18+') || d.includes('12+') || d.includes('mobiliz')) needs.army = true;
+      // Navy objectives
+      if (d.includes('navy') || d.includes('fleet') || d.includes('naval') || d.includes('dreadnought') || d.includes('ship') || d.includes('10+ ships')) needs.fleet = true;
+      // Peace objectives
+      if (d.includes('peace') || d.includes('not at war') || d.includes('not enter war') || d.includes('isolation') || d.includes('never send bef')) { needs.peace = true; needs.befBlock = true; }
+      // War objectives
+      if (d.includes('crush') || d.includes('invade') || d.includes('conquer') || d.includes('capture') || d.includes('schlieffen') || d.includes('plan xvii') || d.includes('war hawk') || d.includes('preemptive')) needs.war = true;
+      // Alliance objectives
+      if (d.includes('alliance') || d.includes('entente') || d.includes('maintain alliance') || d.includes('allied')) needs.alliance = true;
+      // Subsidize Russia (France)
+      if (d.includes('loan russia') || d.includes('gold from allies') || d.includes('fund russia') || d.includes('banker')) needs.subsidizeRussia = true;
+      // Stability objectives
+      if (d.includes('stability') || d.includes('revolution') || d.includes('collapse') || d.includes('dynasty') || d.includes('endure') || d.includes('reform')) needs.stability = true;
+      // Modernization
+      if (d.includes('moderniz') || d.includes('artillery upgrade') || d.includes('4+ division')) needs.modernize = true;
+      // Naval supremacy
+      if (d.includes('naval supremacy') || d.includes('largest navy') || d.includes('2+ more capital')) needs.navalSupremacy = true;
+      // BEF
+      if (d.includes('bef') || d.includes('ground troops') || d.includes('commit ground') || d.includes('continental war')) needs.befDeploy = true;
+      // Blockade
+      if (d.includes('blockade')) needs.navalSupremacy = true;
+      // Trade / economics
+      if (d.includes('trade') || d.includes('colonial') || d.includes('industrial')) needs.tradeDeal = true;
+    });
+
+    return needs;
+  }
+
   // --- Core decision logic ---
-  // Returns { thinking, orders, dispatch } — same shape the old API version returned
+  // VP-MAXIMIZING: every decision is driven by "does this help me score my personal objectives?"
 
   function generateOrders(charId) {
     const char = CHAR_DATA[charId];
@@ -404,6 +444,8 @@ const AI_PLAYER = (function() {
       return generateDealerOrders(charId, factionId, f, turn, p);
     }
 
+    // Analyze what this character's objectives actually require
+    const needs = analyzeObjectives(charId, factionId);
     const gold = f.gold;
     const armyCost = 2;
     const fleetCost = 6;
@@ -411,79 +453,129 @@ const AI_PLAYER = (function() {
     const currentMod = f.modernization || 0;
     const canModernize = modConfig && currentMod < modConfig.max && gold >= modConfig.cost;
 
-    // --- Strategic assessment ---
     const isEarly = turn <= 2;
     const isMid = turn === 3 || turn === 4;
     const isLate = turn >= 5;
     const atWar = f.atWar;
-    const stabLow = (f.stability || 7) <= 4;
     let budgetRemaining = gold;
 
-    // --- Decision: Modernize? ---
-    // Modernization now gives +2g/turn, +1 stability, recruit discounts at level 2+, combat bonus at level 2+
-    if (canModernize && budgetRemaining >= modConfig.cost + 2) {
-      const modChance = p.economy * 12 + (isEarly ? 30 : 10) + (currentMod === 0 ? 20 : 0);
-      if (chance(modChance)) {
-        orders.push({ type: 'modernize', reason: 'Investing in long-term income and military modernization' });
+    // --- Priority 1: Objective-critical actions ---
+
+    // Characters who need army strength (Schlieffen, Steamroller, Strongest Army, etc.)
+    if (needs.army && budgetRemaining >= armyCost) {
+      var armyTarget = (charId === 'war_minister') ? 3 : (charId === 'chief_staff' || charId === 'general') ? 2 : 1;
+      if (atWar) armyTarget += 1;
+      var armyBuys = 0;
+      for (var i = 0; i < armyTarget && budgetRemaining >= armyCost; i++) {
+        orders.push({ type: 'recruit', unitType: 'army', reason: 'Objective: need military strength for VP' });
+        budgetRemaining -= armyCost;
+        armyBuys++;
+      }
+      if (armyBuys > 0) thinking += 'Building army to meet objectives (' + armyBuys + ' divs). ';
+    }
+
+    // Characters who need fleet (Kaiser's Navy Obsession, Admiralty's Dreadnought Race)
+    if (needs.fleet && budgetRemaining >= fleetCost) {
+      var fleetTarget = needs.navalSupremacy ? 2 : 1;
+      // Kaiser: check if navy < 10 (his obsession target)
+      if (charId === 'kaiser' && f.navy < 10) fleetTarget = Math.min(2, Math.floor(budgetRemaining / fleetCost));
+      // Admiralty: check if we lead Germany by 2+
+      if (charId === 'admiralty') {
+        var gerNavy = gameState.factions.germany ? gameState.factions.germany.navy : 0;
+        if (f.navy - gerNavy < 2) fleetTarget = 2;
+      }
+      var fleetBuys = 0;
+      for (var j = 0; j < fleetTarget && budgetRemaining >= fleetCost; j++) {
+        orders.push({ type: 'recruit', unitType: 'fleet', reason: 'Objective: fleet VP target' });
+        budgetRemaining -= fleetCost;
+        fleetBuys++;
+      }
+      if (fleetBuys > 0) thinking += 'Building fleet for VP objectives (' + fleetBuys + ' ships). ';
+    }
+
+    // Characters who need modernization (Young Turk, economy-focused)
+    if (needs.modernize && canModernize && budgetRemaining >= modConfig.cost) {
+      orders.push({ type: 'modernize', reason: 'Objective: modernization VP' });
+      budgetRemaining -= modConfig.cost;
+      thinking += 'Modernizing to score objective. ';
+    } else if (canModernize && isEarly && budgetRemaining >= modConfig.cost + 4) {
+      // Even without a specific objective, modernize early if we can afford it
+      if (chance(p.economy * 10 + 20)) {
+        orders.push({ type: 'modernize', reason: 'Long-term income investment' });
         budgetRemaining -= modConfig.cost;
         thinking += 'Investing in economy. ';
       }
     }
 
-    // --- Decision: Build army? ---
-    if (p.militarism > 0 && budgetRemaining >= armyCost) {
-      let armyBuys = 0;
-      // More militaristic = more armies; scale with turn pressure
-      const wantArmies = Math.floor(p.militarism / 3) + (isMid ? 1 : 0) + (atWar ? 1 : 0);
-      for (let i = 0; i < wantArmies && budgetRemaining >= armyCost; i++) {
-        if (chance(p.militarism * 9 + (atWar ? 25 : 0))) {
-          orders.push({ type: 'recruit', unitType: 'army', reason: 'Building military strength' });
-          budgetRemaining -= armyCost;
-          armyBuys++;
+    // --- Priority 2: Objective-driven diplomacy ---
+
+    // Characters who need alliances (President's Triple Entente, etc.)
+    if (needs.alliance && isEarly && !atWar) {
+      var tradeTargets = getTradeOpportunities(factionId);
+      if (tradeTargets.length > 0) {
+        var target = pick(tradeTargets);
+        orders.push({ type: 'trade', action: 'propose', target: target, reason: 'Objective: maintain alliances for VP' });
+        thinking += 'Proposing trade with ' + (FACTION_NAMES[target] || target) + ' for alliance VP. ';
+      }
+    }
+
+    // Characters who should subsidize Russia (President's Banker objective)
+    if (needs.subsidizeRussia && budgetRemaining >= 2) {
+      var subsidyAmt = Math.min(3, Math.floor(budgetRemaining / 3));
+      if (subsidyAmt >= 1) {
+        orders.push({ type: 'diplomacy', action: 'subsidize', target: 'russia', amount: subsidyAmt, reason: 'Objective: loan gold to Russia for VP' });
+        budgetRemaining -= subsidyAmt;
+        thinking += 'Subsidizing Russia (' + subsidyAmt + 'g) for Banker objective. ';
+      }
+    }
+
+    // Characters who want war (Conrad, Chief of Staff) — lobby Austria
+    if (needs.war && !atWar && turn <= 4 && budgetRemaining >= 2) {
+      if (factionId !== 'austria' && chance(p.aggression * 10)) {
+        orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Objective: need war to score VP' });
+        budgetRemaining -= 2;
+        thinking += 'Lobbying Austria toward war for my objectives. ';
+      }
+    }
+
+    // BEF deployment — characters who need it deployed vs those who score from blocking it
+    if (factionId === 'britain' && isMid) {
+      var befDeployed = f.upgrades && f.upgrades.bef_deployed;
+      if (!befDeployed && budgetRemaining >= 2) {
+        if (needs.befDeploy && !needs.befBlock && atWar) {
+          orders.push({ type: 'deploy', action: 'bef_rapid', reason: 'Objective: deploy BEF for VP' });
+          budgetRemaining -= 2;
+          thinking += 'Deploying BEF to score VP. ';
+        }
+        // PM with peace/isolation objectives deliberately does NOT deploy
+      }
+    }
+
+    // --- Priority 3: General diplomatic actions (non-objective but still useful) ---
+    if (budgetRemaining >= 3 && !atWar && orders.length < 3) {
+      var allies = getDefaultSubsidyTargets(factionId);
+      if (allies.length > 0 && chance(p.diplomacy * 5)) {
+        var allyTarget = pick(allies);
+        var amt = Math.min(2, Math.floor(budgetRemaining / 3));
+        if (amt >= 1) {
+          orders.push({ type: 'diplomacy', action: 'subsidize', target: allyTarget, amount: amt, reason: 'Strengthening alliance for faction VP' });
+          budgetRemaining -= amt;
+          thinking += 'Supporting ' + (FACTION_NAMES[allyTarget] || allyTarget) + '. ';
         }
       }
-      if (armyBuys > 0) thinking += `Recruiting ${armyBuys} army. `;
     }
 
-    // --- Decision: Build fleet? ---
-    if (p.navalism > 0 && budgetRemaining >= fleetCost) {
-      const wantFleets = p.navalism >= 8 ? 2 : 1;
-      let fleetBuys = 0;
-      for (let i = 0; i < wantFleets && budgetRemaining >= fleetCost; i++) {
-        if (chance(p.navalism * 8)) {
-          orders.push({ type: 'recruit', unitType: 'fleet', reason: 'Expanding naval power' });
-          budgetRemaining -= fleetCost;
-          fleetBuys++;
-        }
-      }
-      if (fleetBuys > 0) thinking += `Building ${fleetBuys} fleet. `;
-    }
-
-    // --- Decision: Diplomacy (subsidize an ally)? ---
-    if (p.diplomacy >= 5 && budgetRemaining >= 3 && !atWar) {
-      const allies = getDefaultSubsidyTargets(factionId);
-      if (allies.length > 0 && chance(p.diplomacy * 7)) {
-        const target = pick(allies);
-        const amount = Math.min(Math.floor(budgetRemaining / 3), 3);
-        if (amount >= 1) {
-          orders.push({ type: 'diplomacy', action: 'subsidize', target: target, amount: amount, reason: 'Supporting ally' });
-          budgetRemaining -= amount;
-          thinking += `Subsidizing ${FACTION_NAMES[target]}. `;
-        }
+    // Trade proposals if we don't have one yet
+    if (!needs.alliance && isEarly && !atWar && orders.filter(function(o){ return o.type === 'trade'; }).length === 0) {
+      var potentialTrades = getTradeOpportunities(factionId);
+      if (potentialTrades.length > 0 && chance(30)) {
+        var tt = pick(potentialTrades);
+        orders.push({ type: 'trade', action: 'propose', target: tt, reason: 'Extra income for future spending' });
+        thinking += 'Proposing trade with ' + (FACTION_NAMES[tt] || tt) + '. ';
       }
     }
 
-    // --- Decision: Propose trade? ---
-    if (p.diplomacy >= 4 && isEarly && !atWar) {
-      const tradeTargets = getTradeOpportunities(factionId);
-      if (tradeTargets.length > 0 && chance(p.diplomacy * 6)) {
-        const target = pick(tradeTargets);
-        orders.push({ type: 'trade', action: 'propose', target: target, reason: 'Expanding trade' });
-        thinking += `Proposing trade with ${FACTION_NAMES[target]}. `;
-      }
-    }
-
-    // --- Decision: Send personal gold to incentivize another character? ---
+    // --- Priority 4: Strategic gold transfers (bribe key players who help your objectives) ---
     var personalGold = (gameState.charGold && gameState.charGold[charId]) || 0;
     if (personalGold >= 2) {
       var goldTarget = getGoldTransferTarget(charId, factionId, turn, atWar, p);
@@ -498,23 +590,19 @@ const AI_PLAYER = (function() {
       }
     }
 
-    // --- Decision: BEF deployment (Britain only)? ---
-    if (factionId === 'britain' && charId === 'pm' && isMid && atWar) {
-      const befDeployed = f.upgrades && f.upgrades.bef_deployed;
-      if (!befDeployed && budgetRemaining >= 2 && chance(30)) {
-        orders.push({ type: 'deploy', action: 'bef_rapid', reason: 'Deploying BEF to France' });
-        budgetRemaining -= 2;
-        thinking += 'Deploying BEF. ';
+    // --- Fallback: personality-driven spending if no objectives triggered ---
+    if (orders.length === 0) {
+      // Build something based on personality
+      if (p.militarism >= 5 && budgetRemaining >= armyCost) {
+        orders.push({ type: 'recruit', unitType: 'army', reason: 'General military buildup' });
+        thinking += 'Building army (general strategy). ';
+      } else if (p.navalism >= 5 && budgetRemaining >= fleetCost) {
+        orders.push({ type: 'recruit', unitType: 'fleet', reason: 'General naval buildup' });
+        thinking += 'Building fleet (general strategy). ';
+      } else {
+        thinking += 'Conserving resources — saving gold for VP bonus at endgame. ';
       }
     }
-
-    // --- Caution check: if very cautious and we already have orders, maybe drop some ---
-    if (p.caution >= 8 && orders.length > 2 && chance(p.caution * 6)) {
-      orders.splice(2); // Keep only first 2 orders
-      thinking += 'Being cautious — limiting spending. ';
-    }
-
-    if (!thinking) thinking = 'Holding steady this turn, conserving resources.';
 
     // --- Generate dispatch ---
     const dispatch = generateDispatch(charId);
@@ -575,57 +663,126 @@ const AI_PLAYER = (function() {
   }
 
   // --- Helper: decide who to send personal gold to ---
-  // Each character has strategic motivations for bribing/incentivizing specific others
+  // OBJECTIVE-DRIVEN: each transfer targets someone who can help THIS character score VP
   function getGoldTransferTarget(charId, factionId, turn, atWar, p) {
     var personalGold = (gameState.charGold && gameState.charGold[charId]) || 0;
     if (personalGold < 2) return null;
 
-    // Character-specific gold transfer logic
+    // VP-driven gold targets: who do I need to bribe and WHY does it help MY score?
     var GOLD_TARGETS = {
-      // Germany: Kaiser bribes Ottoman/Austrian allies; Chancellor buys Entente goodwill
-      kaiser:      { targets: ['emperor', 'sultan'], chance: 25, reason: 'Securing alliance loyalty', thinkMsg: 'Sending gold to secure an ally.' },
-      chancellor:  { targets: ['foreign_sec', 'president'], chance: 30, reason: 'Diplomatic sweetener', thinkMsg: 'Sending gold to open diplomatic channels.' },
-      chief_staff: { targets: ['conrad'], chance: 35, reason: 'Coordinating war plans', thinkMsg: 'Funding Conrad to push for war.' },
+      // Kaiser: needs alliance VP (+1 each) → bribe Austria/Ottoman leaders to stay allied
+      //         needs peace with Britain (+3 Cousin George) → bribe PM to stay friendly
+      kaiser:      { targets: ['emperor', 'sultan', 'pm'], chance: 35,
+        reason: 'Buying alliance loyalty — I need alliance VP and peace with Britain',
+        thinkMsg: 'Bribing allies to secure my Alliance and Cousin George VP.' },
 
-      // France: President funds Russia; General bribes War Minister for coordination
-      president:   { targets: ['tsar', 'war_minister'], chance: 40, reason: 'Funding the Franco-Russian alliance', thinkMsg: 'Sending gold to Russia as promised.' },
-      general:     { targets: ['war_minister'], chance: 25, reason: 'Military coordination funds', thinkMsg: 'Funding Russian military coordination.' },
+      // Chancellor: needs Entente treaty (+3 Diplomatic Mastermind) → bribe Foreign Sec or President
+      //             needs to delay war (+2) → bribe cautious leaders
+      chancellor:  { targets: ['foreign_sec', 'president', 'pm'], chance: 40,
+        reason: 'Buying Entente goodwill — I need a treaty with them for +3 VP',
+        thinkMsg: 'Sending gold to Entente — need a treaty for Diplomatic Mastermind VP.' },
 
-      // Britain: PM stays cautious; Admiralty funds naval allies; Foreign Sec buys influence
-      pm:          { targets: ['president', 'tsar'], chance: 15, reason: 'Quiet diplomatic support', thinkMsg: 'Discreetly supporting an ally.' },
-      admiralty:   { targets: ['vickers_dir'], chance: 20, reason: 'Naval procurement incentive', thinkMsg: 'Funding Vickers for naval expansion.' },
-      foreign_sec: { targets: ['president', 'chancellor'], chance: 25, reason: 'Maintaining the balance of power', thinkMsg: 'Sending gold to maintain influence.' },
+      // Chief of Staff: needs war + Schlieffen executed → bribe Conrad to push Austria into war
+      //                 needs 12+ army by T4 → bribe arms dealers for equipment
+      chief_staff: { targets: ['conrad', 'krupp_dir'], chance: 45,
+        reason: 'Funding war preparations — need Schlieffen executed for +6 VP',
+        thinkMsg: 'Paying Conrad and Krupp to make war happen — my legacy depends on it.' },
 
-      // Russia: Tsar sends to Duma to prevent revolution; War Minister pays for arms
-      tsar:        { targets: ['duma'], chance: 30, reason: 'Placating reform demands', thinkMsg: 'Sending gold to the Duma to buy stability.' },
-      war_minister:{ targets: ['krupp_dir', 'merchant'], chance: 25, reason: 'Arms procurement', thinkMsg: 'Paying arms dealers for equipment.' },
-      duma:        { targets: ['tsar'], chance: 15, reason: 'Demonstrating loyalty', thinkMsg: 'Returning gold to the Tsar as show of faith.' },
+      // President: needs Russia funded (+3 Banker) → send gold to Tsar/War Minister
+      //            needs Britain committed (+3 Convince Britain) → bribe PM
+      president:   { targets: ['tsar', 'war_minister', 'pm'], chance: 50,
+        reason: 'Funding Russia per Banker objective (+3 VP) and lobbying Britain',
+        thinkMsg: 'Sending gold to Russia — need 5+ total for Banker VP.' },
 
-      // Austria: Emperor buys stability; Conrad funds German war hawks
-      emperor:     { targets: ['kaiser', 'chancellor'], chance: 20, reason: 'Strengthening the dual alliance', thinkMsg: 'Sending gold to Berlin to shore up the alliance.' },
-      conrad:      { targets: ['chief_staff', 'krupp_dir'], chance: 35, reason: 'Funding the coming war', thinkMsg: 'Sending gold to prepare for war.' },
+      // General: needs war and offensive action (+3/+6 Plan XVII) → fund war hawks
+      general:     { targets: ['war_minister', 'conrad', 'chief_staff'], chance: 35,
+        reason: 'Funding war hawks — I need war for Plan XVII VP (+6 if it succeeds)',
+        thinkMsg: 'Paying war hawks to make the war happen — Plan XVII needs a war.' },
 
-      // Ottoman: Sultan buys neutrality from both sides; Young Turk funds modernization
-      sultan:      { targets: ['kaiser', 'pm'], chance: 20, reason: 'Maintaining profitable neutrality', thinkMsg: 'Sending gifts to maintain relationships.' },
-      young_turk:  { targets: ['chief_staff', 'krupp_dir'], chance: 30, reason: 'Buying German military expertise', thinkMsg: 'Paying for German military training.' },
+      // PM: needs peace (+4 Keep the Peace) → bribe others toward restraint
+      //     needs no France collapse (-7 penalty) → support France
+      pm:          { targets: ['chancellor', 'president', 'emperor'], chance: 25,
+        reason: 'Buying peace — I lose VP if war comes, so paying for restraint',
+        thinkMsg: 'Sending gold to encourage peace — my VP depends on avoiding war.' },
 
-      // Dealers: spread gold widely to create dependencies
-      krupp_dir:   { targets: ['kaiser', 'conrad', 'young_turk'], chance: 35, reason: 'Cultivating clients', thinkMsg: 'Greasing palms to secure arms contracts.' },
-      vickers_dir: { targets: ['admiralty', 'pm'], chance: 25, reason: 'Lobbying for naval orders', thinkMsg: 'Investing in political influence.' },
-      merchant:    { targets: ['duma', 'conrad', 'young_turk'], chance: 40, reason: 'Fomenting instability', thinkMsg: 'Bankrolling troublemakers across Europe.' }
+      // Admiralty: needs 2+ more ships than Germany (+4) → fund own faction
+      //            needs blockade ready (+3) → invest in readiness
+      admiralty:   { targets: ['vickers_dir', 'pm'], chance: 30,
+        reason: 'Funding naval supremacy — need Dreadnought Race VP (+4)',
+        thinkMsg: 'Investing in naval dominance for Dreadnought Race VP.' },
+
+      // Foreign Sec: needs Entente maintained (+3) → support France
+      //              needs balance of power (+4) → prevent any domination
+      foreign_sec: { targets: ['president', 'tsar', 'chancellor'], chance: 35,
+        reason: 'Maintaining balance of power — no single power can dominate for my +4 VP',
+        thinkMsg: 'Funding balance of power — weakening whoever is strongest for my VP.' },
+
+      // Tsar: needs stability > 5 (+4 Dynasty) → placate Duma
+      //       needs no revolution (+10 Tsar Survives) → buy reform support
+      tsar:        { targets: ['duma', 'war_minister'], chance: 40,
+        reason: 'Buying stability — need Duma support to prevent revolution (my +10 VP at stake)',
+        thinkMsg: 'Paying Duma to prevent revolution — 10 VP rides on this.' },
+
+      // War Minister: needs 18+ divisions (+3 Steamroller) → buy from arms dealers
+      //               needs Eastern Front wins (+2) → fund military coordination
+      war_minister:{ targets: ['krupp_dir', 'merchant', 'general'], chance: 35,
+        reason: 'Buying arms for the Steamroller — need 18+ divisions for +3 VP',
+        thinkMsg: 'Paying arms dealers to build the Steamroller.' },
+
+      // Duma: needs reform or revolution (+4/+6) → fund own cause or bribe Tsar
+      duma:        { targets: ['tsar', 'merchant'], chance: 30,
+        reason: 'Funding reform agenda — need Tsar to agree for +4 VP (or revolution for +6)',
+        thinkMsg: 'Investing in reform or revolution — either path scores VP.' },
+
+      // Emperor: needs alliance with Germany (+2) → keep Kaiser happy
+      //          needs stability above 3 (+3) and no collapse (+5) → buy support
+      emperor:     { targets: ['kaiser', 'chancellor', 'conrad'], chance: 30,
+        reason: 'Keeping the empire together — need German alliance VP and stability',
+        thinkMsg: 'Sending gold to maintain German alliance and buy stability.' },
+
+      // Conrad: needs Serbia crushed (+4) and early war (+2) → fund war hawks
+      conrad:      { targets: ['chief_staff', 'krupp_dir', 'merchant'], chance: 45,
+        reason: 'Funding war preparations — need Serbia crushed for +4 VP and early war for +2',
+        thinkMsg: 'Paying everyone who can make war happen — Serbia must fall.' },
+
+      // Sultan: needs survival (+4) and armed neutrality (+4) → buy neutrality from both sides
+      sultan:      { targets: ['kaiser', 'pm', 'president'], chance: 25,
+        reason: 'Buying neutrality — armed neutrality scores +4 VP if I stay out of war',
+        thinkMsg: 'Sending gifts to both sides to maintain profitable neutrality.' },
+
+      // Young Turk: needs 4+ divs + artillery (+3) and German alliance (+3) → fund German ties
+      young_turk:  { targets: ['chief_staff', 'krupp_dir', 'kaiser'], chance: 40,
+        reason: 'Buying German military alliance — need it for +3 VP modernization objective',
+        thinkMsg: 'Paying for German alliance and military training — +3 VP at stake.' },
+
+      // Krupp: needs arms sales VP + German Victory (+5) → fund buyers and war hawks
+      krupp_dir:   { targets: ['conrad', 'young_turk', 'chief_staff'], chance: 40,
+        reason: 'Creating demand for arms — more war = more sales = more VP',
+        thinkMsg: 'Investing in clients who will buy more arms — VP through sales.' },
+
+      // Vickers: needs to sell to both sides (+4) and British naval supremacy (+2)
+      vickers_dir: { targets: ['admiralty', 'young_turk', 'war_minister'], chance: 35,
+        reason: 'Cultivating buyers on both sides — need dual-side sales for +4 VP',
+        thinkMsg: 'Funding buyers on both sides for Entente Sales VP.' },
+
+      // Merchant: needs war to break out (+6), fund revolution (+4), destroy Krupp (+3 each)
+      merchant:    { targets: ['duma', 'conrad', 'chief_staff', 'young_turk'], chance: 50,
+        reason: 'Fomenting war and revolution — War Architect +6 VP, Revolution +4 VP',
+        thinkMsg: 'Bankrolling chaos — war, revolution, instability all score me VP.' }
     };
 
     var config = GOLD_TARGETS[charId];
     if (!config) return null;
 
-    // Apply personality-scaled chance + turn pressure
-    var adjustedChance = config.chance + (p.diplomacy * 2) + (turn >= 3 ? 10 : 0) + (atWar ? 15 : 0);
+    // Higher chance in later turns (more desperate to score) and when at war
+    var adjustedChance = config.chance + (turn >= 4 ? 15 : 0) + (turn >= 5 ? 15 : 0) + (atWar ? 10 : 0);
     if (!chance(adjustedChance)) return null;
 
     var target = pick(config.targets);
     // Send 1-3 gold, scaled to what we have (never more than half our stash)
-    var maxSend = Math.min(3, Math.floor(personalGold / 2));
-    var amount = Math.max(1, Math.min(maxSend, Math.ceil(Math.random() * 2)));
+    // Send MORE in late game (urgency to score)
+    var maxSend = Math.min(turn >= 5 ? 4 : 3, Math.floor(personalGold / 2));
+    var amount = Math.max(1, Math.min(maxSend, Math.ceil(Math.random() * (turn >= 4 ? 3 : 2))));
 
     return {
       to: target,
