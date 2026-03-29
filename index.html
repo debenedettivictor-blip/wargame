@@ -9099,12 +9099,32 @@ function getOrders(fid) {
   return o;
 }
 
+function isDuplicateOrder(existingActions, newAction) {
+  return existingActions.some(a => {
+    if (a.type !== newAction.type) return false;
+    switch (a.type) {
+      case 'recruit': return a.unitType === newAction.unitType && (a.quantity || 1) === (newAction.quantity || 1);
+      case 'move': return a.from === newAction.from && a.to === newAction.to && a.count === newAction.count;
+      case 'attack': return a.from === newAction.from && a.target === newAction.target && a.divisions === newAction.divisions;
+      case 'deploy': return a.unitId === newAction.unitId && a.region === newAction.region;
+      case 'mobilize': return a.unitId === newAction.unitId;
+      case 'support': return a.battleRegion === newAction.battleRegion && a.from === newAction.from;
+      case 'upgrade': return a.upgradeId === newAction.upgradeId;
+      default: return a.desc === newAction.desc;
+    }
+  });
+}
+
 function addOrder(fid, action) {
   if (!gameState.orders) gameState.orders = {};
   if (!gameState.orders[fid] || gameState.orders[fid].turn !== gameState.currentTurnNum) {
     initOrders(fid);
   }
   if (gameState.orders[fid].submitted) return;
+  if (isDuplicateOrder(gameState.orders[fid].actions, action)) {
+    alert('Duplicate order — this order has already been queued.');
+    return;
+  }
   action.id = generateOrderId();
   gameState.orders[fid].actions.push(action);
   saveGameState();
@@ -9852,22 +9872,32 @@ function beginResolution() {
         }
         case 'recruit': {
           const modDiscount = (f.modernization >= 2) ? 1 : 0;
-          const cost = Math.max(1, (action.unitType === 'army' ? UNIT_COSTS.army : UNIT_COSTS.fleet) - modDiscount);
-          if (f.gold >= cost) {
-            f.gold -= cost;
-            const unitId = 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
-            const home = action.unitType === 'army' ? (HOME_REGIONS[fid] || fid) : (HOME_SEAS[fid] || 'mediterranean');
-            const existingCount = f.units.filter(u => u.type === action.unitType).length;
-            const names = UNIT_NAMES[fid] || { army: [], fleet: [] };
-            const nameList = action.unitType === 'army' ? names.army : names.fleet;
-            const unitName = nameList[existingCount] || ((action.unitType === 'army' ? 'Division' : 'Fleet') + ' ' + (existingCount + 1));
-            f.units.push({ id: unitId, name: unitName, type: action.unitType, state: 'reserve', region: home, createdTurn: gameState.currentTurnNum });
+          const costPer = Math.max(1, (action.unitType === 'army' ? UNIT_COSTS.army : UNIT_COSTS.fleet) - modDiscount);
+          const qty = action.quantity || 1;
+          let recruited = 0;
+          for (let ri = 0; ri < qty; ri++) {
+            if (f.gold >= costPer) {
+              f.gold -= costPer;
+              const unitId = 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2,4) + ri;
+              const home = action.unitType === 'army' ? (HOME_REGIONS[fid] || fid) : (HOME_SEAS[fid] || 'mediterranean');
+              const existingCount = f.units.filter(u => u.type === action.unitType).length;
+              const names = UNIT_NAMES[fid] || { army: [], fleet: [] };
+              const nameList = action.unitType === 'army' ? names.army : names.fleet;
+              const unitName = nameList[existingCount] || ((action.unitType === 'army' ? 'Division' : 'Fleet') + ' ' + (existingCount + 1));
+              f.units.push({ id: unitId, name: unitName, type: action.unitType, state: 'reserve', region: home, createdTurn: gameState.currentTurnNum });
+              recruited++;
+            }
+          }
+          if (recruited > 0) {
             recomputeAggregates(fid);
             const typeLabel = action.unitType === 'army' ? 'army division' : 'fleet';
-            gameState.resolutionLog.push({ fid, icon: '+', text: `${FACTION_NAMES[fid]} recruited 1 ${typeLabel} → Reserve (-${cost}g). Will mobilize next turn.` });
-            logAction(fid, 'purchase', `Recruited ${typeLabel} into reserve (-${cost}g)`);
-          } else {
-            gameState.resolutionLog.push({ fid, icon: '\u2717', text: `${FACTION_NAMES[fid]} cannot afford ${action.unitType} (need ${cost}g, have ${f.gold}g)`, error: true });
+            const totalCost = recruited * costPer;
+            gameState.resolutionLog.push({ fid, icon: '+', text: `${FACTION_NAMES[fid]} recruited ${recruited} ${typeLabel}${recruited > 1 ? 's' : ''} \u2192 Reserve (-${totalCost}g). Will mobilize next turn.` });
+            logAction(fid, 'purchase', `Recruited ${recruited} ${typeLabel}${recruited > 1 ? 's' : ''} into reserve (-${totalCost}g)`);
+          }
+          if (recruited < qty) {
+            const typeLabel = action.unitType === 'army' ? 'army division' : 'fleet';
+            gameState.resolutionLog.push({ fid, icon: '\u2717', text: `${FACTION_NAMES[fid]} could not afford ${qty - recruited} remaining ${typeLabel}${(qty - recruited) > 1 ? 's' : ''} (have ${f.gold}g)`, error: true });
           }
           break;
         }
@@ -11788,17 +11818,34 @@ function renderActionTabContent(fid) {
 
   if (activeActionTab === 'recruit') {
     if (isDealer) return '<div class="empty-state">Arms dealers do not recruit military units directly.</div>';
-    const canArmy = f.gold >= UNIT_COSTS.army && !isSubmitted;
-    const canFleet = f.gold >= UNIT_COSTS.fleet && !isSubmitted;
+    const modDiscount = (f.modernization >= 2) ? 1 : 0;
+    const armyCost = Math.max(1, UNIT_COSTS.army - modDiscount);
+    const fleetCost = Math.max(1, UNIT_COSTS.fleet - modDiscount);
+    const maxArmy = Math.max(0, Math.floor(f.gold / armyCost));
+    const maxFleet = Math.max(0, Math.floor(f.gold / fleetCost));
+    const canArmy = maxArmy > 0 && !isSubmitted;
+    const canFleet = maxFleet > 0 && !isSubmitted;
+    const armyOpts = Array.from({length: maxArmy}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
+    const fleetOpts = Array.from({length: maxFleet}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
     return `
-      <button class="action-btn" onclick="addOrder('${fid}',{type:'recruit',unitType:'army',desc:'Recruit Army Division \u2192 ${REGION_NAMES[HOME_REGIONS[fid]]}'})" ${canArmy ? '' : 'disabled'}>
-        <span>Buy Army Division \u2192 ${REGION_NAMES[HOME_REGIONS[fid]]}</span>
-        <span class="action-cost">${UNIT_COSTS.army} Gold</span>
-      </button>
-      <button class="action-btn" onclick="addOrder('${fid}',{type:'recruit',unitType:'fleet',desc:'Recruit Fleet \u2192 ${REGION_NAMES[HOME_SEAS[fid]]}'})" ${canFleet ? '' : 'disabled'}>
-        <span>Buy Fleet \u2192 ${REGION_NAMES[HOME_SEAS[fid]]}</span>
-        <span class="action-cost">${UNIT_COSTS.fleet} Gold</span>
-      </button>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <select id="recruitArmyCount" style="width:60px; padding:4px 6px; border-radius:4px; border:1px solid var(--ink-faint);" ${canArmy ? '' : 'disabled'}>
+          ${canArmy ? armyOpts : '<option>0</option>'}
+        </select>
+        <button class="action-btn" style="flex:1; margin:0;" onclick="queueRecruitOrder('${fid}','army')" ${canArmy ? '' : 'disabled'}>
+          <span>Buy Army Division \u2192 ${REGION_NAMES[HOME_REGIONS[fid]]}</span>
+          <span class="action-cost">${armyCost} Gold each</span>
+        </button>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <select id="recruitFleetCount" style="width:60px; padding:4px 6px; border-radius:4px; border:1px solid var(--ink-faint);" ${canFleet ? '' : 'disabled'}>
+          ${canFleet ? fleetOpts : '<option>0</option>'}
+        </select>
+        <button class="action-btn" style="flex:1; margin:0;" onclick="queueRecruitOrder('${fid}','fleet')" ${canFleet ? '' : 'disabled'}>
+          <span>Buy Fleet \u2192 ${REGION_NAMES[HOME_SEAS[fid]]}</span>
+          <span class="action-cost">${fleetCost} Gold each</span>
+        </button>
+      </div>
     `;
   }
 
@@ -12066,6 +12113,15 @@ function initMoveSelector() {
 
 function initAttackSelector() {
   updateAttackTargets();
+}
+
+function queueRecruitOrder(fid, unitType) {
+  const selectId = unitType === 'army' ? 'recruitArmyCount' : 'recruitFleetCount';
+  const count = parseInt(document.getElementById(selectId).value) || 1;
+  const dest = unitType === 'army' ? REGION_NAMES[HOME_REGIONS[fid]] : REGION_NAMES[HOME_SEAS[fid]];
+  const label = unitType === 'army' ? 'Army Division' : 'Fleet';
+  const qty = count > 1 ? count + 'x ' : '';
+  addOrder(fid, { type: 'recruit', unitType: unitType, quantity: count, desc: 'Recruit ' + qty + label + ' \u2192 ' + dest });
 }
 
 function queueMoveOrder(fid) {
