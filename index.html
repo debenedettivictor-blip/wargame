@@ -8941,24 +8941,28 @@ function toggleWarStatus(fid) {
   const f = gameState.factions[fid];
   // War cannot be declared before Turn 4 — nations need time to mobilize and deploy
   if (gameState.currentTurnNum < 4 && !f.atWar) {
-    alert('War cannot be declared before Turn 4 (1913-14). Nations need time to mobilize and deploy (1 turn mobilize → 1 turn deploy → ready to fight).');
+    if (!window._aiDeclaringWar) {
+      alert('War cannot be declared before Turn 4 (1913-14). Nations need time to mobilize and deploy (1 turn mobilize → 1 turn deploy → ready to fight).');
+    }
     return;
   }
   f.atWar = !f.atWar;
   if (f.atWar) {
     f.warTurns = 0; // Reset war turn counter when entering war
-    // Prompt GM: did an arms dealer influence this war declaration?
-    setTimeout(function() {
-      const dealerInfluence = confirm('Did an arms dealer influence ' + FACTION_NAMES[fid] + '\'s war declaration?\n\nClick OK to award escalation VP, Cancel to skip.');
-      if (dealerInfluence) {
-        const dealer = prompt('Which dealer? Enter "krupp" or "schneider":');
-        if (dealer === 'krupp' || dealer === 'schneider') {
-          addEscalationVP(dealer, 2, 'Influenced ' + FACTION_NAMES[fid] + ' war declaration');
+    // Prompt GM: did an arms dealer influence this war declaration? (skip for AI)
+    if (!window._aiDeclaringWar) {
+      setTimeout(function() {
+        const dealerInfluence = confirm('Did an arms dealer influence ' + FACTION_NAMES[fid] + '\'s war declaration?\n\nClick OK to award escalation VP, Cancel to skip.');
+        if (dealerInfluence) {
+          const dealer = prompt('Which dealer? Enter "krupp" or "schneider":');
+          if (dealer === 'krupp' || dealer === 'schneider') {
+            addEscalationVP(dealer, 2, 'Influenced ' + FACTION_NAMES[fid] + ' war declaration');
+          }
         }
-      }
-    }, 100);
+      }, 100);
+    }
   } else {
-    f.warTurns = 0; // Reset when peace returns
+    f.warTurns = 0; // Also reset when peace returns
   }
   logAction(fid, 'diplomacy', f.atWar ? FACTION_NAMES[fid] + ' is now AT WAR' : FACTION_NAMES[fid] + ' is now at PEACE');
   saveGameState();

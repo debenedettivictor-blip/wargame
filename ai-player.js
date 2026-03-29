@@ -818,6 +818,100 @@ const AI_PLAYER = (function() {
       }
     }
 
+    // --- Priority 7: MOBILIZE reserve units so they can actually fight ---
+    if (typeof gameState !== 'undefined' && f.units) {
+      var reserveUnits = f.units.filter(function(u) { return u.state === 'reserve'; });
+      var mobCost = 1;
+      reserveUnits.forEach(function(u) {
+        if (budgetRemaining >= mobCost) {
+          orders.push({ type: 'mobilize', unitId: u.id, unitName: u.name || u.id, reason: 'Mobilizing ' + (u.name || 'unit') + ' from reserve' });
+          budgetRemaining -= mobCost;
+          thinking += 'Mobilizing ' + (u.name || u.id) + '. ';
+        }
+      });
+    }
+
+    // --- Priority 8: DEPLOY mobilized units to strategic regions ---
+    if (typeof gameState !== 'undefined' && f.units && typeof ADJACENCY !== 'undefined') {
+      var mobilizedUnits = f.units.filter(function(u) { return u.state === 'mobilized'; });
+      var homeRegion = (typeof HOME_REGIONS !== 'undefined') ? HOME_REGIONS[factionId] : factionId;
+      var homeAdj = ADJACENCY[homeRegion] || [];
+      // Find border regions (adjacent to enemy factions)
+      var enemyFactions = Object.keys(gameState.factions).filter(function(eid) {
+        if (eid === factionId || eid === 'krupp' || eid === 'schneider') return false;
+        // If at war, prioritize war enemies; otherwise deploy to potential frontlines
+        return true;
+      });
+      var borderRegions = homeAdj.filter(function(r) {
+        // Regions adjacent to an enemy home region
+        var rAdj = ADJACENCY[r] || [];
+        return enemyFactions.some(function(ef) {
+          var efHome = (typeof HOME_REGIONS !== 'undefined') ? HOME_REGIONS[ef] : ef;
+          return rAdj.indexOf(efHome) !== -1 || r === efHome;
+        });
+      });
+      // Default to home region if no border regions found
+      if (borderRegions.length === 0) borderRegions = [homeRegion];
+
+      mobilizedUnits.forEach(function(u) {
+        var deployRegion;
+        if (u.type === 'fleet') {
+          var homeSea = (typeof HOME_SEAS !== 'undefined') ? HOME_SEAS[factionId] : 'mediterranean';
+          deployRegion = homeSea;
+        } else {
+          deployRegion = pick(borderRegions);
+        }
+        orders.push({ type: 'deploy', unitId: u.id, region: deployRegion, unitName: u.name || u.id, reason: 'Deploying ' + (u.name || 'unit') + ' to ' + deployRegion });
+        thinking += 'Deploying ' + (u.name || u.id) + ' to ' + deployRegion + '. ';
+      });
+    }
+
+    // --- Priority 9: DECLARE WAR when objectives demand it and conditions are met ---
+    if (!atWar && turn >= 4 && (needs.war || (p.aggression >= 7 && effectiveThreat >= 3))) {
+      // Aggressive factions with war objectives should declare war from Turn 4 onward
+      var warChance = (needs.war ? 70 : 30) + (p.aggression * 5) + (turn >= 5 ? 30 : 0);
+      warChance = warChance * diff.lobbyMultiplier;
+      if (chance(warChance)) {
+        orders.push({ type: 'declare_war', reason: 'War objectives demand action — declaring war' });
+        thinking += 'DECLARING WAR to pursue objectives! ';
+      }
+    }
+
+    // --- Priority 10: ATTACK enemy regions when at war ---
+    if (atWar && typeof ADJACENCY !== 'undefined' && f.troops) {
+      // Find regions where we have deployed troops
+      var ourRegions = Object.keys(f.troops).filter(function(r) { return f.troops[r] > 0; });
+      ourRegions.forEach(function(src) {
+        var adj = ADJACENCY[src] || [];
+        // Find adjacent regions with enemy troops
+        adj.forEach(function(targetRegion) {
+          // Check if any enemy faction has troops there
+          var enemyPresent = false;
+          var enemyStrength = 0;
+          Object.keys(gameState.factions).forEach(function(efid) {
+            if (efid === factionId || efid === 'krupp' || efid === 'schneider') return;
+            var ef = gameState.factions[efid];
+            if (ef.atWar && ef.troops && ef.troops[targetRegion] > 0) {
+              enemyPresent = true;
+              enemyStrength += ef.troops[targetRegion];
+            }
+          });
+          if (enemyPresent && f.troops[src] >= 2) {
+            var attackDivs = Math.max(1, f.troops[src] - 1); // Leave 1 behind
+            // Hard AI attacks more aggressively
+            if (diff.personalityScale > 1) attackDivs = f.troops[src];
+            // Only attack if we have reasonable odds
+            var oddsOk = f.troops[src] >= enemyStrength * 0.8;
+            if (diff.personalityScale < 1) oddsOk = f.troops[src] > enemyStrength * 1.3; // Easy AI is timid
+            if (oddsOk && chance(50 + p.aggression * 5)) {
+              orders.push({ type: 'attack', from: src, target: targetRegion, divisions: attackDivs, reason: 'Attacking ' + targetRegion + ' with ' + attackDivs + ' divisions' });
+              thinking += 'ATTACKING ' + targetRegion + ' from ' + src + ' (' + attackDivs + ' div). ';
+            }
+          }
+        });
+      });
+    }
+
     // --- Fallback: personality-driven spending if no objectives triggered ---
     if (orders.length === 0) {
       // Build something based on personality
@@ -1231,6 +1325,57 @@ const AI_PLAYER = (function() {
                 desc: 'BEF Rapid Deployment: 4 divisions to France (2 Gold, one-time)'
               });
               results.push('Queued: BEF deployment');
+            } else if (order.unitId && order.region) {
+              addOrder(factionId, {
+                type: 'deploy',
+                unitId: order.unitId,
+                region: order.region,
+                desc: 'Deploy ' + (order.unitName || order.unitId) + ' to ' + (REGION_NAMES[order.region] || order.region)
+              });
+              results.push('Queued: deploy ' + (order.unitName || order.unitId) + ' to ' + order.region);
+            }
+            break;
+
+          case 'mobilize':
+            if (order.unitId) {
+              addOrder(factionId, {
+                type: 'mobilize',
+                unitId: order.unitId,
+                desc: 'Mobilize ' + (order.unitName || order.unitId) + ' (1 Gold)'
+              });
+              results.push('Queued: mobilize ' + (order.unitName || order.unitId));
+            }
+            break;
+
+          case 'declare_war':
+            // Set faction to war status directly (mirrors toggleWarStatus)
+            if (typeof toggleWarStatus === 'function') {
+              // Use a flag to suppress the GM prompt during AI war declaration
+              window._aiDeclaringWar = true;
+              toggleWarStatus(factionId);
+              window._aiDeclaringWar = false;
+              results.push('WAR DECLARED by ' + (FACTION_NAMES[factionId] || factionId) + '!');
+              if (typeof logAction === 'function') {
+                logAction(factionId, 'war', (FACTION_NAMES[factionId] || factionId) + ' AI has declared war!');
+              }
+            } else {
+              // Fallback: set atWar directly
+              f.atWar = true;
+              f.warTurns = 0;
+              results.push('WAR DECLARED by ' + (FACTION_NAMES[factionId] || factionId) + '!');
+            }
+            break;
+
+          case 'attack':
+            if (order.from && order.target && order.divisions) {
+              addOrder(factionId, {
+                type: 'attack',
+                from: order.from,
+                target: order.target,
+                divisions: order.divisions,
+                desc: 'Attack ' + (REGION_NAMES[order.target] || order.target) + ' from ' + (REGION_NAMES[order.from] || order.from) + ' (' + order.divisions + ' div)'
+              });
+              results.push('Queued: attack ' + order.target + ' from ' + order.from + ' with ' + order.divisions + ' div');
             }
             break;
 
