@@ -10668,12 +10668,17 @@ function renderForceRoster() {
   // Show selected faction first, then the rest
   const factionOrder = [selectedFid, ...Object.keys(FACTION_NAMES).filter(f => f !== selectedFid && f !== 'krupp' && f !== 'schneider')];
 
+  // Check if viewer is GM (no faction selected or viewing GM panel)
+  const isGMView = !selectedFid || selectedFid === 'gm';
+
   factionOrder.forEach(fid => {
     if (fid === 'krupp' || fid === 'schneider') return;
     const f = gameState.factions[fid];
     if (!f) return;
 
     const isSelected = fid === selectedFid;
+    // Fog of war: can the current viewer see this faction's deployments?
+    const canSee = isGMView || isSelected || canSeeTroops(selectedFid, fid);
     let regions = [];
 
     ALL_REGIONS.forEach(r => {
@@ -10685,7 +10690,11 @@ function renderForceRoster() {
     });
 
     let bodyHtml = '';
-    if (regions.length > 0) {
+    if (!canSee) {
+      // Hidden: show faction exists but not troop details
+      const totalRegions = regions.length;
+      bodyHtml = `<div class="roster-empty" style="font-style:italic; color:var(--ink-light);">\u2014 Intelligence unavailable \u2014${totalRegions > 0 ? '<br>Forces deployed in ' + totalRegions + ' region' + (totalRegions > 1 ? 's' : '') : ''}</div>`;
+    } else if (regions.length > 0) {
       bodyHtml = regions.map(r => {
         let forces = [];
         if (r.troops > 0) {
@@ -10713,11 +10722,14 @@ function renderForceRoster() {
 
     const totalArmy = f.army || 0;
     const totalNavy = f.navy || 0;
+    const rosterSummary = canSee
+      ? `${totalArmy} \u2694 ${totalNavy} \u2693`
+      : `\u2014 classified \u2014`;
 
     html += `<div class="roster-faction">
       <div class="roster-faction-header" style="border-left-color:${FACTION_COLORS[fid]};" onclick="this.nextElementSibling.classList.toggle('collapsed')">
         <span>${FACTION_NAMES[fid]}</span>
-        <span style="font-size:0.75em; color:var(--ink-light);">${totalArmy} \u2694 ${totalNavy} \u2693</span>
+        <span style="font-size:0.75em; color:var(--ink-light);">${rosterSummary}</span>
       </div>
       <div class="roster-faction-body${isSelected ? '' : ' collapsed'}">
         ${bodyHtml}
@@ -11040,24 +11052,21 @@ function renderRegionCard(fid, region, f, isSubmitted, isOwned) {
   const isFortified = (region === 'paris' && fid !== 'france') || (region === 'dardanelles' && fid !== 'ottoman');
   const adj = ADJACENCY[region] || [];
 
-  // Enemy intel
-  let enemyInfo = [];
-  let totalEnemy = 0;
-  Object.keys(gameState.factions).forEach(fk => {
-    if (fk === fid || fk === 'krupp' || fk === 'schneider') return;
-    const ft = gameState.factions[fk].troops;
-    if (ft && ft[region] > 0) {
-      enemyInfo.push({ fid: fk, count: ft[region] });
-      totalEnemy += ft[region];
-    }
-  });
+  // Enemy intel (fog of war)
+  const regionIntel = getRegionIntel(fid, region);
+  let totalKnownEnemy = regionIntel.knownForces.reduce((s, e) => s + e.count, 0);
+  let hasUnknownPresence = regionIntel.unknownPresence.length > 0;
 
   // Badges
   let badges = '';
   if (myTroops > 0) badges += `<span class="region-badge troops">\u2694 ${myTroops} div</span>`;
   if (myFleets > 0) badges += `<span class="region-badge fleets">\u2693 ${myFleets} fleet</span>`;
-  enemyInfo.forEach(e => {
+  regionIntel.knownForces.forEach(e => {
     badges += `<span class="region-badge enemy">${FACTION_NAMES[e.fid].split(' ')[0]}: ${e.count}</span>`;
+  });
+  regionIntel.unknownPresence.forEach(e => {
+    const estimateLabels = { light: '~few', moderate: '~some', heavy: '~many' };
+    badges += `<span class="region-badge enemy" style="border-style:dashed;" title="Estimate from border recon">${FACTION_NAMES[e.fid].split(' ')[0]}: ${estimateLabels[e.estimate] || '?'}</span>`;
   });
   if (isFortified) badges += '<span class="region-badge fortified">\u26F3 Fortified</span>';
   if (isHome) badges += '<span class="region-badge home">Capital</span>';
@@ -11089,14 +11098,16 @@ function renderRegionCard(fid, region, f, isSubmitted, isOwned) {
     // Attack: only if at war
     if (f.atWar && myTroops > 0) {
       const adjTargets = adjLand.map(a => {
-        let enemyLabel = '';
-        let eCount = 0;
-        Object.keys(gameState.factions).forEach(fk => {
-          if (fk === fid || fk === 'krupp' || fk === 'schneider') return;
-          const et = gameState.factions[fk].troops[a] || 0;
-          if (et > 0) { enemyLabel += (enemyLabel ? ', ' : '') + FACTION_NAMES[fk].split(' ')[0] + ': ' + et; eCount += et; }
+        const targetIntel = getRegionIntel(fid, a);
+        let intelLabel = '';
+        targetIntel.knownForces.forEach(e => {
+          intelLabel += (intelLabel ? ', ' : '') + FACTION_NAMES[e.fid].split(' ')[0] + ': ' + e.count;
         });
-        const label = (REGION_NAMES[a] || a) + (enemyLabel ? ' [' + enemyLabel + ']' : ' [undefended]');
+        targetIntel.unknownPresence.forEach(e => {
+          const est = { light: '~few', moderate: '~some', heavy: '~many' };
+          intelLabel += (intelLabel ? ', ' : '') + FACTION_NAMES[e.fid].split(' ')[0] + ': ' + (est[e.estimate] || '?');
+        });
+        const label = (REGION_NAMES[a] || a) + (intelLabel ? ' [' + intelLabel + ']' : (targetIntel.knownForces.length === 0 && targetIntel.unknownPresence.length === 0 ? ' [no intel]' : ' [clear]'));
         return `<option value="${a}">${label}</option>`;
       }).join('');
       const atkCountOpts = Array.from({length: myTroops}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
@@ -11131,13 +11142,18 @@ function renderRegionCard(fid, region, f, isSubmitted, isOwned) {
     }
   }
 
-  // For enemy-only regions (not owned), show intel summary
+  // For enemy-only regions (not owned), show intel summary using fog of war
   let intelHtml = '';
-  if (!isOwned && totalEnemy > 0) {
-    const enemyLines = enemyInfo.map(e =>
-      `<span style="color:${FACTION_COLORS[e.fid] || 'var(--ink)'}; font-weight:600;">${FACTION_NAMES[e.fid]}</span>: ${e.count} div`
-    ).join(', ');
-    intelHtml = `<div class="intel-summary">Defenders: ${enemyLines}${isFortified ? ' <strong style="color:#8b6a1a;">(Fortified: +2 defense)</strong>' : ''}</div>`;
+  if (!isOwned && (regionIntel.knownForces.length > 0 || regionIntel.unknownPresence.length > 0)) {
+    let lines = [];
+    regionIntel.knownForces.forEach(e => {
+      lines.push(`<span style="color:${FACTION_COLORS[e.fid] || 'var(--ink)'}; font-weight:600;">${FACTION_NAMES[e.fid]}</span>: ${e.count} div`);
+    });
+    const estLabels = { light: 'light presence', moderate: 'moderate presence', heavy: 'heavy presence' };
+    regionIntel.unknownPresence.forEach(e => {
+      lines.push(`<span style="color:${FACTION_COLORS[e.fid] || 'var(--ink)'}; font-weight:600; font-style:italic;">${FACTION_NAMES[e.fid]}</span>: ${estLabels[e.estimate] || '?'} <span style="color:var(--ink-light);">(recon)</span>`);
+    });
+    intelHtml = `<div class="intel-summary">Intel: ${lines.join(', ')}${isFortified ? ' <strong style="color:#8b6a1a;">(Fortified: +2 defense)</strong>' : ''}</div>`;
   }
 
   return `<div class="region-card${hasClass}${expandedClass}" id="rcard_${region}">
@@ -11415,10 +11431,17 @@ function renderDiplomacyTab(fid) {
       </button>`;
     }
   } else {
-    html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Espionage Mission (3 Gold)'})" ${isSubmitted ? 'disabled' : ''}>
-      <span>Espionage &mdash; GM rolls d6; 4+ reveals enemy orders</span>
-      <span class="action-cost">3 Gold</span>
-    </button>`;
+    // Targeted espionage — select which enemy to spy on
+    const espTargets = Object.keys(FACTION_NAMES).filter(k => k !== fid && k !== 'krupp' && k !== 'schneider');
+    const espOpts = espTargets.map(k => `<option value="${k}">${FACTION_NAMES[k]}</option>`).join('');
+    html += `<div style="display:flex; align-items:end; gap:10px; margin-bottom:10px;">
+      <div style="flex:1;"><label style="font-size:0.75em; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--ink-light); display:block; margin-bottom:3px;">Espionage Target</label>
+      <select id="espTarget_${fid}" style="width:100%; padding:6px 8px; border:2px solid var(--ink); font-family:'Crimson Text',serif; background:var(--parchment);">${espOpts}</select></div>
+      <button class="action-btn" style="width:auto; margin:0; flex:0 0 auto;" onclick="queueEspionageOrder('${fid}', document.getElementById('espTarget_${fid}').value)" ${isSubmitted ? 'disabled' : ''}>
+        <span>Spy \u2014 Reveal deployments</span>
+        <span class="action-cost">3 Gold (d6: 4+)</span>
+      </button>
+    </div>`;
     html += `<button class="action-btn" onclick="addOrder('${fid}',{type:'diplomacy',desc:'Bribe Minor Nation'})" ${isSubmitted ? 'disabled' : ''}>
       <span>Bribe Minor Nation &mdash; GM decides outcome based on amount</span>
       <span class="action-cost">2-5 Gold</span>
@@ -12344,23 +12367,19 @@ function updateAttackTargets() {
   var adj = ADJACENCY[src] || [];
   var dest = document.getElementById('atkTarget');
   if (!dest) return;
-  // Show enemy forces in each adjacent region
+  var fid = document.getElementById('factionSelect') ? document.getElementById('factionSelect').value : '';
+  // Show enemy forces in each adjacent region (fog of war aware)
   dest.innerHTML = adj.filter(function(r) { return !SEA_REGIONS.includes(r); }).map(function(r) {
-    var enemyForces = [];
-    Object.keys(gameState.factions).forEach(function(fk) {
-      if (fk === 'krupp' || fk === 'schneider') return;
-      var ft = gameState.factions[fk].troops;
-      if (ft && ft[r] > 0) {
-        enemyForces.push(FACTION_NAMES[fk].split(' ')[0] + ': ' + ft[r] + ' div');
-      }
-    });
+    var intel = fid ? getRegionIntel(fid, r) : { knownForces: [], unknownPresence: [] };
+    var parts = [];
+    intel.knownForces.forEach(function(e) { parts.push(FACTION_NAMES[e.fid].split(' ')[0] + ': ' + e.count + ' div'); });
+    var estLabels = { light: '~few', moderate: '~some', heavy: '~many' };
+    intel.unknownPresence.forEach(function(e) { parts.push(FACTION_NAMES[e.fid].split(' ')[0] + ': ' + (estLabels[e.estimate] || '?')); });
     var label = REGION_NAMES[r] || r;
-    if (enemyForces.length > 0) label += ' [' + enemyForces.join(', ') + ']';
-    else label += ' [undefended]';
+    if (parts.length > 0) label += ' [' + parts.join(', ') + ']';
+    else label += ' [no intel]';
     return '<option value="'+r+'">'+label+'</option>';
   }).join('');
-  // Update intel panel
-  var fid = document.getElementById('factionSelect') ? document.getElementById('factionSelect').value : '';
   if (fid) updateAttackIntel(fid);
 }
 
@@ -12374,25 +12393,31 @@ function updateAttackIntel(fid) {
   var from = fromSel ? fromSel.value : '';
 
   var yourForces = from ? (f.troops[from] || 0) : 0;
-  var enemyLines = [];
-  var totalEnemy = 0;
-  Object.keys(gameState.factions).forEach(function(fk) {
-    if (fk === fid || fk === 'krupp' || fk === 'schneider') return;
-    var ft = gameState.factions[fk].troops;
-    if (ft && ft[target] > 0) {
-      enemyLines.push('<span style="color:' + (FACTION_COLORS[fk] || 'var(--ink)') + '; font-weight:600;">' + FACTION_NAMES[fk] + '</span>: ' + ft[target] + ' div');
-      totalEnemy += ft[target];
-    }
-  });
-
+  var intel = getRegionIntel(fid, target);
   var isFortified = (target === 'paris' && fid !== 'france') || (target === 'dardanelles' && fid !== 'ottoman');
+
   var html = '<div style="display:flex; gap:20px; flex-wrap:wrap;">';
   html += '<div><strong>Your forces in ' + (REGION_NAMES[from] || from) + ':</strong> ' + yourForces + ' div</div>';
-  html += '<div><strong>Enemy in ' + (REGION_NAMES[target] || target) + ':</strong> ' + (enemyLines.length > 0 ? enemyLines.join(', ') : '<span style="color:#2d5016;">None (uncontested advance)</span>') + '</div>';
+
+  if (intel.knownForces.length > 0 || intel.unknownPresence.length > 0) {
+    var parts = [];
+    intel.knownForces.forEach(function(e) {
+      parts.push('<span style="color:' + (FACTION_COLORS[e.fid] || 'var(--ink)') + '; font-weight:600;">' + FACTION_NAMES[e.fid] + '</span>: ' + e.count + ' div');
+    });
+    var estLabels = { light: 'light presence', moderate: 'moderate presence', heavy: 'heavy presence' };
+    intel.unknownPresence.forEach(function(e) {
+      parts.push('<span style="color:' + (FACTION_COLORS[e.fid] || 'var(--ink)') + '; font-weight:600; font-style:italic;">' + FACTION_NAMES[e.fid] + '</span>: ' + (estLabels[e.estimate] || '?') + ' (recon)');
+    });
+    html += '<div><strong>Intel on ' + (REGION_NAMES[target] || target) + ':</strong> ' + parts.join(', ') + '</div>';
+  } else {
+    html += '<div><strong>Intel on ' + (REGION_NAMES[target] || target) + ':</strong> <span style="color:var(--ink-light);">No intelligence \u2014 consider espionage</span></div>';
+  }
   html += '</div>';
-  if (totalEnemy > 0) {
-    var ratio = yourForces > 0 ? (yourForces / totalEnemy).toFixed(1) : '0';
-    html += '<div style="margin-top:6px;">Force ratio: <strong>' + ratio + ':1</strong>' + (isFortified ? ' <span style="color:var(--red-empire);">(Fortified region: defenders get +2)</span>' : '') + '</div>';
+
+  var totalKnown = intel.knownForces.reduce(function(s, e) { return s + e.count; }, 0);
+  if (totalKnown > 0) {
+    var ratio = yourForces > 0 ? (yourForces / totalKnown).toFixed(1) : '0';
+    html += '<div style="margin-top:6px;">Force ratio: <strong>' + ratio + ':1</strong>' + (intel.unknownPresence.length > 0 ? ' (known forces only)' : '') + (isFortified ? ' <span style="color:var(--red-empire);">(Fortified: defenders get +2)</span>' : '') + '</div>';
   } else if (isFortified) {
     html += '<div style="margin-top:6px; color:var(--red-empire);">Fortified region: defenders get +2 if reinforced.</div>';
   }
@@ -12431,6 +12456,100 @@ function queueAttackOrder(fid) {
   const count = parseInt(document.getElementById('atkCount').value) || 1;
   if (!from || !target) { alert('Select both source and target regions.'); return; }
   addOrder(fid, { type: 'attack', from: from, target: target, divisions: count, desc: 'Attack ' + (REGION_NAMES[target]||target) + ' from ' + (REGION_NAMES[from]||from) + ' (' + count + ' div)' });
+}
+
+// ==================== INTELLIGENCE & FOG OF WAR ====================
+
+// Determine if viewerFid can see targetFid's troop deployments
+function canSeeTroops(viewerFid, targetFid) {
+  if (viewerFid === targetFid) return true;
+  const viewer = gameState.factions[viewerFid];
+  const target = gameState.factions[targetFid];
+  if (!viewer || !target) return false;
+
+  // Allied factions can always see each other's deployments
+  if (viewer.alliances && viewer.alliances.includes(targetFid)) return true;
+
+  // Same alliance bloc can see each other (central/entente)
+  if (FACTION_ALLIANCE[viewerFid] && FACTION_ALLIANCE[viewerFid] === FACTION_ALLIANCE[targetFid]
+      && FACTION_ALLIANCE[viewerFid] !== 'neutral' && FACTION_ALLIANCE[viewerFid] !== 'corp') return true;
+
+  // Check if we have active intelligence on this faction
+  const intel = getIntelligence(viewerFid);
+  if (intel[targetFid] && intel[targetFid].troopsRevealed) {
+    // Intel expires after the turn it was gathered
+    if (intel[targetFid].revealedTurn >= gameState.currentTurnNum) return true;
+  }
+
+  return false;
+}
+
+// Determine if viewerFid can see a specific region's enemy troop count
+// Returns: { visible: true/false, estimate: null or 'unknown'/'light'/'moderate'/'heavy' }
+function getRegionIntel(viewerFid, region) {
+  const result = { knownForces: [], unknownPresence: [] };
+
+  Object.keys(gameState.factions).forEach(fk => {
+    if (fk === viewerFid || fk === 'krupp' || fk === 'schneider') return;
+    const ft = gameState.factions[fk].troops;
+    if (!ft || !ft[region] || ft[region] <= 0) return;
+
+    if (canSeeTroops(viewerFid, fk)) {
+      result.knownForces.push({ fid: fk, count: ft[region] });
+    } else {
+      // Can't see exact numbers — but you know SOMEONE is there if you have
+      // adjacent troops (border reconnaissance)
+      const viewerTroops = gameState.factions[viewerFid].troops || {};
+      const adj = ADJACENCY[region] || [];
+      const hasAdjacentForces = adj.some(r => (viewerTroops[r] || 0) > 0);
+
+      if (hasAdjacentForces) {
+        // Border recon: you know the faction is present, get a rough estimate
+        const actual = ft[region];
+        let estimate;
+        if (actual <= 1) estimate = 'light';
+        else if (actual <= 3) estimate = 'moderate';
+        else estimate = 'heavy';
+        result.unknownPresence.push({ fid: fk, estimate: estimate });
+      }
+      // If no adjacent forces, you don't even know they're there
+    }
+  });
+
+  return result;
+}
+
+// Intelligence data store
+function getIntelligence(fid) {
+  if (!gameState.intelligence) gameState.intelligence = {};
+  if (!gameState.intelligence[fid]) gameState.intelligence[fid] = {};
+  return gameState.intelligence[fid];
+}
+
+// GM or espionage reveals a faction's troops to another faction
+function revealTroops(viewerFid, targetFid) {
+  if (!gameState.intelligence) gameState.intelligence = {};
+  if (!gameState.intelligence[viewerFid]) gameState.intelligence[viewerFid] = {};
+  gameState.intelligence[viewerFid][targetFid] = {
+    troopsRevealed: true,
+    revealedTurn: gameState.currentTurnNum
+  };
+  saveGameState();
+}
+
+// Queue an espionage order that will reveal a specific enemy's deployments
+function queueEspionageOrder(fid, targetFid) {
+  if (!targetFid) { alert('Select a target for espionage.'); return; }
+  const cost = 3;
+  const f = gameState.factions[fid];
+  if (f.gold < cost) { alert('Not enough gold. Espionage costs ' + cost + ' Gold.'); return; }
+  addOrder(fid, {
+    type: 'diplomacy',
+    subtype: 'espionage',
+    target: targetFid,
+    cost: cost,
+    desc: 'Espionage: Reveal ' + FACTION_NAMES[targetFid] + ' deployments (3 Gold, GM rolls d6: 4+ success)'
+  });
 }
 
 // ==================== REDESIGNED MILITARY — HELPER FUNCTIONS ====================
@@ -12478,26 +12597,41 @@ function updateRegionIntel(fid, fromRegion) {
 
   const f = gameState.factions[fid];
   const yourForces = f.troops[fromRegion] || 0;
-  let enemyLines = [];
-  let totalEnemy = 0;
-  Object.keys(gameState.factions).forEach(function(fk) {
-    if (fk === fid || fk === 'krupp' || fk === 'schneider') return;
-    var ft = gameState.factions[fk].troops;
-    if (ft && ft[target] > 0) {
-      enemyLines.push('<span style="color:' + (FACTION_COLORS[fk] || 'var(--ink)') + ';font-weight:600;">' + FACTION_NAMES[fk] + '</span>: ' + ft[target] + ' div');
-      totalEnemy += ft[target];
-    }
-  });
-
+  const targetIntel = getRegionIntel(fid, target);
   const isFortified = (target === 'paris' && fid !== 'france') || (target === 'dardanelles' && fid !== 'ottoman');
+
   let html = '<strong>Your forces:</strong> ' + yourForces + ' div | ';
-  if (totalEnemy > 0) {
-    const ratio = yourForces > 0 ? (yourForces / totalEnemy).toFixed(1) : '0';
-    const ratioCls = ratio >= 2 ? 'favorable' : (ratio >= 1 ? 'even' : 'unfavorable');
-    html += '<strong>Defenders:</strong> ' + enemyLines.join(', ');
-    html += ' | <span class="intel-ratio ' + ratioCls + '">Ratio: ' + ratio + ':1</span>';
+
+  const totalKnown = targetIntel.knownForces.reduce((s, e) => s + e.count, 0);
+  const hasUnknown = targetIntel.unknownPresence.length > 0;
+
+  if (totalKnown > 0 || hasUnknown) {
+    html += '<strong>Intelligence:</strong> ';
+    // Known forces (allied intel)
+    if (targetIntel.knownForces.length > 0) {
+      const knownLines = targetIntel.knownForces.map(e =>
+        '<span style="color:' + (FACTION_COLORS[e.fid] || 'var(--ink)') + ';font-weight:600;">' + FACTION_NAMES[e.fid] + '</span>: ' + e.count + ' div'
+      );
+      html += knownLines.join(', ');
+    }
+    // Unknown presence (border recon only)
+    if (hasUnknown) {
+      const estLabels = { light: 'light presence', moderate: 'moderate presence', heavy: 'heavy presence' };
+      const unknownLines = targetIntel.unknownPresence.map(e =>
+        '<span style="color:' + (FACTION_COLORS[e.fid] || 'var(--ink)') + ';font-weight:600;font-style:italic;">' + FACTION_NAMES[e.fid] + '</span>: ' + (estLabels[e.estimate] || 'unknown')
+      );
+      if (targetIntel.knownForces.length > 0) html += ', ';
+      html += unknownLines.join(', ') + ' <span style="color:var(--ink-light);">(border recon)</span>';
+    }
+    // Show ratio only for known forces
+    if (totalKnown > 0) {
+      const ratio = yourForces > 0 ? (yourForces / totalKnown).toFixed(1) : '0';
+      const ratioCls = ratio >= 2 ? 'favorable' : (ratio >= 1 ? 'even' : 'unfavorable');
+      html += ' | <span class="intel-ratio ' + ratioCls + '">Ratio: ' + ratio + ':1</span>';
+      if (hasUnknown) html += ' <span style="color:var(--ink-light);">(known forces only)</span>';
+    }
   } else {
-    html += '<span style="color:var(--green-neutral);">Undefended \u2014 uncontested advance</span>';
+    html += '<span style="color:var(--ink-light);">No intelligence available \u2014 consider espionage</span>';
   }
   if (isFortified) html += ' | <strong style="color:#8b6a1a;">Fortified (+2 defense)</strong>';
   intelEl.innerHTML = html;
@@ -14472,6 +14606,14 @@ function renderGMControl() {
       <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; margin:16px 0 8px;">War Status</h4>
       <p style="font-size:0.85em; color:var(--ink-light); margin-bottom:8px;">Toggle war status — at peace, deployed troops cost extra mobilization surcharge.</p>
       <div style="display:flex; flex-wrap:wrap;">${warStatusHtml}</div>
+
+      <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; margin:16px 0 8px;">Intelligence Reveal</h4>
+      <p style="font-size:0.85em; color:var(--ink-light); margin-bottom:8px;">Grant a faction intelligence on another faction's troop deployments (e.g. after successful espionage roll). Lasts until end of current turn.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:12px;">
+        <div><label style="font-size:0.8em;">Viewer</label><select id="gmIntelViewer" style="display:block; width:100%;">${nationFids.map(k => '<option value="' + k + '">' + FACTION_NAMES[k] + '</option>').join('')}</select></div>
+        <div><label style="font-size:0.8em;">Reveal Target</label><select id="gmIntelTarget" style="display:block; width:100%;">${nationFids.map(k => '<option value="' + k + '">' + FACTION_NAMES[k] + '</option>').join('')}</select></div>
+        <div><button class="btn-broadcast" style="padding:8px 16px; font-size:0.85em;" onclick="revealTroops(document.getElementById('gmIntelViewer').value, document.getElementById('gmIntelTarget').value); alert('Intel revealed!'); renderDashboard();">Reveal</button></div>
+      </div>
 
       <h4 style="font-family:'Playfair Display',serif; text-transform:uppercase; letter-spacing:1px; font-size:0.85em; margin:16px 0 8px;">⚓ Declare Blockade</h4>
       <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:12px;">
