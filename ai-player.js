@@ -6,6 +6,69 @@ const AI_PLAYER = (function() {
 
   // --- Configuration ---
   let aiCharacters = JSON.parse(localStorage.getItem('gunsOfAugust_aiCharacters') || '{}');
+  let aiDifficulty = localStorage.getItem('gunsOfAugust_aiDifficulty') || 'medium'; // 'easy', 'medium', 'hard'
+
+  // Difficulty modifiers affect AI decision quality
+  const DIFFICULTY_MODIFIERS = {
+    easy: {
+      label: 'Easy',
+      description: 'AI makes poor decisions, wastes gold, and reacts slowly to threats.',
+      personalityScale: 0.6,    // Personality weights scaled down (less focused)
+      chanceMultiplier: 0.5,    // Half as likely to take smart actions
+      minOrders: 1,             // Fewer minimum orders
+      maxArmyPerTurn: 1,        // Cap army recruitment per turn
+      maxFleetPerTurn: 1,       // Cap fleet recruitment per turn
+      threatReaction: 0.3,      // Slow to react to border threats
+      budgetWaste: 0.25,        // 25% of gold wasted (not spent optimally)
+      loanChance: 0.3,          // Rarely requests loans
+      dispatchChance: 30,       // Lower chance to send dispatches
+      goldTransferChance: 0.3,  // Rarely sends personal gold
+      modernizeBonus: -20,      // Less likely to modernize
+      lobbyMultiplier: 0.4,     // Less aggressive lobbying
+    },
+    medium: {
+      label: 'Medium',
+      description: 'Balanced AI with personality-driven strategy.',
+      personalityScale: 1.0,
+      chanceMultiplier: 1.0,
+      minOrders: 3,
+      maxArmyPerTurn: 4,
+      maxFleetPerTurn: 2,
+      threatReaction: 1.0,
+      budgetWaste: 0,
+      loanChance: 1.0,
+      dispatchChance: 60,
+      goldTransferChance: 1.0,
+      modernizeBonus: 0,
+      lobbyMultiplier: 1.0,
+    },
+    hard: {
+      label: 'Hard',
+      description: 'AI optimizes every gold piece, reacts aggressively, and coordinates across factions.',
+      personalityScale: 1.3,    // Amplified personality focus
+      chanceMultiplier: 1.5,    // More likely to take optimal actions
+      minOrders: 4,             // More orders per turn
+      maxArmyPerTurn: 6,        // Can recruit more per turn
+      maxFleetPerTurn: 3,       // Can recruit more fleet
+      threatReaction: 1.8,      // Hyper-reactive to threats
+      budgetWaste: 0,
+      loanChance: 1.5,          // Aggressively seeks funding
+      dispatchChance: 80,       // More diplomatic communication
+      goldTransferChance: 1.5,  // Actively bribes for VP
+      modernizeBonus: 20,       // More likely to invest early
+      lobbyMultiplier: 1.5,     // More aggressive lobbying
+    }
+  };
+
+  function getDifficulty() { return aiDifficulty; }
+  function getDifficultyMod() { return DIFFICULTY_MODIFIERS[aiDifficulty] || DIFFICULTY_MODIFIERS.medium; }
+
+  function setDifficulty(level) {
+    if (DIFFICULTY_MODIFIERS[level]) {
+      aiDifficulty = level;
+      localStorage.setItem('gunsOfAugust_aiDifficulty', level);
+    }
+  }
 
   function isAI(charId) { return !!aiCharacters[charId]; }
 
@@ -512,11 +575,14 @@ const AI_PLAYER = (function() {
     if (!char || !factionId) return { thinking: 'Unknown character', orders: [], dispatch: null };
 
     const p = PERSONALITIES[charId];
+    const diff = getDifficultyMod();
     const f = gameState.factions[factionId];
     const turn = gameState.currentTurnNum;
     const isDealer = factionId === 'krupp' || factionId === 'schneider';
     const orders = [];
     let thinking = '';
+
+    thinking += '[' + diff.label + ' AI] ';
 
     if (isDealer) {
       return generateDealerOrders(charId, factionId, f, turn, p);
@@ -535,7 +601,8 @@ const AI_PLAYER = (function() {
     const isMid = turn === 3 || turn === 4;
     const isLate = turn >= 5;
     const atWar = f.atWar;
-    let budgetRemaining = gold;
+    // Easy AI wastes a portion of its gold (poor resource management)
+    let budgetRemaining = gold - Math.floor(gold * diff.budgetWaste);
 
     // --- Priority 1: Objective-critical actions ---
 
@@ -543,6 +610,9 @@ const AI_PLAYER = (function() {
     if (needs.army && budgetRemaining >= armyCost) {
       var armyTarget = (charId === 'war_minister') ? 3 : (charId === 'chief_staff' || charId === 'general') ? 2 : 1;
       if (atWar) armyTarget += 1;
+      // Hard AI recruits more aggressively; Easy AI caps recruitment
+      armyTarget = Math.min(armyTarget, diff.maxArmyPerTurn);
+      if (diff.personalityScale > 1) armyTarget = Math.ceil(armyTarget * 1.3);
       var armyBuys = 0;
       for (var i = 0; i < armyTarget && budgetRemaining >= armyCost; i++) {
         orders.push({ type: 'recruit', unitType: 'army', reason: 'Objective: need military strength for VP' });
@@ -554,7 +624,7 @@ const AI_PLAYER = (function() {
 
     // Characters who need fleet (Kaiser's Navy Obsession, Admiralty's Dreadnought Race)
     if (needs.fleet && budgetRemaining >= fleetCost) {
-      var fleetTarget = needs.navalSupremacy ? 2 : 1;
+      var fleetTarget = Math.min(needs.navalSupremacy ? 2 : 1, diff.maxFleetPerTurn);
       // Kaiser: check if navy < 10 (his obsession target)
       if (charId === 'kaiser' && f.navy < 10) fleetTarget = Math.min(2, Math.floor(budgetRemaining / fleetCost));
       // Admiralty: check if we lead Germany by 2+
@@ -578,7 +648,7 @@ const AI_PLAYER = (function() {
       thinking += 'Modernizing to score objective. ';
     } else if (canModernize && isEarly && budgetRemaining >= modConfig.cost + 4) {
       // Even without a specific objective, modernize early if we can afford it
-      if (chance(p.economy * 10 + 20)) {
+      if (chance(p.economy * 10 + 20 + diff.modernizeBonus)) {
         orders.push({ type: 'modernize', reason: 'Long-term income investment' });
         budgetRemaining -= modConfig.cost;
         thinking += 'Investing in economy. ';
@@ -609,7 +679,7 @@ const AI_PLAYER = (function() {
 
     // Characters who want war (Conrad, Chief of Staff) — lobby Austria
     if (needs.war && !atWar && turn <= 5 && budgetRemaining >= 2) {
-      if (factionId !== 'austria' && chance(p.aggression * 15)) {
+      if (factionId !== 'austria' && chance(p.aggression * 15 * diff.lobbyMultiplier)) {
         orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Objective: need war to score VP' });
         budgetRemaining -= 2;
         thinking += 'Lobbying Austria toward war for my objectives. ';
@@ -618,7 +688,7 @@ const AI_PLAYER = (function() {
 
     // Even characters without explicit war objectives may lobby if highly aggressive
     if (!needs.war && !atWar && turn <= 4 && budgetRemaining >= 2 && p.aggression >= 6) {
-      if (factionId !== 'austria' && chance(p.aggression * 8)) {
+      if (factionId !== 'austria' && chance(p.aggression * 8 * diff.lobbyMultiplier)) {
         orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Hawkish posture — pushing for confrontation' });
         budgetRemaining -= 2;
         thinking += 'Aggressively lobbying for war even without a direct objective. ';
@@ -664,7 +734,7 @@ const AI_PLAYER = (function() {
 
     // --- Priority 4: Strategic gold transfers (bribe key players who help your objectives) ---
     var personalGold = (gameState.charGold && gameState.charGold[charId]) || 0;
-    if (personalGold >= 2) {
+    if (personalGold >= 2 && chance(100 * diff.goldTransferChance)) {
       var goldTarget = getGoldTransferTarget(charId, factionId, turn, atWar, p);
       if (goldTarget) {
         orders.push({
@@ -679,12 +749,14 @@ const AI_PLAYER = (function() {
 
     // --- Priority 5: THREAT-REACTIVE ORDERS — respond to enemy troops on our borders ---
     var borderIntel = assessBorderThreats(factionId);
-    if (borderIntel.totalThreat > 0) {
-      thinking += 'INTELLIGENCE: ' + borderIntel.threats.length + ' enemy force(s) detected near our borders (' + borderIntel.totalThreat + ' divisions). ';
+    // Easy AI has poor intelligence; Hard AI detects threats earlier
+    var effectiveThreat = Math.floor(borderIntel.totalThreat * diff.threatReaction);
+    if (effectiveThreat > 0) {
+      thinking += 'INTELLIGENCE: ' + borderIntel.threats.length + ' enemy force(s) detected near our borders (' + effectiveThreat + ' divisions perceived). ';
 
       // Reactive military buildup — build army if threatened
-      if (budgetRemaining >= armyCost && borderIntel.totalThreat >= 2) {
-        var reactiveBuilds = Math.min(3, Math.floor(budgetRemaining / armyCost), Math.ceil(borderIntel.totalThreat / 3));
+      if (budgetRemaining >= armyCost && effectiveThreat >= 2) {
+        var reactiveBuilds = Math.min(diff.maxArmyPerTurn, Math.floor(budgetRemaining / armyCost), Math.ceil(effectiveThreat / 3));
         for (var rb = 0; rb < reactiveBuilds; rb++) {
           orders.push({ type: 'recruit', unitType: 'army', reason: 'Reactive buildup — enemy troops on our border (' + borderIntel.totalThreat + ' div detected)' });
           budgetRemaining -= armyCost;
@@ -693,16 +765,16 @@ const AI_PLAYER = (function() {
       }
 
       // If highly threatened and aggressive, lobby for war preemptively
-      if (!atWar && borderIntel.totalThreat >= 4 && p.aggression >= 4 && budgetRemaining >= 2) {
+      if (!atWar && effectiveThreat >= 4 && p.aggression >= 4 && budgetRemaining >= 2) {
         if (factionId !== 'austria' && chance(60 + p.aggression * 5)) {
-          orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Preemptive war lobbying — ' + borderIntel.totalThreat + ' enemy divisions on our borders' });
+          orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Preemptive war lobbying — ' + effectiveThreat + ' enemy divisions on our borders' });
           budgetRemaining -= 2;
           thinking += 'Enemy buildup is alarming — lobbying for preemptive action. ';
         }
       }
 
       // Request allies for help via subsidies if outmatched
-      if (budgetRemaining >= 2 && borderIntel.totalThreat >= 3) {
+      if (budgetRemaining >= 2 && effectiveThreat >= 3) {
         var allies = getDefaultSubsidyTargets(factionId);
         if (allies.length > 0) {
           var allyTarget = pick(allies);
@@ -717,7 +789,7 @@ const AI_PLAYER = (function() {
     }
 
     // --- Priority 6: REQUEST LOANS when gold-starved but need military buildup ---
-    if (budgetRemaining < armyCost && (needs.army || needs.war || borderIntel.totalThreat >= 2)) {
+    if (budgetRemaining < armyCost && (needs.army || needs.war || effectiveThreat >= 2) && chance(100 * diff.loanChance)) {
       // Find an arms dealer who might lend to us
       var potentialLenders = [];
       if (factionId === 'germany' || factionId === 'austria' || factionId === 'ottoman') {
@@ -760,16 +832,17 @@ const AI_PLAYER = (function() {
       }
     }
 
-    // --- MINIMUM 3 ORDERS: pad with useful actions if below threshold ---
-    if (orders.length < 3 && budgetRemaining >= 1) {
+    // --- MINIMUM ORDERS: pad with useful actions if below threshold ---
+    var minOrders = diff.minOrders;
+    if (orders.length < minOrders && budgetRemaining >= 1) {
       // Try to build up military
-      while (orders.length < 3 && budgetRemaining >= armyCost && p.militarism >= 3) {
+      while (orders.length < minOrders && budgetRemaining >= armyCost && p.militarism >= 3) {
         orders.push({ type: 'recruit', unitType: 'army', reason: 'Standing order: maintain military readiness' });
         budgetRemaining -= armyCost;
         thinking += 'Additional army recruitment (standing orders). ';
       }
       // Try diplomatic actions
-      if (orders.length < 3 && !atWar && budgetRemaining >= 2) {
+      if (orders.length < minOrders && !atWar && budgetRemaining >= 2) {
         var allies = getDefaultSubsidyTargets(factionId);
         if (allies.length > 0) {
           var allyTarget = pick(allies);
@@ -779,7 +852,7 @@ const AI_PLAYER = (function() {
         }
       }
       // Try trade proposals
-      if (orders.length < 3 && !atWar) {
+      if (orders.length < minOrders && !atWar) {
         var tradeOps = getTradeOpportunities(factionId);
         if (tradeOps.length > 0) {
           orders.push({ type: 'trade', action: 'propose', target: pick(tradeOps), reason: 'Standing order: expand trade network' });
@@ -787,7 +860,7 @@ const AI_PLAYER = (function() {
         }
       }
       // Try upgrade if affordable
-      if (orders.length < 3 && budgetRemaining >= 3) {
+      if (orders.length < minOrders && budgetRemaining >= 3) {
         var hasArtillery = f.upgrades && f.upgrades.artillery;
         var hasTrenches = f.upgrades && f.upgrades.trenches;
         if (!hasArtillery && budgetRemaining >= 4) {
@@ -811,14 +884,15 @@ const AI_PLAYER = (function() {
   // --- Dealer-specific logic ---
   function generateDealerOrders(charId, factionId, f, turn, p) {
     const orders = [];
-    let thinking = '';
-    const budgetRemaining = f.gold;
+    const diff = getDifficultyMod();
+    let thinking = '[' + diff.label + ' AI] ';
+    const budgetRemaining = f.gold - Math.floor(f.gold * diff.budgetWaste);
 
     // Dealers don't recruit or modernize the same way — they mostly observe
     // But they can lobby and do diplomacy
     if (p.aggression >= 4 && turn <= 5 && budgetRemaining >= 2) {
       // Aggressive dealers lobby Austria toward war
-      if (chance(p.aggression * 12)) {
+      if (chance(p.aggression * 12 * diff.lobbyMultiplier)) {
         orders.push({ type: 'diplomacy', action: 'lobby_austria', reason: 'Stoking tensions for profit' });
         thinking += 'Lobbying Austria toward war. ';
       }
@@ -885,13 +959,13 @@ const AI_PLAYER = (function() {
       }
     }
 
-    // Minimum 3 orders for dealers too
-    if (orders.length < 3 && budgetRemaining >= 2) {
+    // Minimum orders for dealers too (varies by difficulty)
+    if (orders.length < diff.minOrders && budgetRemaining >= 2) {
       // Subsidize a client state if under order minimum
       var clientTargets = factionId === 'krupp'
         ? ['germany', 'austria', 'ottoman']
         : ['france', 'russia'];
-      while (orders.length < 3 && clientTargets.length > 0 && budgetRemaining >= 2) {
+      while (orders.length < diff.minOrders && clientTargets.length > 0 && budgetRemaining >= 2) {
         var ct = pick(clientTargets);
         clientTargets = clientTargets.filter(function(t) { return t !== ct; });
         orders.push({ type: 'diplomacy', action: 'subsidize', target: ct, amount: 1, reason: 'Maintaining client relationships' });
@@ -1072,8 +1146,9 @@ const AI_PLAYER = (function() {
     const templates = DISPATCHES[charId];
     if (!templates) return null;
 
-    // 60% chance to send a dispatch each turn
-    if (!chance(60)) return null;
+    // Dispatch chance varies by difficulty
+    var diff = getDifficultyMod();
+    if (!chance(diff.dispatchChance)) return null;
 
     const targetGroup = pick(templates.templates);
     const message = pick(targetGroup.msgs);
@@ -1385,7 +1460,10 @@ const AI_PLAYER = (function() {
     generateOrders: generateOrders,
     executeOrders: executeOrders,
     runAllAI: runAllAI,
-    CHAR_TO_FACTION: CHAR_TO_FACTION
+    CHAR_TO_FACTION: CHAR_TO_FACTION,
+    getDifficulty: getDifficulty,
+    setDifficulty: setDifficulty,
+    DIFFICULTY_MODIFIERS: DIFFICULTY_MODIFIERS
   };
 
 })();

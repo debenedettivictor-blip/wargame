@@ -14242,6 +14242,25 @@ function renderGMAISection() {
         Let the computer play characters autonomously. AI characters use rule-based strategy to generate orders and send in-character dispatches each turn. Runs instantly in-browser \u2014 no API key or external service needed.
       </p>
 
+      <div class="ai-difficulty-selector" style="margin-bottom:16px;">
+        <label style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:8px;">AI Difficulty</label>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          ${Object.keys(AI_PLAYER.DIFFICULTY_MODIFIERS).map(level => {
+            const mod = AI_PLAYER.DIFFICULTY_MODIFIERS[level];
+            const current = AI_PLAYER.getDifficulty();
+            const isActive = current === level;
+            return `<button class="btn-ai ${isActive ? 'btn-ai-primary' : ''}"
+              onclick="setAIDifficulty('${level}')"
+              style="flex:1; min-width:80px; padding:8px 12px; border:2px solid ${isActive ? 'var(--accent-gold, #b8860b)' : 'var(--border, #ccc)'}; background:${isActive ? 'var(--accent-gold, #b8860b)' : 'var(--bg-card, #fff)'}; color:${isActive ? '#fff' : 'var(--ink, #333)'}; border-radius:6px; cursor:pointer; font-family:'IM Fell English',serif; font-size:0.95em; transition:all 0.2s;">
+              <strong>${mod.label}</strong>
+            </button>`;
+          }).join('')}
+        </div>
+        <p style="font-family:'Crimson Text',serif; font-size:0.85em; color:var(--ink-light); margin-top:6px; font-style:italic;">
+          ${AI_PLAYER.DIFFICULTY_MODIFIERS[AI_PLAYER.getDifficulty()].description}
+        </p>
+      </div>
+
       <div class="ai-char-grid">
         <label style="font-family:'Source Serif 4',serif; font-size:0.8em; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:8px;">Select AI-Controlled Characters</label>
         ${charTogglesHtml}
@@ -14264,6 +14283,13 @@ function renderGMAISection() {
 function toggleAICharacter(charId) {
   if (typeof AI_PLAYER !== 'undefined') {
     AI_PLAYER.toggleAI(charId);
+    renderGMControl();
+  }
+}
+
+function setAIDifficulty(level) {
+  if (typeof AI_PLAYER !== 'undefined') {
+    AI_PLAYER.setDifficulty(level);
     renderGMControl();
   }
 }
