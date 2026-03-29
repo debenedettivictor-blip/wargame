@@ -6110,6 +6110,32 @@ const ADJACENCY = {
   baltic: ['russia','poland','germany','north_sea']
 };
 
+// Gold and stability bonuses for controlling each region (troops present, no enemy troops)
+const REGION_BONUSES = {
+  france:           { gold: 3, stability: 0.5, label: 'French heartland' },
+  paris:            { gold: 4, stability: 1,   label: 'City of Light' },
+  alsace_lorraine:  { gold: 4, stability: 0,   label: 'Industrial corridor' },
+  belgium:          { gold: 2, stability: 0,   label: 'Belgian industry' },
+  britain:          { gold: 3, stability: 1,   label: 'British Isles' },
+  germany:          { gold: 4, stability: 0.5, label: 'Ruhr industry' },
+  austria:          { gold: 2, stability: 0.5, label: 'Dual Monarchy seat' },
+  serbia:           { gold: 1, stability: 0,   label: 'Serbian resources' },
+  russia:           { gold: 3, stability: 0.5, label: 'Russian heartland' },
+  poland:           { gold: 2, stability: 0,   label: 'Polish agriculture' },
+  ottoman:          { gold: 2, stability: 0.5, label: 'Anatolian core' },
+  dardanelles:      { gold: 3, stability: 0,   label: 'Straits tolls' },
+  italy:            { gold: 2, stability: 0.5, label: 'Italian peninsula' },
+  balkans:          { gold: 1, stability: 0,   label: 'Balkan territories' },
+  bulgaria:         { gold: 1, stability: 0,   label: 'Bulgarian lands' },
+  romania:          { gold: 2, stability: 0,   label: 'Romanian oil fields' },
+  greece:           { gold: 1, stability: 0,   label: 'Greek ports' },
+  montenegro:       { gold: 0, stability: 0,   label: 'Montenegrin highlands' },
+  north_sea:        { gold: 1, stability: 0,   label: 'North Sea trade lanes' },
+  english_channel:  { gold: 1, stability: 0,   label: 'Channel shipping' },
+  mediterranean:    { gold: 2, stability: 0,   label: 'Mediterranean trade' },
+  baltic:           { gold: 1, stability: 0,   label: 'Baltic commerce' }
+};
+
 const FACTION_NAMES = {
   germany:'German Empire', france:'French Republic', britain:'British Empire',
   russia:'Russian Empire', austria:'Austria-Hungary', ottoman:'Ottoman Empire',
@@ -8214,6 +8240,50 @@ const BLOCKADE_EFFECTS = {
   3: { tradeLoss: 1.0, industryLoss: 0.60 },   // Turn 3+: trade gone + 60% industry crushed (starvation)
 };
 
+// Compute region control bonuses for a faction
+// A faction controls a region if it has troops/fleets there AND no enemy troops/fleets are present
+function computeRegionBonuses(fid) {
+  const f = gameState.factions[fid];
+  const isDealer = fid === 'krupp' || fid === 'schneider';
+  if (isDealer || !f.troops) return { gold: 0, stability: 0, regions: [] };
+
+  let totalGold = 0;
+  let totalStability = 0;
+  const controlledRegions = [];
+
+  ALL_REGIONS.forEach(r => {
+    const rb = REGION_BONUSES[r];
+    if (!rb || (rb.gold === 0 && rb.stability === 0)) return;
+
+    const isSea = SEA_REGIONS.includes(r);
+    const myForces = isSea ? (f.fleets[r] || 0) : (f.troops[r] || 0);
+    if (myForces <= 0) return;
+
+    // Check if any enemy faction also has forces in this region (contested)
+    const enemyPresent = Object.keys(gameState.factions).some(otherId => {
+      if (otherId === fid || otherId === 'krupp' || otherId === 'schneider') return false;
+      const other = gameState.factions[otherId];
+      if (!other) return false;
+      return isSea ? (other.fleets && other.fleets[r] > 0) : (other.troops && other.troops[r] > 0);
+    });
+
+    if (enemyPresent) {
+      // Contested: half gold, no stability
+      const contestedGold = Math.ceil(rb.gold / 2);
+      if (contestedGold > 0) {
+        totalGold += contestedGold;
+        controlledRegions.push({ region: r, gold: contestedGold, stability: 0, contested: true, label: rb.label });
+      }
+    } else {
+      totalGold += rb.gold;
+      totalStability += rb.stability;
+      controlledRegions.push({ region: r, gold: rb.gold, stability: rb.stability, contested: false, label: rb.label });
+    }
+  });
+
+  return { gold: totalGold, stability: totalStability, regions: controlledRegions };
+}
+
 // Compute full income breakdown for a faction
 function computeEconomy(fid) {
   const f = gameState.factions[fid];
@@ -8232,34 +8302,14 @@ function computeEconomy(fid) {
   let warPenaltyLabel = '';
   let peaceDividend = 0;
 
-  // --- Territorial bonuses (Alsace-Lorraine is CONTESTED) ---
-  // Germany gets +4g only if they hold Alsace AND no enemy troops are present
-  if (fid === 'germany') {
-    const germanTroops = (f.troops && f.troops['alsace_lorraine']) || 0;
-    // Check if any enemy faction has troops in Alsace-Lorraine
-    const enemyInAlsace = Object.keys(gameState.factions).some(otherId => {
-      if (otherId === 'germany' || otherId === 'krupp' || otherId === 'schneider') return false;
-      const other = gameState.factions[otherId];
-      return other.troops && other.troops['alsace_lorraine'] > 0;
-    });
-    if (germanTroops > 0 && !enemyInAlsace) {
-      bonus += 4; bonusLabel = 'Alsace-Lorraine industry (+4g)';
-    } else if (germanTroops > 0 && enemyInAlsace) {
-      bonus += 1; bonusLabel = 'Alsace-Lorraine contested (+1g)';
-    }
-  }
-  // France gets +4g if they have troops in Alsace-Lorraine and Germany doesn't
-  if (fid === 'france') {
-    const frenchTroops = (f.troops && f.troops['alsace_lorraine']) || 0;
-    const germanTroops = (gameState.factions.germany.troops && gameState.factions.germany.troops['alsace_lorraine']) || 0;
-    if (frenchTroops > 0 && germanTroops === 0) {
-      bonus += 4; bonusLabel = 'Lorraine reconquered! (+4g)';
-    } else if (frenchTroops > 0 && germanTroops > 0) {
-      bonus += 1; bonusLabel = 'Alsace-Lorraine contested (+1g)';
-    }
-  }
-  if (fid === 'ottoman' && f.troops && f.troops['dardanelles'] > 0) {
-    bonus += 2; bonusLabel = 'Straits tolls';
+  // --- Region control bonuses ---
+  const regionControl = computeRegionBonuses(fid);
+  let regionGold = regionControl.gold;
+  let regionLabel = '';
+  if (regionControl.regions.length > 0) {
+    regionLabel = regionControl.regions.map(r =>
+      (REGION_NAMES[r.region] || r.region) + ' (+' + r.gold + 'g' + (r.contested ? ' contested' : '') + ')'
+    ).join(', ');
   }
 
   // --- Status-based penalties ---
@@ -8385,7 +8435,7 @@ function computeEconomy(fid) {
     }
   }
 
-  const grossIncome = industry + trade + bonus + warDividend + peaceDividend
+  const grossIncome = industry + trade + bonus + regionGold + warDividend + peaceDividend
                     + tradeAgreementIncome + dualMonarchyBonus + modernizationIncome + minorNationBonus + allianceWarBonus;
   const blockadePenalty = tradeLoss + industryLoss;
   const effectiveIncome = Math.max(0, grossIncome - blockadePenalty);
@@ -8403,6 +8453,7 @@ function computeEconomy(fid) {
 
   return {
     industry, trade, bonus, bonusLabel,
+    regionGold, regionLabel, regionControl,
     tradeLoss, industryLoss, blockadeDetail, stabilityCost,
     mobilizationCost, warDividend, warPenalty, warPenaltyLabel,
     peaceDividend, peaceVP, peaceLabel,
@@ -8455,6 +8506,14 @@ function computeStability(fid) {
     delta += 1; modifiers.push({ label: 'Trade partnerships (' + agreements.length + ' agreements)', value: +1, type: 'positive' });
   }
   // Modernization stability is applied as a one-time +2.5 boost at purchase, not per-turn
+
+  // --- Region control stability ---
+  const regionControl = computeRegionBonuses(fid);
+  if (regionControl.stability > 0) {
+    delta += regionControl.stability;
+    const regionNames = regionControl.regions.filter(r => r.stability > 0).map(r => REGION_NAMES[r.region]).join(', ');
+    modifiers.push({ label: 'Territorial control (' + regionNames + ')', value: +regionControl.stability, type: 'positive' });
+  }
 
   // --- War effects on stability (rally-round-the-flag, then war weariness) ---
   if (f.atWar) {
@@ -9638,6 +9697,7 @@ function advanceTurn() {
       if (e.tradeAgreementIncome > 0) detail += ' + Trade Agreements +' + e.tradeAgreementIncome + 'g';
       if (e.dualMonarchyBonus > 0) detail += ' + Stability +' + e.dualMonarchyBonus + 'g';
       if (e.modernizationIncome > 0) detail += ' + Modernization +' + e.modernizationIncome + 'g';
+      if (e.regionGold > 0) detail += ' + Regions +' + e.regionGold + 'g';
       if (e.minorNationBonus > 0) detail += ' + Minor Nations +' + e.minorNationBonus + 'g (' + e.minorNationLabel + ')';
       if (e.allianceWarBonus > 0) detail += ' + ' + e.allianceWarLabel;
       if (e.tradeLoss > 0) detail += ' | Trade loss: –' + e.tradeLoss + 'g';
@@ -10872,6 +10932,12 @@ function renderFinanceTab(fid) {
   incomeRows += `<div class="ledger-row"><span class="ledger-label">Trade</span><span class="ledger-value ${econ.trade > 0 ? 'positive' : 'zero'}">+${econ.trade}</span></div>`;
   if (econ.bonus !== 0) {
     incomeRows += `<div class="ledger-row"><span class="ledger-label">${econ.bonusLabel || 'Territorial Bonus'}</span><span class="ledger-value ${econ.bonus > 0 ? 'positive' : 'negative'}">${econ.bonus > 0 ? '+' : ''}${econ.bonus}</span></div>`;
+  }
+  if (econ.regionGold > 0) {
+    incomeRows += `<div class="ledger-row"><span class="ledger-label">Region Control</span><span class="ledger-value positive">+${econ.regionGold}</span></div>`;
+    econ.regionControl.regions.forEach(r => {
+      incomeRows += `<div class="ledger-row" style="padding-left:20px;font-size:0.85em;color:var(--ink-light);"><span class="ledger-label">${REGION_NAMES[r.region]} — ${r.label}${r.contested ? ' (contested)' : ''}</span><span class="ledger-value positive">+${r.gold}</span></div>`;
+    });
   }
   if (econ.warDividend > 0) {
     incomeRows += `<div class="ledger-row"><span class="ledger-label">War Dividend</span><span class="ledger-value positive">+${econ.warDividend}</span></div>`;
