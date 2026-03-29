@@ -878,7 +878,9 @@ const AI_PLAYER = (function() {
     }
 
     // --- Priority 10: ATTACK enemy regions when at war ---
-    if (atWar && typeof ADJACENCY !== 'undefined' && f.troops) {
+    // War declaration is a prerequisite — must already be at war OR have declared war this turn
+    var hasWarDeclaration = atWar || orders.some(function(o) { return o.type === 'declare_war'; });
+    if (hasWarDeclaration && typeof ADJACENCY !== 'undefined' && f.troops) {
       // Find regions where we have deployed troops
       var ourRegions = Object.keys(f.troops).filter(function(r) { return f.troops[r] > 0; });
       ourRegions.forEach(function(src) {
@@ -1258,6 +1260,12 @@ const AI_PLAYER = (function() {
     const results = [];
     const orders = aiResponse.orders || [];
 
+    // Sort orders so declare_war runs before attacks (war is prerequisite for attacking)
+    var ORDER_PRIORITY = { declare_war: 0, mobilize: 1, deploy: 2, recruit: 3, modernize: 3, upgrade: 3, diplomacy: 3, trade: 3, gold_transfer: 4, loan_request: 4, loan_offer: 4, attack: 5 };
+    orders.sort(function(a, b) {
+      return (ORDER_PRIORITY[a.type] || 3) - (ORDER_PRIORITY[b.type] || 3);
+    });
+
     // Clear any existing orders for this faction first
     initOrders(factionId);
 
@@ -1367,6 +1375,11 @@ const AI_PLAYER = (function() {
             break;
 
           case 'attack':
+            // War declaration is a prerequisite for attacking
+            if (!gameState.factions[factionId].atWar) {
+              results.push('Cannot attack — not at war (declare war first)');
+              break;
+            }
             if (order.from && order.target && order.divisions) {
               addOrder(factionId, {
                 type: 'attack',
