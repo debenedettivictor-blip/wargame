@@ -4313,6 +4313,99 @@ body::before {
 .decision-card-cost { font-family: 'Source Serif 4', serif; font-size: 0.7em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gold-accent); margin-top: 6px; }
 .decision-panel { margin-top: 16px; border: 2px solid var(--ink); border-left: 5px solid var(--gold-accent); padding: 20px; background: var(--cream); }
 .decision-panel-title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--parchment-dark); }
+
+/* ==================== REDESIGNED MILITARY INTERFACE ==================== */
+
+/* War Declaration Banner */
+.war-banner { padding: 14px 18px; margin-bottom: 16px; border: 2px solid var(--ink-light); background: var(--cream); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.war-banner.at-war { border-color: var(--red-empire); background: rgba(139,26,26,0.06); border-left: 5px solid var(--red-empire); }
+.war-banner.at-peace { border-color: var(--green-neutral); background: rgba(45,80,22,0.06); border-left: 5px solid var(--green-neutral); }
+.war-banner-status { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.1em; text-transform: uppercase; letter-spacing: 2px; }
+.war-banner.at-war .war-banner-status { color: var(--red-empire); }
+.war-banner.at-peace .war-banner-status { color: var(--green-neutral); }
+.war-banner-info { font-family: 'Crimson Text', serif; font-size: 0.85em; color: var(--ink-light); flex: 1; }
+.war-declare-btn { padding: 10px 20px; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1.5px; border: 2px solid var(--red-empire); background: var(--red-empire); color: white; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.war-declare-btn:hover { background: #5a1010; border-color: #5a1010; }
+.war-declare-btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--ink-light); border-color: var(--ink-light); }
+.war-declare-btn.peace-btn { background: var(--green-neutral); border-color: var(--green-neutral); }
+.war-declare-btn.peace-btn:hover { background: #1a3a0b; border-color: #1a3a0b; }
+
+/* Quick Actions Bar */
+.mil-quick-actions { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.mil-quick-btn { flex: 1; min-width: 120px; padding: 10px 14px; border: 2px solid var(--ink-light); background: var(--parchment); cursor: pointer; transition: all 0.2s; text-align: center; font-family: 'Source Serif 4', serif; }
+.mil-quick-btn:hover { border-color: var(--ink); background: var(--cream); transform: translateY(-1px); }
+.mil-quick-btn.active { border-color: var(--gold-accent); border-bottom: 3px solid var(--gold-accent); background: var(--cream); }
+.mil-quick-btn .qb-icon { font-size: 1.3em; display: block; margin-bottom: 2px; }
+.mil-quick-btn .qb-label { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.mil-quick-panel { border: 2px solid var(--ink); border-left: 5px solid var(--gold-accent); padding: 16px 18px; background: var(--cream); margin-bottom: 16px; }
+.mil-quick-panel-title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--parchment-dark); }
+
+/* Theater Command */
+.theater-header { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 0.85em; text-transform: uppercase; letter-spacing: 2px; color: var(--ink-light); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.theater-header::after { content: ''; flex: 1; height: 1px; background: var(--ink-light); }
+
+.region-card { border: 2px solid var(--ink-light); background: var(--parchment); margin-bottom: 10px; transition: all 0.15s; }
+.region-card:hover { border-color: var(--ink); }
+.region-card.has-troops { border-color: var(--ink); }
+.region-card-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; gap: 10px; }
+.region-card-name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 0.95em; }
+.region-card-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.region-badge { font-family: 'Source Serif 4', serif; font-size: 0.7em; font-weight: 600; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+.region-badge.troops { background: rgba(45,80,22,0.12); color: var(--green-neutral); border: 1px solid var(--green-neutral); }
+.region-badge.fleets { background: rgba(26,55,139,0.1); color: var(--blue-entente); border: 1px solid var(--blue-entente); }
+.region-badge.enemy { background: rgba(139,26,26,0.1); color: var(--red-empire); border: 1px solid var(--red-empire); }
+.region-badge.fortified { background: rgba(139,100,26,0.1); color: #8b6a1a; border: 1px solid #8b6a1a; }
+.region-badge.home { background: rgba(0,0,0,0.05); color: var(--ink-light); border: 1px solid var(--ink-light); font-style: italic; }
+
+.region-card-body { padding: 0 14px 12px; display: none; }
+.region-card.expanded .region-card-body { display: block; }
+.region-card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.region-action-btn { padding: 6px 14px; font-family: 'Source Serif 4', serif; font-size: 0.8em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border: 2px solid var(--ink-light); background: var(--cream); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 5px; }
+.region-action-btn:hover { border-color: var(--ink); background: var(--parchment-dark); }
+.region-action-btn.move-btn { border-color: var(--gold-accent); }
+.region-action-btn.move-btn:hover { background: rgba(184,148,64,0.1); }
+.region-action-btn.attack-btn { border-color: var(--red-empire); color: var(--red-empire); }
+.region-action-btn.attack-btn:hover { background: rgba(139,26,26,0.08); }
+.region-action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Region inline form */
+.region-inline-form { margin-top: 10px; padding: 10px 12px; background: var(--cream); border: 1px solid var(--ink-light); border-radius: 2px; }
+.region-inline-form label { font-family: 'Source Serif 4', serif; font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-light); display: block; margin-bottom: 3px; }
+.region-inline-form select, .region-inline-form input[type="number"] { padding: 6px 8px; border: 2px solid var(--ink); font-family: 'Crimson Text', serif; font-size: 0.95em; background: var(--parchment); width: 100%; }
+.region-inline-row { display: flex; gap: 10px; align-items: end; }
+.region-inline-row > div { flex: 1; }
+.region-inline-submit { margin-top: 8px; }
+
+/* Intel Summary */
+.intel-summary { font-family: 'Crimson Text', serif; font-size: 0.85em; line-height: 1.5; color: var(--ink-light); padding: 6px 0; }
+.intel-summary strong { color: var(--ink); }
+.intel-ratio { font-weight: 700; }
+.intel-ratio.favorable { color: var(--green-neutral); }
+.intel-ratio.even { color: var(--gold-accent); }
+.intel-ratio.unfavorable { color: var(--red-empire); }
+
+/* Force Readiness Inline */
+.readiness-inline { margin-top: 12px; }
+.readiness-inline-header { font-family: 'Source Serif 4', serif; font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-light); margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.readiness-inline-header::before { content: '▸'; transition: transform 0.2s; }
+.readiness-inline.expanded .readiness-inline-header::before { transform: rotate(90deg); }
+.readiness-inline-body { display: none; }
+.readiness-inline.expanded .readiness-inline-body { display: block; }
+
+/* Battles Awareness */
+.active-battles-bar { border: 2px solid var(--red-empire); background: rgba(139,26,26,0.04); padding: 12px 16px; margin-bottom: 16px; }
+.active-battles-title { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 0.8em; text-transform: uppercase; letter-spacing: 2px; color: var(--red-empire); margin-bottom: 8px; }
+.active-battle-item { font-family: 'Crimson Text', serif; font-size: 0.9em; padding: 4px 0; border-bottom: 1px dashed rgba(139,26,26,0.2); }
+.active-battle-item:last-child { border-bottom: none; }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .war-banner { flex-direction: column; text-align: center; }
+  .mil-quick-actions { flex-direction: column; }
+  .region-inline-row { flex-direction: column; }
+  .region-card-actions { flex-direction: column; }
+}
+
 /* Confirmation Modal */
 .order-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,16,8,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; }
 .order-modal { background: var(--cream); border: 3px solid var(--ink); max-width: 550px; width: 90%; max-height: 80vh; overflow-y: auto; }
@@ -10806,7 +10899,7 @@ function setDashTab(tab) {
 }
 
 function setActionTab(tab) {
-  activeActionTab = tab;
+  activeActionTab = (activeActionTab === tab) ? '' : tab;
   renderDashboard();
 }
 
@@ -10815,52 +10908,248 @@ function renderMilitaryTab(fid) {
   if (isDealer) return '<div class="empty-state">Arms dealers do not command military forces.</div>';
 
   const f = gameState.factions[fid];
-  const decisions = [
-    { id: 'recruit', icon: '+', title: 'Build Forces', desc: 'Recruit new army divisions or naval fleets', cost: '2 Gold (army) / 6 Gold (fleet)' },
-    { id: 'move', icon: '\u2794', title: 'Move Forces', desc: 'Reposition troops and fleets to adjacent regions', cost: 'Free' },
-    { id: 'attack', icon: '\u2694', title: 'Attack', desc: 'Launch offensive operations against enemy regions', cost: 'Risk of losses' },
-    { id: 'upgrades', icon: '\u2605', title: 'Upgrades', desc: 'Purchase artillery, trenches, or gas weapons', cost: '3-6 Gold' },
-    { id: 'readiness', icon: '\u2616', title: 'Force Readiness', desc: 'Mobilize, deploy, and review all unit statuses', cost: '1g/mob' }
-  ];
+  const orders = getOrders(fid);
+  const isSubmitted = orders.submitted;
 
-  // Add arms dealer-specific tabs
-  if (isDealer) {
-    decisions.push(
-      { id: 'loans', icon: '$', title: 'Offer Loans', desc: 'Extend credit to nations at 40% interest', cost: 'Variable' },
-      { id: 'crisis', icon: '!', title: 'Manufacture Crisis', desc: 'Border incidents, leaked treaties, assassination attempts', cost: '3-5 Gold' }
-    );
+  // ── War Declaration Banner ──
+  let warBannerHtml = '';
+  const canDeclareWar = gameState.currentTurnNum >= 4;
+  if (f.atWar) {
+    warBannerHtml = `<div class="war-banner at-war">
+      <div><div class="war-banner-status">\u2694 At War</div>
+      <div class="war-banner-info">War turn ${f.warTurns || 0}. Your forces may launch attacks on enemy regions.</div></div>
+      <button class="war-declare-btn peace-btn" onclick="playerToggleWar('${fid}')">\u262E Sue for Peace</button>
+    </div>`;
+  } else {
+    const turnMsg = canDeclareWar
+      ? 'Your forces are mobilized. You may declare war when ready.'
+      : 'War cannot be declared before Turn 4 (' + (4 - gameState.currentTurnNum) + ' turns remaining). Use this time to mobilize and deploy.';
+    warBannerHtml = `<div class="war-banner at-peace">
+      <div><div class="war-banner-status">\u262E At Peace</div>
+      <div class="war-banner-info">${turnMsg}</div></div>
+      <button class="war-declare-btn" onclick="playerToggleWar('${fid}')" ${canDeclareWar ? '' : 'disabled'}>\u2694 Declare War</button>
+    </div>`;
   }
 
-  const validIds = decisions.map(d => d.id);
-  if (!validIds.includes(activeActionTab)) activeActionTab = '';
+  // ── Active Battles Awareness ──
+  let battlesHtml = '';
+  const pendingBattles = (gameState.battles || []).filter(b => b.status === 'pending' && b.turn === gameState.currentTurnNum);
+  const myBattles = pendingBattles.filter(b =>
+    b.attackerCoalition.some(c => c.fid === fid) || b.defenderCoalition.some(c => c.fid === fid)
+  );
+  if (myBattles.length > 0) {
+    battlesHtml = '<div class="active-battles-bar"><div class="active-battles-title">\u2694 Active Battles</div>';
+    myBattles.forEach(b => {
+      const role = b.attackerCoalition.some(c => c.fid === fid) ? 'Attacking' : 'Defending';
+      const atkNames = b.attackerCoalition.map(c => FACTION_NAMES[c.fid]).join(' + ');
+      const defNames = b.defenderCoalition.map(c => FACTION_NAMES[c.fid]).join(' + ');
+      battlesHtml += `<div class="active-battle-item"><strong>${REGION_NAMES[b.targetRegion]}</strong> \u2014 ${role} | ${atkNames} vs ${defNames}</div>`;
+    });
+    battlesHtml += '</div>';
+  }
 
-  let menuHtml = '<div class="decision-menu">';
-  decisions.forEach(d => {
-    menuHtml += `<div class="decision-card ${activeActionTab === d.id ? 'active' : ''}" onclick="setActionTab('${d.id}')">
-      <div class="decision-card-icon">${d.icon}</div>
-      <div class="decision-card-title">${d.title}</div>
-      <div class="decision-card-desc">${d.desc}</div>
-      <div class="decision-card-cost">${d.cost}</div>
+  // ── Quick Actions Bar ──
+  const quickTabs = [
+    { id: 'recruit', icon: '+', label: 'Recruit' },
+    { id: 'upgrades', icon: '\u2605', label: 'Upgrades' },
+    { id: 'readiness', icon: '\u2616', label: 'Readiness' }
+  ];
+  const validQuickIds = quickTabs.map(t => t.id);
+  // Validate activeActionTab — only keep if it's a quick tab id
+  if (activeActionTab && !validQuickIds.includes(activeActionTab)) activeActionTab = '';
+
+  let quickBarHtml = '<div class="mil-quick-actions">';
+  quickTabs.forEach(t => {
+    quickBarHtml += `<div class="mil-quick-btn ${activeActionTab === t.id ? 'active' : ''}" onclick="setActionTab('${t.id}')">
+      <span class="qb-icon">${t.icon}</span><span class="qb-label">${t.label}</span>
     </div>`;
   });
-  menuHtml += '</div>';
+  quickBarHtml += '</div>';
 
-  let panelHtml = '';
-  if (activeActionTab && validIds.includes(activeActionTab)) {
-    const selected = decisions.find(d => d.id === activeActionTab);
-    let panelContent = '';
+  let quickPanelHtml = '';
+  if (activeActionTab && validQuickIds.includes(activeActionTab)) {
+    const selected = quickTabs.find(t => t.id === activeActionTab);
+    let content = '';
     if (activeActionTab === 'readiness') {
-      panelContent = renderReadinessTab(fid);
+      content = renderReadinessTab(fid);
     } else {
-      panelContent = renderActionTabContent(fid);
+      content = renderActionTabContent(fid);
     }
-    panelHtml = `<div class="decision-panel">
-      <div class="decision-panel-title">${selected.icon} ${selected.title}</div>
-      ${panelContent}
+    quickPanelHtml = `<div class="mil-quick-panel">
+      <div class="mil-quick-panel-title">${selected.icon} ${selected.label}</div>
+      ${content}
     </div>`;
   }
 
-  return menuHtml + panelHtml;
+  // ── Theater Command: Region Cards ──
+  let theaterHtml = '<div class="theater-header">Theater Command</div>';
+
+  // Gather all regions where this faction has forces or could act
+  const regionsWithTroops = [];
+  const regionsWithFleets = [];
+  const otherAdjacentRegions = new Set();
+
+  LAND_REGIONS.forEach(r => {
+    if ((f.troops[r] || 0) > 0) {
+      regionsWithTroops.push(r);
+      // Add adjacent land regions as potential targets
+      (ADJACENCY[r] || []).forEach(adj => {
+        if (!SEA_REGIONS.includes(adj) && !(f.troops[adj] > 0)) {
+          otherAdjacentRegions.add(adj);
+        }
+      });
+    }
+  });
+  SEA_REGIONS.forEach(r => {
+    if ((f.fleets[r] || 0) > 0) regionsWithFleets.push(r);
+  });
+
+  // Your regions (with troops)
+  if (regionsWithTroops.length > 0 || regionsWithFleets.length > 0) {
+    theaterHtml += renderTheaterSection(fid, 'Your Forces', regionsWithTroops.concat(regionsWithFleets), f, isSubmitted, true);
+  }
+
+  // Adjacent / attackable regions
+  const adjacentArr = Array.from(otherAdjacentRegions).filter(r => !regionsWithTroops.includes(r));
+  if (adjacentArr.length > 0 && f.atWar) {
+    theaterHtml += renderTheaterSection(fid, 'Adjacent Regions', adjacentArr, f, isSubmitted, false);
+  }
+
+  if (regionsWithTroops.length === 0 && regionsWithFleets.length === 0) {
+    theaterHtml += '<div class="empty-state">No forces deployed yet. Use Recruit and Readiness above to build and deploy your army.</div>';
+  }
+
+  return warBannerHtml + battlesHtml + quickBarHtml + quickPanelHtml + theaterHtml;
+}
+
+function renderTheaterSection(fid, title, regions, f, isSubmitted, isOwned) {
+  let html = `<div style="margin-bottom: 6px; margin-top: 14px; font-family:'Source Serif 4',serif; font-size:0.7em; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-light);">${title}</div>`;
+  regions.forEach(r => {
+    html += renderRegionCard(fid, r, f, isSubmitted, isOwned);
+  });
+  return html;
+}
+
+function renderRegionCard(fid, region, f, isSubmitted, isOwned) {
+  const regionName = REGION_NAMES[region] || region;
+  const isSea = SEA_REGIONS.includes(region);
+  const myTroops = f.troops[region] || 0;
+  const myFleets = f.fleets[region] || 0;
+  const hasTroops = myTroops > 0 || myFleets > 0;
+  const isHome = HOME_REGIONS[fid] === region;
+  const isFortified = (region === 'paris' && fid !== 'france') || (region === 'dardanelles' && fid !== 'ottoman');
+  const adj = ADJACENCY[region] || [];
+
+  // Enemy intel
+  let enemyInfo = [];
+  let totalEnemy = 0;
+  Object.keys(gameState.factions).forEach(fk => {
+    if (fk === fid || fk === 'krupp' || fk === 'schneider') return;
+    const ft = gameState.factions[fk].troops;
+    if (ft && ft[region] > 0) {
+      enemyInfo.push({ fid: fk, count: ft[region] });
+      totalEnemy += ft[region];
+    }
+  });
+
+  // Badges
+  let badges = '';
+  if (myTroops > 0) badges += `<span class="region-badge troops">\u2694 ${myTroops} div</span>`;
+  if (myFleets > 0) badges += `<span class="region-badge fleets">\u2693 ${myFleets} fleet</span>`;
+  enemyInfo.forEach(e => {
+    badges += `<span class="region-badge enemy">${FACTION_NAMES[e.fid].split(' ')[0]}: ${e.count}</span>`;
+  });
+  if (isFortified) badges += '<span class="region-badge fortified">\u26F3 Fortified</span>';
+  if (isHome) badges += '<span class="region-badge home">Capital</span>';
+
+  // Determine expanded state
+  const isExpanded = window._expandedRegion === region;
+  const expandedClass = isExpanded ? ' expanded' : '';
+  const hasClass = hasTroops ? ' has-troops' : '';
+
+  // Action buttons (for owned regions with troops)
+  let actionsHtml = '';
+  if (isOwned && hasTroops && !isSea) {
+    // Move: dropdown of adjacent regions + count
+    const adjLand = adj.filter(a => !SEA_REGIONS.includes(a));
+    if (adjLand.length > 0 && myTroops > 0) {
+      const destOpts = adjLand.map(a => `<option value="${a}">${REGION_NAMES[a] || a}</option>`).join('');
+      const countOpts = Array.from({length: myTroops}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
+      actionsHtml += `<div class="region-inline-form">
+        <div class="region-inline-row">
+          <div><label>Move To</label><select id="rmove_dest_${region}">${destOpts}</select></div>
+          <div style="max-width:70px;"><label>Count</label><select id="rmove_cnt_${region}">${countOpts}</select></div>
+          <div style="max-width:120px; align-self:end;">
+            <button class="region-action-btn move-btn" onclick="queueRegionMove('${fid}','${region}')" ${isSubmitted ? 'disabled' : ''}>\u2794 Move</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // Attack: only if at war
+    if (f.atWar && myTroops > 0) {
+      const adjTargets = adjLand.map(a => {
+        let enemyLabel = '';
+        let eCount = 0;
+        Object.keys(gameState.factions).forEach(fk => {
+          if (fk === fid || fk === 'krupp' || fk === 'schneider') return;
+          const et = gameState.factions[fk].troops[a] || 0;
+          if (et > 0) { enemyLabel += (enemyLabel ? ', ' : '') + FACTION_NAMES[fk].split(' ')[0] + ': ' + et; eCount += et; }
+        });
+        const label = (REGION_NAMES[a] || a) + (enemyLabel ? ' [' + enemyLabel + ']' : ' [undefended]');
+        return `<option value="${a}">${label}</option>`;
+      }).join('');
+      const atkCountOpts = Array.from({length: myTroops}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
+      actionsHtml += `<div class="region-inline-form" style="border-color:var(--red-empire);">
+        <div class="region-inline-row">
+          <div><label>Attack Target</label><select id="ratk_dest_${region}" onchange="updateRegionIntel('${fid}','${region}')">${adjTargets}</select></div>
+          <div style="max-width:70px;"><label>Divisions</label><select id="ratk_cnt_${region}">${atkCountOpts}</select></div>
+          <div style="max-width:120px; align-self:end;">
+            <button class="region-action-btn attack-btn" onclick="queueRegionAttack('${fid}','${region}')" ${isSubmitted ? 'disabled' : ''}>\u2694 Attack</button>
+          </div>
+        </div>
+        <div id="ratk_intel_${region}" class="intel-summary" style="display:none;"></div>
+      </div>`;
+    }
+  }
+
+  // Fleet move for sea regions
+  if (isOwned && myFleets > 0 && isSea) {
+    const adjSeas = adj.filter(a => SEA_REGIONS.includes(a));
+    if (adjSeas.length > 0) {
+      const destOpts = adjSeas.map(a => `<option value="${a}">${REGION_NAMES[a] || a}</option>`).join('');
+      const countOpts = Array.from({length: myFleets}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('');
+      actionsHtml += `<div class="region-inline-form">
+        <div class="region-inline-row">
+          <div><label>Move Fleet To</label><select id="rmove_dest_${region}">${destOpts}</select></div>
+          <div style="max-width:70px;"><label>Count</label><select id="rmove_cnt_${region}">${countOpts}</select></div>
+          <div style="max-width:120px; align-self:end;">
+            <button class="region-action-btn move-btn" onclick="queueRegionMove('${fid}','${region}')" ${isSubmitted ? 'disabled' : ''}>\u2794 Move</button>
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+
+  // For enemy-only regions (not owned), show intel summary
+  let intelHtml = '';
+  if (!isOwned && totalEnemy > 0) {
+    const enemyLines = enemyInfo.map(e =>
+      `<span style="color:${FACTION_COLORS[e.fid] || 'var(--ink)'}; font-weight:600;">${FACTION_NAMES[e.fid]}</span>: ${e.count} div`
+    ).join(', ');
+    intelHtml = `<div class="intel-summary">Defenders: ${enemyLines}${isFortified ? ' <strong style="color:#8b6a1a;">(Fortified: +2 defense)</strong>' : ''}</div>`;
+  }
+
+  return `<div class="region-card${hasClass}${expandedClass}" id="rcard_${region}">
+    <div class="region-card-header" onclick="toggleRegionCard('${region}')">
+      <span class="region-card-name">${isSea ? '\u2693 ' : ''}${regionName}</span>
+      <div class="region-card-badges">${badges}</div>
+    </div>
+    <div class="region-card-body">
+      ${intelHtml}
+      ${actionsHtml}
+    </div>
+  </div>`;
 }
 
 function renderFinanceTab(fid) {
@@ -12142,6 +12431,89 @@ function queueAttackOrder(fid) {
   const count = parseInt(document.getElementById('atkCount').value) || 1;
   if (!from || !target) { alert('Select both source and target regions.'); return; }
   addOrder(fid, { type: 'attack', from: from, target: target, divisions: count, desc: 'Attack ' + (REGION_NAMES[target]||target) + ' from ' + (REGION_NAMES[from]||from) + ' (' + count + ' div)' });
+}
+
+// ==================== REDESIGNED MILITARY — HELPER FUNCTIONS ====================
+
+// Track which region card is expanded
+window._expandedRegion = null;
+
+function toggleRegionCard(region) {
+  if (window._expandedRegion === region) {
+    window._expandedRegion = null;
+  } else {
+    window._expandedRegion = region;
+  }
+  renderDashboard();
+}
+
+function queueRegionMove(fid, fromRegion) {
+  const destEl = document.getElementById('rmove_dest_' + fromRegion);
+  const cntEl = document.getElementById('rmove_cnt_' + fromRegion);
+  if (!destEl || !cntEl) return;
+  const to = destEl.value;
+  const count = parseInt(cntEl.value) || 1;
+  if (!to) { alert('Select a destination.'); return; }
+  const isSea = SEA_REGIONS.includes(fromRegion);
+  const unitType = isSea ? 'fleet' : 'division';
+  addOrder(fid, { type: 'move', from: fromRegion, to: to, count: count, desc: 'Move ' + count + ' ' + unitType + (count > 1 ? 's' : '') + ' ' + (REGION_NAMES[fromRegion]||fromRegion) + ' \u2192 ' + (REGION_NAMES[to]||to) });
+}
+
+function queueRegionAttack(fid, fromRegion) {
+  const destEl = document.getElementById('ratk_dest_' + fromRegion);
+  const cntEl = document.getElementById('ratk_cnt_' + fromRegion);
+  if (!destEl || !cntEl) return;
+  const target = destEl.value;
+  const count = parseInt(cntEl.value) || 1;
+  if (!target) { alert('Select a target.'); return; }
+  addOrder(fid, { type: 'attack', from: fromRegion, target: target, divisions: count, desc: 'Attack ' + (REGION_NAMES[target]||target) + ' from ' + (REGION_NAMES[fromRegion]||fromRegion) + ' (' + count + ' div)' });
+}
+
+function updateRegionIntel(fid, fromRegion) {
+  const destEl = document.getElementById('ratk_dest_' + fromRegion);
+  const intelEl = document.getElementById('ratk_intel_' + fromRegion);
+  if (!destEl || !intelEl) return;
+  const target = destEl.value;
+  if (!target) { intelEl.style.display = 'none'; return; }
+
+  const f = gameState.factions[fid];
+  const yourForces = f.troops[fromRegion] || 0;
+  let enemyLines = [];
+  let totalEnemy = 0;
+  Object.keys(gameState.factions).forEach(function(fk) {
+    if (fk === fid || fk === 'krupp' || fk === 'schneider') return;
+    var ft = gameState.factions[fk].troops;
+    if (ft && ft[target] > 0) {
+      enemyLines.push('<span style="color:' + (FACTION_COLORS[fk] || 'var(--ink)') + ';font-weight:600;">' + FACTION_NAMES[fk] + '</span>: ' + ft[target] + ' div');
+      totalEnemy += ft[target];
+    }
+  });
+
+  const isFortified = (target === 'paris' && fid !== 'france') || (target === 'dardanelles' && fid !== 'ottoman');
+  let html = '<strong>Your forces:</strong> ' + yourForces + ' div | ';
+  if (totalEnemy > 0) {
+    const ratio = yourForces > 0 ? (yourForces / totalEnemy).toFixed(1) : '0';
+    const ratioCls = ratio >= 2 ? 'favorable' : (ratio >= 1 ? 'even' : 'unfavorable');
+    html += '<strong>Defenders:</strong> ' + enemyLines.join(', ');
+    html += ' | <span class="intel-ratio ' + ratioCls + '">Ratio: ' + ratio + ':1</span>';
+  } else {
+    html += '<span style="color:var(--green-neutral);">Undefended \u2014 uncontested advance</span>';
+  }
+  if (isFortified) html += ' | <strong style="color:#8b6a1a;">Fortified (+2 defense)</strong>';
+  intelEl.innerHTML = html;
+  intelEl.style.display = 'block';
+}
+
+function playerToggleWar(fid) {
+  const f = gameState.factions[fid];
+  if (!f.atWar && gameState.currentTurnNum < 4) {
+    alert('War cannot be declared before Turn 4. ' + (4 - gameState.currentTurnNum) + ' turn(s) remaining.');
+    return;
+  }
+  const action = f.atWar ? 'sue for peace' : 'DECLARE WAR';
+  const confirmed = confirm(FACTION_NAMES[fid] + ': Are you sure you want to ' + action + '?\n\nThis action will be visible to all players.');
+  if (!confirmed) return;
+  toggleWarStatus(fid);
 }
 
 function renderPlayerDashboard(container) {
